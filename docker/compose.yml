@@ -1,0 +1,68 @@
+# Run via make (make backend-up / make up / make down), which passes:
+#   docker compose --project-directory . --env-file env/.env -f docker/compose.yml
+# Variables come from env/.env; --project-directory keeps paths and volume names repo-rooted.
+#
+# Profiles:
+#   backend  Postgres + the Spring API (published image). Use with `pnpm dev` on the host.
+#   full     backend + this frontend as a production container.
+services:
+  postgres:
+    profiles: [backend, full]
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: boilerplate
+      POSTGRES_USER: boilerplate
+      POSTGRES_PASSWORD: boilerplate
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U boilerplate -d boilerplate']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes: ['postgres-data:/var/lib/postgresql/data']
+    networks: [app]
+
+  backend:
+    profiles: [backend, full]
+    # The backend repo publishes this image (CI/CD - dev / main). It is amd64-only, so
+    # Apple Silicon runs it under emulation: slower to start, otherwise identical.
+    image: ghcr.io/neszadev/spring-postgres-boilerplate:${BACKEND_TAG:-dev}
+    platform: linux/amd64
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/boilerplate
+      DB_USERNAME: boilerplate
+      DB_PASSWORD: boilerplate
+      JWT_SECRET: ${BACKEND_JWT_SECRET:-local-development-secret-at-least-32-bytes}
+    depends_on:
+      postgres: { condition: service_healthy }
+    ports: ['${BACKEND_PORT:-8080}:8080']
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:8080/actuator/health/readiness | grep -q UP']
+      interval: 5s
+      timeout: 3s
+      retries: 60
+    networks: [app]
+
+  frontend:
+    profiles: [full]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      BACKEND_URL: http://backend:8080
+      APP_URL: http://localhost:${FRONTEND_PORT:-3000}
+    depends_on:
+      backend: { condition: service_healthy }
+    ports: ['${FRONTEND_PORT:-3000}:3000']
+    # Lets `up --wait` return only once the server answers (CI starts Playwright right after).
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/ >/dev/null']
+      interval: 3s
+      timeout: 3s
+      retries: 40
+    networks: [app]
+
+volumes:
+  postgres-data: {}
+networks:
+  app: {}
