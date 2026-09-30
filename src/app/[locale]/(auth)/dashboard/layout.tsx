@@ -1,7 +1,7 @@
-import { SignOutButton } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
+import { SignOutButton } from '@/components/SignOutButton';
 import { Link } from '@/libs/I18nNavigation';
 import { BaseTemplate } from '@/templates/BaseTemplate';
 
@@ -12,10 +12,7 @@ type DashboardLayoutProps = {
 
 export async function generateMetadata(props: DashboardLayoutProps): Promise<Metadata> {
   const { locale } = await props.params;
-  const t = await getTranslations({
-    locale,
-    namespace: 'DashboardLayout',
-  });
+  const t = await getTranslations({ locale, namespace: 'DashboardLayout' });
 
   return {
     title: t('meta_title'),
@@ -23,13 +20,13 @@ export async function generateMetadata(props: DashboardLayoutProps): Promise<Met
   };
 }
 
+// Every page below is personal: never prerender or cache it.
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardLayout(props: DashboardLayoutProps) {
   const { locale } = await props.params;
   setRequestLocale(locale);
-  const t = await getTranslations({
-    locale,
-    namespace: 'DashboardLayout',
-  });
+  const t = await getTranslations({ locale, namespace: 'DashboardLayout' });
 
   return (
     <BaseTemplate
@@ -42,10 +39,10 @@ export default async function DashboardLayout(props: DashboardLayoutProps) {
           </li>
           <li>
             <Link
-              href="/dashboard/user-profile/"
+              href="/dashboard/test-results/"
               className="border-none text-gray-700 hover:text-gray-900"
             >
-              {t('user_profile_link')}
+              {t('test_results_link')}
             </Link>
           </li>
         </>
@@ -53,20 +50,15 @@ export default async function DashboardLayout(props: DashboardLayoutProps) {
       rightNav={
         <>
           <li>
-            <SignOutButton>
-              <button className="border-none text-gray-700 hover:text-gray-900" type="button">
-                {t('sign_out')}
-              </button>
-            </SignOutButton>
+            <SignOutButton />
           </li>
-
           <li>
             <LocaleSwitcher />
           </li>
         </>
       }
     >
-      {props.children}
+      <div className="py-5">{props.children}</div>
     </BaseTemplate>
   );
 }
