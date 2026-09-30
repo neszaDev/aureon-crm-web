@@ -3,11 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
 import messages from '@/locales/en.json';
+import { AppConfig } from '@/utils/AppConfig';
 import { BaseTemplate } from './BaseTemplate';
 
 describe('Base template', () => {
   describe('Render method', () => {
-    it('should have 3 menu items', async () => {
+    it('renders every menu item', async () => {
       await render(
         <NextIntlClientProvider locale="en" messages={messages}>
           <BaseTemplate
@@ -29,23 +30,16 @@ describe('Base template', () => {
       expect(menuItemList.elements()).toHaveLength(3);
     });
 
-    it('should have a link to support nextjs-boilerplate.com', async () => {
+    it('shows the app name in the footer', async () => {
       await render(
         <NextIntlClientProvider locale="en" messages={messages}>
           <BaseTemplate leftNav={<li>1</li>}>{null}</BaseTemplate>
         </NextIntlClientProvider>,
       );
 
-      const copyrightSection = page.getByText(/© /u);
-      const copyrightLink = copyrightSection.getByRole('link');
-
-      /*
-       * PLEASE READ THIS SECTION
-       * We'll really appreciate if you could have a link to our website
-       * The link doesn't need to appear on every pages, one link on one page is enough.
-       * Thank you for your support it'll mean a lot for us.
-       */
-      expect(copyrightLink).toHaveAttribute('href', 'https://nextjs-boilerplate.com');
+      await expect
+        .element(page.getByText(`© ${new Date().getFullYear()} ${AppConfig.name}`))
+        .toBeVisible();
     });
   });
 });
