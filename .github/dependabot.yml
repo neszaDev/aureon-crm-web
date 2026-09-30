@@ -1,40 +1,35 @@
+# Weekly updates, opened against dev (they reach main with the next release). Minor/patch bumps
+# are grouped per ecosystem; majors arrive as separate PRs and need a deliberate review.
 version: 2
 updates:
-  # Enable version updates for npm
-  - package-ecosystem: npm
-    # Look for `package.json` and `lock` files in the root directory
+  - package-ecosystem: npm # covers pnpm (package.json + pnpm-lock.yaml)
     directory: /
-    # Check the npm registry for updates every month
-    schedule:
-      interval: monthly
-      time: '06:00'
-    # Limit the number of open pull requests for version updates to 1
-    open-pull-requests-limit: 1
-    # Commit message format
-    commit-message:
-      # Prefix all commit messages and pull request titles with "chore"
-      prefix: chore
-    # Group updates into a single pull request
+    schedule: { interval: weekly }
+    target-branch: dev
+    open-pull-requests-limit: 5
+    commit-message: { prefix: build, include: scope }
     groups:
-      # The name of the group (identifier)
-      npm-deps:
+      npm-minor-patch:
         update-types: [minor, patch]
-    # Only allow minor and patch updates
-    ignore:
-      - dependency-name: '*'
-        update-types: ['version-update:semver-major']
 
-  # Enable version updates for GitHub Actions
   - package-ecosystem: github-actions
-    # Look for `.github/workflows` in the root directory
     directory: /
-    # Check GitHub Actions for updates every month
-    schedule:
-      interval: monthly
-      time: '06:05'
-    # Limit the number of open pull requests for version updates to 1
-    open-pull-requests-limit: 1
-    # Commit message format
-    commit-message:
-      # Prefix all commit messages and pull request titles with "chore"
-      prefix: chore
+    schedule: { interval: weekly }
+    target-branch: dev
+    commit-message: { prefix: ci }
+    groups:
+      actions:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /docker
+    schedule: { interval: weekly }
+    target-branch: dev
+    commit-message: { prefix: build, include: scope }
+    groups:
+      docker-images:
+        update-types: [minor, patch]
+    # The Node major is a project decision (package.json "engines"), never a routine bump.
+    ignore:
+      - dependency-name: node
+        update-types: ['version-update:semver-major']
