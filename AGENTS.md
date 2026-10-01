@@ -24,7 +24,9 @@ src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
 src/proxy.ts                    i18n routing + auth: protects /dashboard, refreshes tokens
 src/validations/                zod schemas mirroring the backend's request rules
-src/components/ src/templates/  UI; src/locales/*.json  all user-visible text
+src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx shadcn add`)
+src/components/report/          Marksheet domain UI: marks, totals, results table
+src/components/ src/templates/  UI (MarketingTemplate, AppShell); src/locales/*.json  all user-visible text
 tests/e2e/                      Playwright, always against the real backend
 docker/  env/  scripts/  docs/  same roles as in the backend repo
 ```
@@ -94,7 +96,8 @@ Use `pnpm` (version pinned in `package.json` → `packageManager`), never npm or
 - Hypothesis-driven debugging: 1-3 causes, validate the most likely first.
 
 ### Styling
-Tailwind v4 utility classes. Reuse shared components. Responsive. No unnecessary classes.
+Tailwind v4 utility classes. Reuse shared components (`src/components/ui`, `src/components/report`)
+and the tokens in `src/styles/global.css`; see `DESIGN.md`. Responsive. No unnecessary classes.
 
 ### React
 - No `useMemo`/`useCallback` (React compiler handles it). Avoid `useEffect`.
