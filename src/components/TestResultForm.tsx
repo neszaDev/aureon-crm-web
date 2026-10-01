@@ -1,30 +1,41 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { LoaderCircleIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { createTestResult } from '@/actions/TestResultActions';
-import { FieldError } from '@/components/FieldError';
+import { FormAlert } from '@/components/FormAlert';
+import { describedBy, FormField } from '@/components/FormField';
+import { Mark } from '@/components/report/Mark';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import { Textarea } from '@/components/ui/textarea';
 import type { TestResultFormValues } from '@/validations/TestResultValidation';
 import { TEST_STATUSES, TestResultFormValidation } from '@/validations/TestResultValidation';
 
 const isFormField = (field: string): field is keyof TestResultFormValues =>
   field in TestResultFormValidation.shape;
 
-const inputClass =
-  'w-full rounded-sm border px-2 py-1 text-gray-700 focus:ring-3 focus:ring-blue-300/50 focus:outline-hidden';
-
 export const TestResultForm = () => {
   const t = useTranslations('TestResultForm');
   const [formError, setFormError] = useState<string>();
+  const [created, setCreated] = useState(false);
   const form = useForm<TestResultFormValues>({
     resolver: zodResolver(TestResultFormValidation),
     defaultValues: { testName: '', status: 'PENDING', notes: '' },
   });
+  const { errors, isSubmitting } = form.formState;
+  const invalid = (field: keyof TestResultFormValues) => ({
+    'aria-invalid': errors[field] ? true : undefined,
+    'aria-describedby': errors[field] ? describedBy(field) : undefined,
+  });
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(undefined);
+    setCreated(false);
     const result = await createTestResult({
       ...values,
       // datetime-local has no offset; send an ISO instant like the backend expects.
@@ -34,6 +45,7 @@ export const TestResultForm = () => {
 
     if (result.ok) {
       form.reset();
+      setCreated(true);
       return;
     }
     for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
@@ -45,78 +57,100 @@ export const TestResultForm = () => {
   });
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2" noValidate>
-      <div>
-        <label className="text-sm font-bold text-gray-700" htmlFor="testName">
-          {t('test_name_label')}
-        </label>
-        <input id="testName" className={inputClass} {...form.register('testName')} />
-        <FieldError error={form.formState.errors.testName} />
-      </div>
+    <form onSubmit={onSubmit} className="grid grid-cols-2 gap-x-4 gap-y-5" noValidate>
+      {formError && (
+        <div className="col-span-2">
+          <FormAlert>{formError}</FormAlert>
+        </div>
+      )}
 
-      <div>
-        <label className="text-sm font-bold text-gray-700" htmlFor="status">
-          {t('status_label')}
-        </label>
-        <select id="status" className={inputClass} {...form.register('status')}>
+      <FormField
+        htmlFor="testName"
+        label={t('test_name_label')}
+        error={errors.testName}
+        className="col-span-2"
+      >
+        <Input
+          id="testName"
+          autoComplete="off"
+          {...invalid('testName')}
+          {...form.register('testName')}
+        />
+      </FormField>
+
+      <FormField htmlFor="status" label={t('status_label')} error={errors.status}>
+        <NativeSelect id="status" {...invalid('status')} {...form.register('status')}>
           {TEST_STATUSES.map((status) => (
-            <option key={status} value={status}>
+            <NativeSelectOption key={status} value={status}>
               {t(`status_${status}`)}
-            </option>
+            </NativeSelectOption>
           ))}
-        </select>
-        <FieldError error={form.formState.errors.status} />
-      </div>
+        </NativeSelect>
+      </FormField>
 
-      <div>
-        <label className="text-sm font-bold text-gray-700" htmlFor="score">
-          {t('score_label')}
-        </label>
-        <input
+      <FormField
+        htmlFor="score"
+        label={t('score_label')}
+        aside={t('score_hint')}
+        error={errors.score}
+      >
+        <Input
           id="score"
           type="number"
           step="0.01"
-          className={inputClass}
+          min={0}
+          max={100}
+          inputMode="decimal"
+          className="tabular-nums"
+          {...invalid('score')}
           {...form.register('score', { valueAsNumber: true })}
         />
-        <FieldError error={form.formState.errors.score} />
-      </div>
+      </FormField>
 
-      <div>
-        <label className="text-sm font-bold text-gray-700" htmlFor="testedAt">
-          {t('tested_at_label')}
-        </label>
-        <input
+      <FormField
+        htmlFor="testedAt"
+        label={t('tested_at_label')}
+        error={errors.testedAt}
+        className="col-span-2"
+      >
+        <Input
           id="testedAt"
           type="datetime-local"
-          className={inputClass}
+          className="tabular-nums"
+          {...invalid('testedAt')}
           {...form.register('testedAt')}
         />
-        <FieldError error={form.formState.errors.testedAt} />
-      </div>
+      </FormField>
 
-      <div className="sm:col-span-2">
-        <label className="text-sm font-bold text-gray-700" htmlFor="notes">
-          {t('notes_label')}
-        </label>
-        <textarea id="notes" rows={2} className={inputClass} {...form.register('notes')} />
-        <FieldError error={form.formState.errors.notes} />
-      </div>
+      <FormField
+        htmlFor="notes"
+        label={t('notes_label')}
+        aside={t('notes_hint')}
+        error={errors.notes}
+        className="col-span-2"
+      >
+        <Textarea
+          id="notes"
+          rows={2}
+          className="font-hand text-base leading-snug"
+          {...invalid('notes')}
+          {...form.register('notes')}
+        />
+      </FormField>
 
-      {formError && (
-        <p className="text-sm text-red-600 sm:col-span-2" role="alert">
-          {formError}
-        </p>
-      )}
-
-      <div className="sm:col-span-2">
-        <button
-          className="rounded-sm bg-blue-500 px-5 py-1 font-bold text-white hover:bg-blue-600 focus:ring-3 focus:ring-blue-300/50 focus:outline-hidden disabled:pointer-events-none disabled:opacity-50"
-          type="submit"
-          disabled={form.formState.isSubmitting}
-        >
+      <div className="col-span-2 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <Button type="submit" disabled={isSubmitting} className="min-w-28">
+          {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
           {t('create_button')}
-        </button>
+        </Button>
+        <output className="flex items-center gap-1.5 text-sm font-medium text-pass">
+          {created && (
+            <>
+              <Mark status="PASSED" animate className="size-4" />
+              {t('created')}
+            </>
+          )}
+        </output>
       </div>
     </form>
   );

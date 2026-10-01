@@ -3,6 +3,8 @@ import * as z from 'zod';
 /** Statuses accepted by the backend (`testresult/TestStatus`). */
 export const TEST_STATUSES = ['PENDING', 'PASSED', 'FAILED'] as const;
 
+export type TestStatus = (typeof TEST_STATUSES)[number];
+
 // Mirrors the backend's CreateTestResultRequest. Messages are `Validation` translation keys.
 export const TestResultValidation = z.object({
   testName: z.string().trim().min(1, 'required').max(100, 'too_long'),

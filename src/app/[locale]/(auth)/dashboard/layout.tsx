@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { LocaleSwitcher } from '@/components/LocaleSwitcher';
-import { SignOutButton } from '@/components/SignOutButton';
-import { Link } from '@/libs/I18nNavigation';
-import { BaseTemplate } from '@/templates/BaseTemplate';
+import { getCurrentUser } from '@/libs/api/Queries';
+import { redirect } from '@/libs/I18nNavigation';
+import { AppShell } from '@/templates/AppShell';
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -26,39 +25,11 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardLayout(props: DashboardLayoutProps) {
   const { locale } = await props.params;
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: 'DashboardLayout' });
 
-  return (
-    <BaseTemplate
-      leftNav={
-        <>
-          <li>
-            <Link href="/dashboard/" className="border-none text-gray-700 hover:text-gray-900">
-              {t('dashboard_link')}
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/dashboard/test-results/"
-              className="border-none text-gray-700 hover:text-gray-900"
-            >
-              {t('test_results_link')}
-            </Link>
-          </li>
-        </>
-      }
-      rightNav={
-        <>
-          <li>
-            <SignOutButton />
-          </li>
-          <li>
-            <LocaleSwitcher />
-          </li>
-        </>
-      }
-    >
-      <div className="py-5">{props.children}</div>
-    </BaseTemplate>
-  );
+  const { user, unauthorized } = await getCurrentUser();
+  if (unauthorized || !user) {
+    return redirect({ href: '/sign-in', locale });
+  }
+
+  return <AppShell email={user.email}>{props.children}</AppShell>;
 }

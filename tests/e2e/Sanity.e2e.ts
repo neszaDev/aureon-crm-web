@@ -6,7 +6,7 @@ test.describe('Sanity', () => {
       await page.goto('/');
 
       await expect(
-        page.getByRole('heading', { name: 'Frontend starter for the Spring Boot API' }),
+        page.getByRole('heading', { name: 'Every test, graded on one card.' }),
       ).toBeVisible();
     });
 
@@ -17,6 +17,13 @@ test.describe('Sanity', () => {
 
       await expect(page).toHaveURL(/about$/u);
       await expect(page.getByRole('link', { name: 'Next.js Boilerplate' })).toBeVisible();
+    });
+
+    test('shows the not-found page for an unknown path', async ({ page }) => {
+      const response = await page.goto('/no-such-page');
+
+      expect(response?.status()).toBe(404);
+      await expect(page.getByRole('heading', { name: 'This page is absent.' })).toBeVisible();
     });
   });
 });

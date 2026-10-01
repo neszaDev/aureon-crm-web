@@ -1,49 +1,110 @@
 {
+  "Brand": {
+    "home_label": "Marksheet home",
+    "sample_note": "Marksheet is a sample product for the Next.js + Spring Boilerplate. Replace this copy with your own."
+  },
   "RootLayout": {
-    "home_link": "Home",
     "about_link": "About",
     "sign_in_link": "Sign in",
-    "sign_up_link": "Sign up"
-  },
-  "BaseTemplate": {
-    "description": "Next.js frontend for the Spring Boot API",
-    "footer_text": "© {year} {name}",
+    "sign_up_link": "Create account",
     "main_navigation_label": "Main navigation"
   },
+  "Footer": {
+    "footer_text": "© {year} {name}",
+    "template_link": "Built on the Next.js + Spring Boilerplate",
+    "footer_navigation_label": "Footer"
+  },
   "Index": {
-    "meta_title": "Next.js + Spring Boilerplate",
-    "meta_description": "A Next.js frontend wired to a Spring Boot and PostgreSQL API.",
-    "title": "Frontend starter for the Spring Boot API",
-    "intro": "This app talks to the backend through its Next.js server, so tokens never reach the browser.",
-    "feature_auth": "Sign up, sign in and sign out with the backend's JWT and rotating refresh tokens",
-    "feature_api": "Typed API client generated from the backend's OpenAPI spec",
-    "feature_i18n": "Multi-language routing with next-intl",
-    "feature_quality": "Lint, type checks, unit tests and full-stack end-to-end tests in CI",
-    "cta": "Create an account"
+    "meta_title": "Marksheet: every test, graded on one card",
+    "meta_description": "Log what you tested, how it went and when. A sample product built on the Next.js + Spring Boilerplate.",
+    "title": "Every test, graded on one card.",
+    "intro": "Log what you tested, how it went and when. Marksheet keeps every mark in one place, so you can see what passed at a glance.",
+    "cta": "Create an account",
+    "secondary_cta": "Sign in",
+    "card_title": "Report of tests",
+    "card_term": "Autumn 2026",
+    "card_name_label": "Name",
+    "card_name": "Alex Martin",
+    "sample_tag": "Sample data",
+    "remark_label": "Remarks",
+    "remark": "Strong term. Retake the Spanish listening part.",
+    "sample_1_name": "Driving theory test",
+    "sample_2_name": "Spanish B1 mock exam",
+    "sample_2_note": "Retake the listening part",
+    "sample_3_name": "Blood pressure check",
+    "sample_4_name": "First-aid refresher",
+    "sample_5_name": "Piano grade 3 mock",
+    "sample_5_note": "Examiner's sheet due Friday",
+    "sample_6_name": "5 km time trial",
+    "key_title": "Three marks, read in one look",
+    "key_intro": "Every result gets one mark. Scan down the column and you know where you stand.",
+    "key_passed": "A tick: the test passed.",
+    "key_failed": "A circle: it failed and wants another go.",
+    "key_pending": "An open box: still waiting on the result.",
+    "rows_title": "What goes on each row",
+    "rows_intro": "Five fields, the same every time, so every row lines up with the last.",
+    "row_name": "Test name",
+    "row_name_desc": "What you tested, in your own words. Up to 100 characters.",
+    "row_status": "Status",
+    "row_status_desc": "Passed, failed or pending.",
+    "row_score": "Score",
+    "row_score_desc": "A mark from 0 to 100. Decimals are fine.",
+    "row_tested_at": "Tested at",
+    "row_tested_at_desc": "When the test happened, to the minute.",
+    "row_notes": "Notes",
+    "row_notes_desc": "A remark for later. Optional, up to 1,000 characters.",
+    "features_title": "Kept the way a card should be",
+    "feature_totals_title": "Totals at the top",
+    "feature_totals": "Counts for each mark, updated the moment you add a row.",
+    "feature_history_title": "The whole history",
+    "feature_history": "Every result you have logged, most recent test first, ten to a page.",
+    "feature_private_title": "Yours alone",
+    "feature_private": "Each account sees only its own results. Your session lives on the server, never in the browser's JavaScript.",
+    "feature_languages_title": "English and French",
+    "feature_languages": "Switch language from any page and the card follows.",
+    "close_title": "Start your card",
+    "close_text": "Create an account, log your first test and watch the mark go on.",
+    "row_notes_sample": "First go, no mistakes"
   },
   "About": {
     "meta_title": "About",
-    "meta_description": "About this boilerplate",
-    "about_paragraph": "A starting point for frontends built on the spring-postgres-boilerplate API.",
+    "meta_description": "About Marksheet and the template it is built on",
+    "title": "About this template",
+    "about_paragraph": "Marksheet is a sample product. It shows what a frontend built on the spring-postgres-boilerplate API looks like when it is finished: a landing page, sign-in, and an app working on real data.",
+    "replace_paragraph": "To start your own product, replace the Marksheet copy in src/locales and swap the test-results example for your own domain.",
+    "inside_title": "What is inside",
+    "feature_auth": "Sign up, sign in and sign out with the backend's JWT and rotating refresh tokens, kept in httpOnly cookies",
+    "feature_api": "A typed API client generated from the backend's OpenAPI spec",
+    "feature_ui": "Shared UI components from shadcn/ui, themed with design tokens",
+    "feature_i18n": "Multi-language routing with next-intl",
+    "feature_quality": "Lint, type checks, unit tests and full-stack end-to-end tests in CI",
     "credits": "Based on <upstream>Next.js Boilerplate</upstream> by ixartz (MIT licence)."
+  },
+  "AuthLayout": {
+    "aside_title": "One card for every test.",
+    "aside_text": "Ticks for what passed, circles for what needs another go.",
+    "back_home": "Back to home"
   },
   "SignInPage": {
     "meta_title": "Sign in",
     "meta_description": "Sign in to your account.",
     "title": "Sign in",
+    "subtitle": "Welcome back. Your card is where you left it.",
     "switch_prompt": "No account yet?",
-    "switch_link": "Sign up"
+    "switch_link": "Create one"
   },
   "SignUpPage": {
-    "meta_title": "Sign up",
+    "meta_title": "Create an account",
     "meta_description": "Create an account.",
     "title": "Create an account",
+    "subtitle": "Start a card for your tests. An email and a password is all it takes.",
     "switch_prompt": "Already have an account?",
     "switch_link": "Sign in"
   },
   "AuthForm": {
     "email_label": "Email address",
     "password_label": "Password",
+    "password_hint": "At least 6 characters.",
     "sign_in_button": "Sign in",
     "sign_up_button": "Create account",
     "error_invalid_credentials": "Invalid email or password",
@@ -64,26 +125,50 @@
   "DashboardLayout": {
     "meta_title": "Dashboard",
     "meta_description": "Your account and test results.",
-    "dashboard_link": "Dashboard",
+    "nav_label": "App navigation",
+    "dashboard_link": "Overview",
     "test_results_link": "Test results",
-    "sign_out": "Sign out"
+    "account_link": "Account",
+    "sign_out": "Sign out",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "signed_in_as": "Signed in as"
   },
   "DashboardPage": {
+    "title": "Overview",
     "hello_message": "Hello {email}!",
-    "account_details": "Role: {role} · Member since {since}"
+    "account_details": "Role: {role} · Member since {since}",
+    "totals_title": "Totals",
+    "latest_title": "Most recent tests",
+    "see_all": "See every result",
+    "empty_title": "Your card is empty",
+    "empty_text": "Add your first test and its mark goes on here.",
+    "empty_cta": "Add your first test"
   },
-  "TestResultsPage": {
-    "summary_title": "Summary ({total} total)",
-    "create_title": "Add a test result",
-    "list_title": "Your test results",
-    "empty": "No test results yet",
-    "column_name": "Name",
+  "Totals": {
+    "label": "Totals by mark",
+    "total": "Total"
+  },
+  "ResultsTable": {
+    "column_name": "Test",
     "column_status": "Status",
     "column_score": "Score",
     "column_tested_at": "Tested at",
-    "column_actions": "Actions",
+    "column_actions": "Actions"
+  },
+  "TestResultsPage": {
+    "title": "Test results",
+    "description": "Every test you have logged, most recent first.",
+    "create_title": "Add a test result",
+    "list_title": "Your test results",
+    "empty": "No test results yet",
+    "empty_text": "Fill in the form and the first row goes on the card.",
     "delete_button": "Delete",
     "delete_label": "Delete {name}",
+    "confirm_title": "Delete “{name}”?",
+    "confirm_text": "This takes the result off your card. It can't be undone.",
+    "confirm_cancel": "Keep it",
+    "confirm_delete": "Delete",
     "pagination_label": "Pages",
     "previous_page": "Previous",
     "next_page": "Next",
@@ -93,16 +178,50 @@
     "test_name_label": "Test name",
     "status_label": "Status",
     "score_label": "Score",
+    "score_hint": "0 to 100",
     "tested_at_label": "Tested at",
     "notes_label": "Notes",
+    "notes_hint": "Optional",
     "create_button": "Add",
+    "created": "Added to your card.",
     "status_PENDING": "Pending",
     "status_PASSED": "Passed",
     "status_FAILED": "Failed",
     "error_invalid_input": "Check the highlighted fields",
     "error_generic": "Something went wrong"
   },
+  "AccountPage": {
+    "title": "Account",
+    "description": "The details on your card.",
+    "email_label": "Email address",
+    "role_label": "Role",
+    "member_since_label": "Member since",
+    "id_label": "Account number",
+    "role_USER": "User",
+    "role_ADMIN": "Admin"
+  },
+  "NotFound": {
+    "meta_title": "Page not found",
+    "mark": "Absent",
+    "title": "This page is absent.",
+    "text": "The link may be old or mistyped. Nothing was lost.",
+    "home": "Back to home"
+  },
+  "ErrorPage": {
+    "title": "Something went wrong",
+    "text": "This page didn't load. Try again; if it keeps happening, come back in a little while.",
+    "retry": "Try again",
+    "home": "Back to home"
+  },
+  "GlobalError": {
+    "title": "Something went wrong",
+    "text": "The app hit an error it couldn't recover from.",
+    "retry": "Try again"
+  },
   "LocaleSwitcher": {
     "change_language": "Change language"
+  },
+  "Loading": {
+    "label": "Loading"
   }
 }

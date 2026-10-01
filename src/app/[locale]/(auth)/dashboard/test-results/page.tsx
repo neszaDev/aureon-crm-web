@@ -1,8 +1,14 @@
-import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { DeleteTestResultButton } from '@/components/DeleteTestResultButton';
+import { PageHeader } from '@/components/PageHeader';
+import { Pagination } from '@/components/Pagination';
+import { freshDrawDelays } from '@/components/report/freshRows';
+import { ResultsTable } from '@/components/report/ResultsTable';
+import { TotalsStrip } from '@/components/report/TotalsStrip';
 import { TestResultForm } from '@/components/TestResultForm';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { listTestResults } from '@/libs/api/Queries';
-import { Link, redirect } from '@/libs/I18nNavigation';
+import { redirect } from '@/libs/I18nNavigation';
 
 const PAGE_SIZE = 10;
 
@@ -15,12 +21,10 @@ export default async function TestResultsPage(props: TestResultsPageProps) {
   const { locale } = await props.params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'TestResultsPage' });
-  const tStatus = await getTranslations({ locale, namespace: 'TestResultForm' });
-  const format = await getFormatter({ locale });
   const searchParams = await props.searchParams;
   const page = Math.max(Math.trunc(Number(searchParams.page ?? '0')) || 0, 0);
 
-  const { results, summary, unauthorized } = await listTestResults(page, PAGE_SIZE);
+  const { results, summary, readAt, unauthorized } = await listTestResults(page, PAGE_SIZE);
   if (unauthorized) {
     return redirect({ href: '/sign-in', locale });
   }
@@ -29,84 +33,53 @@ export default async function TestResultsPage(props: TestResultsPageProps) {
   const totalPages = results?.totalPages ?? 0;
 
   return (
-    <div className="flex flex-col gap-8">
-      <section aria-labelledby="summary-heading">
-        <h2 id="summary-heading" className="mb-3 text-xl font-bold text-gray-900">
-          {t('summary_title', { total: summary?.total ?? 0 })}
-        </h2>
-        <ul className="flex gap-6">
-          {(summary?.byStatus ?? []).map((entry) => (
-            <li key={entry.status} data-testid={`summary-${entry.status}`}>
-              {tStatus(`status_${entry.status ?? 'PENDING'}`)}:{' '}
-              <span className="font-bold">{entry.count ?? 0}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+    <>
+      <PageHeader title={t('title')} description={t('description')} />
 
-      <section aria-labelledby="create-heading">
-        <h2 id="create-heading" className="mb-3 text-xl font-bold text-gray-900">
-          {t('create_title')}
-        </h2>
-        <TestResultForm />
-      </section>
+      <TotalsStrip summary={summary} />
 
-      <section aria-labelledby="list-heading">
-        <h2 id="list-heading" className="mb-3 text-xl font-bold text-gray-900">
-          {t('list_title')}
-        </h2>
-        {rows.length === 0 ? (
-          <p>{t('empty')}</p>
-        ) : (
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="py-2">{t('column_name')}</th>
-                <th>{t('column_status')}</th>
-                <th>{t('column_score')}</th>
-                <th>{t('column_tested_at')}</th>
-                <th>
-                  <span className="sr-only">{t('column_actions')}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.id} className="border-b">
-                  <td className="py-2">{row.testName}</td>
-                  <td>{tStatus(`status_${row.status ?? 'PENDING'}`)}</td>
-                  <td>{format.number(row.score ?? 0)}</td>
-                  <td>
-                    {row.testedAt
-                      ? format.dateTime(new Date(row.testedAt), {
-                          dateStyle: 'medium',
-                          timeStyle: 'short',
-                        })
-                      : ''}
-                  </td>
-                  <td className="text-right">
-                    {row.id !== undefined && (
-                      <DeleteTestResultButton id={row.id} name={row.testName ?? ''} />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <Card className="xl:sticky xl:top-12 xl:col-start-2 xl:row-start-1">
+          <CardHeader className="border-b-[3px] border-double border-ink-300 pb-5">
+            <CardTitle>
+              <h2 id="create-heading">{t('create_title')}</h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TestResultForm />
+          </CardContent>
+        </Card>
 
-        {totalPages > 1 && (
-          <nav className="mt-4 flex gap-4 text-sm" aria-label={t('pagination_label')}>
-            {page > 0 && (
-              <Link href={`/dashboard/test-results?page=${page - 1}`}>{t('previous_page')}</Link>
-            )}
-            <span>{t('page_of', { page: page + 1, total: totalPages })}</span>
-            {page + 1 < totalPages && (
-              <Link href={`/dashboard/test-results?page=${page + 1}`}>{t('next_page')}</Link>
-            )}
-          </nav>
-        )}
-      </section>
-    </div>
+        <Card className="gap-0 pb-0 xl:col-start-1 xl:row-start-1">
+          <CardHeader className="border-b-[3px] border-double border-ink-300 pb-5">
+            <CardTitle>
+              <h2 id="list-heading">{t('list_title')}</h2>
+            </CardTitle>
+          </CardHeader>
+          <div className="px-2 sm:px-3">
+            <ResultsTable
+              rows={rows}
+              drawDelays={freshDrawDelays(rows, readAt)}
+              renderActions={(row) =>
+                row.id !== undefined && (
+                  <DeleteTestResultButton id={row.id} name={row.testName ?? ''} />
+                )
+              }
+              empty={
+                <>
+                  <p className="text-lg font-bold text-ink-950">{t('empty')}</p>
+                  <p className="max-w-sm text-[0.9375rem] text-ink-600">{t('empty_text')}</p>
+                </>
+              }
+            />
+          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            href={(target) => `/dashboard/test-results?page=${target}`}
+          />
+        </Card>
+      </div>
+    </>
   );
 }
