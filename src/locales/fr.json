@@ -1,62 +1,123 @@
 {
+  "Brand": {
+    "home_label": "Accueil Marksheet",
+    "sample_note": "Marksheet est un produit d'exemple pour le Next.js + Spring Boilerplate. Remplacez ces textes par les vôtres."
+  },
   "RootLayout": {
-    "home_link": "Accueil",
     "about_link": "À propos",
     "sign_in_link": "Se connecter",
-    "sign_up_link": "S'inscrire"
-  },
-  "BaseTemplate": {
-    "description": "Frontend Next.js pour l'API Spring Boot",
-    "footer_text": "© {year} {name}",
+    "sign_up_link": "Créer un compte",
     "main_navigation_label": "Navigation principale"
   },
+  "Footer": {
+    "footer_text": "© {year} {name}",
+    "template_link": "Construit sur le Next.js + Spring Boilerplate",
+    "footer_navigation_label": "Pied de page"
+  },
   "Index": {
-    "meta_title": "Next.js + Spring Boilerplate",
-    "meta_description": "Un frontend Next.js connecté à une API Spring Boot et PostgreSQL.",
-    "title": "Point de départ frontend pour l'API Spring Boot",
-    "intro": "Cette application passe par son serveur Next.js pour parler au backend : les jetons n'atteignent jamais le navigateur.",
-    "feature_auth": "Inscription, connexion et déconnexion avec les JWT du backend et des jetons de rafraîchissement renouvelés",
-    "feature_api": "Client API typé, généré depuis la spécification OpenAPI du backend",
-    "feature_i18n": "Routage multilingue avec next-intl",
-    "feature_quality": "Lint, vérification des types, tests unitaires et tests de bout en bout dans la CI",
-    "cta": "Créer un compte"
+    "meta_title": "Marksheet : chaque test, noté sur un seul bulletin",
+    "meta_description": "Notez ce que vous avez testé, le résultat et la date. Un produit d'exemple construit sur le Next.js + Spring Boilerplate.",
+    "title": "Chaque test, noté sur un seul bulletin.",
+    "intro": "Notez ce que vous avez testé, le résultat et la date. Marksheet garde toutes vos notes au même endroit : vous voyez d'un coup d'œil ce qui est réussi.",
+    "cta": "Créer un compte",
+    "secondary_cta": "Se connecter",
+    "card_title": "Bulletin de tests",
+    "card_term": "Automne 2026",
+    "card_name_label": "Nom",
+    "card_name": "Alex Martin",
+    "sample_tag": "Données d'exemple",
+    "remark_label": "Appréciation",
+    "remark": "Très bon trimestre. Repasser l'écoute en espagnol.",
+    "sample_1_name": "Code de la route",
+    "sample_2_name": "Examen blanc d'espagnol B1",
+    "sample_2_note": "Repasser l'épreuve d'écoute",
+    "sample_3_name": "Contrôle de tension",
+    "sample_4_name": "Recyclage premiers secours",
+    "sample_5_name": "Examen blanc de piano, niveau 3",
+    "sample_5_note": "Fiche de l'examinateur attendue vendredi",
+    "sample_6_name": "Contre-la-montre 5 km",
+    "key_title": "Trois marques, lues d'un seul regard",
+    "key_intro": "Chaque résultat reçoit une marque. Parcourez la colonne et vous savez où vous en êtes.",
+    "key_passed": "Une coche : le test est réussi.",
+    "key_failed": "Un cercle : il a échoué et mérite un nouvel essai.",
+    "key_pending": "Une case vide : le résultat est encore attendu.",
+    "rows_title": "Ce que contient chaque ligne",
+    "rows_intro": "Cinq champs, toujours les mêmes, pour que chaque ligne s'aligne sur la précédente.",
+    "row_name": "Nom du test",
+    "row_name_desc": "Ce que vous avez testé, avec vos mots. 100 caractères au plus.",
+    "row_status": "Statut",
+    "row_status_desc": "Réussi, échoué ou en attente.",
+    "row_score": "Score",
+    "row_score_desc": "Une note de 0 à 100. Les décimales sont acceptées.",
+    "row_tested_at": "Testé le",
+    "row_tested_at_desc": "Quand le test a eu lieu, à la minute près.",
+    "row_notes": "Notes",
+    "row_notes_desc": "Une remarque pour plus tard. Facultative, 1 000 caractères au plus.",
+    "features_title": "Tenu comme un bulletin doit l'être",
+    "feature_totals_title": "Les totaux en tête",
+    "feature_totals": "Le compte de chaque marque, mis à jour dès que vous ajoutez une ligne.",
+    "feature_history_title": "Tout l'historique",
+    "feature_history": "Chaque résultat enregistré, le test le plus récent en premier, dix par page.",
+    "feature_private_title": "Rien qu'à vous",
+    "feature_private": "Chaque compte ne voit que ses propres résultats. Votre session reste sur le serveur, jamais dans le JavaScript du navigateur.",
+    "feature_languages_title": "Anglais et français",
+    "feature_languages": "Changez de langue depuis n'importe quelle page, le bulletin suit.",
+    "close_title": "Ouvrez votre bulletin",
+    "close_text": "Créez un compte, enregistrez votre premier test et regardez la marque s'inscrire.",
+    "row_notes_sample": "Du premier coup, sans faute"
   },
   "About": {
     "meta_title": "À propos",
-    "meta_description": "À propos de ce boilerplate",
-    "about_paragraph": "Un point de départ pour les frontends basés sur l'API spring-postgres-boilerplate.",
+    "meta_description": "À propos de Marksheet et du modèle sur lequel il repose",
+    "title": "À propos de ce modèle",
+    "about_paragraph": "Marksheet est un produit d'exemple. Il montre à quoi ressemble, une fois terminé, un frontend construit sur l'API spring-postgres-boilerplate : une page d'accueil, la connexion et une application qui travaille sur de vraies données.",
+    "replace_paragraph": "Pour lancer votre propre produit, remplacez les textes de Marksheet dans src/locales et l'exemple des résultats de tests par votre propre domaine.",
+    "inside_title": "Ce qu'il contient",
+    "feature_auth": "Inscription, connexion et déconnexion avec le JWT du backend et des jetons de rafraîchissement renouvelés, gardés dans des cookies httpOnly",
+    "feature_api": "Un client d'API typé, généré à partir de la spécification OpenAPI du backend",
+    "feature_ui": "Des composants d'interface partagés issus de shadcn/ui, thématisés par des design tokens",
+    "feature_i18n": "Routage multilingue avec next-intl",
+    "feature_quality": "Lint, vérification des types, tests unitaires et tests de bout en bout sur toute la pile en CI",
     "credits": "Basé sur <upstream>Next.js Boilerplate</upstream> par ixartz (licence MIT)."
+  },
+  "AuthLayout": {
+    "aside_title": "Un seul bulletin pour tous vos tests.",
+    "aside_text": "Des coches pour ce qui est réussi, des cercles pour ce qui mérite un nouvel essai.",
+    "back_home": "Retour à l'accueil"
   },
   "SignInPage": {
     "meta_title": "Se connecter",
     "meta_description": "Connectez-vous à votre compte.",
     "title": "Se connecter",
+    "subtitle": "Bon retour. Votre bulletin vous attend là où vous l'avez laissé.",
     "switch_prompt": "Pas encore de compte ?",
-    "switch_link": "S'inscrire"
+    "switch_link": "En créer un"
   },
   "SignUpPage": {
-    "meta_title": "S'inscrire",
+    "meta_title": "Créer un compte",
     "meta_description": "Créez un compte.",
     "title": "Créer un compte",
+    "subtitle": "Ouvrez un bulletin pour vos tests. Une adresse e-mail et un mot de passe suffisent.",
     "switch_prompt": "Vous avez déjà un compte ?",
     "switch_link": "Se connecter"
   },
   "AuthForm": {
     "email_label": "Adresse e-mail",
     "password_label": "Mot de passe",
+    "password_hint": "6 caractères au moins.",
     "sign_in_button": "Se connecter",
     "sign_up_button": "Créer le compte",
     "error_invalid_credentials": "E-mail ou mot de passe incorrect",
-    "error_email_taken": "Cet e-mail est déjà enregistré",
+    "error_email_taken": "Cette adresse e-mail est déjà utilisée",
     "error_invalid_input": "Vérifiez les champs signalés",
-    "error_generic": "Une erreur s'est produite"
+    "error_generic": "Une erreur est survenue"
   },
   "Validation": {
     "required": "Obligatoire",
     "invalid_email": "Saisissez une adresse e-mail valide",
     "too_long": "Trop long",
-    "password_too_short": "Au moins 6 caractères",
-    "password_too_long": "Au plus 72 caractères",
+    "password_too_short": "Utilisez au moins 6 caractères",
+    "password_too_long": "Utilisez au plus 72 caractères",
     "invalid_number": "Saisissez un nombre",
     "score_range": "Le score doit être compris entre 0 et 100",
     "invalid_date": "Saisissez une date valide"
@@ -64,45 +125,103 @@
   "DashboardLayout": {
     "meta_title": "Tableau de bord",
     "meta_description": "Votre compte et vos résultats de tests.",
-    "dashboard_link": "Tableau de bord",
+    "nav_label": "Navigation de l'application",
+    "dashboard_link": "Vue d'ensemble",
     "test_results_link": "Résultats de tests",
-    "sign_out": "Se déconnecter"
+    "account_link": "Compte",
+    "sign_out": "Se déconnecter",
+    "open_menu": "Ouvrir le menu",
+    "close_menu": "Fermer le menu",
+    "signed_in_as": "Connecté en tant que"
   },
   "DashboardPage": {
+    "title": "Vue d'ensemble",
     "hello_message": "Bonjour {email} !",
-    "account_details": "Rôle : {role} · Membre depuis le {since}"
+    "account_details": "Rôle : {role} · Membre depuis le {since}",
+    "totals_title": "Totaux",
+    "latest_title": "Tests les plus récents",
+    "see_all": "Voir tous les résultats",
+    "empty_title": "Votre bulletin est vide",
+    "empty_text": "Ajoutez votre premier test et sa marque s'inscrit ici.",
+    "empty_cta": "Ajouter votre premier test"
   },
-  "TestResultsPage": {
-    "summary_title": "Résumé ({total} au total)",
-    "create_title": "Ajouter un résultat",
-    "list_title": "Vos résultats de tests",
-    "empty": "Aucun résultat pour l'instant",
-    "column_name": "Nom",
+  "Totals": {
+    "label": "Totaux par marque",
+    "total": "Total"
+  },
+  "ResultsTable": {
+    "column_name": "Test",
     "column_status": "Statut",
     "column_score": "Score",
-    "column_tested_at": "Date du test",
-    "column_actions": "Actions",
+    "column_tested_at": "Testé le",
+    "column_actions": "Actions"
+  },
+  "TestResultsPage": {
+    "title": "Résultats de tests",
+    "description": "Chaque test enregistré, le plus récent en premier.",
+    "create_title": "Ajouter un résultat de test",
+    "list_title": "Vos résultats de tests",
+    "empty": "Aucun résultat de test pour l'instant",
+    "empty_text": "Remplissez le formulaire et la première ligne s'inscrit sur le bulletin.",
     "delete_button": "Supprimer",
     "delete_label": "Supprimer {name}",
+    "confirm_title": "Supprimer « {name} » ?",
+    "confirm_text": "Le résultat sera retiré de votre bulletin. Cette action est définitive.",
+    "confirm_cancel": "Le garder",
+    "confirm_delete": "Supprimer",
     "pagination_label": "Pages",
-    "previous_page": "Précédent",
-    "next_page": "Suivant",
+    "previous_page": "Précédente",
+    "next_page": "Suivante",
     "page_of": "Page {page} sur {total}"
   },
   "TestResultForm": {
     "test_name_label": "Nom du test",
     "status_label": "Statut",
     "score_label": "Score",
-    "tested_at_label": "Date du test",
+    "score_hint": "De 0 à 100",
+    "tested_at_label": "Testé le",
     "notes_label": "Notes",
+    "notes_hint": "Facultatif",
     "create_button": "Ajouter",
+    "created": "Ajouté à votre bulletin.",
     "status_PENDING": "En attente",
     "status_PASSED": "Réussi",
     "status_FAILED": "Échoué",
     "error_invalid_input": "Vérifiez les champs signalés",
-    "error_generic": "Une erreur s'est produite"
+    "error_generic": "Une erreur est survenue"
+  },
+  "AccountPage": {
+    "title": "Compte",
+    "description": "Les informations de votre bulletin.",
+    "email_label": "Adresse e-mail",
+    "role_label": "Rôle",
+    "member_since_label": "Membre depuis",
+    "id_label": "Numéro de compte",
+    "role_USER": "Utilisateur",
+    "role_ADMIN": "Administrateur"
+  },
+  "NotFound": {
+    "meta_title": "Page introuvable",
+    "mark": "Absent",
+    "title": "Cette page est absente.",
+    "text": "Le lien est peut-être ancien ou mal saisi. Rien n'a été perdu.",
+    "home": "Retour à l'accueil"
+  },
+  "ErrorPage": {
+    "title": "Une erreur est survenue",
+    "text": "Cette page ne s'est pas chargée. Réessayez ; si cela continue, revenez un peu plus tard.",
+    "retry": "Réessayer",
+    "home": "Retour à l'accueil"
+  },
+  "GlobalError": {
+    "title": "Une erreur est survenue",
+    "text": "L'application a rencontré une erreur dont elle n'a pas pu se remettre.",
+    "retry": "Réessayer"
   },
   "LocaleSwitcher": {
     "change_language": "Changer de langue"
+  },
+  "Loading": {
+    "label": "Chargement"
   }
 }

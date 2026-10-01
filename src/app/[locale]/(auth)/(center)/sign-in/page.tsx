@@ -23,15 +23,23 @@ export default async function SignInPage(props: SignInPageProps) {
   const t = await getTranslations({ locale, namespace: 'SignInPage' });
 
   return (
-    <>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">{t('title')}</h1>
-      <AuthForm mode="sign-in" />
-      <p className="mt-6 text-sm text-gray-700">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-ink-950">{t('title')}</h1>
+        <p className="text-[0.9375rem] leading-relaxed text-ink-600">{t('subtitle')}</p>
+      </div>
+      <div className="paper p-6 sm:p-7">
+        <AuthForm mode="sign-in" />
+      </div>
+      <p className="text-sm text-ink-600">
         {t('switch_prompt')}{' '}
-        <Link href="/sign-up/" className="text-blue-700 hover:underline">
+        <Link
+          href="/sign-up/"
+          className="font-semibold text-folder underline decoration-folder/40 underline-offset-4 hover:decoration-folder"
+        >
           {t('switch_link')}
         </Link>
       </p>
-    </>
+    </div>
   );
 }

@@ -5,10 +5,11 @@ test.describe('I18n', () => {
     test('switches the homepage from English to French with the dropdown', async ({ page }) => {
       await page.goto('/');
 
-      await page.getByLabel('Change language').selectOption('fr');
+      // By role: the footer copy of the picker (phones only) is hidden on desktop.
+      await page.getByRole('combobox', { name: 'Change language' }).selectOption('fr');
 
       await expect(
-        page.getByRole('heading', { name: "Point de départ frontend pour l'API Spring Boot" }),
+        page.getByRole('heading', { name: 'Chaque test, noté sur un seul bulletin.' }),
       ).toBeVisible();
     });
 

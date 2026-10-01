@@ -20,7 +20,8 @@ export const getCurrentUser = async () => {
  * Loads one page of the user's test results plus the per-status summary.
  * @param page Zero-based page number.
  * @param size Page size (the backend allows 1-100).
- * @returns The page, the summary, or `unauthorized` when the session is no longer valid.
+ * @returns The page, the summary, when they were read (`readAt`, epoch ms), or `unauthorized`
+ * when the session is no longer valid.
  */
 export const listTestResults = async (page: number, size: number) => {
   const api = await authedBackend();
@@ -32,6 +33,7 @@ export const listTestResults = async (page: number, size: number) => {
   return {
     results: list.data,
     summary: summary.data,
+    readAt: Date.now(),
     unauthorized: list.response.status === 401 || summary.response.status === 401,
   };
 };

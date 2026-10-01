@@ -1,9 +1,24 @@
 import type { Metadata, Viewport } from 'next';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
+import { Kalam, Libre_Franklin } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { routing } from '@/libs/I18nRouting';
 import '@/styles/global.css';
+
+// The printed form face and the handwritten remark face. Self-hosted by next/font at build.
+const franklin = Libre_Franklin({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-franklin',
+  display: 'swap',
+});
+
+const kalam = Kalam({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '700'],
+  variable: '--font-kalam',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   icons: [
@@ -33,6 +48,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: '#1f5c45',
 };
 
 export function generateStaticParams() {
@@ -52,7 +68,7 @@ export default async function RootLayout(props: {
   setRequestLocale(locale);
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={`${franklin.variable} ${kalam.variable}`}>
       <body>
         <NextIntlClientProvider>{props.children}</NextIntlClientProvider>
       </body>

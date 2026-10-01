@@ -1,1 +1,249 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+/*
+ * Marksheet: a school report card. Folder green owns large fields, ruled card stock is the
+ * working ground, navy form ink on one stepped ramp carries text and rules, red pen is kept
+ * for failed marks and errors, graphite pencil for pending.
+ */
+
+:root {
+  /* Folder (the card's cover): hero, app sidebar, closing band. */
+  --folder: #1f5c45;
+  --folder-deep: #164433;
+  --folder-ink: #f1f5ef;
+  --folder-ink-soft: #bcd3c5;
+
+  /* Card stock. */
+  --paper: #e8eee6;
+  --paper-card: #f5f8f3;
+  --ply: #ffffff;
+
+  /* Navy form ink: the only neutral ramp. */
+  --ink-950: #111b30;
+  --ink-900: #1b2b4b;
+  --ink-700: #33436a;
+  --ink-600: #4a5878;
+  --ink-400: #8a94a9;
+  --ink-300: #b3bccb;
+  --ink-200: #cfd7de;
+  --ink-100: #dfe5e6;
+
+  /* Marks. */
+  --pass: #1f6b4e;
+  --pen: #c42f2a;
+  --pencil: #5f666e;
+
+  /* shadcn semantic tokens mapped onto the card. */
+  --background: var(--paper);
+  --foreground: var(--ink-900);
+  --card: var(--paper-card);
+  --card-foreground: var(--ink-900);
+  --popover: var(--ply);
+  --popover-foreground: var(--ink-900);
+  --primary: var(--folder);
+  --primary-foreground: var(--folder-ink);
+  --secondary: var(--ink-100);
+  --secondary-foreground: var(--ink-900);
+  --muted: var(--ink-100);
+  --muted-foreground: var(--ink-600);
+  --accent: var(--ink-100);
+  --accent-foreground: var(--ink-900);
+  --destructive: var(--pen);
+  --border: var(--ink-200);
+  --input: var(--ink-300);
+  --ring: var(--folder);
+  --radius: 0.375rem;
+
+  --shadow-paper:
+    0 1px 0 rgb(17 27 48 / 6%), 0 2px 4px -2px rgb(17 27 48 / 10%),
+    0 24px 48px -24px rgb(10 32 22 / 45%);
+  --shadow-ply: 0 1px 2px rgb(17 27 48 / 10%);
+  /* A card lying flat on the desk, for app panels. */
+  --shadow-sheet: 0 1px 0 rgb(17 27 48 / 5%), 0 1px 3px rgb(17 27 48 / 8%);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@theme inline {
+  --font-sans: var(--font-franklin), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-franklin), ui-sans-serif, system-ui, sans-serif;
+  --font-hand: var(--font-kalam), 'Bradley Hand', cursive;
+
+  --color-folder: var(--folder);
+  --color-folder-deep: var(--folder-deep);
+  --color-folder-ink: var(--folder-ink);
+  --color-folder-ink-soft: var(--folder-ink-soft);
+  --color-paper: var(--paper);
+  --color-paper-card: var(--paper-card);
+  --color-ply: var(--ply);
+  --color-ink-950: var(--ink-950);
+  --color-ink-900: var(--ink-900);
+  --color-ink-700: var(--ink-700);
+  --color-ink-600: var(--ink-600);
+  --color-ink-400: var(--ink-400);
+  --color-ink-300: var(--ink-300);
+  --color-ink-200: var(--ink-200);
+  --color-ink-100: var(--ink-100);
+  --color-pass: var(--pass);
+  --color-pen: var(--pen);
+  --color-pencil: var(--pencil);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+
+  --shadow-paper: var(--shadow-paper);
+  --shadow-ply: var(--shadow-ply);
+  --shadow-sheet: var(--shadow-sheet);
+  --ease-out-expo: var(--ease-out-expo);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply bg-paper font-sans text-ink-900 antialiased;
+    font-feature-settings: 'kern', 'liga';
+    scrollbar-color: var(--ink-300) transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply min-h-dvh bg-background text-foreground;
+    caret-color: var(--folder);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--folder) 22%, transparent);
+    color: var(--ink-950);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Every figure on the card lines up in columns. */
+  table,
+  time,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Printed form label: small, tracked caps in form ink. */
+  .form-label {
+    @apply text-[0.6875rem] font-semibold tracking-[0.12em] text-ink-600 uppercase;
+  }
+
+  /* The ruled card itself. */
+  .paper {
+    @apply rounded-lg bg-paper-card text-ink-900;
+    box-shadow: var(--shadow-paper);
+  }
+}
+
+/* Marks draw on like a pen stroke. Paths use pathLength="1". */
+@keyframes mark-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.mark-draw path,
+.mark-draw rect,
+.mark-draw circle,
+.mark-draw ellipse {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: mark-draw 0.7s var(--ease-out-expo) both;
+  animation-delay: calc(var(--mark-delay, 0) * 1ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mark-draw path,
+  .mark-draw rect,
+  .mark-draw circle,
+  .mark-draw ellipse {
+    animation: none;
+  }
+}
+
+/* The remark is written left to right, after the marks. */
+@keyframes write-on {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.write-on {
+  animation: write-on 0.9s var(--ease-out-expo) 1.6s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .write-on {
+    animation: none;
+  }
+}
+
+/* The key's marks draw on as they scroll into view (no JS; skipped where unsupported). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .mark-draw-view path {
+      stroke-dasharray: 1;
+      animation: mark-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 35%;
+    }
+  }
+}

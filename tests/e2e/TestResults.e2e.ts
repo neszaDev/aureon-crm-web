@@ -19,6 +19,7 @@ test.describe('Test results', () => {
     await expect(page.getByTestId('summary-PASSED')).toContainText('1');
 
     await page.getByRole('button', { name: 'Delete Blood pressure check' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click();
     await expect(page.getByText('No test results yet')).toBeVisible();
     await expect(page.getByTestId('summary-PASSED')).toContainText('0');
   });
