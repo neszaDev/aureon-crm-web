@@ -54,12 +54,14 @@ const NavItem = (props: {
 
 /**
  * The app's sections, with the current page marked and its group open.
+ * @param props Component props.
+ * @param props.isAdmin Whether the signed-in user may manage users.
  * @returns The navigation list.
  */
-export const AppNav = () => {
+export const AppNav = (props: { isAdmin: boolean }) => {
   const t = useTranslations('AppNav');
   const pathname = usePathname().replace(/\/$/u, '');
-  const navSections = useNavSections();
+  const navSections = useNavSections({ isAdmin: props.isAdmin });
 
   return (
     <nav aria-label={t('nav_label')} className="flex flex-col gap-5">

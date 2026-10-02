@@ -25,13 +25,20 @@ Always against the **real backend**, never mocks:
 
 A global setup fails fast with "Backend not ready at …" if the backend isn't up.
 
+The backend in `docker/compose.yml` creates an admin (`admin@e2e.test`, see `ADMIN` in
+`tests/e2e/helpers.ts`) and raises the per-IP rate limits, since the suite registers every user
+from one address. The per-email limit on failed sign-ins keeps its default; `Auth.e2e.ts` checks
+it. Never change or delete the admin in a test.
+
 Rules: every test registers its own user (`tests/e2e/helpers.ts`), so tests are independent and
 can run in any order. Use `signOut(page)`, which waits for sign-out to finish, before visiting a
 page that must be signed out.
 
 What's covered: public pages, i18n switching, protected-route redirects (with locale), the full
 session lifecycle, **token refresh through the proxy** (access cookie removed → page still loads,
-refresh token rotated), auth errors, form validation, and test-results CRUD with the summary.
+refresh token rotated), auth errors, the failed-sign-in limit, form validation, test-results CRUD
+with the summary, file upload/download/delete with type and size errors, and admin user
+management (hidden from regular users, search, role change, delete, no self-edit).
 
 ## Accessibility
 

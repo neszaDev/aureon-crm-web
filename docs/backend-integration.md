@@ -39,7 +39,26 @@ isn't in the backend's spec, so it's written by hand in `ApiError.ts`. In action
   forms render (`fieldErrors` go under their inputs).
 - Handle known statuses first with translated messages (401 invalid credentials, 409 email
   taken), then fall back to the backend's message.
-- A 401 on an authenticated call means the session is gone: redirect to `/sign-in`.
+- A 401 on an authenticated call means the session is gone: redirect to `/sign-in`
+  (`redirectIfUnauthorized` in `src/libs/api/Session.ts`).
+- 403 means the user lacks a role (admin pages): render `AdminOnlyNotice`, don't redirect.
+- 429 (sign-in, sign-up) carries `Retry-After`; the form says how many minutes to wait.
+
+## Client IP and rate limits
+
+The backend limits sign-in and registration per client IP. Every request reaches it from this
+server, so `AuthActions` forwards the browser's address as `X-Forwarded-For`
+(`src/libs/api/ClientIp.ts`: the last entry of the incoming header, which Next.js or the proxy in
+front of it wrote). The backend trusts that header only from private and loopback addresses.
+Behind more than one proxy, or with this server exposed directly, adjust `clientIpFrom`.
+
+## Files
+
+Uploads go through a server action (`FileActions.uploadFile`, multipart to `POST /files`).
+`next.config.ts` raises the server-action and proxy body limits to 11 MB to fit the backend's
+10 MB maximum. Downloads stream through `dashboard/files/[id]/content/route.ts`, so the browser
+never calls the backend and the token stays in its httpOnly cookie; the proxy refreshes it first.
+The route always answers with an attachment, `nosniff` and a sandbox CSP.
 - Unexpected and 5xx responses are logged (`src/libs/Logger.ts`).
 
 ## Adding an endpoint end to end

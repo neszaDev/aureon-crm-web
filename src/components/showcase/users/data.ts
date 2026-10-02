@@ -16,9 +16,6 @@ export type User = {
   highlight?: 'success' | 'danger';
 };
 
-/** Rows per page of the users list, as in the Vue app. */
-export const USERS_PAGE_SIZE = 5;
-
 /** The 25 sample users of the Vue app. */
 export const USERS: User[] = [
   { id: 1, username: 'Samppa Nori', registered: '2012-01-01', role: 'member', status: 'active' },
@@ -134,13 +131,6 @@ export const USERS: User[] = [
     status: 'pending',
   },
 ];
-
-/**
- * Finds a sample user by the id in the URL.
- * @param id The `[id]` route segment.
- * @returns The user, or `undefined` when no user has that id.
- */
-export const findUser = (id: string) => USERS.find((user) => String(user.id) === id);
 
 /**
  * A copy of the users in random order, like the Vue basic tables page (one shuffle per request).

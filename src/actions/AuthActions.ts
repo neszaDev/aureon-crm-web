@@ -1,10 +1,11 @@
 'use server';
 
 import { getLocale, getTranslations } from 'next-intl/server';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { toActionError } from '@/libs/api/ApiError';
 import { backend } from '@/libs/api/Backend';
+import { clientIpFrom } from '@/libs/api/ClientIp';
 import {
   ACCESS_TOKEN_COOKIE,
   isSecureAppUrl,
@@ -38,6 +39,34 @@ const startSession = async (body: Parameters<typeof toSessionTokens>[0]) => {
 };
 
 /**
+ * Passes the browser's address on, so the backend rate-limits each client and not this server.
+ * @returns Headers for the backend's sign-in and registration calls.
+ */
+const forwardedFor = async () => {
+  const incoming = await headers();
+  const ip = clientIpFrom(incoming.get('x-forwarded-for'));
+
+  return ip ? { 'X-Forwarded-For': ip } : {};
+};
+
+/**
+ * The form message for a backend 429: how long to wait, rounded up to whole minutes.
+ * @param response The backend response.
+ * @returns The translated message.
+ */
+const rateLimited = async (response: Response) => {
+  const t = await getTranslations('AuthForm');
+  const seconds = Number(response.headers.get('Retry-After'));
+
+  return {
+    ok: false,
+    message: t('error_rate_limited', {
+      minutes: Math.max(1, Math.ceil((Number.isFinite(seconds) ? seconds : 60) / 60)),
+    }),
+  } satisfies ActionResult;
+};
+
+/**
  * Signs in through the backend (`POST /auth/login`).
  * @param values Email and password from the form.
  * @returns Field or form errors; on success it redirects instead of returning.
@@ -51,8 +80,12 @@ export async function signIn(values: AuthValues): Promise<ActionResult> {
 
   const { data, error, response } = await backend.POST('/api/v1/auth/login', {
     body: parsed.data,
+    headers: await forwardedFor(),
   });
   if (!data) {
+    if (response.status === 429) {
+      return await rateLimited(response);
+    }
     return response.status === 401
       ? { ok: false, message: t('error_invalid_credentials') }
       : toActionError(error, t('error_generic'));
@@ -75,8 +108,12 @@ export async function signUp(values: AuthValues): Promise<ActionResult> {
 
   const { data, error, response } = await backend.POST('/api/v1/auth/register', {
     body: parsed.data,
+    headers: await forwardedFor(),
   });
   if (!data) {
+    if (response.status === 429) {
+      return await rateLimited(response);
+    }
     return response.status === 409
       ? { ok: false, fieldErrors: { email: t('error_email_taken') } }
       : toActionError(error, t('error_generic'));

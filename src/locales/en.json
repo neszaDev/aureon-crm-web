@@ -110,7 +110,8 @@
     "error_invalid_credentials": "Invalid email or password",
     "error_email_taken": "This email is already registered",
     "error_invalid_input": "Check the highlighted fields",
-    "error_generic": "Something went wrong"
+    "error_generic": "Something went wrong",
+    "error_rate_limited": "Too many attempts. Try again in {minutes, plural, one {# minute} other {# minutes}}."
   },
   "Validation": {
     "required": "Required",
@@ -179,6 +180,31 @@
     "previous_page": "Previous",
     "next_page": "Next",
     "page_of": "Page {page} of {total}"
+  },
+  "FilesPage": {
+    "title": "Files",
+    "description": "Documents and images you have uploaded. Only you can see them.",
+    "upload_title": "Upload a file",
+    "list_title": "Your files",
+    "file_label": "File",
+    "file_hint": "PNG, JPEG, GIF, WebP, PDF, text or CSV, up to 10 MB.",
+    "upload_button": "Upload",
+    "uploaded": "Uploaded {name}",
+    "error_empty": "Choose a file that isn't empty",
+    "error_too_large": "The file is larger than 10 MB",
+    "error_type": "This kind of file isn't allowed, or its content doesn't match its type",
+    "error_generic": "Something went wrong",
+    "column_name": "Name",
+    "column_size": "Size",
+    "column_uploaded": "Uploaded",
+    "column_actions": "Actions",
+    "empty": "No files yet. Upload one and it appears here.",
+    "delete_button": "Delete",
+    "delete_label": "Delete {name}",
+    "confirm_title": "Delete “{name}”?",
+    "confirm_text": "The file is removed for good.",
+    "confirm_cancel": "Keep it",
+    "confirm_delete": "Delete"
   },
   "TestResultForm": {
     "test_name_label": "Test name",
@@ -300,7 +326,8 @@
     "invoice": "Invoice",
     "inbox": "Inbox",
     "message": "Message",
-    "compose": "Compose"
+    "compose": "Compose",
+    "files": "Files"
   },
   "AnalyticsPage": {
     "title": "Analytics",
@@ -1637,20 +1664,43 @@
   },
   "UsersPage": {
     "title": "Users",
-    "description": "Everyone with an account. Open a row to see the user.",
-    "card_title": "Users"
+    "description": "Everyone with an account.",
+    "description_count": "{count, plural, =0 {No accounts yet.} one {# account.} other {# accounts.}}",
+    "search_label": "Search by email",
+    "search_placeholder": "name@example.com",
+    "search_button": "Search",
+    "list_title": "All users",
+    "results_title": "Users matching “{query}”",
+    "column_email": "Email address",
+    "column_role": "Role",
+    "column_member_since": "Member since",
+    "empty": "No users match this search.",
+    "admin_only_title": "Only admins manage users",
+    "admin_only_text": "Ask an admin to give your account the admin role."
   },
   "UserPage": {
-    "title": "User not found",
-    "description": "The account details on file.",
-    "card_title": "User ID {id}",
-    "value_column": "Value",
-    "field_id": "ID",
-    "field_registered": "Registered",
-    "field_role": "Role",
-    "field_status": "Status",
-    "not_found": "Not found",
-    "back": "Back to users"
+    "title": "User",
+    "member_since": "Member since {date}",
+    "back": "Back to users",
+    "self_notice": "This is your own account. Another admin has to change or delete it, so there is always one admin left.",
+    "edit_title": "Email and role",
+    "delete_title": "Delete account",
+    "delete_text": "Removes the account with its test results and files. It can't be undone."
+  },
+  "UserForm": {
+    "email_label": "Email address",
+    "role_label": "Role",
+    "sign_out_hint": "Saving signs this user out on every device.",
+    "save_button": "Save changes",
+    "saved": "Saved",
+    "error_invalid_input": "Check the highlighted fields",
+    "error_email_taken": "This email is already registered",
+    "error_generic": "Something went wrong",
+    "delete_button": "Delete account",
+    "confirm_title": "Delete {email}?",
+    "confirm_text": "The account, its test results and its files are removed for good.",
+    "confirm_cancel": "Keep it",
+    "confirm_delete": "Delete"
   },
   "InvoicePage": {
     "title": "Invoice",
