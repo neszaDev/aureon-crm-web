@@ -15,10 +15,12 @@ const SidebarContent = (props: { email?: string }) => {
   const t = useTranslations('DashboardLayout');
 
   return (
-    <div className="flex h-full flex-col gap-8 p-4 pt-5">
+    <div className="flex h-full flex-col gap-6 p-4 pt-5">
       <Wordmark tone="folder" href="/dashboard/" className="px-3" />
-      <AppNav />
-      <div className="mt-auto flex flex-col gap-3 border-t border-white/12 px-1 pt-4">
+      <div className="-mx-2 min-h-0 flex-1 [scrollbar-color:rgb(255_255_255/20%)_transparent] overflow-y-auto px-2">
+        <AppNav />
+      </div>
+      <div className="flex flex-col gap-3 border-t border-white/12 px-1 pt-4">
         <div className="flex min-w-0 flex-col gap-0.5 px-2">
           <span className="text-xs text-folder-ink-soft">{t('signed_in_as')}</span>
           <span className="truncate text-sm font-semibold text-folder-ink" title={props.email}>

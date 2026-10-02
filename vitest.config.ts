@@ -12,6 +12,14 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     tsconfigPaths: true,
+    // `next/image` is a CommonJS re-export whose default import arrives as the module object
+    // in browser tests; point straight at its ESM build.
+    alias: { 'next/image': 'next/dist/esm/shared/lib/image-external.js' },
+  },
+  // Pre-bundle dnd-kit: on a cold cache, Vite otherwise re-optimises mid-run and the first
+  // drag-and-drop test loads a second React copy ("Invalid hook call").
+  optimizeDeps: {
+    include: ['@dnd-kit/core', '@dnd-kit/sortable'],
   },
   test: {
     coverage: {
