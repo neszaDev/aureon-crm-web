@@ -72,7 +72,7 @@ export const AppNav = () => {
         return (
           <div key={section.id} className="flex flex-col gap-1.5">
             {section.title && (
-              <h2 className="px-3 text-[0.6875rem] font-semibold tracking-[0.12em] text-folder-ink-soft/80 uppercase">
+              <h2 className="px-3 text-[0.6875rem] font-semibold tracking-[0.12em] text-folder-ink-soft uppercase">
                 {section.title}
               </h2>
             )}
