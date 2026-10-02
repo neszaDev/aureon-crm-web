@@ -38,11 +38,11 @@ docker/  env/  scripts/  docs/  same roles as in the backend repo
 | Format + autofix | `make fmt` |
 | Lint, types, unused code, i18n keys | `make lint` |
 | Unit + UI tests | `make test` |
-| Everything CI's `verify` job runs | `make verify` |
+| Lint + tests + build, as in CI | `make verify` |
 | Backend for local dev | `make backend-up`, then `pnpm dev` |
 | End-to-end (dev server + backend) | `make e2e` |
 | End-to-end as CI does (containers) | `make e2e-image` |
-| Regenerate API types | `make api-types` |
+| Regenerate API types | `make api-types` (CI fails when they are out of date: `make api-check`) |
 
 Use `pnpm` (version pinned in `package.json` → `packageManager`), never npm or bun.
 

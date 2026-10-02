@@ -14,13 +14,15 @@
     "check:types": "tsc --noEmit --pretty",
     "check:deps": "knip",
     "check:i18n": "i18n-check -l src/locales -s en -u src -f next-intl",
-    "api:types": "pnpm dlx --package=openapi-typescript@7.13.0 --package=typescript@5.9.3 openapi-typescript \"${BACKEND_URL:-http://localhost:8080}/v3/api-docs\" -o src/libs/api/schema.d.ts",
+    "api:types": "node scripts/api-types.ts",
     "commit": "commit",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=chromium",
     "storybook": "storybook dev -p 6006",
     "storybook:test": "vitest run --config .storybook/vitest.config.ts",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "api:check": "node scripts/api-types.ts --check",
+    "test:visual": "playwright test --project=visual"
   },
   "dependencies": {
     "@codemirror/lang-html": "6.4.12",
@@ -63,6 +65,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@commitlint/cli": "21.2.2",
     "@commitlint/config-conventional": "21.2.2",
     "@commitlint/prompt-cli": "21.2.2",

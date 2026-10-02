@@ -7,7 +7,7 @@
 COMPOSE := docker compose --project-directory . --env-file env/.env -f docker/compose.yml
 BACKEND_URL ?= http://localhost:8080
 
-.PHONY: help setup fmt lint test verify backend-up e2e e2e-image api-types up down db-reset docker-ready
+.PHONY: help setup fmt lint test verify backend-up e2e e2e-image api-types api-check up down db-reset docker-ready
 
 help: ## List targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z0-9-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -50,6 +50,9 @@ e2e-image: env/.env docker-ready ## As CI does: build the frontend image, run ev
 
 api-types: backend-up ## Regenerate src/libs/api/schema.d.ts from the backend's OpenAPI spec
 	BACKEND_URL=$(BACKEND_URL) pnpm run api:types
+
+api-check: backend-up ## Fail if src/libs/api/schema.d.ts is out of date with the backend (CI runs this)
+	BACKEND_URL=$(BACKEND_URL) pnpm run api:check
 
 up: env/.env docker-ready ## Run the full stack in containers (frontend on :3000)
 	$(COMPOSE) --profile full up --build

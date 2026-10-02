@@ -33,7 +33,7 @@ Sign up at `/sign-up`, then open *Test results*. `make up` runs everything in co
 | `make fmt` | Format and auto-fix lint issues |
 | `make lint` | Lint, type check, unused code/deps (knip), i18n keys |
 | `make test` | Unit + UI component tests |
-| `make verify` | Everything CI's `verify` job runs (lint + tests + production build) |
+| `make verify` | Lint, unit + UI tests and the production build, as in CI |
 | `make e2e` | Playwright against `pnpm dev` + the backend |
 | `make e2e-image` | Playwright against the production image, as CI does |
 | `make api-types` | Regenerate API types from the backend's OpenAPI spec |
