@@ -7,7 +7,10 @@ allowBuilds:
 
 # Security: transitive versions with known advisories. ajv (via @hookform/resolvers) pins an old
 # fast-uri; brace-expansion < 5.0.11 has two high DoS advisories (GHSA-6j4f-fj2g-mc7p,
-# GHSA-qhr7-859c-m2p7). Drop an entry once nothing resolves the vulnerable range.
+# GHSA-qhr7-859c-m2p7); image-size <= 2.0.2 (via Storybook) has two high DoS advisories
+# (GHSA-w3rx-r6r6-pgpr, GHSA-5p2g-fcmc-qvqq). Drop an entry once nothing resolves the
+# vulnerable range.
 overrides:
   brace-expansion: ^5.0.11
   fast-uri: ^3.1.8
+  image-size: ^2.0.3
