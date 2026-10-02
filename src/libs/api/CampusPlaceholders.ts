@@ -48,15 +48,15 @@ export const placeholderDepartments: OrgUnit[] = [
 ];
 
 export const placeholderProfile: CampusProfile = {
-  name: 'Saksith Rittanasatheiyn',
+  name: 'Pattaradanai Prommanee',
   avatar: '/assets/images/avatars/1.jpg',
   agency: 'ศูนย์บริการ',
   branch: 'ศูนย์เทคโนโลยีสารสนเทศ',
-  position: 'เจ้าหน้าที่',
-  mobile: '+66 093 4102002',
-  email: 'saksith.rit@mfu.ac.th',
+  position: 'นักศึกษา',
+  mobile: '+66 092 9923653',
+  email: '6531501001@lamduan.mfu.ac.th',
   gender: 'Male',
-  birthDate: '+66 093 4102002',
+  birthDate: '25/01/2004',
   address: '406, M',
   links: { facebook: 'xxxx', instagram: 'xxxx', google: 'xxxx' },
 };
