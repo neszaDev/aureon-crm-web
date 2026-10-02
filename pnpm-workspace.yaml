@@ -4,3 +4,7 @@ allowBuilds:
   core-js-pure: false
   esbuild: true
   lefthook: true
+
+# Security: ajv (via @hookform/resolvers) pins a fast-uri with known advisories.
+overrides:
+  fast-uri: ^3.1.8
