@@ -5,6 +5,9 @@ allowBuilds:
   esbuild: true
   lefthook: true
 
-# Security: ajv (via @hookform/resolvers) pins a fast-uri with known advisories.
+# Security: transitive versions with known advisories. ajv (via @hookform/resolvers) pins an old
+# fast-uri; brace-expansion < 5.0.11 has two high DoS advisories (GHSA-6j4f-fj2g-mc7p,
+# GHSA-qhr7-859c-m2p7). Drop an entry once nothing resolves the vulnerable range.
 overrides:
+  brace-expansion: ^5.0.11
   fast-uri: ^3.1.8
