@@ -12,6 +12,9 @@ export const Env = createEnv({
     NEXT_PUBLIC_LOGGING_LEVEL: z
       .enum(['error', 'info', 'debug', 'warning', 'trace', 'fatal'])
       .default('info'),
+    // Browser key for the Google Maps demo page. Optional: without it the page explains how to
+    // enable the map. Restrict it by HTTP referrer in the Google Cloud console.
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z.string().optional(),
   },
   shared: {
     NODE_ENV: z.enum(['test', 'development', 'production']).optional(),
@@ -21,6 +24,7 @@ export const Env = createEnv({
     BACKEND_URL: process.env.BACKEND_URL,
     APP_URL: process.env.APP_URL,
     NEXT_PUBLIC_LOGGING_LEVEL: process.env.NEXT_PUBLIC_LOGGING_LEVEL,
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     NODE_ENV: process.env.NODE_ENV,
   },
   // `docker build` has no runtime configuration; validation runs when the server starts.

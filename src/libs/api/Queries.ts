@@ -1,5 +1,11 @@
 import 'server-only';
 import { authedBackend } from './Backend';
+import {
+  placeholderAgencies,
+  placeholderDepartments,
+  placeholderOrganizations,
+  placeholderProfile,
+} from './CampusPlaceholders';
 
 // Read-side backend calls used by server components. Pages depend on these functions, not on
 // API paths, so an endpoint change is fixed in one place (and flagged by `schema.d.ts` types).
@@ -36,4 +42,30 @@ export const listTestResults = async (page: number, size: number) => {
     readAt: Date.now(),
     unauthorized: list.response.status === 401 || summary.response.status === 401,
   };
+};
+
+/**
+ * Loads the organisations, agencies and departments for the campus filters.
+ * Placeholder data until the Spring API serves them (Vue: `POST /api/v1/organization/explorers`).
+ * @returns The three lists.
+ */
+export const listOrgUnits = async () => {
+  await Promise.resolve();
+
+  return {
+    organizations: placeholderOrganizations,
+    agencies: placeholderAgencies,
+    departments: placeholderDepartments,
+  };
+};
+
+/**
+ * Loads the signed-in person's campus profile.
+ * Placeholder data until the Spring API serves it (Vue: `POST /api/v1/system/profile`).
+ * @returns The profile.
+ */
+export const getCampusProfile = async () => {
+  await Promise.resolve();
+
+  return placeholderProfile;
 };

@@ -45,6 +45,16 @@ function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="card-description"
+      className={cn('text-[0.9375rem] text-ink-600', className)}
+      {...props}
+    />
+  );
+}
+
 function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -61,4 +71,17 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-export { Card, CardHeader, CardTitle, CardAction, CardContent };
+function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="card-footer"
+      className={cn(
+        'flex items-center gap-2 border-t border-ink-200 bg-paper px-(--card-spacing) py-3',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter };

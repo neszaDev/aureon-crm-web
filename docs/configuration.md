@@ -11,6 +11,7 @@ git-ignored); in containers and CI, from the environment.
 | `BACKEND_URL` | none | yes | Where the **server** reaches the Spring API (e.g. `http://backend:8080` in Compose). Never exposed to browsers. |
 | `APP_URL` | `http://localhost:3000` | in prod | Public URL of this app. `https://` → auth cookies are `Secure`. Used for sitemap/robots. |
 | `NEXT_PUBLIC_LOGGING_LEVEL` | `info` | no | `error`, `warning`, `info`, `debug`, `trace`, `fatal`. Inlined at build time. |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | (none) | no | Browser key for the Google Maps demo page; restrict it by HTTP referrer. Inlined at build time. |
 | `NEXT_TELEMETRY_DISABLED` | unset | no | `1` disables Next.js telemetry. |
 | `SKIP_ENV_VALIDATION` | unset | no | Only for `docker build`, where runtime config doesn't exist yet. |
 
