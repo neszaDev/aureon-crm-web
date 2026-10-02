@@ -4,23 +4,7 @@
  */
 
 export interface paths {
-    "/api/v1/test-results": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["list"];
-        put?: never;
-        post: operations["create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/register": {
+    "/api/v1/auth/login": {
         parameters: {
             query?: never;
             header?: never;
@@ -29,23 +13,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["refresh"];
+        post: operations["login"];
         delete?: never;
         options?: never;
         head?: never;
@@ -68,7 +36,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/login": {
+    "/api/v1/auth/refresh": {
         parameters: {
             query?: never;
             header?: never;
@@ -77,7 +45,55 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["login"];
+        post: operations["refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/test-results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list"];
+        put?: never;
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/test-results/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["summary"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -116,134 +132,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/test-results/summary": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["summary"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        CreateTestResultRequest: {
-            testName: string;
-            /** @enum {string} */
-            status: "PENDING" | "PASSED" | "FAILED";
-            score: number;
-            /** Format: date-time */
-            testedAt: string;
-            notes?: string;
-        };
-        TestResultResponse: {
-            /** Format: int64 */
-            id?: number;
-            testName?: string;
-            /** @enum {string} */
-            status?: "PENDING" | "PASSED" | "FAILED";
-            score?: number;
-            /** Format: date-time */
-            testedAt?: string;
-            notes?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        RegisterRequest: {
-            /** Format: email */
-            email: string;
-            password: string;
-        };
         AuthTokensResponse: {
             accessToken?: string;
-            tokenType?: string;
             /** Format: int64 */
             expiresIn?: number;
-            refreshToken?: string;
             /** Format: int64 */
             refreshExpiresIn?: number;
+            refreshToken?: string;
+            tokenType?: string;
         };
-        RefreshTokenRequest: {
-            refreshToken: string;
+        CreateTestResultRequest: {
+            notes?: string;
+            score: number;
+            /** @enum {string} */
+            status: "PENDING" | "PASSED" | "FAILED";
+            testName: string;
+            /** Format: date-time */
+            testedAt: string;
         };
         LoginRequest: {
             /** Format: email */
             email: string;
             password: string;
         };
-        UpdateTestResultRequest: {
-            testName: string;
-            /** @enum {string} */
-            status: "PENDING" | "PASSED" | "FAILED";
-            score: number;
-            /** Format: date-time */
-            testedAt: string;
-            notes?: string;
-        };
-        UserResponse: {
-            /** Format: int64 */
-            id?: number;
-            email?: string;
-            /** @enum {string} */
-            role?: "USER" | "ADMIN";
-            /** Format: date-time */
-            createdAt?: string;
-        };
         PageTestResultResponse: {
+            content?: components["schemas"]["TestResultResponse"][];
+            empty?: boolean;
+            first?: boolean;
+            last?: boolean;
+            /** Format: int32 */
+            number?: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            size?: number;
+            sort?: components["schemas"]["SortObject"];
             /** Format: int64 */
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            pageable?: components["schemas"]["PageableObject"];
-            /** Format: int32 */
-            numberOfElements?: number;
-            first?: boolean;
-            last?: boolean;
-            /** Format: int32 */
-            size?: number;
-            content?: components["schemas"]["TestResultResponse"][];
-            /** Format: int32 */
-            number?: number;
-            sort?: components["schemas"]["SortObject"];
-            empty?: boolean;
         };
         PageableObject: {
-            paged?: boolean;
-            /** Format: int32 */
-            pageSize?: number;
-            /** Format: int32 */
-            pageNumber?: number;
-            unpaged?: boolean;
             /** Format: int64 */
             offset?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            /** Format: int32 */
+            pageSize?: number;
+            paged?: boolean;
             sort?: components["schemas"]["SortObject"];
+            unpaged?: boolean;
+        };
+        RefreshTokenRequest: {
+            refreshToken: string;
+        };
+        RegisterRequest: {
+            /** Format: email */
+            email: string;
+            password: string;
         };
         SortObject: {
+            empty?: boolean;
             sorted?: boolean;
             unsorted?: boolean;
-            empty?: boolean;
         };
         StatusCount: {
-            /** @enum {string} */
-            status?: "PENDING" | "PASSED" | "FAILED";
             /** Format: int64 */
             count?: number;
+            /** @enum {string} */
+            status?: "PENDING" | "PASSED" | "FAILED";
+        };
+        TestResultResponse: {
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: int64 */
+            id?: number;
+            notes?: string;
+            score?: number;
+            /** @enum {string} */
+            status?: "PENDING" | "PASSED" | "FAILED";
+            testName?: string;
+            /** Format: date-time */
+            testedAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
         };
         TestResultSummaryResponse: {
+            byStatus?: components["schemas"]["StatusCount"][];
             /** Format: int64 */
             total?: number;
-            byStatus?: components["schemas"]["StatusCount"][];
+        };
+        UpdateTestResultRequest: {
+            notes?: string;
+            score: number;
+            /** @enum {string} */
+            status: "PENDING" | "PASSED" | "FAILED";
+            testName: string;
+            /** Format: date-time */
+            testedAt: string;
+        };
+        UserResponse: {
+            /** Format: date-time */
+            createdAt?: string;
+            email?: string;
+            /** Format: int64 */
+            id?: number;
+            /** @enum {string} */
+            role?: "USER" | "ADMIN";
         };
     };
     responses: never;
@@ -254,6 +254,100 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthTokensResponse"];
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthTokensResponse"];
+                };
+            };
+        };
+    };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthTokensResponse"];
+                };
+            };
+        };
+    };
     list: {
         parameters: {
             query?: {
@@ -301,42 +395,14 @@ export interface operations {
             };
         };
     };
-    register: {
+    summary: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterRequest"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["AuthTokensResponse"];
-                };
-            };
-        };
-    };
-    refresh: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -344,53 +410,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["AuthTokensResponse"];
-                };
-            };
-        };
-    };
-    logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenRequest"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["AuthTokensResponse"];
+                    "*/*": components["schemas"]["TestResultSummaryResponse"];
                 };
             };
         };
@@ -479,26 +499,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UserResponse"];
-                };
-            };
-        };
-    };
-    summary: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["TestResultSummaryResponse"];
                 };
             };
         };

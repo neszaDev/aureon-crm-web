@@ -15,7 +15,7 @@ make e2e         # needs Docker (starts the backend)
    ([CI/CD](../docs/ci.md#releasing)).
 2. Small, focused commits; mechanical changes (formatting, renames) in their own commits.
 3. Before pushing: `make verify`, plus `make e2e` if you touched pages, actions, auth or the proxy.
-4. Open a PR and fill in the checklist. CI (`verify` + `e2e`) must pass.
+4. Open a PR and fill in the checklist. CI must pass (the **CI Gate** check).
 
 ## Commit messages
 

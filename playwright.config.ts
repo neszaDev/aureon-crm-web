@@ -59,5 +59,14 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      // Screenshot comparisons (`pnpm test:visual`). Baselines are rendered by CI on Linux, so
+      // one set is committed for every platform; see docs/testing.md to update them.
+      name: 'visual',
+      testDir: './tests/visual',
+      testMatch: '*.visual.ts',
+      snapshotPathTemplate: '{testDir}/__screenshots__/{arg}{ext}',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } },
+    },
   ],
 });

@@ -1,9 +1,22 @@
+import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import a11yBaseline from './a11y-baseline.json' with { type: 'json' };
 import { signUp } from './helpers';
 
-// Every screen ported from the Vue admin app (docs/plans/0003-vue-ui-port.md).
+// WCAG 2.1 A + AA, as checked by axe-core.
+const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+
+// Known violations per route, to be fixed and removed from a11y-baseline.json. Any other
+// violation fails the test; a listed rule that no longer occurs is reported as an annotation.
+const knownViolations = (route: string): string[] =>
+  Object.entries(a11yBaseline).find(([path]) => path === route)?.[1] ?? [];
+
+// The product pages and every screen ported from the Vue admin app (docs/plans/0003-vue-ui-port.md).
 const routes = [
+  '/dashboard',
+  '/dashboard/test-results',
+  '/dashboard/account',
   '/dashboard/analytics',
   '/dashboard/campus',
   '/dashboard/campus/filters',
@@ -70,18 +83,21 @@ test.describe('Showcase screens', () => {
   };
 
   test.beforeAll(async ({ browser }) => {
-    const page = await browser.newPage();
+    // Reduced motion: no fade-ins half-way through when axe measures contrast.
+    // (axe needs a page from an explicit context.)
+    const context = await browser.newContext({ reducedMotion: 'reduce' });
+    const page = await context.newPage();
     page.on('pageerror', (error) => session.errors.push(`${page.url()}: ${error.message}`));
     await signUp(page);
     session.page = page;
   });
 
   test.afterAll(async () => {
-    await session.page?.close();
+    await session.page?.context().close();
   });
 
   for (const route of routes) {
-    test(`renders ${route} without errors`, async () => {
+    test(`renders ${route} without errors or new accessibility violations`, async () => {
       const page = signedInPage();
       session.errors.length = 0;
       const response = await page.goto(`${route}/`);
@@ -90,6 +106,25 @@ test.describe('Showcase screens', () => {
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       await expect(page.getByText('Something went wrong')).toHaveCount(0);
       expect(session.errors).toEqual([]);
+
+      const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
+      const known = knownViolations(route);
+      const found = new Set(violations.map((violation) => violation.id));
+      const unexpected = violations
+        .filter((violation) => !known.includes(violation.id))
+        .map((violation) => ({
+          rule: violation.id,
+          help: violation.help,
+          targets: violation.nodes.map((node) => node.target.join(' ')),
+        }));
+      for (const fixed of known.filter((rule) => !found.has(rule))) {
+        test.info().annotations.push({
+          type: 'a11y-baseline',
+          description: `${route}: ${fixed} no longer occurs; remove it from a11y-baseline.json`,
+        });
+      }
+
+      expect(unexpected).toEqual([]);
     });
   }
 });

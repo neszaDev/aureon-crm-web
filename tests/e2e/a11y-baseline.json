@@ -1,0 +1,19 @@
+{
+  "/dashboard/analytics": ["color-contrast", "scrollable-region-focusable"],
+  "/dashboard/base/cards": ["color-contrast"],
+  "/dashboard/base/list-groups": ["color-contrast"],
+  "/dashboard/base/navbars": ["color-contrast"],
+  "/dashboard/base/popovers": ["color-contrast"],
+  "/dashboard/buttons/brand-buttons": ["scrollable-region-focusable"],
+  "/dashboard/campus/filters": ["color-contrast"],
+  "/dashboard/editors/code-editors": ["color-contrast", "scrollable-region-focusable"],
+  "/dashboard/forms/advanced-forms": ["color-contrast"],
+  "/dashboard/forms/basic-forms": ["color-contrast"],
+  "/dashboard/notifications/alerts": ["color-contrast"],
+  "/dashboard/notifications/badges": ["color-contrast"],
+  "/dashboard/notifications/toaster": ["color-contrast"],
+  "/dashboard/plugins/calendar": ["color-contrast"],
+  "/dashboard/tables/tables": ["scrollable-region-focusable"],
+  "/dashboard/theme/colors": ["color-contrast"],
+  "/dashboard/widgets": ["color-contrast"]
+}
