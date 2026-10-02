@@ -3,36 +3,31 @@ import * as z from 'zod';
 
 export const Env = createEnv({
   server: {
-    ARCJET_KEY: z.string().startsWith('ajkey_').optional(),
-    CLERK_SECRET_KEY: z.string().min(1),
-    DATABASE_URL: z.string().min(1),
+    // Where the Next.js server reaches the Spring API. Never exposed to the browser.
+    BACKEND_URL: z.url(),
+    // Public URL of this app. `https://` makes auth cookies `Secure`; used for sitemap/robots.
+    APP_URL: z.url().default('http://localhost:3000'),
   },
   client: {
-    NEXT_PUBLIC_APP_URL: z.string().optional(),
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
     NEXT_PUBLIC_LOGGING_LEVEL: z
       .enum(['error', 'info', 'debug', 'warning', 'trace', 'fatal'])
       .default('info'),
-    NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN: z.string().optional(),
-    NEXT_PUBLIC_BETTER_STACK_INGESTING_HOST: z.string().optional(),
-    NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
-    NEXT_PUBLIC_POSTHOG_HOST: z.string().optional(),
+    // Browser key for the Google Maps demo page. Optional: without it the page explains how to
+    // enable the map. Restrict it by HTTP referrer in the Google Cloud console.
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z.string().optional(),
   },
   shared: {
     NODE_ENV: z.enum(['test', 'development', 'production']).optional(),
   },
   // You need to destructure all the keys manually
   runtimeEnv: {
-    ARCJET_KEY: process.env.ARCJET_KEY,
-    CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
-    DATABASE_URL: process.env.DATABASE_URL,
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    BACKEND_URL: process.env.BACKEND_URL,
+    APP_URL: process.env.APP_URL,
     NEXT_PUBLIC_LOGGING_LEVEL: process.env.NEXT_PUBLIC_LOGGING_LEVEL,
-    NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN: process.env.NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN,
-    NEXT_PUBLIC_BETTER_STACK_INGESTING_HOST: process.env.NEXT_PUBLIC_BETTER_STACK_INGESTING_HOST,
-    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
-    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     NODE_ENV: process.env.NODE_ENV,
   },
+  // `docker build` has no runtime configuration; validation runs when the server starts.
+  skipValidation: process.env.SKIP_ENV_VALIDATION === 'true',
+  emptyStringAsUndefined: true,
 });

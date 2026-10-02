@@ -1,9 +1,8 @@
-import { SignOutButton } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { LocaleSwitcher } from '@/components/LocaleSwitcher';
-import { Link } from '@/libs/I18nNavigation';
-import { BaseTemplate } from '@/templates/BaseTemplate';
+import { getCurrentUser } from '@/libs/api/Queries';
+import { redirect } from '@/libs/I18nNavigation';
+import { AppShell } from '@/templates/AppShell';
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -12,10 +11,7 @@ type DashboardLayoutProps = {
 
 export async function generateMetadata(props: DashboardLayoutProps): Promise<Metadata> {
   const { locale } = await props.params;
-  const t = await getTranslations({
-    locale,
-    namespace: 'DashboardLayout',
-  });
+  const t = await getTranslations({ locale, namespace: 'DashboardLayout' });
 
   return {
     title: t('meta_title'),
@@ -23,50 +19,21 @@ export async function generateMetadata(props: DashboardLayoutProps): Promise<Met
   };
 }
 
+// Every page below is personal: never prerender or cache it.
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardLayout(props: DashboardLayoutProps) {
   const { locale } = await props.params;
   setRequestLocale(locale);
-  const t = await getTranslations({
-    locale,
-    namespace: 'DashboardLayout',
-  });
+
+  const { user, unauthorized } = await getCurrentUser();
+  if (unauthorized || !user) {
+    return redirect({ href: '/sign-in', locale });
+  }
 
   return (
-    <BaseTemplate
-      leftNav={
-        <>
-          <li>
-            <Link href="/dashboard/" className="border-none text-gray-700 hover:text-gray-900">
-              {t('dashboard_link')}
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/dashboard/user-profile/"
-              className="border-none text-gray-700 hover:text-gray-900"
-            >
-              {t('user_profile_link')}
-            </Link>
-          </li>
-        </>
-      }
-      rightNav={
-        <>
-          <li>
-            <SignOutButton>
-              <button className="border-none text-gray-700 hover:text-gray-900" type="button">
-                {t('sign_out')}
-              </button>
-            </SignOutButton>
-          </li>
-
-          <li>
-            <LocaleSwitcher />
-          </li>
-        </>
-      }
-    >
+    <AppShell email={user.email} isAdmin={user.role === 'ADMIN'}>
       {props.children}
-    </BaseTemplate>
+    </AppShell>
   );
 }

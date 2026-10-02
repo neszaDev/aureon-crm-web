@@ -1,0 +1,399 @@
+/*
+ * SpinKit loaders (tobiasahlin/SpinKit 2) in Marksheet ink: folder green on the card.
+ * Every child gets `--i` (its index from 0) so delays and angles are computed, not listed.
+ * Under reduced motion the loaders stand still.
+ */
+
+.loader {
+  --sk-size: 40px;
+  --sk-color: var(--folder);
+  width: var(--sk-size);
+  height: var(--sk-size);
+  position: relative;
+}
+
+/* Grow: the filled dot that swells and fades (CoreUI's spinner-grow). Sized by the caller. */
+.grow {
+  display: inline-block;
+  border-radius: 50%;
+  background-color: currentcolor;
+  opacity: 0;
+  animation: grow 0.75s linear infinite;
+}
+
+@keyframes grow {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Rotating plane */
+.plane {
+  background-color: var(--sk-color);
+  animation: plane 1.2s infinite ease-in-out;
+}
+
+@keyframes plane {
+  0% {
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+  }
+  100% {
+    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+  }
+}
+
+/* Double bounce */
+.bounce > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-color: var(--sk-color);
+  opacity: 0.6;
+  animation: bounce 2s infinite cubic-bezier(0.455, 0.03, 0.515, 0.955);
+  animation-delay: calc(var(--i) * -1s);
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: scale(0);
+  }
+  45%,
+  55% {
+    transform: scale(1);
+  }
+}
+
+/* Wave */
+.wave {
+  display: flex;
+  justify-content: space-between;
+}
+
+.wave > span {
+  width: 15%;
+  height: 100%;
+  background-color: var(--sk-color);
+  animation: wave 1.2s infinite ease-in-out;
+  animation-delay: calc(-1.2s + var(--i) * 0.1s);
+}
+
+@keyframes wave {
+  0%,
+  40%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  20% {
+    transform: scaleY(1);
+  }
+}
+
+/* Wandering cubes */
+.wander > span {
+  --sk-wander-distance: calc(var(--sk-size) * 0.75);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20%;
+  height: 20%;
+  background-color: var(--sk-color);
+  animation: wander 2s ease-in-out infinite both;
+  animation-delay: calc(-2s + var(--i) * -0.5s);
+}
+
+@keyframes wander {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: translateX(var(--sk-wander-distance)) rotate(-90deg) scale(0.6);
+  }
+  50% {
+    transform: translateX(var(--sk-wander-distance)) translateY(var(--sk-wander-distance))
+      rotate(-179deg);
+  }
+  50.1% {
+    transform: translateX(var(--sk-wander-distance)) translateY(var(--sk-wander-distance))
+      rotate(-180deg);
+  }
+  75% {
+    transform: translateX(0) translateY(var(--sk-wander-distance)) rotate(-270deg) scale(0.6);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+/* Pulse */
+.pulse {
+  border-radius: 50%;
+  background-color: var(--sk-color);
+  animation: pulse 1.2s infinite cubic-bezier(0.455, 0.03, 0.515, 0.955);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Chasing dots */
+.chase {
+  animation: chase 2.5s infinite linear both;
+}
+
+.chase > span {
+  position: absolute;
+  inset: 0;
+  animation: chase-dot 2s infinite ease-in-out both;
+  animation-delay: calc(-1.1s + var(--i) * 0.1s);
+}
+
+.chase > span::before {
+  content: '';
+  display: block;
+  width: 25%;
+  height: 25%;
+  border-radius: 50%;
+  background-color: var(--sk-color);
+  animation: chase-dot-before 2s infinite ease-in-out both;
+  animation-delay: calc(-1.1s + var(--i) * 0.1s);
+}
+
+@keyframes chase {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes chase-dot {
+  80%,
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes chase-dot-before {
+  50% {
+    transform: scale(0.4);
+  }
+  100%,
+  0% {
+    transform: scale(1);
+  }
+}
+
+/* Swing */
+.swing {
+  animation: swing 1.8s infinite linear;
+}
+
+.swing > span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 45%;
+  height: 45%;
+  margin: auto;
+  border-radius: 50%;
+  background-color: var(--sk-color);
+  animation: swing-dot 2s infinite ease-in-out;
+}
+
+.swing > span:nth-child(2) {
+  top: auto;
+  bottom: 0;
+  animation-delay: -1s;
+}
+
+@keyframes swing {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes swing-dot {
+  0%,
+  100% {
+    transform: scale(0.2);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+/* Flow */
+.flow {
+  width: calc(var(--sk-size) * 1.3);
+  height: calc(var(--sk-size) * 1.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flow > span {
+  width: 25%;
+  height: 25%;
+  border-radius: 50%;
+  background-color: var(--sk-color);
+  animation: flow 1.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite both;
+  animation-delay: calc(-0.3s + var(--i) * 0.15s);
+}
+
+@keyframes flow {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.3);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Circle and fading circle: twelve dots around a ring. */
+.circle > span,
+.circleFade > span {
+  position: absolute;
+  inset: 0;
+  transform: rotate(calc(var(--i) * 30deg));
+}
+
+.circle > span::before,
+.circleFade > span::before {
+  content: '';
+  display: block;
+  width: 15%;
+  height: 15%;
+  border-radius: 50%;
+  background-color: var(--sk-color);
+  animation: circle 1.2s infinite ease-in-out both;
+  animation-delay: calc(-1.2s + var(--i) * 0.1s);
+}
+
+.circleFade > span::before {
+  animation-name: circle-fade;
+}
+
+@keyframes circle {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+@keyframes circle-fade {
+  0%,
+  39%,
+  100% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Cube grid: a 3x3 grid, the wave running from the bottom-left corner. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid > span {
+  background-color: var(--sk-color);
+  animation: grid 1.3s infinite ease-in-out;
+  animation-delay: calc(var(--grid-delay) * 0.1s);
+}
+
+@keyframes grid {
+  0%,
+  70%,
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
+  35% {
+    transform: scale3d(0, 0, 1);
+  }
+}
+
+/* Folding cube */
+.fold {
+  transform: rotateZ(45deg);
+}
+
+.fold > span {
+  float: left;
+  width: 50%;
+  height: 50%;
+  position: relative;
+  transform: scale(1.1) rotateZ(var(--fold-turn));
+}
+
+.fold > span::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--sk-color);
+  transform-origin: 100% 100%;
+  animation: fold 2.4s infinite linear both;
+  animation-delay: var(--fold-delay);
+}
+
+@keyframes fold {
+  0%,
+  10% {
+    transform: perspective(140px) rotateX(-180deg);
+    opacity: 0;
+  }
+  25%,
+  75% {
+    transform: perspective(140px) rotateX(0deg);
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: perspective(140px) rotateY(180deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grow,
+  .loader,
+  .loader > span,
+  .loader > span::before {
+    animation: none;
+  }
+
+  .grow {
+    opacity: 1;
+  }
+
+  /* Keep the resting shape visible where the first frame would hide it. */
+  .bounce > span,
+  .pulse,
+  .circleFade > span::before,
+  .fold > span::before {
+    opacity: 0.6;
+    transform: none;
+  }
+}

@@ -3,10 +3,23 @@ import { playwright } from '@vitest/browser-playwright';
 import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 
+const testEnv = {
+  BACKEND_URL: 'http://localhost:8080',
+  APP_URL: 'http://localhost:3000',
+};
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
     tsconfigPaths: true,
+    // `next/image` is a CommonJS re-export whose default import arrives as the module object
+    // in browser tests; point straight at its ESM build.
+    alias: { 'next/image': 'next/dist/esm/shared/lib/image-external.js' },
+  },
+  // Pre-bundle dnd-kit: on a cold cache, Vite otherwise re-optimises mid-run and the first
+  // drag-and-drop test loads a second React copy ("Invalid hook call").
+  optimizeDeps: {
+    include: ['@dnd-kit/core', '@dnd-kit/sortable'],
   },
   test: {
     coverage: {
@@ -43,9 +56,12 @@ export default defineConfig({
       // conditional reporter
       process.env.CI ? 'github-actions' : {},
     ],
-    env: loadEnv('', process.cwd(), ''), // Expose .env variables to Node.js
+    // Same variables as `pnpm dev` (env/.env, when present), with defaults so unit tests never
+    // depend on a local file or a running backend.
+    env: { ...testEnv, ...loadEnv('', 'env', '') },
   },
   define: {
-    'process.env': JSON.stringify(loadEnv('', process.cwd(), 'NEXT_PUBLIC_')), // Expose .env variables to browser
+    // Expose NEXT_PUBLIC_* variables to browser tests
+    'process.env': JSON.stringify(loadEnv('', 'env', 'NEXT_PUBLIC_')),
   },
 });

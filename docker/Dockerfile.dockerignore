@@ -1,0 +1,13 @@
+# Allowlist: only what `next build` needs. Everything else (env/, .git, node_modules, tests,
+# docs, local builds) stays out of the build context.
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!next.config.ts
+!tsconfig.json
+!src
+!public
+src/**/*.test.ts
+src/**/*.test.tsx
+src/**/*.stories.tsx

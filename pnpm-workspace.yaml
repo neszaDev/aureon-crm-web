@@ -1,0 +1,18 @@
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  core-js-pure: false
+  esbuild: true
+  lefthook: true
+
+# Security: transitive versions with known advisories. ajv (via @hookform/resolvers) pins an old
+# fast-uri; brace-expansion < 5.0.11 has two high DoS advisories (GHSA-6j4f-fj2g-mc7p,
+# GHSA-qhr7-859c-m2p7); image-size <= 2.0.2 (via Storybook) has two high DoS advisories
+# (GHSA-w3rx-r6r6-pgpr, GHSA-5p2g-fcmc-qvqq); js-yaml < 4.3.2 (via commitlint) has a high CPU
+# exhaustion advisory (GHSA-2883-xcg3-v3hh). Drop an entry once nothing resolves the vulnerable
+# range.
+overrides:
+  brace-expansion: ^5.0.11
+  fast-uri: ^3.1.8
+  image-size: ^2.0.3
+  js-yaml: ^4.3.2
