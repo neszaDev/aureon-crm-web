@@ -16,6 +16,7 @@ const knownViolations = (route: string): string[] =>
 const routes = [
   '/dashboard',
   '/dashboard/test-results',
+  '/dashboard/files',
   '/dashboard/account',
   '/dashboard/analytics',
   '/dashboard/campus',

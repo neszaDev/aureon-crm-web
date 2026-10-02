@@ -1,23 +1,13 @@
 'use server';
 
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { toActionError } from '@/libs/api/ApiError';
 import { authedBackend } from '@/libs/api/Backend';
-import { redirect } from '@/libs/I18nNavigation';
+import { redirectIfUnauthorized } from '@/libs/api/Session';
 import type { TestResultValues } from '@/validations/TestResultValidation';
 import { TestResultValidation } from '@/validations/TestResultValidation';
-
-/**
- * Sends the user to sign in when the backend no longer accepts the session.
- * @param status HTTP status of the backend response.
- */
-const redirectIfUnauthorized = async (status: number) => {
-  if (status === 401) {
-    redirect({ href: '/sign-in', locale: await getLocale() });
-  }
-};
 
 /**
  * Creates a test result for the signed-in user (`POST /test-results`).

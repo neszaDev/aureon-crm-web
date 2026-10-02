@@ -110,7 +110,8 @@
     "error_invalid_credentials": "E-mail ou mot de passe incorrect",
     "error_email_taken": "Cette adresse e-mail est déjà utilisée",
     "error_invalid_input": "Vérifiez les champs signalés",
-    "error_generic": "Une erreur est survenue"
+    "error_generic": "Une erreur est survenue",
+    "error_rate_limited": "Trop de tentatives. Réessayez dans {minutes, plural, one {# minute} other {# minutes}}."
   },
   "Validation": {
     "required": "Obligatoire",
@@ -179,6 +180,31 @@
     "previous_page": "Précédente",
     "next_page": "Suivante",
     "page_of": "Page {page} sur {total}"
+  },
+  "FilesPage": {
+    "title": "Fichiers",
+    "description": "Les documents et images que vous avez envoyés. Vous seul pouvez les voir.",
+    "upload_title": "Envoyer un fichier",
+    "list_title": "Vos fichiers",
+    "file_label": "Fichier",
+    "file_hint": "PNG, JPEG, GIF, WebP, PDF, texte ou CSV, jusqu’à 10 Mo.",
+    "upload_button": "Envoyer",
+    "uploaded": "{name} envoyé",
+    "error_empty": "Choisissez un fichier non vide",
+    "error_too_large": "Le fichier dépasse 10 Mo",
+    "error_type": "Ce type de fichier n’est pas autorisé, ou son contenu ne correspond pas à son type",
+    "error_generic": "Une erreur s’est produite",
+    "column_name": "Nom",
+    "column_size": "Taille",
+    "column_uploaded": "Envoyé le",
+    "column_actions": "Actions",
+    "empty": "Aucun fichier pour l’instant. Envoyez-en un et il apparaîtra ici.",
+    "delete_button": "Supprimer",
+    "delete_label": "Supprimer {name}",
+    "confirm_title": "Supprimer « {name} » ?",
+    "confirm_text": "Le fichier est supprimé définitivement.",
+    "confirm_cancel": "Le garder",
+    "confirm_delete": "Supprimer"
   },
   "TestResultForm": {
     "test_name_label": "Nom du test",
@@ -300,7 +326,8 @@
     "invoice": "Facture",
     "inbox": "Boîte de réception",
     "message": "Message",
-    "compose": "Nouveau message"
+    "compose": "Nouveau message",
+    "files": "Fichiers"
   },
   "AnalyticsPage": {
     "title": "Statistiques",
@@ -1637,20 +1664,43 @@
   },
   "UsersPage": {
     "title": "Utilisateurs",
-    "description": "Toutes les personnes qui ont un compte. Ouvrez une ligne pour voir l’utilisateur.",
-    "card_title": "Utilisateurs"
+    "description": "Toutes les personnes qui ont un compte.",
+    "description_count": "{count, plural, =0 {Aucun compte pour l’instant.} one {# compte.} other {# comptes.}}",
+    "search_label": "Rechercher par e-mail",
+    "search_placeholder": "nom@exemple.com",
+    "search_button": "Rechercher",
+    "list_title": "Tous les utilisateurs",
+    "results_title": "Utilisateurs correspondant à « {query} »",
+    "column_email": "Adresse e-mail",
+    "column_role": "Rôle",
+    "column_member_since": "Membre depuis",
+    "empty": "Aucun utilisateur ne correspond à cette recherche.",
+    "admin_only_title": "Seuls les administrateurs gèrent les utilisateurs",
+    "admin_only_text": "Demandez à un administrateur de vous donner le rôle administrateur."
   },
   "UserPage": {
-    "title": "Utilisateur introuvable",
-    "description": "Les informations du compte enregistrées.",
-    "card_title": "Utilisateur n° {id}",
-    "value_column": "Valeur",
-    "field_id": "Identifiant",
-    "field_registered": "Inscription",
-    "field_role": "Rôle",
-    "field_status": "Statut",
-    "not_found": "Introuvable",
-    "back": "Retour aux utilisateurs"
+    "title": "Utilisateur",
+    "member_since": "Membre depuis le {date}",
+    "back": "Retour aux utilisateurs",
+    "self_notice": "C’est votre propre compte. Un autre administrateur doit le modifier ou le supprimer, pour qu’il reste toujours un administrateur.",
+    "edit_title": "E-mail et rôle",
+    "delete_title": "Supprimer le compte",
+    "delete_text": "Supprime le compte avec ses résultats de tests et ses fichiers. Action irréversible."
+  },
+  "UserForm": {
+    "email_label": "Adresse e-mail",
+    "role_label": "Rôle",
+    "sign_out_hint": "L’enregistrement déconnecte cet utilisateur sur tous ses appareils.",
+    "save_button": "Enregistrer",
+    "saved": "Enregistré",
+    "error_invalid_input": "Vérifiez les champs signalés",
+    "error_email_taken": "Cet e-mail est déjà enregistré",
+    "error_generic": "Une erreur s’est produite",
+    "delete_button": "Supprimer le compte",
+    "confirm_title": "Supprimer {email} ?",
+    "confirm_text": "Le compte, ses résultats de tests et ses fichiers sont supprimés définitivement.",
+    "confirm_cancel": "Le garder",
+    "confirm_delete": "Supprimer"
   },
   "InvoicePage": {
     "title": "Facture",

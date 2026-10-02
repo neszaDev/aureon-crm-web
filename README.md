@@ -3,8 +3,8 @@
 A **Next.js 16** (App Router, React 19, TypeScript, Tailwind v4) frontend for the
 [spring-postgres-boilerplate](https://github.com/neszaDev/spring-postgres-boilerplate) API:
 sign-up/sign-in with the backend's JWT and rotating refresh tokens (kept in httpOnly cookies), a
-protected dashboard, a test-results CRUD example, i18n (en/fr), a designed UI on shadcn/ui
-(a sample product, "Marksheet", see [the redesign plan](docs/plans/0002-ui-redesign.md)), and a CI/CD pipeline that tests the
+protected dashboard, a test-results CRUD example, file uploads, admin user management, i18n
+(en/fr), a designed UI on shadcn/ui (a sample product, "Marksheet", see [the redesign plan](docs/plans/0002-ui-redesign.md)), and a CI/CD pipeline that tests the
 real frontend image against the real backend image.
 
 Based on [Next.js Boilerplate](https://github.com/ixartz/Next-js-Boilerplate) by ixartz (MIT); the

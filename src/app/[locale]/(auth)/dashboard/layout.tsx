@@ -31,5 +31,9 @@ export default async function DashboardLayout(props: DashboardLayoutProps) {
     return redirect({ href: '/sign-in', locale });
   }
 
-  return <AppShell email={user.email}>{props.children}</AppShell>;
+  return (
+    <AppShell email={user.email} isAdmin={user.role === 'ADMIN'}>
+      {props.children}
+    </AppShell>
+  );
 }

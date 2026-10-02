@@ -25,6 +25,8 @@ Runtime values are **not** baked into the image, so one image serves every envir
 | `BACKEND_PORT` | `8080` | Host port of the backend |
 | `FRONTEND_PORT` | `3000` | Host port of the frontend container (`make up`) |
 | `BACKEND_JWT_SECRET` | local placeholder | JWT secret for the local backend container (≥ 32 bytes). Never a real secret. |
+| `BACKEND_ADMIN_EMAIL` / `BACKEND_ADMIN_PASSWORD` | `admin@e2e.test` / `e2e-admin-password` | Admin the local backend creates at startup (used by e2e). Local only. |
+| `BACKEND_RATE_LIMIT_PER_IP` | `10000` | Per-IP sign-in and registration limit of the local backend; high because e2e registers every user from one address |
 
 When you add a variable: declare it in `Env.ts`, document it here, and add it to
 `env/.env.example`. Never commit real values.

@@ -6,6 +6,7 @@ import {
   ClipboardListIcon,
   CodeIcon,
   FileWarningIcon,
+  FolderOpenIcon,
   FilterIcon,
   LanguagesIcon,
   LayersIcon,
@@ -42,9 +43,11 @@ const sub = (base: string, slugs: [string, string][]): NavLink[] =>
 /**
  * The sidebar, translated: the product's own pages, then the sections of the original Vue
  * admin app.
+ * @param options Who is signed in.
+ * @param options.isAdmin Whether to show user management (the backend enforces it anyway).
  * @returns The sections in display order.
  */
-export const useNavSections = (): NavSection[] => {
+export const useNavSections = (options: { isAdmin: boolean }): NavSection[] => {
   const t = useTranslations('AppNav');
 
   return [
@@ -53,7 +56,11 @@ export const useNavSections = (): NavSection[] => {
       entries: [
         { href: '/dashboard', label: t('dashboard'), icon: LayoutGridIcon },
         { href: '/dashboard/test-results', label: t('test_results'), icon: ClipboardListIcon },
+        { href: '/dashboard/files', label: t('files'), icon: FolderOpenIcon },
         { href: '/dashboard/account', label: t('account'), icon: UserRoundIcon },
+        ...(options.isAdmin
+          ? [{ href: '/dashboard/users', label: t('users'), icon: UsersIcon }]
+          : []),
       ],
     },
     {
@@ -179,7 +186,6 @@ export const useNavSections = (): NavSection[] => {
       title: t('section_extras'),
       entries: [
         { href: '/dashboard/analytics', label: t('analytics'), icon: ChartLineIcon },
-        { href: '/dashboard/users', label: t('users'), icon: UsersIcon },
         {
           base: '/dashboard/pages',
           label: t('pages'),

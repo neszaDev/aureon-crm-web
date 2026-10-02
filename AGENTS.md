@@ -7,8 +7,9 @@ Keep this file the single source of truth; `CLAUDE.md` only imports it.
 
 A Next.js 16 (App Router) frontend for the
 [spring-postgres-boilerplate](https://github.com/neszaDev/spring-postgres-boilerplate) API.
-The Next.js **server** talks to the backend: sign-in/sign-up/sign-out, a protected dashboard, and
-an owner-scoped test-results CRUD. Tokens live in httpOnly cookies and never reach browser JS.
+The Next.js **server** talks to the backend: sign-in/sign-up/sign-out, a protected dashboard,
+owner-scoped test-results CRUD and file uploads, and admin user management. Tokens live in
+httpOnly cookies and never reach browser JS.
 Architecture: [docs/architecture.md](docs/architecture.md). Guides:
 [configuration](docs/configuration.md) · [backend integration](docs/backend-integration.md) ·
 [testing](docs/testing.md) · [CI/CD](docs/ci.md).

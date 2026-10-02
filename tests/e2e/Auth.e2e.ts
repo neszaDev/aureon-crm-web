@@ -51,6 +51,34 @@ test.describe('Auth', () => {
       expect(after.find((c) => c.name === 'refresh_token')?.value).not.toBe(before);
     });
 
+    test('slows down repeated failed sign-ins for one email', async ({ page }) => {
+      const email = await signUp(page);
+      await signOut(page);
+      await page.goto('/sign-in');
+      await page.getByLabel('Email address').fill(email);
+
+      // The backend allows 10 failures per email per 15 minutes (RATE_LIMIT_LOGIN_FAILURES_PER_EMAIL).
+      // One attempt after another: each must be answered before the next is sent.
+      const failSignIn = async (remaining: number): Promise<void> => {
+        if (remaining === 0) {
+          return;
+        }
+        await page.getByLabel('Password').fill(`wrong-password-${remaining}`);
+        await page.getByRole('button', { name: 'Sign in' }).click();
+        await expect(page.locator('form').getByRole('alert')).toHaveText(
+          'Invalid email or password',
+        );
+        await failSignIn(remaining - 1);
+      };
+      await failSignIn(10);
+      await page.getByLabel('Password').fill(PASSWORD);
+      await page.getByRole('button', { name: 'Sign in' }).click();
+
+      await expect(page.locator('form').getByRole('alert')).toContainText(
+        'Too many attempts. Try again in',
+      );
+    });
+
     test('sends signed-in users from sign-in to the dashboard', async ({ page }) => {
       await signUp(page);
 

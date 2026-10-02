@@ -45,6 +45,58 @@ export const listTestResults = async (page: number, size: number) => {
 };
 
 /**
+ * Loads one page of users for an admin (`GET /users`), newest first.
+ * @param params Search and paging.
+ * @param params.query Part of an email to search for; empty lists everyone.
+ * @param params.page Zero-based page number.
+ * @param params.size Page size (the backend allows 1-100).
+ * @returns The page, or `forbidden` for a non-admin, or `unauthorized`.
+ */
+export const listUsers = async (params: { query: string; page: number; size: number }) => {
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/users', {
+    params: { query: { q: params.query || undefined, page: params.page, size: params.size } },
+  });
+
+  return {
+    users: data,
+    forbidden: response.status === 403,
+    unauthorized: response.status === 401,
+  };
+};
+
+/**
+ * Loads one user for an admin (`GET /users/{id}`).
+ * @param id User id.
+ * @returns The user (undefined when it doesn't exist), or `forbidden`, or `unauthorized`.
+ */
+export const getUser = async (id: number) => {
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/users/{id}', { params: { path: { id } } });
+
+  return {
+    user: data,
+    forbidden: response.status === 403,
+    unauthorized: response.status === 401,
+  };
+};
+
+/**
+ * Loads one page of the signed-in user's files (`GET /files`), newest first.
+ * @param page Zero-based page number.
+ * @param size Page size (the backend allows 1-100).
+ * @returns The page, or `unauthorized` when the session is no longer valid.
+ */
+export const listFiles = async (page: number, size: number) => {
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/files', {
+    params: { query: { page, size } },
+  });
+
+  return { files: data, unauthorized: response.status === 401 };
+};
+
+/**
  * Loads the organisations, agencies and departments for the campus filters.
  * Placeholder data until the Spring API serves them (Vue: `POST /api/v1/organization/explorers`).
  * @returns The three lists.
