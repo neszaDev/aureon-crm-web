@@ -1,0 +1,705 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T23:35:32.162Z",
+  "title": "Design System: Aureon CRM",
+  "extensions": {
+    "colorMeta": {
+      "seal": {
+        "role": "primary",
+        "displayName": "Seal Vermilion",
+        "canonical": "#c8361c",
+        "tonalRamp": [
+          "oklch(15% 0.078 32.4)",
+          "oklch(26.4% 0.138 32.4)",
+          "oklch(37.9% 0.187 32.4)",
+          "oklch(49.3% 0.187 32.4)",
+          "oklch(60.7% 0.187 32.4)",
+          "oklch(72.1% 0.146 32.4)",
+          "oklch(83.6% 0.086 32.4)",
+          "oklch(95% 0.026 32.4)"
+        ]
+      },
+      "seal-deep": {
+        "role": "primary",
+        "displayName": "Seal Deep",
+        "canonical": "#9e2812",
+        "tonalRamp": [
+          "oklch(15% 0.066 32.6)",
+          "oklch(26.4% 0.117 32.6)",
+          "oklch(37.9% 0.158 32.6)",
+          "oklch(49.3% 0.158 32.6)",
+          "oklch(60.7% 0.158 32.6)",
+          "oklch(72.1% 0.123 32.6)",
+          "oklch(83.6% 0.073 32.6)",
+          "oklch(95% 0.022 32.6)"
+        ]
+      },
+      "seal-ink": {
+        "role": "primary",
+        "displayName": "Seal Ink",
+        "canonical": "#b8321a",
+        "tonalRamp": [
+          "oklch(15% 0.073 32.4)",
+          "oklch(26.4% 0.129 32.4)",
+          "oklch(37.9% 0.175 32.4)",
+          "oklch(49.3% 0.175 32.4)",
+          "oklch(60.7% 0.175 32.4)",
+          "oklch(72.1% 0.136 32.4)",
+          "oklch(83.6% 0.08 32.4)",
+          "oklch(95% 0.024 32.4)"
+        ]
+      },
+      "seal-tint": {
+        "role": "primary",
+        "displayName": "Seal Tint",
+        "canonical": "#f6e3dc",
+        "tonalRamp": [
+          "oklch(15% 0.01 41.4)",
+          "oklch(26.4% 0.017 41.4)",
+          "oklch(37.9% 0.023 41.4)",
+          "oklch(49.3% 0.023 41.4)",
+          "oklch(60.7% 0.023 41.4)",
+          "oklch(72.1% 0.018 41.4)",
+          "oklch(83.6% 0.011 41.4)",
+          "oklch(95% 0.003 41.4)"
+        ]
+      },
+      "on-seal": {
+        "role": "primary",
+        "displayName": "On Seal",
+        "canonical": "#fff4f0",
+        "tonalRamp": [
+          "oklch(15% 0.005 41.2)",
+          "oklch(26.4% 0.01 41.2)",
+          "oklch(37.9% 0.013 41.2)",
+          "oklch(49.3% 0.013 41.2)",
+          "oklch(60.7% 0.013 41.2)",
+          "oklch(72.1% 0.01 41.2)",
+          "oklch(83.6% 0.006 41.2)",
+          "oklch(95% 0.002 41.2)"
+        ]
+      },
+      "danger": {
+        "role": "secondary",
+        "displayName": "Crimson Danger",
+        "canonical": "#b4123a",
+        "tonalRamp": [
+          "oklch(15% 0.08 16.4)",
+          "oklch(26.4% 0.14 16.4)",
+          "oklch(37.9% 0.189 16.4)",
+          "oklch(49.3% 0.189 16.4)",
+          "oklch(60.7% 0.189 16.4)",
+          "oklch(72.1% 0.148 16.4)",
+          "oklch(83.6% 0.087 16.4)",
+          "oklch(95% 0.027 16.4)"
+        ]
+      },
+      "warning": {
+        "role": "tertiary",
+        "displayName": "Ochre Warning",
+        "canonical": "#8a5700",
+        "tonalRamp": [
+          "oklch(15% 0.046 70.5)",
+          "oklch(26.4% 0.08 70.5)",
+          "oklch(37.9% 0.108 70.5)",
+          "oklch(49.3% 0.108 70.5)",
+          "oklch(60.7% 0.108 70.5)",
+          "oklch(72.1% 0.085 70.5)",
+          "oklch(83.6% 0.05 70.5)",
+          "oklch(95% 0.015 70.5)"
+        ]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Pine Success",
+        "canonical": "#2f6b4f",
+        "tonalRamp": [
+          "oklch(15% 0.033 161.1)",
+          "oklch(26.4% 0.058 161.1)",
+          "oklch(37.9% 0.078 161.1)",
+          "oklch(49.3% 0.078 161.1)",
+          "oklch(60.7% 0.078 161.1)",
+          "oklch(72.1% 0.061 161.1)",
+          "oklch(83.6% 0.036 161.1)",
+          "oklch(95% 0.011 161.1)"
+        ]
+      },
+      "info": {
+        "role": "tertiary",
+        "displayName": "Slate Info",
+        "canonical": "#1f5d8c",
+        "tonalRamp": [
+          "oklch(15% 0.041 245.5)",
+          "oklch(26.4% 0.073 245.5)",
+          "oklch(37.9% 0.099 245.5)",
+          "oklch(49.3% 0.099 245.5)",
+          "oklch(60.7% 0.099 245.5)",
+          "oklch(72.1% 0.077 245.5)",
+          "oklch(83.6% 0.045 245.5)",
+          "oklch(95% 0.014 245.5)"
+        ]
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Ground",
+        "canonical": "#eff0ec",
+        "tonalRamp": [
+          "oklch(15% 0.002 117.9)",
+          "oklch(26.4% 0.004 117.9)",
+          "oklch(37.9% 0.005 117.9)",
+          "oklch(49.3% 0.005 117.9)",
+          "oklch(60.7% 0.005 117.9)",
+          "oklch(72.1% 0.004 117.9)",
+          "oklch(83.6% 0.002 117.9)",
+          "oklch(95% 0.001 117.9)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Bond Paper",
+        "canonical": "#fbfbf9",
+        "tonalRamp": [
+          "oklch(15% 0.001 106.4)",
+          "oklch(26.4% 0.002 106.4)",
+          "oklch(37.9% 0.003 106.4)",
+          "oklch(49.3% 0.003 106.4)",
+          "oklch(60.7% 0.003 106.4)",
+          "oklch(72.1% 0.002 106.4)",
+          "oklch(83.6% 0.001 106.4)",
+          "oklch(95% 0 106.4)"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Field",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0 89.9)",
+          "oklch(26.4% 0 89.9)",
+          "oklch(37.9% 0 89.9)",
+          "oklch(49.3% 0 89.9)",
+          "oklch(60.7% 0 89.9)",
+          "oklch(72.1% 0 89.9)",
+          "oklch(83.6% 0 89.9)",
+          "oklch(95% 0 89.9)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#e6e7e2",
+        "tonalRamp": [
+          "oklch(15% 0.003 115.7)",
+          "oklch(26.4% 0.005 115.7)",
+          "oklch(37.9% 0.007 115.7)",
+          "oklch(49.3% 0.007 115.7)",
+          "oklch(60.7% 0.007 115.7)",
+          "oklch(72.1% 0.005 115.7)",
+          "oklch(83.6% 0.003 115.7)",
+          "oklch(95% 0.001 115.7)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Sumi Ink",
+        "canonical": "#1c1d21",
+        "tonalRamp": [
+          "oklch(15% 0.003 274.6)",
+          "oklch(26.4% 0.006 274.6)",
+          "oklch(37.9% 0.008 274.6)",
+          "oklch(49.3% 0.008 274.6)",
+          "oklch(60.7% 0.008 274.6)",
+          "oklch(72.1% 0.006 274.6)",
+          "oklch(83.6% 0.004 274.6)",
+          "oklch(95% 0.001 274.6)"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Second Ink",
+        "canonical": "#5b5e66",
+        "tonalRamp": [
+          "oklch(15% 0.006 269.4)",
+          "oklch(26.4% 0.01 269.4)",
+          "oklch(37.9% 0.013 269.4)",
+          "oklch(49.3% 0.013 269.4)",
+          "oklch(60.7% 0.013 269.4)",
+          "oklch(72.1% 0.01 269.4)",
+          "oklch(83.6% 0.006 269.4)",
+          "oklch(95% 0.002 269.4)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#d9dad4",
+        "tonalRamp": [
+          "oklch(15% 0.003 114.2)",
+          "oklch(26.4% 0.006 114.2)",
+          "oklch(37.9% 0.008 114.2)",
+          "oklch(49.3% 0.008 114.2)",
+          "oklch(60.7% 0.008 114.2)",
+          "oklch(72.1% 0.006 114.2)",
+          "oklch(83.6% 0.004 114.2)",
+          "oklch(95% 0.001 114.2)"
+        ]
+      },
+      "input-stroke": {
+        "role": "neutral",
+        "displayName": "Input Stroke",
+        "canonical": "#84867f",
+        "tonalRamp": [
+          "oklch(15% 0.004 119.7)",
+          "oklch(26.4% 0.008 119.7)",
+          "oklch(37.9% 0.011 119.7)",
+          "oklch(49.3% 0.011 119.7)",
+          "oklch(60.7% 0.011 119.7)",
+          "oklch(72.1% 0.008 119.7)",
+          "oklch(83.6% 0.005 119.7)",
+          "oklch(95% 0.001 119.7)"
+        ]
+      },
+      "lacquer-ground": {
+        "role": "neutral",
+        "displayName": "Lacquer Ground",
+        "canonical": "#141212",
+        "theme": "dark",
+        "lightCounterpart": "ground",
+        "tonalRamp": [
+          "oklch(15% 0.001 17.5)",
+          "oklch(26.4% 0.002 17.5)",
+          "oklch(37.9% 0.003 17.5)",
+          "oklch(49.3% 0.003 17.5)",
+          "oklch(60.7% 0.003 17.5)",
+          "oklch(72.1% 0.003 17.5)",
+          "oklch(83.6% 0.002 17.5)",
+          "oklch(95% 0 17.5)"
+        ]
+      },
+      "lacquer-paper": {
+        "role": "neutral",
+        "displayName": "Lacquer Bond Paper",
+        "canonical": "#1c1a19",
+        "theme": "dark",
+        "lightCounterpart": "paper",
+        "tonalRamp": [
+          "oklch(15% 0.002 48.6)",
+          "oklch(26.4% 0.003 48.6)",
+          "oklch(37.9% 0.004 48.6)",
+          "oklch(49.3% 0.004 48.6)",
+          "oklch(60.7% 0.004 48.6)",
+          "oklch(72.1% 0.003 48.6)",
+          "oklch(83.6% 0.002 48.6)",
+          "oklch(95% 0.001 48.6)"
+        ]
+      },
+      "lacquer-field": {
+        "role": "neutral",
+        "displayName": "Lacquer Field",
+        "canonical": "#252220",
+        "theme": "dark",
+        "lightCounterpart": "field",
+        "tonalRamp": [
+          "oklch(15% 0.002 56.1)",
+          "oklch(26.4% 0.004 56.1)",
+          "oklch(37.9% 0.006 56.1)",
+          "oklch(49.3% 0.006 56.1)",
+          "oklch(60.7% 0.006 56.1)",
+          "oklch(72.1% 0.005 56.1)",
+          "oklch(83.6% 0.003 56.1)",
+          "oklch(95% 0.001 56.1)"
+        ]
+      },
+      "lacquer-muted": {
+        "role": "neutral",
+        "displayName": "Lacquer Muted",
+        "canonical": "#2c2826",
+        "theme": "dark",
+        "lightCounterpart": "muted",
+        "tonalRamp": [
+          "oklch(15% 0.003 48.5)",
+          "oklch(26.4% 0.005 48.5)",
+          "oklch(37.9% 0.007 48.5)",
+          "oklch(49.3% 0.007 48.5)",
+          "oklch(60.7% 0.007 48.5)",
+          "oklch(72.1% 0.005 48.5)",
+          "oklch(83.6% 0.003 48.5)",
+          "oklch(95% 0.001 48.5)"
+        ]
+      },
+      "lacquer-ink": {
+        "role": "neutral",
+        "displayName": "Lacquer Sumi Ink",
+        "canonical": "#eeece8",
+        "theme": "dark",
+        "lightCounterpart": "ink",
+        "tonalRamp": [
+          "oklch(15% 0.002 84.6)",
+          "oklch(26.4% 0.004 84.6)",
+          "oklch(37.9% 0.006 84.6)",
+          "oklch(49.3% 0.006 84.6)",
+          "oklch(60.7% 0.006 84.6)",
+          "oklch(72.1% 0.004 84.6)",
+          "oklch(83.6% 0.003 84.6)",
+          "oklch(95% 0.001 84.6)"
+        ]
+      },
+      "lacquer-ink-2": {
+        "role": "neutral",
+        "displayName": "Lacquer Second Ink",
+        "canonical": "#a9a49e",
+        "theme": "dark",
+        "lightCounterpart": "ink-2",
+        "tonalRamp": [
+          "oklch(15% 0.004 72.6)",
+          "oklch(26.4% 0.008 72.6)",
+          "oklch(37.9% 0.01 72.6)",
+          "oklch(49.3% 0.01 72.6)",
+          "oklch(60.7% 0.01 72.6)",
+          "oklch(72.1% 0.008 72.6)",
+          "oklch(83.6% 0.005 72.6)",
+          "oklch(95% 0.001 72.6)"
+        ]
+      },
+      "lacquer-rule": {
+        "role": "neutral",
+        "displayName": "Lacquer Hairline",
+        "canonical": "#3a3533",
+        "theme": "dark",
+        "lightCounterpart": "rule",
+        "tonalRamp": [
+          "oklch(15% 0.003 43.2)",
+          "oklch(26.4% 0.006 43.2)",
+          "oklch(37.9% 0.008 43.2)",
+          "oklch(49.3% 0.008 43.2)",
+          "oklch(60.7% 0.008 43.2)",
+          "oklch(72.1% 0.006 43.2)",
+          "oklch(83.6% 0.004 43.2)",
+          "oklch(95% 0.001 43.2)"
+        ]
+      },
+      "lacquer-input-stroke": {
+        "role": "neutral",
+        "displayName": "Lacquer Input Stroke",
+        "canonical": "#7a746e",
+        "theme": "dark",
+        "lightCounterpart": "input-stroke",
+        "tonalRamp": [
+          "oklch(15% 0.005 67.6)",
+          "oklch(26.4% 0.009 67.6)",
+          "oklch(37.9% 0.012 67.6)",
+          "oklch(49.3% 0.012 67.6)",
+          "oklch(60.7% 0.012 67.6)",
+          "oklch(72.1% 0.009 67.6)",
+          "oklch(83.6% 0.005 67.6)",
+          "oklch(95% 0.002 67.6)"
+        ]
+      },
+      "lacquer-seal-ink": {
+        "role": "primary",
+        "displayName": "Lacquer Seal Ink",
+        "canonical": "#ec7357",
+        "theme": "dark",
+        "lightCounterpart": "seal-ink",
+        "tonalRamp": [
+          "oklch(15% 0.065 34.3)",
+          "oklch(26.4% 0.115 34.3)",
+          "oklch(37.9% 0.156 34.3)",
+          "oklch(49.3% 0.156 34.3)",
+          "oklch(60.7% 0.156 34.3)",
+          "oklch(72.1% 0.122 34.3)",
+          "oklch(83.6% 0.072 34.3)",
+          "oklch(95% 0.022 34.3)"
+        ]
+      },
+      "lacquer-seal-tint": {
+        "role": "primary",
+        "displayName": "Lacquer Seal Tint",
+        "canonical": "#3d1a12",
+        "theme": "dark",
+        "lightCounterpart": "seal-tint",
+        "tonalRamp": [
+          "oklch(15% 0.024 34.1)",
+          "oklch(26.4% 0.042 34.1)",
+          "oklch(37.9% 0.057 34.1)",
+          "oklch(49.3% 0.057 34.1)",
+          "oklch(60.7% 0.057 34.1)",
+          "oklch(72.1% 0.045 34.1)",
+          "oklch(83.6% 0.026 34.1)",
+          "oklch(95% 0.008 34.1)"
+        ]
+      },
+      "lacquer-danger": {
+        "role": "secondary",
+        "displayName": "Lacquer Crimson Danger",
+        "canonical": "#ff7a95",
+        "theme": "dark",
+        "lightCounterpart": "danger",
+        "tonalRamp": [
+          "oklch(15% 0.069 9.2)",
+          "oklch(26.4% 0.121 9.2)",
+          "oklch(37.9% 0.163 9.2)",
+          "oklch(49.3% 0.163 9.2)",
+          "oklch(60.7% 0.163 9.2)",
+          "oklch(72.1% 0.127 9.2)",
+          "oklch(83.6% 0.075 9.2)",
+          "oklch(95% 0.023 9.2)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The one heading of a standalone page (sign in, sign up, invitation)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The page h1 inside the CRM shell and on the workspace picker."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "A value in a fact strip, larger than its label."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "A panel's heading."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text; descriptions cap at 65ch."
+      },
+      "body-dense": {
+        "displayName": "Body dense",
+        "purpose": "Navigation items, names in list rows, control text from 640px up."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Secondary lines, emails under names, counts."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form and fact labels: sentence case, ink-2, no uppercase or tracking."
+      },
+      "label-table": {
+        "displayName": "Label table",
+        "purpose": "Table heads."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Button text at every size."
+      },
+      "record-number": {
+        "displayName": "Record number",
+        "purpose": "Record identifiers such as D-0042."
+      },
+      "stamp": {
+        "displayName": "Stamp",
+        "purpose": "Exact days inside an open stamp box."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ply",
+        "value": "0 1px 2px rgb(17 27 48 / 10%)",
+        "purpose": "Controls only: buttons, inputs, selects."
+      },
+      {
+        "name": "sheet",
+        "value": "0 1px 0 rgb(17 27 48 / 5%), 0 1px 3px rgb(17 27 48 / 8%)",
+        "purpose": "A standalone card on a page, a dragged row, the skip link. Never panels inside the shell."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-change",
+        "value": "150ms",
+        "purpose": "Colour, border and shadow transitions on buttons, rows and navigation."
+      },
+      {
+        "name": "press",
+        "value": "translateY(1px)",
+        "purpose": "Buttons nudge down while pressed; the account seal scales to 0.95."
+      },
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Draw-on marks; with reduced motion, menus and sheets only fade."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px",
+        "purpose": "The rail appears; below it, the vermilion top bar and drawer."
+      },
+      {
+        "name": "xl",
+        "value": "1280px",
+        "purpose": "Settings links become a column beside the page."
+      }
+    ],
+    "focus": {
+      "value": "2px solid seal ring, 2px offset; on-seal on vermilion fills",
+      "purpose": "Every interactive element."
+    },
+    "stampBox": {
+      "openOutline": "2px solid ink",
+      "blankOutline": "1px seal-ink at 40%",
+      "signedSeal": "28px, 1.5px seal-ink ring, rotated -8deg",
+      "won": "seal fill, impression in on-seal (rule; state to add to StampBox when deals ship)"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one 36px primary action: seal fill, white text.",
+      "html": "<button class=\"ds-btn-primary\">Save stage</button>",
+      "css": ".ds-btn-primary { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 4.8px; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color 150ms, border-color 150ms, color 150ms, transform 150ms; background: var(--seal, #c8361c); color: #ffffff; box-shadow: 0 1px 2px rgb(17 27 48 / 10%); } .ds-btn-primary:hover { background: var(--seal-deep, #9e2812); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--background, #eff0ec), 0 0 0 4px var(--seal, #c8361c); } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary actions on the white field with the control stroke.",
+      "html": "<button class=\"ds-btn-outline\">Cancel</button>",
+      "css": ".ds-btn-outline { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 4.8px; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color 150ms, border-color 150ms, color 150ms, transform 150ms; background: var(--field, #ffffff); color: var(--ink, #1c1d21); border-color: var(--input, #84867f); box-shadow: 0 1px 2px rgb(17 27 48 / 10%); } .ds-btn-outline:hover { background: var(--muted, #e6e7e2); border-color: var(--ink-2, #5b5e66); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--background, #eff0ec), 0 0 0 4px var(--seal, #c8361c); } .ds-btn-outline:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Crimson, never the seal; confirms a destructive action.",
+      "html": "<button class=\"ds-btn-danger\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 6h18\"/><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\"/><path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/></svg>Remove member</button>",
+      "css": ".ds-btn-danger { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 4.8px; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color 150ms, border-color 150ms, color 150ms, transform 150ms; background: var(--danger, #b4123a); color: #ffffff; box-shadow: 0 1px 2px rgb(17 27 48 / 10%); } .ds-btn-danger:hover { background: color-mix(in oklab, var(--danger, #b4123a) 90%, transparent); } .ds-btn-danger:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--background, #eff0ec), 0 0 0 4px var(--seal, #c8361c); } .ds-btn-danger:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Labelled Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Quiet sentence-case label over a 40px field control.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-name\">Stage name</label><input class=\"ds-input\" id=\"ds-name\" value=\"Proposal\"></div>",
+      "css": ".ds-field { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: flex; flex-direction: column; gap: 8px; max-width: 280px; } .ds-label { font-size: 13px; font-weight: 500; line-height: 1.375; color: var(--ink-2, #5b5e66); } .ds-input { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; height: 40px; padding: 8px 12px; border: 1px solid var(--input, #84867f); border-radius: 4.8px; background: var(--field, #ffffff); color: var(--ink, #1c1d21); font-size: 15px; box-shadow: 0 1px 2px rgb(17 27 48 / 10%); outline: none; transition: border-color 150ms, box-shadow 150ms; } .ds-input:hover { border-color: var(--ink-2, #5b5e66); } .ds-input:focus-visible { border-color: var(--seal, #c8361c); box-shadow: 0 0 0 3px color-mix(in oklab, var(--seal, #c8361c) 20%, transparent); }"
+    },
+    {
+      "name": "Seal Rail",
+      "kind": "nav",
+      "refersTo": "rail",
+      "description": "The full-bleed vermilion rail with the workspace chop and sections.",
+      "html": "<nav class=\"ds-rail\"><div class=\"ds-rail-ws\"><span class=\"ds-chop\">NS</span>Northwind Supply</div><a class=\"ds-rail-item ds-current\" href=\"#\" aria-current=\"page\">Dashboard</a><a class=\"ds-rail-item\" href=\"#\">Settings</a></nav>",
+      "css": ".ds-rail { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: flex; flex-direction: column; gap: 2px; width: 232px; padding: 16px 10px; background: var(--seal, #c8361c); color: var(--on-seal, #fff4f0); } .ds-rail-ws { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; padding: 0 6px; font-size: 15px; font-weight: 700; } .ds-chop { display: inline-grid; place-items: center; width: 32px; height: 32px; border: 2px solid currentColor; border-radius: 4.8px; font-size: 12px; font-weight: 700; } .ds-rail-item { display: flex; align-items: center; min-height: 36px; padding: 6px 12px; border-radius: 4.8px; color: inherit; font-size: 15px; font-weight: 500; text-decoration: none; transition: background-color 150ms; } .ds-rail-item:hover { background: rgb(0 0 0 / 10%); } .ds-rail-item.ds-current { background: var(--seal-deep, #9e2812); color: #ffffff; font-weight: 600; } .ds-rail-item:focus-visible { outline: 2px solid var(--on-seal, #fff4f0); outline-offset: 2px; }"
+    },
+    {
+      "name": "Hairline Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Paper panel on the ground: heading row, rows divided by the one hairline.",
+      "html": "<section class=\"ds-panel\"><div class=\"ds-panel-head\"><h2>Members</h2><span>2</span></div><div class=\"ds-row\"><span class=\"ds-seal\">CD</span>Claire Dubois</div><div class=\"ds-row\"><span class=\"ds-seal\">SW</span>Somchai Wongsa</div></section>",
+      "css": ".ds-panel { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; max-width: 360px; overflow: hidden; border: 1px solid var(--rule, #d9dad4); border-radius: 6px; background: var(--paper, #fbfbf9); color: var(--ink, #1c1d21); } .ds-panel-head { display: flex; align-items: baseline; justify-content: space-between; padding: 16px 20px 12px; } .ds-panel-head h2 { margin: 0; font-size: 16px; font-weight: 600; } .ds-panel-head span { font-size: 14px; color: var(--ink-2, #5b5e66); font-variant-numeric: tabular-nums; } .ds-row { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 20px; border-top: 1px solid var(--rule, #d9dad4); font-size: 15px; font-weight: 500; transition: background-color 150ms; } .ds-row:hover { background: var(--muted, #e6e7e2); } .ds-seal { display: inline-grid; place-items: center; width: 24px; height: 24px; border: 1.5px solid var(--seal-ink, #b8321a); border-radius: 9999px; background: var(--field, #ffffff); color: var(--seal-ink, #b8321a); font-size: 11px; font-weight: 700; line-height: 1; }"
+    },
+    {
+      "name": "Seal",
+      "kind": "custom",
+      "refersTo": "seal-md",
+      "description": "A person, and the only way a person appears; signs only for the recorded actor.",
+      "html": "<span class=\"ds-seal-md\" role=\"img\" aria-label=\"Ana Lima\">AL</span>",
+      "css": ".ds-seal-md { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: inline-grid; place-items: center; width: 32px; height: 32px; border: 2px solid var(--seal-ink, #b8321a); border-radius: 9999px; background: var(--field, #ffffff); color: var(--seal-ink, #b8321a); font-size: 12px; font-weight: 700; line-height: 1; user-select: none; }"
+    },
+    {
+      "name": "Stamp Row",
+      "kind": "custom",
+      "refersTo": "stamp-box",
+      "description": "Fixed 36px StampBoxes: signed by the mover, open with exact days in a 2px ink outline, blank.",
+      "html": "<div class=\"ds-stamps\" aria-hidden=\"true\"><span class=\"ds-box ds-signed\"><span class=\"ds-imp\">AL</span></span><span class=\"ds-box ds-signed\"><span class=\"ds-imp\">KS</span></span><span class=\"ds-box ds-open\">8d</span><span class=\"ds-box\"></span><span class=\"ds-box\"></span></div>",
+      "css": ".ds-stamps { display: flex; gap: 4px; } .ds-box { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; box-sizing: border-box; border: 1px solid color-mix(in oklab, var(--seal-ink, #b8321a) 40%, transparent); border-radius: 3px; background: var(--field, #ffffff); color: var(--seal-ink, #b8321a); } .ds-signed { background: var(--seal-tint, #f6e3dc); } .ds-open { border: 2px solid var(--ink, #1c1d21); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; } .ds-imp { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: grid; place-items: center; width: 28px; height: 28px; box-sizing: border-box; border: 1.5px solid var(--seal-ink, #b8321a); border-radius: 9999px; font-size: 11px; font-weight: 700; line-height: 1; transform: rotate(-8deg); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Approval Circular",
+    "overview": "Aureon reads like a circular passed from desk to desk in an office: each step carries the seal of the person who moved it. A full-height vermilion rail holds the workspace and its sections; to its right, bond-paper panels sit on a cool grey ground, ruled with one hairline. Text is sumi ink. People appear only as round vermilion seals with their initials, workspaces as square chops. The memorable object is the stamp row: one fixed box per pipeline stage, the reached stages signed, the open stage showing its exact days.\n\nThe density is that of a working ledger: 36px controls and rows, small sentence-case labels in a second ink, figures set larger than their labels, hierarchy by scale and weight rather than decoration. Panels lie flat on the ground, separated by hairlines; depth is rare. The dark theme is lacquer: near-black warm surfaces under the same vermilion seal, never navy or cool grey.\n\nThe world refuses the default CRM: no navy sidebar, no blue primary button, no grid of KPI tiles with icons in coloured circles. Every visible person, signature and stage says who did what.",
+    "keyCharacteristics": [
+      "A full-bleed vermilion rail (`seal`) on the left edge; below 1024px it folds into a vermilion top bar that opens the rail as a drawer.",
+      "Hairline paper panels (`paper` on `ground`, 1px `rule` border, 6px radius) as the only container.",
+      "People are seals, workspaces are chops; both draw initials in `seal-ink`.",
+      "The stamp row: fixed 36px boxes, signed, open (2px ink outline, exact days) or blank.",
+      "Anuphan for Latin and Thai alike; mono only for record numbers and stamp days.",
+      "Light (bond paper) and dark (lacquer) themes from the same token names."
+    ],
+    "rules": [
+      {
+        "name": "The Seal Is a Signature Rule",
+        "body": "Vermilion marks the rail, the primary action and who signed what. It never decorates, never colours a status and never signals an error.",
+        "section": "colors"
+      },
+      {
+        "name": "The Crimson Is Not the Seal Rule",
+        "body": "Danger uses `danger`, never `seal` or `seal-ink`, and always arrives with an icon and words. Colour alone never signals an error.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lacquer Rule",
+        "body": "Dark mode keeps the same seal fill on the rail and swaps paper, ink and seal-ink for their `lacquer-` values; it adds no new accents.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Label Rule",
+        "body": "Labels are sentence case, 12–13px, weight 500, in `ink-2`, with no uppercase and no letter-spacing. A label never competes with the value under it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Figure Over Label Rule",
+        "body": "Values are set larger and heavier than their labels (18px/600 under a 13px label); tables, times and record numbers use tabular figures.",
+        "section": "typography"
+      },
+      {
+        "name": "The Record Number Rule",
+        "body": "A record's number is a type letter, a hyphen and a zero-padded number (`D-0042` for a deal), set in the record-number style, so it can be read aloud and scanned down a column.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Hairline Rule",
+        "body": "Every division between paper areas is the same 1px `rule`. No double borders, no tinted section backgrounds, no shadows on panels inside the shell.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Circle Is a Person Rule",
+        "body": "A circle with initials is always a person and a rounded square with initials is always a workspace. Nothing else takes either shape.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Signed by the Actor Rule",
+        "body": "Seals are the only way a person appears: no photos, no generic avatars, no initials in coloured squares. A seal signs an action only for the member recorded as having done it, never the viewer because they are the one looking.",
+        "section": "components"
+      },
+      {
+        "name": "The Fixed Box Rule",
+        "body": "Stamp boxes are always 36px, whatever the stage name or language. Stage names live outside the box.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** run the vermilion rail full-bleed down the left edge, on the ground, with hairline paper panels beside it.",
+      "**Do** write labels in sentence case, 12–13px, weight 500, `ink-2`.",
+      "**Do** use the 36px button height for every primary action.",
+      "**Do** show people only as `Seal`s, signed by the member who actually did the action.",
+      "**Do** draw pipeline progress as a stamp row of fixed 36px `StampBox`es, with exact days on the open stage and the WON stage filled with the seal.",
+      "**Do** set record numbers in mono with tabular figures (`D-0042`).",
+      "**Do** pair every crimson error with an icon and words.",
+      "**Do** check every screen in Thai and in the lacquer theme."
+    ],
+    "donts": [
+      "**Don't** use uppercase or letter-spacing on labels, table heads or badges.",
+      "**Don't** use the seal vermilion for errors, or crimson for anything but danger.",
+      "**Don't** stamp the viewer's seal on an action someone else recorded.",
+      "**Don't** use photos, generic avatars or a second avatar style.",
+      "**Don't** add shadows to panels inside the shell, or a second border colour.",
+      "**Don't** use a navy sidebar, blue primary buttons or KPI tiles with icons in coloured circles.",
+      "**Don't** use the Marksheet tokens, `.form-label`, `.paper` or Kalam outside the `/dashboard` demo pages."
+    ]
+  }
+}
