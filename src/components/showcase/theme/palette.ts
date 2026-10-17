@@ -19,7 +19,7 @@ export const THEME_COLORS = [
   { token: 'pass', hex: '#1f6b4e', pair: 'paper-card' },
   { token: 'pen', hex: '#c42f2a', pair: 'paper-card' },
   { token: 'pencil', hex: '#5f666e', pair: 'paper-card' },
-  { token: 'paper', hex: '#e8eee6', pair: 'ink-900' },
+  { token: 'paper', hex: '#fbfbf9', pair: 'ink-900' },
   { token: 'paper-card', hex: '#f5f8f3', pair: 'ink-900' },
   { token: 'ply', hex: '#ffffff', pair: 'ink-900' },
 ] as const satisfies readonly Swatch[];

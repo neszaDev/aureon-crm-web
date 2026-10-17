@@ -35,7 +35,7 @@ export default async function SignInPage(props: SignInPageProps) {
         {t('switch_prompt')}{' '}
         <Link
           href="/sign-up/"
-          className="font-semibold text-folder underline decoration-folder/40 underline-offset-4 hover:decoration-folder"
+          className="font-semibold text-seal-ink underline decoration-seal-ink/40 underline-offset-4 hover:decoration-seal-ink"
         >
           {t('switch_link')}
         </Link>

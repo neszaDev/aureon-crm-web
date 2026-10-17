@@ -59,7 +59,7 @@ export default async function AboutPage(props: AboutPageProps) {
         {t.rich('credits', {
           upstream: (chunks) => (
             <a
-              className="font-semibold text-folder underline decoration-folder/40 underline-offset-4 hover:decoration-folder"
+              className="font-semibold text-seal-ink underline decoration-seal-ink/40 underline-offset-4 hover:decoration-seal-ink"
               href="https://github.com/ixartz/Next-js-Boilerplate"
             >
               {chunks}

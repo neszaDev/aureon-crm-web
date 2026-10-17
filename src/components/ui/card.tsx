@@ -11,7 +11,7 @@ function Card({
       data-slot="card"
       data-size={size}
       className={cn(
-        'group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-sm border border-ink-200 bg-card py-(--card-spacing) text-sm text-card-foreground shadow-sheet [--card-spacing:--spacing(5)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl',
+        'group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-sm border border-border bg-card py-(--card-spacing) text-sm text-card-foreground shadow-sheet [--card-spacing:--spacing(5)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl',
         className,
       )}
       {...props}
@@ -37,7 +37,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-title"
       className={cn(
-        'font-heading text-lg leading-snug font-semibold tracking-[-0.01em] text-ink-950 group-data-[size=sm]/card:text-base',
+        'font-heading text-lg leading-snug font-semibold tracking-[-0.01em] text-foreground group-data-[size=sm]/card:text-base',
         className,
       )}
       {...props}
@@ -49,7 +49,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-description"
-      className={cn('text-[0.9375rem] text-ink-600', className)}
+      className={cn('text-[0.9375rem] text-muted-foreground', className)}
       {...props}
     />
   );
@@ -76,7 +76,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-footer"
       className={cn(
-        'flex items-center gap-2 border-t border-ink-200 bg-paper px-(--card-spacing) py-3',
+        'flex items-center gap-2 border-t border-border bg-muted/50 px-(--card-spacing) py-3',
         className,
       )}
       {...props}

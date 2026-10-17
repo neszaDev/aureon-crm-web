@@ -1,0 +1,15 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [".impeccable/mocks/decision/model-pick.html"],
+        "createdAt": "2026-10-17T16:37:19.301Z",
+        "reason": "agent decision: throwaway decision-round sketch of a T-card kanban rack (cards in columns by design); never shipped"
+      }
+    ]
+  }
+}

@@ -5,7 +5,7 @@ import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { Accordion as AccordionPrimitive } from 'radix-ui';
 import * as React from 'react';
 
-// Themed for Marksheet: items are ruled rows in ink-200 with printed, semibold triggers.
+// Themed for Aureon: items are rows on the hairline rule with semibold triggers.
 function Accordion({ className, ...props }: React.ComponentProps<typeof AccordionPrimitive.Root>) {
   return (
     <AccordionPrimitive.Root
@@ -23,7 +23,7 @@ function AccordionItem({
   return (
     <AccordionPrimitive.Item
       data-slot="accordion-item"
-      className={cn('border-ink-200 not-last:border-b', className)}
+      className={cn('border-border not-last:border-b', className)}
       {...props}
     />
   );
@@ -39,7 +39,7 @@ function AccordionTrigger({
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          'group/accordion-trigger relative flex flex-1 items-start justify-between rounded-sm border border-transparent py-3 text-left text-sm font-semibold text-ink-950 transition-all outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-ink-600',
+          'group/accordion-trigger relative flex flex-1 items-start justify-between rounded-sm border border-transparent py-3 text-left text-sm font-semibold text-foreground transition-all outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground',
           className,
         )}
         {...props}
@@ -71,7 +71,7 @@ function AccordionContent({
     >
       <div
         className={cn(
-          'h-(--radix-accordion-content-height) pt-0 pb-3 text-ink-700 [&_a]:text-folder [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4',
+          'h-(--radix-accordion-content-height) pt-0 pb-3 text-foreground [&_a]:text-seal-ink [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4',
           className,
         )}
       >

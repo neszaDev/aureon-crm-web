@@ -8,77 +8,96 @@ web
 
 ## Users
 
-Developers on the owner's team who clone this repository to start a new web app on top of the
-[spring-postgres-boilerplate](https://github.com/neszaDev/spring-postgres-boilerplate) API. They
-read the code and run the app to see a working pattern, then copy, adapt or delete it for their
-own product.
+People in small and medium-sized businesses who work their sales pipeline here every day, at a
+desk or on a phone between meetings, in English, French or Thai. Each person has one role per
+workspace (a workspace is the account of one business):
 
-End users only arrive once a product is built from the template. They are not a defined audience
-here, and each derived product sets its own.
+- **Owner**: created the workspace and manages everything, including other owners.
+- **Admin**: runs the workspace day to day: members, roles, pipeline stages and lead sources.
+- **Manager**: leads a sales team, works with every record, reassigns work and exports data.
+- **Sales representative**: works their own leads, deals and tasks, and reads the rest of the
+  workspace so the team can collaborate.
+
+Developers are the second audience: they buy or clone this template to start their own CRM on top
+of the [spring-postgres-boilerplate](https://github.com/neszaDev/spring-postgres-boilerplate) API,
+read the code, run it, and extend or rebrand it.
 
 ## Product Purpose
 
-A production-style starting point. A new frontend gets backend authentication, a typed API client,
-i18n, tests and CI/CD that already work. Success means a developer can go from clone to a running,
-signed-in app against the real backend quickly, and can extend it without rediscovering the
-architecture.
+Aureon CRM is a multi-user CRM for small and medium-sized businesses: companies, contacts, leads,
+deals, tasks and activities that link to each other, with a dashboard and reports computed from
+the stored data. Its job is to show each person what needs doing next and who owns it, find a
+record fast, move a deal and log what happened, without losing track of ownership.
 
-The UI is a reference implementation, not a product. Each screen exists to demonstrate a pattern:
-public pages, auth forms, a protected area, and an owner-scoped CRUD with a summary and pagination.
+Success means a sales team can run its pipeline in it without surprises, and a developer can go
+from clone to a running, signed-in workspace against the real backend quickly, then extend it
+without rediscovering the architecture.
 
 ## Positioning
 
-Unlike a generic Next.js starter, this one is wired end to end to one specific Spring backend.
-The Next.js server holds the backend's JWT and rotating refresh tokens in httpOnly cookies, so
-tokens never reach browser JavaScript. API types are generated from the backend's OpenAPI spec,
-and CI runs end-to-end tests of the real frontend image against the real backend image.
+A CRM that reads as an approval circular: every step of a relationship is signed. Pipeline stages
+are stamped by the member who moved the deal, and the open stage shows its exact days. It refuses
+the default navy-sidebar, blue-button, KPI-tile CRM.
+
+As a template, it is wired end to end to one specific Spring backend. The Next.js server holds the
+backend's JWT and rotating refresh tokens in httpOnly cookies, API types are generated from the
+backend's OpenAPI spec, and CI runs end-to-end tests of the real frontend against the real backend.
 
 ## Operating Context
 
-- Local dev: `make setup`, `make backend-up` (Postgres and the published backend image), then
-  `pnpm dev` on http://localhost:3000.
-- Repo flow matches the backend: feature branch → PR into `dev` → release PR `dev` → `main`.
-  Images are published to `ghcr.io/neszadev/nextjs-boilerplate`.
-- The demo flow developers walk through: sign up at `/sign-up`, then open the dashboard and
-  *Test results*.
-- Rules for agents and humans live in `AGENTS.md`. The architecture is in `docs/architecture.md`.
+- Local only for now: `make setup`, the backend's CRM branch on `http://localhost:8081`, then
+  `pnpm dev`. No deployment, domain or paid service.
+- The CRM lives at `/app`, one workspace per URL (`/app/{workspaceId}/...`). The boilerplate's
+  demo pages stay at `/dashboard/**`, reachable from the account menu, as a component gallery.
+- Repo flow: feature branch → PR into `dev` → release PR `dev` → `main`.
+- Rules for agents and humans live in `AGENTS.md`; the CRM's specification lives in the backend
+  repo (`docs/crm/`).
 
 ## Capabilities and Constraints
 
-- Routes: public `(marketing)` home and about; `(auth)` sign-in and sign-up; and the protected
-  `/dashboard` with `dashboard/test-results`.
-- Test results: create (name, status `PENDING`/`PASSED`/`FAILED`, score 0–100, tested-at date,
-  notes), list with pagination, per-status summary, delete. Owner-scoped.
-- Stack: Next.js 16 App Router, React 19 with the React compiler, TypeScript, Tailwind v4,
-  next-intl (en, fr, th; `as-needed` locale prefix), react-hook-form + zod, Storybook, Vitest,
-  Playwright.
-- Only the server talks to the backend: `src/actions/*` for writes and
-  `src/libs/api/Queries.ts` for reads. Client components never call it.
-- All user-visible text lives in `src/locales/*.json`, and every string must exist in every
-  locale (en, fr, th).
-- No SaaS integrations and no frontend database. Re-adding one needs a recorded decision.
-- Terminology: "test results" is the example resource. It is a placeholder domain, and derived
-  products are expected to replace it.
+- Workspaces: any signed-in user can create one and becomes its owner; people join only through a
+  single-use invitation link (7 days, invited email only) that an owner or admin copies and
+  shares. A user can belong to several workspaces with a different role in each.
+- Records: companies, contacts, leads (with conversion), deals on one pipeline with stage history,
+  tasks and activities. Records are archived and restored, never deleted. Money is decimal with an
+  ISO 4217 currency and is never converted between currencies.
+- Insights: a dashboard, reports and in-app reminders computed from stored data, in the
+  workspace's time zone. No statistic implies history the data does not have.
+- Permissions come from the backend (`GET /workspaces/{id}` → `permissions`); the UI hides actions
+  the caller can't take and still handles the backend's 403.
+- Languages: en (default), fr, th. Every user-visible string lives in `src/locales/*.json` and
+  exists in all three.
+- Only the server talks to the backend: server actions for writes and query modules for reads.
+  Client components never call it.
+- No SaaS integrations: no email sending, calendar sync, telephony, analytics or monitoring, and
+  no frontend database. Adding one needs a recorded decision.
+- Light and dark themes, WCAG 2.1 AA, Thai text that wraps and fits.
 
 ## Brand Commitments
 
-None. The working name is "Next.js + Spring Boilerplate" (`AppConfig.name`). There is no logo,
-voice or identity to preserve beyond the favicons in `public/`. Upstream credit to ixartz's
-Next.js Boilerplate (MIT) must stay on the about page.
+- "Aureon CRM" is a placeholder name: derived products rename it in `AppConfig.name` and the
+  `Brand` copy in `src/locales`.
+- The chosen identity is the "Seal and circular" world: a vermilion seal rail, bond-paper panels
+  on a grey ground, sumi ink text, hairline rules, people as round vermilion ink seals with their
+  initials, Anuphan for Latin and Thai, and a lacquer-black dark theme with the same seal. The
+  tokens live in `src/styles/global.css`.
+- Upstream credit to ixartz's Next.js Boilerplate (MIT) stays on the about page.
 
 ## Evidence on Hand
 
-- Real, working features: auth with token refresh, dashboard, test-results CRUD, en/fr/th.
+- A product specification, permission matrix and API contract in the backend repo.
 - No users, customers, testimonials, metrics or adoption numbers. Future work must not invent
   them.
 
 ## Product Principles
 
-1. **Each screen teaches a pattern.** Demo UI should show how to do something correctly and be
-   easy to replace. It is not a product to market.
-2. **Easy to delete.** Derived products will reskin or remove the demo. Design choices should
-   lower that cost, not raise it.
-3. **Production-grade defaults.** Accessibility, i18n, error states and security stay at the
-   level a real product needs, because developers copy whatever the template shows them.
-4. **The backend is the source of truth.** The UI reflects the backend's rules and errors
-   rather than duplicating them.
+1. **Ownership is always visible.** Every record shows who owns it and who moved it; nothing
+   changes hands silently.
+2. **What persists is what shows.** No optimistic UI that hides a failed write; the backend is the
+   source of truth for rules, permissions and errors.
+3. **Dense but readable.** Rows, figures and stage stamps carry the information; hierarchy comes
+   from scale, not decoration, in every language.
+4. **Production-grade defaults.** Accessibility, i18n, error states and security stay at the level
+   a real product needs, because developers copy whatever the template shows them.
+5. **Easy to rebrand.** The name, copy and tokens are the only things a derived product has to
+   change to make it its own.

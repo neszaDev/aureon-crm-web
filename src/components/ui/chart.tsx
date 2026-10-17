@@ -5,7 +5,7 @@ import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
 import type { TooltipValueType } from 'recharts';
 
-// Themed for Marksheet: the tooltip is a white ply with an ink-200 rule and the ply shadow.
+// Themed for Aureon: the tooltip is a popover with a hairline rule and the ply shadow.
 // Each theme's CSS selector prefix.
 const THEMES = [
   { name: 'light', prefix: '' },
@@ -311,7 +311,7 @@ function ChartTooltipContent({
   return (
     <div
       className={cn(
-        'grid min-w-32 items-start gap-1.5 rounded-md border border-ink-200 bg-ply px-2.5 py-1.5 text-xs text-ink-900 shadow-ply',
+        'grid min-w-32 items-start gap-1.5 rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs text-foreground shadow-ply',
         className,
       )}
     >

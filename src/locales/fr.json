@@ -1,7 +1,7 @@
 {
   "Brand": {
-    "home_label": "Accueil Marksheet",
-    "sample_note": "Marksheet est un produit d'exemple pour le Next.js + Spring Boilerplate. Remplacez ces textes par les vôtres."
+    "home_label": "Accueil Aureon CRM",
+    "sample_note": "Aureon CRM est un produit d'exemple construit sur le Next.js + Spring Boilerplate. Remplacez son nom et ces textes par les vôtres."
   },
   "RootLayout": {
     "about_link": "À propos",
@@ -68,10 +68,10 @@
   },
   "About": {
     "meta_title": "À propos",
-    "meta_description": "À propos de Marksheet et du modèle sur lequel il repose",
+    "meta_description": "À propos d'Aureon CRM et du modèle sur lequel il repose",
     "title": "À propos de ce modèle",
-    "about_paragraph": "Marksheet est un produit d'exemple. Il montre à quoi ressemble, une fois terminé, un frontend construit sur l'API spring-postgres-boilerplate : une page d'accueil, la connexion et une application qui travaille sur de vraies données.",
-    "replace_paragraph": "Pour lancer votre propre produit, remplacez les textes de Marksheet dans src/locales et l'exemple des résultats de tests par votre propre domaine.",
+    "about_paragraph": "Aureon CRM est un produit d'exemple. Il montre à quoi ressemble, une fois terminé, un frontend construit sur l'API spring-postgres-boilerplate : une page d'accueil, la connexion et une application qui travaille sur de vraies données.",
+    "replace_paragraph": "Pour lancer votre propre produit, remplacez le nom et les textes d'Aureon CRM dans src/locales et l'exemple des résultats de tests par votre propre domaine.",
     "inside_title": "Ce qu'il contient",
     "feature_auth": "Inscription, connexion et déconnexion avec le JWT du backend et des jetons de rafraîchissement renouvelés, gardés dans des cookies httpOnly",
     "feature_api": "Un client d'API typé, généré à partir de la spécification OpenAPI du backend",
@@ -229,6 +229,7 @@
     "role_label": "Rôle",
     "member_since_label": "Membre depuis",
     "id_label": "Numéro de compte",
+    "theme_label": "Thème",
     "role_USER": "Utilisateur",
     "role_ADMIN": "Administrateur"
   },
@@ -252,6 +253,12 @@
   },
   "LocaleSwitcher": {
     "change_language": "Changer de langue"
+  },
+  "ThemeSwitcher": {
+    "label": "Thème",
+    "theme_light": "Clair",
+    "theme_dark": "Sombre",
+    "theme_system": "Système"
   },
   "Loading": {
     "label": "Chargement"
@@ -1256,7 +1263,7 @@
   },
   "TypographyPage": {
     "title": "Typographie",
-    "description": "L’échelle typographique Marksheet : Libre Franklin pour tout ce qui est imprimé, Kalam pour la main qui remplit le formulaire.",
+    "description": "L’échelle typographique Marksheet : Anuphan pour tout ce qui est imprimé, Kalam pour la main qui remplit le formulaire.",
     "headings_title": "Titres",
     "headings_description": "Trois rôles de titre couvrent l’application et les pages publiques ; serrés, gras et imprimés.",
     "column_element": "Élément",

@@ -1,7 +1,7 @@
 {
   "Brand": {
-    "home_label": "หน้าแรก Marksheet",
-    "sample_note": "Marksheet เป็นผลิตภัณฑ์ตัวอย่างสำหรับ Next.js + Spring Boilerplate เปลี่ยนข้อความนี้เป็นของคุณเองได้เลย"
+    "home_label": "หน้าแรก Aureon CRM",
+    "sample_note": "Aureon CRM เป็นผลิตภัณฑ์ตัวอย่างที่สร้างบน Next.js + Spring Boilerplate เปลี่ยนชื่อและข้อความนี้เป็นของคุณเองได้เลย"
   },
   "RootLayout": {
     "about_link": "เกี่ยวกับ",
@@ -60,7 +60,7 @@
     "feature_history": "ทุกผลที่คุณบันทึกไว้ เรียงจากการทดสอบล่าสุด หน้าละสิบรายการ",
     "feature_private_title": "เป็นของคุณคนเดียว",
     "feature_private": "แต่ละบัญชีเห็นเฉพาะผลของตัวเอง เซสชันของคุณอยู่บนเซิร์ฟเวอร์ ไม่อยู่ใน JavaScript ของเบราว์เซอร์",
-    "feature_languages_title": "อังกฤษ ฝรั่งเศส และไทย",
+    "feature_languages_title": "ภาษาอังกฤษ ฝรั่งเศส และไทย",
     "feature_languages": "สลับภาษาได้จากทุกหน้า แล้วบัตรจะเปลี่ยนตาม",
     "close_title": "เริ่มบัตรของคุณ",
     "close_text": "สร้างบัญชี บันทึกการทดสอบครั้งแรก แล้วดูเครื่องหมายขึ้นมา",
@@ -68,10 +68,10 @@
   },
   "About": {
     "meta_title": "เกี่ยวกับ",
-    "meta_description": "เกี่ยวกับ Marksheet และเทมเพลตที่ใช้สร้าง",
+    "meta_description": "เกี่ยวกับ Aureon CRM และเทมเพลตที่ใช้สร้าง",
     "title": "เกี่ยวกับเทมเพลตนี้",
-    "about_paragraph": "Marksheet เป็นผลิตภัณฑ์ตัวอย่าง แสดงให้เห็นว่าฟรอนต์เอนด์ที่สร้างบน API ของ spring-postgres-boilerplate เมื่อทำเสร็จแล้วหน้าตาเป็นอย่างไร ได้แก่ หน้าแรก หน้าเข้าสู่ระบบ และแอปที่ทำงานกับข้อมูลจริง",
-    "replace_paragraph": "หากต้องการเริ่มผลิตภัณฑ์ของคุณเอง ให้แทนที่ข้อความ Marksheet ใน src/locales และเปลี่ยนตัวอย่างผลการทดสอบเป็นโดเมนของคุณ",
+    "about_paragraph": "Aureon CRM เป็นผลิตภัณฑ์ตัวอย่าง แสดงให้เห็นว่าฟรอนต์เอนด์ที่สร้างบน API ของ spring-postgres-boilerplate เมื่อทำเสร็จแล้วหน้าตาเป็นอย่างไร ได้แก่ หน้าแรก หน้าเข้าสู่ระบบ และแอปที่ทำงานกับข้อมูลจริง",
+    "replace_paragraph": "หากต้องการเริ่มผลิตภัณฑ์ของคุณเอง ให้แทนที่ชื่อและข้อความของ Aureon CRM ใน src/locales และเปลี่ยนตัวอย่างผลการทดสอบเป็นโดเมนของคุณ",
     "inside_title": "มีอะไรอยู่ข้างใน",
     "feature_auth": "สมัคร เข้าสู่ระบบ และออกจากระบบด้วย JWT และ refresh token แบบหมุนเวียนของแบ็กเอนด์ โดยเก็บใน httpOnly cookie",
     "feature_api": "ไคลเอนต์ API แบบมีชนิดข้อมูล สร้างจากสเปก OpenAPI ของแบ็กเอนด์",
@@ -109,9 +109,9 @@
     "sign_up_button": "สร้างบัญชี",
     "error_invalid_credentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
     "error_email_taken": "อีเมลนี้ลงทะเบียนไว้แล้ว",
-    "error_invalid_input": "ตรวจสอบช่องที่ไฮไลต์ไว้",
+    "error_invalid_input": "ตรวจสอบช่องที่ทำเครื่องหมายไว้",
     "error_generic": "เกิดข้อผิดพลาดบางอย่าง",
-    "error_rate_limited": "ลองมากเกินไป โปรดลองอีกครั้งใน {minutes, plural, one {# นาที} other {# นาที}}"
+    "error_rate_limited": "ลองหลายครั้งเกินไป โปรดลองอีกครั้งใน {minutes, plural, one {# นาที} other {# นาที}}"
   },
   "Validation": {
     "required": "จำเป็นต้องกรอก",
@@ -219,7 +219,7 @@
     "status_PENDING": "รอผล",
     "status_PASSED": "ผ่าน",
     "status_FAILED": "ไม่ผ่าน",
-    "error_invalid_input": "ตรวจสอบช่องที่ไฮไลต์ไว้",
+    "error_invalid_input": "ตรวจสอบช่องที่ทำเครื่องหมายไว้",
     "error_generic": "เกิดข้อผิดพลาดบางอย่าง"
   },
   "AccountPage": {
@@ -229,11 +229,12 @@
     "role_label": "บทบาท",
     "member_since_label": "เป็นสมาชิกตั้งแต่",
     "id_label": "เลขที่บัญชี",
+    "theme_label": "ธีม",
     "role_USER": "ผู้ใช้",
     "role_ADMIN": "ผู้ดูแลระบบ"
   },
   "NotFound": {
-    "meta_title": "ไม่พบหน้า",
+    "meta_title": "ไม่พบหน้านี้",
     "mark": "ขาด",
     "title": "ไม่พบหน้านี้",
     "text": "ลิงก์อาจเก่าหรือพิมพ์ผิด ไม่มีอะไรสูญหาย",
@@ -241,7 +242,7 @@
   },
   "ErrorPage": {
     "title": "เกิดข้อผิดพลาดบางอย่าง",
-    "text": "หน้านี้โหลดไม่สำเร็จ ลองอีกครั้ง หากยังเป็นอยู่ ให้กลับมาใหม่ภายหลัง",
+    "text": "หน้านี้โหลดไม่สำเร็จ ลองอีกครั้ง หากยังเกิดขึ้นอีก ให้กลับมาใหม่ภายหลัง",
     "retry": "ลองอีกครั้ง",
     "home": "กลับหน้าแรก"
   },
@@ -252,6 +253,12 @@
   },
   "LocaleSwitcher": {
     "change_language": "เปลี่ยนภาษา"
+  },
+  "ThemeSwitcher": {
+    "label": "ธีม",
+    "theme_light": "สว่าง",
+    "theme_dark": "มืด",
+    "theme_system": "ตามระบบ"
   },
   "Loading": {
     "label": "กำลังโหลด"
@@ -644,7 +651,7 @@
     "card_with_flush": "การ์ดพร้อมกลุ่มรายการแบบชิดขอบ",
     "card_text": "แต่ละวิชาเก็บการทดสอบเรียงตามวันที่ เปิดดูแต่ละวิชาเพื่อดูคะแนน หมายเหตุ และวันที่สอบครั้งถัดไป",
     "custom_title": "เนื้อหากำหนดเอง",
-    "days_ago": "{count, plural, one {# วันที่แล้ว} other {# วันที่แล้ว}}",
+    "days_ago": "{count, plural, one {# วันก่อน} other {# วันก่อน}}",
     "custom_spanish_title": "ข้อสอบจำลองภาษาสเปน",
     "custom_spanish_text": "ส่วนการฟังทำได้ดี ส่วนการเขียนต้องทบทวนอีกรอบก่อนสอบจริง",
     "custom_spanish_note": "ตรวจโดยภาควิชาภาษา",
@@ -1256,7 +1263,7 @@
   },
   "TypographyPage": {
     "title": "ตัวอักษร",
-    "description": "สเกลตัวอักษรของ Marksheet: Libre Franklin สำหรับทุกอย่างที่พิมพ์ และ Kalam สำหรับลายมือที่กรอกแบบฟอร์ม",
+    "description": "สเกลตัวอักษรของ Marksheet: Anuphan สำหรับทุกอย่างที่พิมพ์ และ Kalam สำหรับลายมือที่กรอกแบบฟอร์ม",
     "headings_title": "หัวเรื่อง",
     "headings_description": "หัวเรื่องสามบทบาทครอบคลุมทั้งแอปและหน้าการตลาด แน่น หนา และเป็นตัวพิมพ์",
     "column_element": "องค์ประกอบ",
@@ -1406,10 +1413,10 @@
     "text_placeholder": "ข้อความ",
     "date_label": "วันที่",
     "email_input_label": "ช่องกรอกอีเมล",
-    "email_input_hint": "โปรดกรอกอีเมลของคุณ",
+    "email_input_hint": "กรอกอีเมลของคุณ",
     "email_input_placeholder": "กรอกอีเมลของคุณ",
     "password_input_label": "ช่องกรอกรหัสผ่าน",
-    "password_input_hint": "โปรดกรอกรหัสผ่านที่คาดเดายาก",
+    "password_input_hint": "กรอกรหัสผ่านที่คาดเดายาก",
     "password_input_placeholder": "กรอกรหัสผ่านของคุณ",
     "disabled_label": "ช่องกรอกที่ปิดใช้",
     "disabled_placeholder": "ปิดใช้",
@@ -1444,10 +1451,10 @@
     "horizontal_title": "ฟอร์มแนวนอน",
     "horizontal_description": "ช่องเข้าสู่ระบบที่มีป้ายกำกับอยู่ทางซ้าย",
     "email_label": "อีเมล",
-    "email_hint": "โปรดกรอกอีเมลของคุณ",
+    "email_hint": "กรอกอีเมลของคุณ",
     "email_placeholder": "กรอกอีเมล…",
     "password_label": "รหัสผ่าน",
-    "password_hint": "โปรดกรอกรหัสผ่านของคุณ",
+    "password_hint": "กรอกรหัสผ่านของคุณ",
     "password_placeholder": "กรอกรหัสผ่าน…",
     "normal_title": "ฟอร์มปกติ",
     "normal_description": "ทั้งสองช่องจำเป็นต้องกรอกและตรวจสอบขณะพิมพ์",
@@ -1468,12 +1475,12 @@
     "invalid_input_label": "ข้อมูลไม่ถูกต้อง",
     "not_required_feedback": "ไม่จำเป็นต้องกรอกช่องนี้",
     "thank_you_feedback": "ขอบคุณ!",
-    "required_feedback": "โปรดกรอกช่องที่จำเป็น",
+    "required_feedback": "กรอกช่องที่จำเป็น",
     "custom_validation_title": "การตรวจสอบแบบกำหนดเอง",
     "custom_validation_description": "กฎที่กำหนดเอง: อย่างน้อย 4 ตัวอักษร",
     "valid_value": "ค่าที่ถูกต้อง",
     "valid_feedback": "ข้อมูลถูกต้อง",
-    "min_length_feedback": "โปรดกรอกอย่างน้อย 4 ตัวอักษร",
+    "min_length_feedback": "กรอกอย่างน้อย 4 ตัวอักษร",
     "icon_groups_title": "กลุ่มไอคอนและข้อความ",
     "icon_groups_description": "ไอคอนและข้อความที่ต่อไว้ก่อนหรือหลังช่องกรอก",
     "username": "ชื่อผู้ใช้",
@@ -1693,7 +1700,7 @@
     "sign_out_hint": "การบันทึกจะทำให้ผู้ใช้นี้ออกจากระบบในทุกอุปกรณ์",
     "save_button": "บันทึกการเปลี่ยนแปลง",
     "saved": "บันทึกแล้ว",
-    "error_invalid_input": "ตรวจสอบช่องที่ไฮไลต์ไว้",
+    "error_invalid_input": "ตรวจสอบช่องที่ทำเครื่องหมายไว้",
     "error_email_taken": "อีเมลนี้ลงทะเบียนไว้แล้ว",
     "error_generic": "เกิดข้อผิดพลาดบางอย่าง",
     "delete_button": "ลบบัญชี",
@@ -2101,7 +2108,7 @@
     "value": "ค่า",
     "key_label": "คีย์ภาษา แถวที่ {row}",
     "value_label": "ข้อความ แถวที่ {row}",
-    "text_label": "ข้อความรูปแบบสมบูรณ์ แถวที่ {row}",
+    "text_label": "ข้อความที่จัดรูปแบบได้ แถวที่ {row}",
     "add": "เพิ่มภาษา",
     "remove": "ลบแถวที่ {row}",
     "data_title": "ข้อมูลที่บันทึกแล้ว",
@@ -2109,7 +2116,7 @@
     "fields_title": "ช่องหลายภาษา",
     "fields_description": "คีย์ภาษาและข้อความของภาษานั้นในแต่ละแถว",
     "fields_caption": "ชื่อเรื่อง",
-    "editor_title": "ข้อความรูปแบบสมบูรณ์หลายภาษา",
+    "editor_title": "ข้อความที่จัดรูปแบบได้หลายภาษา",
     "editor_description": "คีย์ภาษาและข้อความที่จัดรูปแบบแล้วในแต่ละแถว การลบแถวสุดท้ายจะนำแถวภาษาไทยที่ว่างกลับมา",
     "editor_caption": "คำอธิบาย"
   },

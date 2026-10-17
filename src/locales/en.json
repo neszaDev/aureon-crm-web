@@ -1,7 +1,7 @@
 {
   "Brand": {
-    "home_label": "Marksheet home",
-    "sample_note": "Marksheet is a sample product for the Next.js + Spring Boilerplate. Replace this copy with your own."
+    "home_label": "Aureon CRM home",
+    "sample_note": "Aureon CRM is a sample product built on the Next.js + Spring Boilerplate. Replace its name and this copy with your own."
   },
   "RootLayout": {
     "about_link": "About",
@@ -68,10 +68,10 @@
   },
   "About": {
     "meta_title": "About",
-    "meta_description": "About Marksheet and the template it is built on",
+    "meta_description": "About Aureon CRM and the template it is built on",
     "title": "About this template",
-    "about_paragraph": "Marksheet is a sample product. It shows what a frontend built on the spring-postgres-boilerplate API looks like when it is finished: a landing page, sign-in, and an app working on real data.",
-    "replace_paragraph": "To start your own product, replace the Marksheet copy in src/locales and swap the test-results example for your own domain.",
+    "about_paragraph": "Aureon CRM is a sample product. It shows what a frontend built on the spring-postgres-boilerplate API looks like when it is finished: a landing page, sign-in, and an app working on real data.",
+    "replace_paragraph": "To start your own product, replace the Aureon CRM name and copy in src/locales and swap the test-results example for your own domain.",
     "inside_title": "What is inside",
     "feature_auth": "Sign up, sign in and sign out with the backend's JWT and rotating refresh tokens, kept in httpOnly cookies",
     "feature_api": "A typed API client generated from the backend's OpenAPI spec",
@@ -229,6 +229,7 @@
     "role_label": "Role",
     "member_since_label": "Member since",
     "id_label": "Account number",
+    "theme_label": "Theme",
     "role_USER": "User",
     "role_ADMIN": "Admin"
   },
@@ -252,6 +253,12 @@
   },
   "LocaleSwitcher": {
     "change_language": "Change language"
+  },
+  "ThemeSwitcher": {
+    "label": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_system": "System"
   },
   "Loading": {
     "label": "Loading"
@@ -1256,7 +1263,7 @@
   },
   "TypographyPage": {
     "title": "Typography",
-    "description": "The Marksheet type scale: Libre Franklin for everything printed, Kalam for the hand that fills the form in.",
+    "description": "The Marksheet type scale: Anuphan for everything printed, Kalam for the hand that fills the form in.",
     "headings_title": "Headings",
     "headings_description": "Three heading roles cover the app and the marketing pages; tight, heavy and printed.",
     "column_element": "Element",

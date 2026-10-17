@@ -3,24 +3,65 @@
 @import 'shadcn/tailwind.css';
 
 /*
- * Marksheet: a school report card. Folder green owns large fields, ruled card stock is the
- * working ground, navy form ink on one stepped ramp carries text and rules, red pen is kept
- * for failed marks and errors, graphite pencil for pending.
+ * Aureon, "Seal and circular": every step of a relationship is signed. A vermilion seal rail,
+ * bond-paper panels on a grey ground, sumi ink text, one hairline system; people are round
+ * vermilion seals. Dark is lacquer black with the same seal.
+ *
+ * Seal roles: `seal` and `seal-deep` are fills that carry white text (rail, primary button);
+ * seal-coloured text, rings and lines on paper use `seal-ink`, which stays AA in both themes.
  */
 
+/* Dark: the `.dark` class on <html>, or the OS preference while the theme cookie is `system`. */
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not(.light), :root:not(.light) *) {
+      @slot;
+    }
+  }
+}
+
 :root {
-  /* Folder (the card's cover): hero, app sidebar, closing band. */
+  color-scheme: light;
+
+  --seal: #c8361c;
+  --seal-deep: #9e2812;
+  --seal-tint: #f6e3dc;
+  --seal-ink: #b8321a;
+  --paper: #fbfbf9;
+  --ground: #eff0ec;
+  /* Controls (inputs, outline buttons, menus) sit on white, a step above the paper. */
+  --field: #ffffff;
+  --ink: #1c1d21;
+  --ink-2: #5b5e66;
+  --rule: #d9dad4;
+
+  /* Danger is crimson, kept apart from the seal's vermilion; pair it with an icon and words. */
+  --danger: #b4123a;
+  --warning: #8a5700;
+  --success: #2f6b4f;
+  --info: #1f5d8c;
+
+  --chart-1: var(--seal);
+  --chart-2: #1f5d8c;
+  --chart-3: #2f6b4f;
+  --chart-4: #a86a10;
+  --chart-5: #6d4c8f;
+
+  /*
+   * Marksheet, the boilerplate's demo world under /dashboard and the public pages. Kept so those
+   * components still render; `bg-paper` there now resolves to Aureon's paper. New UI must not
+   * use these.
+   */
   --folder: #1f5c45;
   --folder-deep: #164433;
   --folder-ink: #f1f5ef;
   --folder-ink-soft: #bcd3c5;
-
-  /* Card stock. */
-  --paper: #e8eee6;
   --paper-card: #f5f8f3;
   --ply: #ffffff;
-
-  /* Navy form ink: the only neutral ramp. */
   --ink-950: #111b30;
   --ink-900: #1b2b4b;
   --ink-700: #33436a;
@@ -29,31 +70,30 @@
   --ink-300: #b3bccb;
   --ink-200: #cfd7de;
   --ink-100: #dfe5e6;
-
-  /* Marks. */
   --pass: #1f6b4e;
   --pen: #c42f2a;
   --pencil: #5f666e;
 
-  /* shadcn semantic tokens mapped onto the card. */
-  --background: var(--paper);
-  --foreground: var(--ink-900);
-  --card: var(--paper-card);
-  --card-foreground: var(--ink-900);
-  --popover: var(--ply);
-  --popover-foreground: var(--ink-900);
-  --primary: var(--folder);
-  --primary-foreground: var(--folder-ink);
-  --secondary: var(--ink-100);
-  --secondary-foreground: var(--ink-900);
-  --muted: var(--ink-100);
-  --muted-foreground: var(--ink-600);
-  --accent: var(--ink-100);
-  --accent-foreground: var(--ink-900);
-  --destructive: var(--pen);
-  --border: var(--ink-200);
-  --input: var(--ink-300);
-  --ring: var(--folder);
+  /* shadcn semantic tokens, mapped onto Aureon. */
+  --background: var(--ground);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--field);
+  --popover-foreground: var(--ink);
+  --primary: var(--seal);
+  --primary-foreground: #ffffff;
+  --secondary: var(--muted);
+  --secondary-foreground: var(--ink);
+  --muted: #e6e7e2;
+  --muted-foreground: var(--ink-2);
+  --accent: var(--muted);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --border: var(--rule);
+  /* Control borders: 3:1 against field, paper and ground (WCAG 1.4.11). */
+  --input: #84867f;
+  --ring: var(--seal);
   --radius: 0.375rem;
 
   --shadow-paper:
@@ -63,18 +103,99 @@
   /* A card lying flat on the desk, for app panels. */
   --shadow-sheet: 0 1px 0 rgb(17 27 48 / 5%), 0 1px 3px rgb(17 27 48 / 8%);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Lacquer black with the same seal. */
+  @variant dark {
+    color-scheme: dark;
+
+    --seal-tint: #3d1a12;
+    --seal-ink: #ec7357;
+    --paper: #1c1a19;
+    --ground: #141212;
+    --field: #252220;
+    --ink: #eeece8;
+    --ink-2: #a9a49e;
+    --rule: #3a3533;
+
+    --danger: #ff7a95;
+    --warning: #e5a845;
+    --success: #62c08f;
+    --info: #78b4e2;
+
+    --chart-1: var(--seal-ink);
+    --chart-2: #78b4e2;
+    --chart-3: #62c08f;
+    --chart-4: #e5a845;
+    --chart-5: #b79be0;
+
+    /* Marksheet had no dark theme: its neutrals follow Aureon's so the demos stay legible. */
+    --paper-card: var(--paper);
+    --ply: var(--field);
+    --ink-950: var(--ink);
+    --ink-900: var(--ink);
+    --ink-700: var(--ink);
+    --ink-600: var(--ink-2);
+    --ink-400: var(--ink-2);
+    --ink-300: var(--input);
+    --ink-200: var(--rule);
+    --ink-100: var(--muted);
+    --pass: var(--success);
+    --pen: var(--danger);
+    --pencil: var(--ink-2);
+
+    --muted: #2c2826;
+    --input: #7a746e;
+  }
+}
+
+/*
+ * Thai stacks vowels and tone marks above and below the letters: open the tight end of the type
+ * scale so stacked marks never touch the line above or clip in a truncated line.
+ */
+:root:lang(th) {
+  --text-xs--line-height: 1.6;
+  --text-sm--line-height: 1.6;
+  --text-base--line-height: 1.65;
+  --text-lg--line-height: 1.6;
+  --text-xl--line-height: 1.5;
+  --text-2xl--line-height: 1.45;
+  --text-3xl--line-height: 1.4;
+  --text-4xl--line-height: 1.35;
+  --text-5xl--line-height: 1.3;
+  --text-6xl--line-height: 1.3;
+  --leading-tight: 1.4;
+  --leading-snug: 1.5;
 }
 
 @theme inline {
-  --font-sans: var(--font-franklin), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-franklin), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
   --font-hand: var(--font-kalam), 'Bradley Hand', cursive;
+
+  --color-seal: var(--seal);
+  --color-seal-deep: var(--seal-deep);
+  --color-seal-tint: var(--seal-tint);
+  --color-seal-ink: var(--seal-ink);
+  --color-paper: var(--paper);
+  --color-ground: var(--ground);
+  --color-field: var(--field);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-rule: var(--rule);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-info: var(--info);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
   --color-folder: var(--folder);
   --color-folder-deep: var(--folder-deep);
   --color-folder-ink: var(--folder-ink);
   --color-folder-ink-soft: var(--folder-ink-soft);
-  --color-paper: var(--paper);
   --color-paper-card: var(--paper-card);
   --color-ply: var(--ply);
   --color-ink-950: var(--ink-950);
@@ -125,20 +246,24 @@
   }
 
   html {
-    @apply bg-paper font-sans text-ink-900 antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
     font-feature-settings: 'kern', 'liga';
-    scrollbar-color: var(--ink-300) transparent;
+    scrollbar-color: var(--input) transparent;
     -webkit-text-size-adjust: 100%;
+  }
+
+  html:lang(th) {
+    line-height: 1.65;
   }
 
   body {
     @apply min-h-dvh bg-background text-foreground;
-    caret-color: var(--folder);
+    caret-color: var(--seal-ink);
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--folder) 22%, transparent);
-    color: var(--ink-950);
+    background: color-mix(in oklab, var(--seal) 24%, transparent);
+    color: var(--ink);
   }
 
   h1,
@@ -166,7 +291,7 @@
     cursor: pointer;
   }
 
-  /* Every figure on the card lines up in columns. */
+  /* Figures line up in columns. */
   table,
   time,
   .tabular {
@@ -175,12 +300,12 @@
 }
 
 @layer components {
-  /* Printed form label: small, tracked caps in form ink. */
+  /* Marksheet's printed form label: small, tracked caps in form ink. */
   .form-label {
     @apply text-[0.6875rem] font-semibold tracking-[0.12em] text-ink-600 uppercase;
   }
 
-  /* The ruled card itself. */
+  /* Marksheet's ruled card. */
   .paper {
     @apply rounded-lg bg-paper-card text-ink-900;
     box-shadow: var(--shadow-paper);

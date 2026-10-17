@@ -1,15 +1,19 @@
+import { cn } from 'cn';
 import type { Metadata, Viewport } from 'next';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
-import { Kalam, Libre_Franklin } from 'next/font/google';
+import { Anuphan, Kalam } from 'next/font/google';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { routing } from '@/libs/I18nRouting';
+import { parseTheme, THEME_COOKIE } from '@/libs/Theme';
 import '@/styles/global.css';
 
-// The printed form face and the handwritten remark face. Self-hosted by next/font at build.
-const franklin = Libre_Franklin({
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-franklin',
+// Anuphan sets Latin and Thai alike; Kalam is the demo pages' handwritten remarks only.
+// Both are self-hosted by next/font at build.
+const anuphan = Anuphan({
+  subsets: ['latin', 'latin-ext', 'thai'],
+  variable: '--font-anuphan',
   display: 'swap',
 });
 
@@ -48,7 +52,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#1f5c45',
+  // The ground of each theme (`--ground`).
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#eff0ec' },
+    { media: '(prefers-color-scheme: dark)', color: '#141212' },
+  ],
 };
 
 export function generateStaticParams() {
@@ -66,9 +74,15 @@ export default async function RootLayout(props: {
   }
 
   setRequestLocale(locale);
+  // Set on the server so the first paint already has the theme; `system` leaves it to the OS.
+  const jar = await cookies();
+  const theme = parseTheme(jar.get(THEME_COOKIE)?.value);
 
   return (
-    <html lang={locale} className={`${franklin.variable} ${kalam.variable}`}>
+    <html
+      lang={locale}
+      className={cn(anuphan.variable, kalam.variable, theme !== 'system' && theme)}
+    >
       <body>
         <NextIntlClientProvider>{props.children}</NextIntlClientProvider>
       </body>
