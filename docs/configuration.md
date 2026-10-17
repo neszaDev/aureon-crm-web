@@ -8,7 +8,7 @@ git-ignored); in containers and CI, from the environment.
 
 | Variable | Default | Required | Notes |
 |---|---|---|---|
-| `BACKEND_URL` | none | yes | Where the **server** reaches the Spring API (e.g. `http://backend:8080` in Compose). Never exposed to browsers. |
+| `BACKEND_URL` | none | yes | Where the **server** reaches the Spring API (`http://localhost:8081` for the API repo run locally, `http://backend:8080` in Compose). Never exposed to browsers. |
 | `APP_URL` | `http://localhost:3000` | in prod | Public URL of this app. `https://` → auth cookies are `Secure`. Used for sitemap/robots. |
 | `NEXT_PUBLIC_LOGGING_LEVEL` | `info` | no | `error`, `warning`, `info`, `debug`, `trace`, `fatal`. Inlined at build time. |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | (none) | no | Browser key for the Google Maps demo page; restrict it by HTTP referrer. Inlined at build time. |
@@ -19,9 +19,17 @@ Runtime values are **not** baked into the image, so one image serves every envir
 
 ## Local Docker stack (`env/.env`)
 
+`make backend-up`, `make e2e`, `make up` and `make e2e-image` run the API from
+`ghcr.io/neszadev/aureon-crm-api` (`docker/compose.yml`). **That image isn't published yet**
+(publishing needs the owner's approval), so these targets fail to pull it today. Until it is,
+run the API repo ([aureon-crm-api](https://github.com/neszaDev/aureon-crm-api), `feat/crm`) with
+its own `make up` and `APP_PORT=8081`, and set `BACKEND_URL=http://localhost:8081` here: see
+[testing](testing.md#the-crm-backend). The variables below configure the containers for when the
+image exists.
+
 | Variable | Default | Notes |
 |---|---|---|
-| `BACKEND_TAG` | `dev` | Tag of `ghcr.io/neszadev/spring-postgres-boilerplate` to run |
+| `BACKEND_TAG` | `dev` | Tag of `ghcr.io/neszadev/aureon-crm-api` to run (not published yet) |
 | `BACKEND_PORT` | `8080` | Host port of the backend |
 | `FRONTEND_PORT` | `3000` | Host port of the frontend container (`make up`) |
 | `BACKEND_JWT_SECRET` | local placeholder | JWT secret for the local backend container (≥ 32 bytes). Never a real secret. |

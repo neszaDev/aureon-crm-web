@@ -62,6 +62,31 @@ Next.js server, which holds the session in two **httpOnly** cookies.
 | Text | `src/locales/en.json` **and** every other locale |
 | Env var | `src/libs/Env.ts` + [configuration.md](configuration.md) + `env/.env.example` |
 
+## The CRM: routes and shell
+
+Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale (`/fr/app/...`).
+
+| Route | What it is |
+|---|---|
+| `/app` | The signed-in home: the create form with no workspace, the workspace itself with one, the list with several (`PickerFrame`: wordmark and your seal over one column) |
+| `/app/new` | Create another workspace |
+| `/app/{workspaceId}` | The workspace's dashboard (for now a welcome with next steps and the members) |
+| `/app/{workspaceId}/settings/{workspace,members,roles,pipeline,sources,profile}` | Settings: name, currency and time zone; members and invitation links; the role matrix; pipeline stages; lead sources; your display name and password |
+| `/invite/{token}` | Public: an invitation's preview, then register, sign in or join (`(center)` layout, like sign-in and sign-up) |
+
+- `app/layout.tsx` loads the signed-in user; a 401 ends the session (`/api/session/expired`), a
+  5xx throws to the error boundary.
+- `app/[workspaceId]/layout.tsx` loads the workspace (`GET /workspaces/{id}`, with the caller's
+  role and `permissions`) and the caller's workspaces, then renders `CrmShell`: the vermilion
+  seal rail (workspace switcher, sections from `CrmNav`) on large screens, a vermilion bar that
+  opens the rail as a drawer below `lg`, your seal for the account menu (profile, theme,
+  language, the demo gallery, sign out) and a skip link. A 404 (unknown workspace, or not a
+  member) is `notFound()`, "Workspace not found"; a 403 shows `ForbiddenNotice`.
+- Pages read the same cached calls (`CrmQueries.ts`), hide what `can(workspace, permission)`
+  (`src/libs/crm/Permissions.ts`) says the caller can't do, and still handle the backend's 403.
+- Writes are server actions in `src/actions/crm/`, bound to the workspace id. Record edits send
+  the `version` they read; a stale one (409) is "Someone else changed this", with a reload.
+
 ## Rendering
 
 Public pages are statically generated per locale. Everything under `app` and

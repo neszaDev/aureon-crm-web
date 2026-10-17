@@ -5,11 +5,16 @@ Keep this file the single source of truth; `CLAUDE.md` only imports it.
 
 ## What this is
 
-A Next.js 16 (App Router) frontend for the
-[spring-postgres-boilerplate](https://github.com/neszaDev/spring-postgres-boilerplate) API.
-The Next.js **server** talks to the backend: sign-in/sign-up/sign-out, a protected dashboard,
-owner-scoped test-results CRUD and file uploads, and admin user management. Tokens live in
-httpOnly cookies and never reach browser JS.
+**Aureon CRM web**: the Next.js 16 (App Router) web app of Aureon CRM, a multi-tenant CRM for
+small and medium-sized businesses. Its API is
+[aureon-crm-api](https://github.com/neszaDev/aureon-crm-api) (Spring); the CRM's specification,
+permission matrix and REST contract live in that repo's `docs/crm/` (branch `feat/crm`). The
+Next.js **server** talks to the API: sign-in/sign-up/sign-out, the CRM at `/app` (workspaces,
+members and invitation links, pipeline stages, lead sources, settings) and the demo gallery
+inherited from [nextjs-boilerplate](https://github.com/neszaDev/nextjs-boilerplate) at
+`/dashboard` (test results, files, admin users). The boilerplate stays the `boilerplate` git
+remote for updates. Tokens live in httpOnly cookies and never reach browser JS. Who the product
+is for: [PRODUCT.md](PRODUCT.md); its look: [DESIGN.md](DESIGN.md).
 Architecture: [docs/architecture.md](docs/architecture.md). Guides:
 [configuration](docs/configuration.md) · [backend integration](docs/backend-integration.md) ·
 [testing](docs/testing.md) · [CI/CD](docs/ci.md).
@@ -18,19 +23,23 @@ Architecture: [docs/architecture.md](docs/architecture.md). Guides:
 
 ```
 src/app/[locale]/(marketing)/   public pages (home, about)
-src/app/[locale]/(auth)/        sign-in, sign-up (centered), app/* (the CRM) and dashboard/* (demos)
+src/app/[locale]/(auth)/        (center)/ sign-in, sign-up, invite/[token]; app/** (the CRM);
+                                dashboard/** (the boilerplate's demos)
 src/actions/                    server actions: the only place that mutates via the backend
-src/libs/api/                   Backend.ts (typed client), Queries.ts and CrmQueries.ts (reads for pages),
-                                ApiError.ts, schema.d.ts (GENERATED, see below)
+src/actions/crm/*               CRM writes: workspaces, members, invitations (create, accept), pipeline, sources
+src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for pages), ApiError.ts,
+                                ActionFailure.ts, Session.ts, schema.d.ts (GENERATED, see below)
+src/libs/api/CrmQueries.ts      CRM reads for pages (workspaces, members, invitations, stages, sources)
+src/libs/crm/*                  CRM logic: Permissions (`can`), WorkspaceId, Stages, PageMetadata
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
 src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens
-src/validations/                zod schemas mirroring the backend's request rules
+src/validations/                zod schemas mirroring the backend's request rules (CRM: crm/*)
 src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx shadcn add`)
-src/components/report/          Marksheet domain UI: marks, totals, results table
-src/components/crm/             the CRM: shell/ (rail, switcher, account menu), seals, forms
+src/components/report/          Marksheet domain UI: marks, totals, results table (demos only)
+src/components/crm/**           the CRM: shell/ (rail, switcher, account menu), settings/, seals, forms
 src/components/ src/templates/  UI (MarketingTemplate, AppShell); src/locales/*.json  all user-visible text
-tests/e2e/                      Playwright, always against the real backend
-docker/  env/  scripts/  docs/  same roles as in the backend repo
+tests/e2e/                      Playwright, always against the real backend (crm/*: the CRM specs)
+docker/  env/  scripts/  docs/  same roles as in the API repo
 ```
 
 ## Commands
@@ -41,16 +50,20 @@ docker/  env/  scripts/  docs/  same roles as in the backend repo
 | Lint, types, unused code, i18n keys | `make lint` |
 | Unit + UI tests | `make test` |
 | Lint + tests + build, as in CI | `make verify` |
-| Backend for local dev | `make backend-up`, then `pnpm dev` |
-| End-to-end (dev server + backend) | `make e2e` |
-| End-to-end as CI does (containers) | `make e2e-image` |
-| Regenerate API types | `make api-types` (CI fails when they are out of date: `make api-check`) |
+| Backend for local dev | the API repo's `make up` with `APP_PORT=8081`, then `BACKEND_URL=http://localhost:8081` in `env/.env` and `pnpm dev` |
+| End-to-end (dev server + backend) | `pnpm exec playwright test --project=chromium --workers=1` (one worker; never beside a Maven build) |
+| End-to-end as CI does (containers) | `make e2e-image` (needs the API image, not published yet) |
+| Regenerate API types | `BACKEND_URL=http://localhost:8081 pnpm api:types` (CI fails when they are out of date: `make api-check`) |
+
+`make backend-up` and `make e2e` pull `ghcr.io/neszadev/aureon-crm-api`, which isn't published
+yet (publishing needs the owner's approval): run the API repo instead
+([testing](docs/testing.md#the-crm-backend)).
 
 Use `pnpm` (version pinned in `package.json` → `packageManager`), never npm or bun.
 
 ## Definition of done
 
-1. `make verify` passes; `make e2e` too when pages, actions, auth or the proxy changed.
+1. `make verify` passes; the end-to-end suite too when pages, actions, auth or the proxy changed.
 2. New behaviour has a test: `*.test.ts` (logic), `*.test.tsx` (component), `*.e2e.ts` (flows).
 3. `git status` shows only intended files. Never commit `env/.env`, `.next/`, test reports.
 4. Conventional Commits: `type: summary` (`feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert`),
@@ -66,6 +79,23 @@ Use `pnpm` (version pinned in `package.json` → `packageManager`), never npm or
 - The backend's error body is `ApiError` (hand-written in `ApiError.ts`; not in its spec). Map
   failures with `toActionError`; handle 401 by redirecting to sign-in.
 - Keep zod rules in `src/validations/` in sync with the backend's request constraints.
+
+## CRM rules
+
+- **Tokens are never logged**: access, refresh and invitation tokens. No logger call receives
+  one; backend paths go through `redactPath` (`ApiError.ts`); `next.config.ts` keeps invite URLs
+  and Server Function arguments (passwords) out of the dev log; invite pages send no `Referer`.
+- **`?next=` only through `safeNextPath`** (`src/libs/SafeRedirect.ts`, `/app/**` and
+  `/invite/**`); never redirect to a raw query value.
+- **A backend 401 ends the session through `/api/session/expired`**: pages and layouts call
+  `endRejectedSession`, actions `actionFailure` (`redirectIfUnauthorized`). Never redirect
+  straight to `/sign-in` (the proxy still sees the cookie: a loop). A 5xx throws to the error
+  boundary; a 404 on the workspace is `notFound()`.
+- **Record forms always send the `version` they read and the current owner** (`ownerId` /
+  `assigneeId`; `null` unassigns). A stale version is a 409: `actionFailure` turns it into
+  "Someone else changed this" with `conflict: true`, and the UI offers a reload.
+- **Permissions come from `GET /workspaces/{id}` → `permissions`**: hide what `can()` denies,
+  and still handle the backend's 403 (`ForbiddenNotice`, or the refusal in a toast or form).
 
 ## Files that need extra care
 

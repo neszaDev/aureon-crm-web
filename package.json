@@ -1,5 +1,5 @@
 {
-  "name": "nextjs-boilerplate",
+  "name": "aureon-crm-web",
   "author": "neszaDev (based on Next.js Boilerplate by Ixartz, https://github.com/ixartz)",
   "type": "module",
   "scripts": {

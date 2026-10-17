@@ -20,11 +20,14 @@ it keeps API paths in one place).
 ## Regenerating types
 
 ```sh
-make api-types     # starts the backend if needed, then writes schema.d.ts
+# With the API repo (aureon-crm-api, feat/crm) running on 8081 through its `make up`:
+BACKEND_URL=http://localhost:8081 pnpm api:types   # writes schema.d.ts
 ```
 
-Run it whenever the backend API changes (or `BACKEND_TAG` moves to a version with changes) and
-commit `schema.d.ts`. The generator runs through `pnpm dlx` with pinned versions
+`make api-types` does the same after starting the published API image with `make backend-up`;
+that image isn't published yet ([configuration](configuration.md#local-docker-stack-envenv)), so
+use the command above until it is. Run it whenever the backend API changes and commit
+`schema.d.ts`. The generator runs through `pnpm dlx` with pinned versions
 (openapi-typescript 7 needs the TypeScript 5 compiler API; this project uses TypeScript 7).
 
 **Type errors after regenerating are the point.** A renamed field or removed endpoint in the

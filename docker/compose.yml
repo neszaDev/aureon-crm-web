@@ -3,7 +3,8 @@
 # Variables come from env/.env; --project-directory keeps paths and volume names repo-rooted.
 #
 # Profiles:
-#   backend  Postgres + the Spring API (published image). Use with `pnpm dev` on the host.
+#   backend  Postgres + the Spring API (published image, not yet available; see below). Use
+#            with `pnpm dev` on the host.
 #   full     backend + this frontend as a production container.
 services:
   postgres:
@@ -23,9 +24,12 @@ services:
 
   backend:
     profiles: [backend, full]
-    # The backend repo publishes this image (CI/CD - dev / main). It is amd64-only, so
-    # Apple Silicon runs it under emulation: slower to start, otherwise identical.
-    image: ghcr.io/neszadev/spring-postgres-boilerplate:${BACKEND_TAG:-dev}
+    # The API repo (aureon-crm-api) will publish this image from its CI/CD (dev / main). It is
+    # NOT published yet: publishing needs the owner's approval, so pulling it fails today. Local
+    # development runs the API repo itself instead (its `make up` with APP_PORT=8081, then
+    # BACKEND_URL=http://localhost:8081 here; see docs/testing.md). The image is amd64-only, so
+    # Apple Silicon will run it under emulation: slower to start, otherwise identical.
+    image: ghcr.io/neszadev/aureon-crm-api:${BACKEND_TAG:-dev}
     platform: linux/amd64
     environment:
       SPRING_PROFILES_ACTIVE: dev
