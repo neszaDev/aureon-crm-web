@@ -19,7 +19,8 @@ workspace (a workspace is the account of one business):
   workspace so the team can collaborate.
 
 Developers are the second audience: they buy or clone this template to start their own CRM on top
-of the [spring-postgres-boilerplate](https://github.com/neszaDev/spring-postgres-boilerplate) API,
+of the [aureon-crm-api](https://github.com/neszaDev/aureon-crm-api) API (Spring, built from
+[spring-postgres-boilerplate](https://github.com/neszaDev/spring-postgres-boilerplate)),
 read the code, run it, and extend or rebrand it.
 
 ## Product Purpose

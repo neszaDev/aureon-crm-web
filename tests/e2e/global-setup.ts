@@ -12,7 +12,9 @@ export default async function globalSetup() {
     }
   } catch (error) {
     throw new Error(
-      `Backend not ready at ${backendUrl} (${String(error)}). Start it with \`make backend-up\`.`,
+      `Backend not ready at ${backendUrl} (${String(error)}). Start the API repo (aureon-crm-api: ` +
+        '`make up` with APP_PORT=8081) and set BACKEND_URL=http://localhost:8081; see ' +
+        'docs/testing.md#the-crm-backend.',
       { cause: error },
     );
   }

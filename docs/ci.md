@@ -16,7 +16,7 @@ feature/* ──PR──▶ dev ──PR (release)──▶ main ──tag v1.2.
 | `ci.yml` (**CI**) | every pull request | the jobs below; **CI Gate** is required to merge |
 | `cd-dev.yml` (**CI/CD - dev**) | push to `dev` | CI, then publish `ghcr.io/<repo>:dev` |
 | `cd-main.yml` (**CI/CD - main**) | push to `main`, tags `v*` | CI, **approval** on `main`, then publish `:main` + `:latest` or `:1.2.3` + `:1.2` |
-| `publish-image.yml` | called by the two above | the only place image build + push is defined; then rolls the image out to Azure Container Apps when the environment has `AZURE_*` variables ([deployment, in the backend repo](https://github.com/neszaDev/spring-postgres-boilerplate/blob/dev/docs/deployment.md)) |
+| `publish-image.yml` | called by the two above | the only place image build + push is defined; then rolls the image out to Azure Container Apps when the environment has `AZURE_*` variables ([deployment, in the API repo](https://github.com/neszaDev/aureon-crm-api/blob/dev/docs/deployment.md)) |
 | `cleanup-pr-cache.yml` | PR closed | delete that PR's Actions caches |
 
 Every image also gets `:sha-<short>`. Nothing is published unless CI (including E2E) passes for
@@ -34,7 +34,7 @@ The jobs run in parallel; `make verify` runs the first four in one go.
 | **UI tests** † | Vitest browser tests (Chromium) | `pnpm exec vitest run --project ui` |
 | **Production build** † | `next build` (with the `.next/cache` restored) | `pnpm build` |
 | **Security audit** | `pnpm audit --prod` (high/critical blocks), dev-dependency advisories as a warning, and on PRs `dependency-review-action` (new dependencies with high advisories or disallowed licences block) | `pnpm audit --prod` |
-| **E2E, accessibility & visual** † | builds the frontend image, starts it with the backend image (`BACKEND_TAG`, default `dev`) and Postgres, then: `schema.d.ts` vs the backend's spec, Playwright (with axe checks on every app route), visual regression, and a Trivy scan of the image (fixable high/critical blocks) | `make e2e-image`, `make api-check` |
+| **E2E, accessibility & visual** † | builds the frontend image, starts it with the API image (`ghcr.io/neszadev/aureon-crm-api`, `BACKEND_TAG`, default `dev`) and Postgres, then: `schema.d.ts` vs the API's spec, Playwright (with axe checks on every app route), visual regression, and a Trivy scan of the image (fixable high/critical blocks). **The API image isn't published yet**, so this job can't pass until it is. | until then: the API repo on 8081 and `BACKEND_URL=http://localhost:8081 pnpm exec playwright test --project=chromium --workers=1` ([testing](testing.md#the-crm-backend)); afterwards `make e2e-image`, `make api-check` |
 | **CI Gate** | fails when any job above failed or was cancelled (skipped is fine) | none |
 
 On failure the E2E job uploads the Playwright reports (`playwright-report`) and prints container

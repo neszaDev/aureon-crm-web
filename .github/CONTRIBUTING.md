@@ -5,8 +5,13 @@
 ```sh
 make setup       # dependencies, git hooks (lefthook), Playwright browser, env/.env
 make verify      # should pass before you change anything
-make e2e         # needs Docker (starts the backend)
 ```
+
+The end-to-end suite needs the API: run [aureon-crm-api](https://github.com/neszaDev/aureon-crm-api)
+(`feat/crm`) with its `make up` and `APP_PORT=8081`, then
+`BACKEND_URL=http://localhost:8081 pnpm exec playwright test --project=chromium --workers=1`
+([testing](../docs/testing.md#the-crm-backend)). `make e2e` needs the API image, which isn't
+published yet.
 
 ## Workflow
 
@@ -14,7 +19,8 @@ make e2e         # needs Docker (starts the backend)
    `dev`. Never push directly to `dev` or `main`; releases are a `dev` → `main` PR
    ([CI/CD](../docs/ci.md#releasing)).
 2. Small, focused commits; mechanical changes (formatting, renames) in their own commits.
-3. Before pushing: `make verify`, plus `make e2e` if you touched pages, actions, auth or the proxy.
+3. Before pushing: `make verify`, plus the end-to-end suite if you touched pages, actions, auth or
+   the proxy.
 4. Open a PR and fill in the checklist. CI must pass (the **CI Gate** check).
 
 ## Commit messages
@@ -25,7 +31,7 @@ make e2e         # needs Docker (starts the backend)
 
 ## Definition of done
 
-- `make verify` passes (and `make e2e` for behaviour changes).
+- `make verify` passes (and the end-to-end suite for behaviour changes).
 - New behaviour is tested ([Testing](../docs/testing.md)).
 - User-visible text is in every `src/locales/*.json`.
 - Backend API changes: `make api-types` run and `schema.d.ts` committed.
