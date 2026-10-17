@@ -24,7 +24,7 @@ const initialsOf = (name: string | undefined, email: string) => {
           .join('')
       : /^.{0,2}/u.exec(email.split('@')[0] ?? '')?.[0];
 
-  return (initials ?? '').toLocaleUpperCase();
+  return (initials ?? '').toUpperCase();
 };
 
 /**

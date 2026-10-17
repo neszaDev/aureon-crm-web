@@ -3,10 +3,10 @@ import type { Metadata, Viewport } from 'next';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { Anuphan, Kalam } from 'next/font/google';
-import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
+import { ThemeClass } from '@/components/ThemeClass';
 import { routing } from '@/libs/I18nRouting';
-import { parseTheme, THEME_COOKIE } from '@/libs/Theme';
+import { THEME_SCRIPT } from '@/libs/Theme';
 import '@/styles/global.css';
 
 // Anuphan sets Latin and Thai alike; Kalam is the demo pages' handwritten remarks only.
@@ -74,16 +74,20 @@ export default async function RootLayout(props: {
   }
 
   setRequestLocale(locale);
-  // Set on the server so the first paint already has the theme; `system` leaves it to the OS.
-  const jar = await cookies();
-  const theme = parseTheme(jar.get(THEME_COOKIE)?.value);
 
+  // The theme class comes from the cookie in the browser (THEME_SCRIPT, before the first paint),
+  // so pages stay static; the server renders none, hence suppressHydrationWarning.
   return (
-    <html
-      lang={locale}
-      className={cn(anuphan.variable, kalam.variable, theme !== 'system' && theme)}
-    >
+    <html lang={locale} className={cn(anuphan.variable, kalam.variable)} suppressHydrationWarning>
+      <head>
+        <script
+          // A constant script with no user input; Theme.test.ts proves it applies only light|dark.
+          // oxlint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
+        />
+      </head>
       <body>
+        <ThemeClass />
         <NextIntlClientProvider>{props.children}</NextIntlClientProvider>
       </body>
     </html>

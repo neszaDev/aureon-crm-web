@@ -6,8 +6,8 @@ import { Env } from '@/libs/Env';
 import { parseTheme, THEME_COOKIE } from '@/libs/Theme';
 
 /**
- * Stores the colour theme for a year. Setting the cookie re-renders the page, so the root layout
- * applies the new theme class in the same round trip.
+ * Stores the colour theme for a year; the inline theme script applies it on the next full load.
+ * The ThemeSwitcher sets the class on `<html>` itself, so this is only persistence.
  * @param theme The chosen theme; anything unknown is stored as `system`.
  */
 export async function setTheme(theme: string) {
@@ -18,7 +18,8 @@ export async function setTheme(theme: string) {
     path: '/',
     maxAge: 60 * 60 * 24 * 365,
     sameSite: 'lax',
-    httpOnly: true,
+    // Not a secret: the inline theme script reads it before the first paint.
+    httpOnly: false,
     secure: isSecureAppUrl(Env.APP_URL),
   });
 }

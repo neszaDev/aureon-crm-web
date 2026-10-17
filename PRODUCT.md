@@ -59,8 +59,9 @@ backend's OpenAPI spec, and CI runs end-to-end tests of the real frontend agains
   single-use invitation link (7 days, invited email only) that an owner or admin copies and
   shares. A user can belong to several workspaces with a different role in each.
 - Records: companies, contacts, leads (with conversion), deals on one pipeline with stage history,
-  tasks and activities. Records are archived and restored, never deleted. Money is decimal with an
-  ISO 4217 currency and is never converted between currencies.
+  tasks and activities. Companies, contacts, leads and deals are archived and restored, never
+  deleted; tasks are cancelled; activities can be deleted by their author or a manager. Money is
+  decimal with an ISO 4217 currency and is never converted between currencies.
 - Insights: a dashboard, reports and in-app reminders computed from stored data, in the
   workspace's time zone. No statistic implies history the data does not have.
 - Permissions come from the backend (`GET /workspaces/{id}` → `permissions`); the UI hides actions

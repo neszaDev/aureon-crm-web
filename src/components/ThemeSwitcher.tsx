@@ -6,13 +6,13 @@ import { startTransition, useOptimistic } from 'react';
 import { setTheme } from '@/actions/ThemeActions';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { Theme } from '@/libs/Theme';
-import { parseTheme, THEMES } from '@/libs/Theme';
+import { applyTheme, parseTheme, THEMES } from '@/libs/Theme';
 
 const ICONS = { light: SunIcon, dark: MoonIcon, system: MonitorIcon };
 
 /**
- * Picks the colour theme: light, dark or the system's. The choice goes to a cookie, and the page
- * comes back from the server already wearing it.
+ * Picks the colour theme: light, dark or the system's. The class on `<html>` changes at once; the
+ * choice is then stored in the theme cookie for the next page load.
  * @param props Component props.
  * @param props.theme The current theme, read from the cookie on the server.
  * @returns The theme picker.
@@ -34,9 +34,11 @@ export const ThemeSwitcher = (props: { theme: Theme }) => {
           return;
         }
 
+        const next = parseTheme(value);
         startTransition(async () => {
-          setOptimisticTheme(parseTheme(value));
-          await setTheme(value);
+          setOptimisticTheme(next);
+          applyTheme(next);
+          await setTheme(next);
         });
       }}
     >

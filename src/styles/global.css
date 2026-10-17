@@ -167,6 +167,11 @@
   --leading-snug: 1.5;
 }
 
+/* Tracked caps: `uppercase` leaves Thai alone but letter-spacing pulls its letters apart. */
+:lang(th) :is([data-slot='label'], [data-slot='table-head'], [data-slot='badge'], .form-label) {
+  letter-spacing: normal;
+}
+
 @theme inline {
   --font-sans: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
