@@ -131,7 +131,9 @@
     "passwords_must_match": "Les mots de passe doivent correspondre",
     "accept_terms": "Vous devez accepter avant d’envoyer",
     "invalid_email_list": "Saisissez des adresses e-mail valides, séparées par des virgules",
-    "two_factor_code": "Saisissez les 6 lettres ou chiffres de votre code"
+    "two_factor_code": "Saisissez les 6 lettres ou chiffres de votre code",
+    "invalid_currency": "Choisissez une devise dans la liste",
+    "invalid_time_zone": "Choisissez un fuseau horaire dans la liste"
   },
   "DashboardLayout": {
     "meta_title": "Tableau de bord",
@@ -143,8 +145,86 @@
     "signed_in_as": "Connecté en tant que"
   },
   "AppPage": {
-    "title": "Bienvenue dans Aureon CRM",
-    "dashboard_link": "Aller au tableau de bord"
+    "title": "Vos espaces de travail",
+    "description": "Ouvrez un espace de travail, ou créez-en un autre pour une autre équipe ou entreprise.",
+    "create_title": "Créez votre premier espace de travail",
+    "create_text": "Un espace de travail réunit les entreprises, contacts, prospects et affaires de votre équipe. Vous pourrez en créer d'autres plus tard.",
+    "new_link": "Créer un espace de travail"
+  },
+  "NewWorkspacePage": {
+    "title": "Créer un espace de travail",
+    "description": "Chaque espace de travail a ses propres membres, fiches et pipeline."
+  },
+  "WorkspaceForm": {
+    "name_label": "Nom de l'espace de travail",
+    "name_hint": "En général, votre entreprise ou votre équipe, par exemple Northwind Supply.",
+    "currency_label": "Devise par défaut",
+    "currency_hint": "Les nouvelles affaires démarrent dans cette devise.",
+    "timezone_label": "Fuseau horaire",
+    "timezone_hint": "Les échéances et les rappels suivent ce fuseau.",
+    "submit": "Créer l'espace de travail",
+    "error_invalid_input": "Vérifiez les champs signalés",
+    "error_generic": "L'espace de travail n'a pas été créé. Réessayez."
+  },
+  "Roles": {
+    "role_OWNER": "Propriétaire",
+    "role_ADMIN": "Administrateur",
+    "role_MANAGER": "Responsable",
+    "role_SALES_REP": "Commercial"
+  },
+  "CrmShell": {
+    "nav_label": "Navigation de l'espace de travail",
+    "nav_dashboard": "Tableau de bord",
+    "nav_settings": "Paramètres",
+    "open_menu": "Ouvrir le menu",
+    "close_menu": "Fermer le menu",
+    "switcher_label": "Changer d'espace de travail. Actuel : {name}",
+    "workspaces": "Espaces de travail",
+    "current": "Actuel",
+    "create_workspace": "Créer un espace de travail",
+    "all_workspaces": "Vos espaces de travail"
+  },
+  "AccountMenu": {
+    "label": "Votre compte",
+    "profile": "Votre profil",
+    "language": "Langue",
+    "demos": "Démos du boilerplate",
+    "sign_out": "Se déconnecter"
+  },
+  "WorkspacePage": {
+    "title": "Tableau de bord",
+    "heading": "Bienvenue dans {name}",
+    "intro": "Réglez l'essentiel pour que votre équipe puisse travailler son pipeline.",
+    "fact_role": "Votre rôle",
+    "fact_currency": "Devise par défaut",
+    "fact_timezone": "Fuseau horaire",
+    "steps_title": "Prochaines étapes",
+    "steps_progress": "{done} sur {total} terminées",
+    "step_done": "Terminé",
+    "step_todo": "À faire",
+    "step_profile_title": "Ajoutez votre nom d'affichage",
+    "step_profile_text": "Votre sceau affiche vos initiales sur tout ce que vous signez.",
+    "step_team_title": "Invitez votre équipe",
+    "step_team_text": "Envoyez des liens d'invitation et choisissez le rôle de chacun.",
+    "step_pipeline_title": "Façonnez votre pipeline",
+    "step_pipeline_text": "Nommez les étapes que traverse une affaire et ses chances de conclusion à chacune.",
+    "step_sources_title": "Listez vos sources de prospects",
+    "step_sources_text": "Sachez d'où viennent vos prospects : recommandations, salons, votre site.",
+    "step_roles_title": "Voyez ce que permet votre rôle",
+    "step_roles_text": "Propriétaires, administrateurs, responsables et commerciaux n'ont pas les mêmes droits.",
+    "members_title": "Membres",
+    "members_more": "{count, plural, one {# autre membre} other {# autres membres}}",
+    "you": "Vous"
+  },
+  "CrmNotFound": {
+    "meta_title": "Espace de travail introuvable",
+    "title": "Espace de travail introuvable, ou vous n'en êtes pas membre",
+    "text": "Vérifiez le lien, ou demandez au propriétaire de l'espace de travail de vous inviter.",
+    "back": "Aller à vos espaces de travail"
+  },
+  "ForbiddenNotice": {
+    "title": "Vous n'avez pas accès à cette partie",
+    "text": "Votre rôle dans cet espace de travail ne le permet pas. Demandez à un propriétaire ou à un administrateur si vous en avez besoin."
   },
   "DashboardPage": {
     "title": "Vue d'ensemble",

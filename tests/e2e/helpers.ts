@@ -48,12 +48,13 @@ export const signIn = async (page: Page, credentials: { email: string; password:
 };
 
 /**
- * Signs out with the dashboard's button and waits until the session cookies are gone (the
+ * Signs out from the CRM's account menu and waits until the session cookies are gone (the
  * action finishes by redirecting home), so the next navigation is really signed out.
  * @param page Playwright page.
  */
 export const signOut = async (page: Page) => {
-  await page.goto('/dashboard');
-  await page.getByRole('button', { name: 'Sign out' }).click();
+  await page.goto('/app');
+  await page.getByRole('button', { name: 'Your account' }).click();
+  await page.getByRole('menuitem', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/$/u);
 };

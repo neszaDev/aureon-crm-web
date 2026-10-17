@@ -41,7 +41,11 @@ isn't in the backend's spec, so it's written by hand in `ApiError.ts`. In action
   taken), then fall back to the backend's message.
 - A 401 on an authenticated call means the session is gone: redirect to `/sign-in`
   (`redirectIfUnauthorized` in `src/libs/api/Session.ts`).
-- 403 means the user lacks a role (admin pages): render `AdminOnlyNotice`, don't redirect.
+- 403 means the user lacks a role (admin pages): render `AdminOnlyNotice`, don't redirect. In the
+  CRM, a role without the permission: render `ForbiddenNotice`.
+- CRM workspace layouts: a 404 on the workspace (unknown, or not a member) is `notFound()`
+  ("Workspace not found"); any other failure throws to the error boundary, which offers a
+  retry. Never redirect to sign-in for those: the access cookie is still valid, so it loops.
 - 429 (sign-in, sign-up) carries `Retry-After`; the form says how many minutes to wait.
 
 ## Client IP and rate limits

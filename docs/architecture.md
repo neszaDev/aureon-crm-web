@@ -47,8 +47,8 @@ Next.js server, which holds the session in two **httpOnly** cookies.
 
 | Need | Put it in |
 |---|---|
-| A page | `src/app/[locale]/(marketing)` (public) or `(auth)/dashboard` (signed in) |
-| Read data for a page | a function in `src/libs/api/Queries.ts` |
+| A page | `src/app/[locale]/(marketing)` (public), `(auth)/app/[workspaceId]` (the CRM) or `(auth)/dashboard` (demos) |
+| Read data for a page | a function in `src/libs/api/Queries.ts` (CRM: `CrmQueries.ts`) |
 | Change data | a server action in `src/actions/` (validate with zod, map errors, revalidate) |
 | Validation rules | `src/validations/`, mirroring the backend's request constraints |
 | Text | `src/locales/en.json` **and** every other locale |
@@ -56,8 +56,8 @@ Next.js server, which holds the session in two **httpOnly** cookies.
 
 ## Rendering
 
-Public pages are statically generated per locale. Everything under `dashboard` is
-`force-dynamic`: personal data is never prerendered or cached.
+Public pages are statically generated per locale. Everything under `app` and
+`dashboard` is `force-dynamic`: personal data is never prerendered or cached.
 
 ## Deployment shape
 

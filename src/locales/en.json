@@ -131,7 +131,9 @@
     "passwords_must_match": "Passwords must match",
     "accept_terms": "You must accept before submitting",
     "invalid_email_list": "Enter valid email addresses, separated by commas",
-    "two_factor_code": "Enter the 6 letters or digits of your code"
+    "two_factor_code": "Enter the 6 letters or digits of your code",
+    "invalid_currency": "Choose a currency from the list",
+    "invalid_time_zone": "Choose a time zone from the list"
   },
   "DashboardLayout": {
     "meta_title": "Dashboard",
@@ -143,8 +145,86 @@
     "signed_in_as": "Signed in as"
   },
   "AppPage": {
-    "title": "Welcome to Aureon CRM",
-    "dashboard_link": "Go to the dashboard"
+    "title": "Your workspaces",
+    "description": "Open a workspace, or create another for a separate team or business.",
+    "create_title": "Create your first workspace",
+    "create_text": "A workspace holds your team's companies, contacts, leads and deals. You can create more later.",
+    "new_link": "Create workspace"
+  },
+  "NewWorkspacePage": {
+    "title": "Create a workspace",
+    "description": "Each workspace has its own members, records and pipeline."
+  },
+  "WorkspaceForm": {
+    "name_label": "Workspace name",
+    "name_hint": "Usually your company or team, such as Northwind Supply.",
+    "currency_label": "Default currency",
+    "currency_hint": "New deals start in this currency.",
+    "timezone_label": "Time zone",
+    "timezone_hint": "Due dates and reminders follow this zone.",
+    "submit": "Create workspace",
+    "error_invalid_input": "Check the highlighted fields",
+    "error_generic": "The workspace wasn't created. Try again."
+  },
+  "Roles": {
+    "role_OWNER": "Owner",
+    "role_ADMIN": "Admin",
+    "role_MANAGER": "Manager",
+    "role_SALES_REP": "Sales rep"
+  },
+  "CrmShell": {
+    "nav_label": "Workspace navigation",
+    "nav_dashboard": "Dashboard",
+    "nav_settings": "Settings",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "switcher_label": "Switch workspace. Current: {name}",
+    "workspaces": "Workspaces",
+    "current": "Current",
+    "create_workspace": "Create workspace",
+    "all_workspaces": "Your workspaces"
+  },
+  "AccountMenu": {
+    "label": "Your account",
+    "profile": "Your profile",
+    "language": "Language",
+    "demos": "Boilerplate demos",
+    "sign_out": "Sign out"
+  },
+  "WorkspacePage": {
+    "title": "Dashboard",
+    "heading": "Welcome to {name}",
+    "intro": "Set up the basics so your team can start working the pipeline.",
+    "fact_role": "Your role",
+    "fact_currency": "Default currency",
+    "fact_timezone": "Time zone",
+    "steps_title": "Next steps",
+    "steps_progress": "{done} of {total} done",
+    "step_done": "Done",
+    "step_todo": "To do",
+    "step_profile_title": "Add your display name",
+    "step_profile_text": "Your seal shows your initials on everything you sign.",
+    "step_team_title": "Invite your team",
+    "step_team_text": "Send invitation links and choose each person's role.",
+    "step_pipeline_title": "Shape your pipeline",
+    "step_pipeline_text": "Name the stages a deal moves through and how likely each one is to close.",
+    "step_sources_title": "List your lead sources",
+    "step_sources_text": "Know where leads come from: referrals, events, your website.",
+    "step_roles_title": "See what your role allows",
+    "step_roles_text": "Owners, admins, managers and sales reps can do different things.",
+    "members_title": "Members",
+    "members_more": "{count, plural, one {# more member} other {# more members}}",
+    "you": "You"
+  },
+  "CrmNotFound": {
+    "meta_title": "Workspace not found",
+    "title": "Workspace not found or you're not a member",
+    "text": "Check the link, or ask the workspace's owner to invite you.",
+    "back": "Go to your workspaces"
+  },
+  "ForbiddenNotice": {
+    "title": "You don't have access to this",
+    "text": "Your role in this workspace doesn't allow it. Ask an owner or admin if you need it."
   },
   "DashboardPage": {
     "title": "Overview",

@@ -14,7 +14,7 @@ const SIZES = {
  * @param email Email address.
  * @returns The initials, upper-cased.
  */
-const initialsOf = (name: string | undefined, email: string) => {
+export const initialsOf = (name: string | undefined, email: string) => {
   const words = name?.trim().split(/\s+/u).filter(Boolean) ?? [];
   const initials =
     words.length > 0

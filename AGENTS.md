@@ -18,15 +18,16 @@ Architecture: [docs/architecture.md](docs/architecture.md). Guides:
 
 ```
 src/app/[locale]/(marketing)/   public pages (home, about)
-src/app/[locale]/(auth)/        sign-in, sign-up (centered) and dashboard/* (protected)
+src/app/[locale]/(auth)/        sign-in, sign-up (centered), app/* (the CRM) and dashboard/* (demos)
 src/actions/                    server actions: the only place that mutates via the backend
-src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for pages),
+src/libs/api/                   Backend.ts (typed client), Queries.ts and CrmQueries.ts (reads for pages),
                                 ApiError.ts, schema.d.ts (GENERATED, see below)
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
 src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens
 src/validations/                zod schemas mirroring the backend's request rules
 src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx shadcn add`)
 src/components/report/          Marksheet domain UI: marks, totals, results table
+src/components/crm/             the CRM: shell/ (rail, switcher, account menu), seals, forms
 src/components/ src/templates/  UI (MarketingTemplate, AppShell); src/locales/*.json  all user-visible text
 tests/e2e/                      Playwright, always against the real backend
 docker/  env/  scripts/  docs/  same roles as in the backend repo

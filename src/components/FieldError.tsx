@@ -7,7 +7,7 @@ type ValidationKey = keyof typeof messages.Validation;
 const isValidationKey = (value: string): value is ValidationKey => value in messages.Validation;
 
 /**
- * Shows a form field error, written in red pen at the field. Client-side messages are
+ * Shows a form field error, written in crimson at the field. Client-side messages are
  * `Validation` keys; server messages (`type: 'server'`) are already human-readable and shown as-is.
  * @param props Component props.
  * @param props.error The react-hook-form error for the field, if any.
@@ -23,7 +23,7 @@ export const FieldError = (props: { error?: HookFormFieldError; id?: string }) =
   }
 
   return (
-    <p id={props.id} className="text-[0.8125rem] font-medium text-pen" role="alert">
+    <p id={props.id} className="text-[0.8125rem] font-medium text-danger" role="alert">
       {isValidationKey(message) ? t(message) : message}
     </p>
   );

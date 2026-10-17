@@ -31,6 +31,8 @@
   --seal-deep: #9e2812;
   --seal-tint: #f6e3dc;
   --seal-ink: #b8321a;
+  /* Text on the seal fills (rail, mobile bar): 4.9:1 on seal, 7:1 on seal-deep. */
+  --on-seal: #fff4f0;
   --paper: #fbfbf9;
   --ground: #eff0ec;
   /* Controls (inputs, outline buttons, menus) sit on white, a step above the paper. */
@@ -167,8 +169,24 @@
   --leading-snug: 1.5;
 }
 
-/* Tracked caps: `uppercase` leaves Thai alone but letter-spacing pulls its letters apart. */
-:lang(th) :is([data-slot='label'], [data-slot='table-head'], [data-slot='badge'], .form-label) {
+/*
+ * Thai keeps its natural spacing: tracked caps pull its letters apart (`uppercase` leaves Thai
+ * alone), and negative tracking on headings crowds its stacked marks together.
+ */
+:lang(th)
+  :is(
+    [data-slot='label'],
+    [data-slot='table-head'],
+    [data-slot='badge'],
+    .form-label,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    [class*='tracking-[-']
+  ) {
   letter-spacing: normal;
 }
 
@@ -181,6 +199,7 @@
   --color-seal-deep: var(--seal-deep);
   --color-seal-tint: var(--seal-tint);
   --color-seal-ink: var(--seal-ink);
+  --color-on-seal: var(--on-seal);
   --color-paper: var(--paper);
   --color-ground: var(--ground);
   --color-field: var(--field);
@@ -314,6 +333,23 @@
   .paper {
     @apply rounded-lg bg-paper-card text-ink-900;
     box-shadow: var(--shadow-paper);
+  }
+}
+
+/*
+ * Menus, sheets and dialogs slide and zoom in with tw-animate, which ignores the motion
+ * preference: with reduced motion they only fade.
+ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    --tw-enter-translate-x: 0;
+    --tw-enter-translate-y: 0;
+    --tw-enter-scale: 1;
+    --tw-enter-rotate: 0;
+    --tw-exit-translate-x: 0;
+    --tw-exit-translate-y: 0;
+    --tw-exit-scale: 1;
+    --tw-exit-rotate: 0;
   }
 }
 
