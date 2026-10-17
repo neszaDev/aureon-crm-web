@@ -35,7 +35,10 @@ Next.js server, which holds the session in two **httpOnly** cookies.
   them). With neither, it redirects to `/sign-in`, with `?next=` back to the page for `/app/**`.
 - **Invitation pages** (`/invite/<token>`) are public. The proxy refreshes the session there too,
   but never redirects, so a signed-in visitor is still recognised. The token is a secret: the
-  page sends no `Referer`, and nothing logs it (`redactPath` in `ApiError.ts`).
+  page sends no `Referer` (meta and header), and nothing logs it (`redactPath` in `ApiError.ts`;
+  `next.config.ts` keeps invite URLs and Server Function arguments out of the dev log).
+  Without email delivery, whoever holds a link (the inviter included) can register the invited
+  email: share links privately and revoke unused ones.
 - Because each cookie expires with its token, "is the access cookie present?" is the only check
   needed: no JWT decoding in the frontend.
 - **A failed refresh does not delete cookies.** Two tabs can refresh at once and, with rotation,

@@ -162,7 +162,7 @@ const RegisterForm = (props: {
   });
 
   return (
-    <form onSubmit={onSubmit} className={PANEL} noValidate>
+    <form method="post" onSubmit={onSubmit} className={PANEL} noValidate>
       <ActionAlert result={failure} />
       {/* The invitation's email, not editable; the seal shows the initials as the name is typed. */}
       <Person label={t('email_label')} email={props.email} name={name.trim() || undefined} />

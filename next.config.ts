@@ -19,6 +19,24 @@ const baseConfig: NextConfig = {
   },
   logging: {
     browserToTerminal: process.env.BROWSER_TO_TERMINAL_DISABLED !== 'true',
+    // Dev logs print Server Function arguments: passwords and invitation tokens. Never.
+    serverFunctions: false,
+    // Invitation tokens are secrets: keep invite URLs, and a sign-in `next` to one, out of the log.
+    incomingRequests: {
+      ignore: [/\/invite\//u, /[?&]next=(?:%2F|\/)(?:[a-z]{2}(?:%2F|\/))?invite/iu],
+    },
+  },
+  // The token is in the invite page's URL: no Referer may carry it (the page sets the meta too).
+  headers: async () => {
+    // Next wants a promise; nothing to wait for.
+    await Promise.resolve();
+
+    return [
+      {
+        source: '/:locale?/invite/:path*',
+        headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
+      },
+    ];
   },
   // Self-contained server in .next/standalone, used by docker/Dockerfile.
   output: 'standalone',

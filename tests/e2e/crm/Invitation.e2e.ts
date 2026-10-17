@@ -87,7 +87,8 @@ test.describe('Invitation links', () => {
     const email = uniqueEmail();
     const { path, workspaceId } = await invite(request, email);
 
-    await page.goto(path);
+    const response = await page.goto(path);
+    expect(response?.headers()['referrer-policy']).toBe('no-referrer');
     await expect(page.getByRole('heading', { level: 1, name: 'Join Acme' })).toBeVisible();
     await expect(page).toHaveTitle('Invitation');
     await expect(page.locator('meta[name="referrer"]')).toHaveAttribute('content', 'no-referrer');
@@ -218,7 +219,8 @@ test.describe('Invitation links', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     const { path } = await invite(request, uniqueEmail());
 
-    await page.goto(`/th${path}`);
+    const response = await page.goto(`/th${path}`);
+    expect(response?.headers()['referrer-policy']).toBe('no-referrer');
 
     await expect(page.getByRole('heading', { level: 1, name: 'เข้าร่วม Acme' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'สร้างบัญชีและเข้าร่วม' })).toBeVisible();

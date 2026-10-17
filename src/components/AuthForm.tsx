@@ -39,7 +39,7 @@ export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
       {formError && <FormAlert>{formError}</FormAlert>}
 
       <FormField htmlFor="email" label={t('email_label')} error={errors.email}>
