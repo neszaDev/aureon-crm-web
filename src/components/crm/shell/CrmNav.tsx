@@ -14,7 +14,8 @@ const crmNavItems = [
 ] as const;
 
 /**
- * The workspace's sections on the vermilion rail, the current one filled in seal-deep.
+ * The workspace's sections on the vermilion rail, the current one filled in seal-deep and set
+ * in a heavier weight (a cue besides colour).
  * @param props Component props.
  * @param props.workspaceId The workspace the links stay in.
  * @returns The navigation.
@@ -44,13 +45,6 @@ export const CrmNav = (props: { workspaceId: number }) => {
               >
                 <item.icon aria-hidden="true" className="size-4 shrink-0" />
                 {t(`nav_${item.key}`)}
-                {/* Marks the current section by shape too, not only by its darker fill. */}
-                {current && (
-                  <span
-                    aria-hidden="true"
-                    className="ml-auto size-1.5 shrink-0 rounded-full bg-white"
-                  />
-                )}
               </Link>
             </li>
           );

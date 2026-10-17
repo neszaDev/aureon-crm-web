@@ -70,7 +70,7 @@ export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
         />
       </FormField>
 
-      <Button type="submit" size="lg" className="mt-1 w-full" disabled={isSubmitting}>
+      <Button type="submit" className="mt-1 w-full" disabled={isSubmitting}>
         {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
         {isSignUp ? t('sign_up_button') : t('sign_in_button')}
       </Button>

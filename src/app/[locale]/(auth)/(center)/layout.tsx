@@ -1,20 +1,11 @@
-import { cn } from 'cn';
 import type { LucideIcon } from 'lucide-react';
 import { ArrowLeftIcon, BellIcon, Building2Icon, LanguagesIcon, StampIcon } from 'lucide-react';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server';
+import { StampBox } from '@/components/crm/StampBox';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { Button } from '@/components/ui/button';
-import { BrandSeal, Wordmark } from '@/components/Wordmark';
+import { Wordmark } from '@/components/Wordmark';
 import { Link } from '@/libs/I18nNavigation';
-
-// A deal's stamp row: stages already signed, the open one outlined, the next one still blank.
-const STAMPS = [
-  { id: 1, state: 'signed', tilt: '-rotate-3' },
-  { id: 2, state: 'signed', tilt: 'rotate-2' },
-  { id: 3, state: 'signed', tilt: '-rotate-6' },
-  { id: 4, state: 'open' },
-  { id: 5, state: 'blank' },
-] as const;
 
 const FEATURES = [
   { key: 'workspaces', icon: Building2Icon },
@@ -22,6 +13,23 @@ const FEATURES = [
   { key: 'follow_ups', icon: BellIcon },
   { key: 'languages', icon: LanguagesIcon },
 ] as const satisfies { key: string; icon: LucideIcon }[];
+
+/**
+ * A deal's stamp row, as the CRM draws it: three stages signed by members' seals, the open one
+ * with its days, the next one blank. An illustration: the seals and days are made up.
+ * @param props Component props.
+ * @param props.days The open stage's days, formatted for the locale.
+ * @returns The row, hidden from assistive technology.
+ */
+const StampRow = (props: { days: string }) => (
+  <div aria-hidden="true" className="flex gap-1">
+    <StampBox seal="AL" />
+    <StampBox seal="AL" />
+    <StampBox seal="KS" />
+    <StampBox days={props.days} />
+    <StampBox />
+  </div>
+);
 
 export default async function AuthLayout(props: {
   children: React.ReactNode;
@@ -31,6 +39,8 @@ export default async function AuthLayout(props: {
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'AuthLayout' });
   const tBrand = await getTranslations({ locale, namespace: 'Brand' });
+  const format = await getFormatter({ locale });
+  const days = format.number(8, { style: 'unit', unit: 'day', unitDisplay: 'narrow' });
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
@@ -38,23 +48,7 @@ export default async function AuthLayout(props: {
       <aside className="hidden flex-col justify-between gap-12 bg-seal p-10 text-on-seal lg:flex xl:p-14">
         <Wordmark tone="seal" />
         <div className="flex max-w-md flex-col gap-9">
-          <div aria-hidden="true" className="flex gap-1.5">
-            {STAMPS.map((stamp) => (
-              <span
-                key={stamp.id}
-                className={cn(
-                  'grid size-14 place-items-center rounded-[3px] xl:size-16',
-                  stamp.state === 'signed' && 'border border-on-seal/40 bg-seal-deep',
-                  stamp.state === 'open' && 'border-2 border-on-seal',
-                  stamp.state === 'blank' && 'border border-on-seal/40',
-                )}
-              >
-                {stamp.state === 'signed' && (
-                  <BrandSeal className={cn('size-10 xl:size-11', stamp.tilt)} />
-                )}
-              </span>
-            ))}
-          </div>
+          <StampRow days={days} />
           <div className="flex flex-col gap-3">
             <p className="text-3xl leading-tight font-bold tracking-[-0.02em]">
               {t('aside_title')}
@@ -81,8 +75,12 @@ export default async function AuthLayout(props: {
       </aside>
 
       <div className="flex flex-col">
-        <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-8">
-          <Wordmark className="lg:hidden" />
+        {/* Below lg the aside folds into a slim band: the wordmark and the stamp row. */}
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 bg-seal px-4 py-3 text-on-seal sm:px-8 lg:hidden">
+          <Wordmark tone="seal" />
+          <StampRow days={days} />
+        </div>
+        <div className="flex items-center justify-between gap-4 px-4 py-4 max-lg:justify-end sm:px-8">
           <Button asChild variant="ghost" size="sm" className="max-lg:hidden">
             <Link href="/">
               <ArrowLeftIcon data-icon="inline-start" />
@@ -91,7 +89,7 @@ export default async function AuthLayout(props: {
           </Button>
           <LocaleSwitcher />
         </div>
-        <main className="flex flex-1 items-center justify-center px-4 pt-6 pb-16 sm:px-8">
+        <main className="flex flex-1 justify-center px-4 pb-16 sm:px-8 lg:items-center lg:pt-6">
           <div className="w-full max-w-[25rem]">{props.children}</div>
         </main>
       </div>

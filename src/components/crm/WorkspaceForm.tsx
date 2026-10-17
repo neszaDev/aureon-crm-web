@@ -137,7 +137,7 @@ export const WorkspaceForm = (props: {
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        <Button type="submit" size="lg" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
           {props.submitLabel ?? t('submit')}
         </Button>

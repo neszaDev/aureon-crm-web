@@ -18,7 +18,7 @@ const TONES = {
  * @param props.className Size and colour (it draws in `currentColor`).
  * @returns The seal.
  */
-export const BrandSeal = (props: { className?: string }) => (
+const BrandSeal = (props: { className?: string }) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"

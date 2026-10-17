@@ -100,12 +100,12 @@ const SourceForm = (props: {
         />
       </FormField>
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" size="sm" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
           {props.submitLabel}
         </Button>
         {props.onCancel && (
-          <Button type="button" variant="ghost" size="sm" onClick={props.onCancel}>
+          <Button type="button" variant="ghost" onClick={props.onCancel}>
             {t('cancel')}
           </Button>
         )}

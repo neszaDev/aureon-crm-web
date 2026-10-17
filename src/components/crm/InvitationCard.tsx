@@ -198,7 +198,7 @@ const RegisterForm = (props: {
           {...form.register('password')}
         />
       </FormField>
-      <Button type="submit" size="lg" className="mt-1 w-full" disabled={isSubmitting}>
+      <Button type="submit" className="mt-1 w-full" disabled={isSubmitting}>
         {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
         {t('register_button')}
       </Button>
@@ -274,7 +274,6 @@ export const InvitationCard = (props: {
           <Person label={t('invited_label')} email={props.invitation.email} />
           <Person label={t('signed_in_label')} email={userEmail} name={props.user?.displayName} />
           <Button
-            size="lg"
             className="mt-1 w-full"
             disabled={pending}
             onClick={() => {
@@ -304,8 +303,7 @@ export const InvitationCard = (props: {
         <ActionAlert result={failure} />
         <Person label={t('signed_in_label')} email={userEmail} name={props.user?.displayName} />
         <Button
-          size="lg"
-          className="mt-1 h-auto min-h-11 w-full py-2.5 break-words whitespace-normal"
+          className="mt-1 h-auto min-h-9 w-full py-2 break-words whitespace-normal"
           disabled={pending}
           onClick={() => {
             setFailure(undefined);

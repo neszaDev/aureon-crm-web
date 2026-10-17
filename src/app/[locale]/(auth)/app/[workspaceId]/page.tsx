@@ -1,9 +1,9 @@
-import { cn } from 'cn';
-import { CheckIcon, ChevronRightIcon } from 'lucide-react';
+import { ChevronRightIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
-import { Seal } from '@/components/crm/Seal';
+import { initialsOf, Seal } from '@/components/crm/Seal';
+import { StampBox } from '@/components/crm/StampBox';
 import { getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
@@ -53,6 +53,8 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
   }
 
   const base = `/app/${workspace.id}/settings`;
+  // Your next steps: the ones you completed carry your seal.
+  const sealOfUser = initialsOf(user.displayName, user.email ?? '');
   const memberCount = members.members?.length ?? 0;
   const steps = [
     {
@@ -144,20 +146,10 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
                   href={step.href}
                   className="group flex items-center gap-3.5 px-5 py-3 no-underline transition-colors duration-150 hover:bg-muted focus-visible:-outline-offset-2"
                 >
-                  {/* The stamp box: empty until the step is done, then sealed. */}
-                  <span
-                    className={cn(
-                      'grid size-9 shrink-0 place-items-center rounded-[3px] border border-seal-ink/40',
-                      step.done ? 'bg-seal-tint' : 'bg-field',
-                    )}
-                  >
-                    {step.done && (
-                      <span className="grid size-7 -rotate-8 place-items-center rounded-full border-[1.5px] border-seal-ink text-seal-ink">
-                        <CheckIcon aria-hidden="true" className="size-3.5" strokeWidth={3} />
-                      </span>
-                    )}
+                  {/* The stamp box: empty until the step is done, then signed with your seal. */}
+                  <StampBox seal={step.done ? sealOfUser : undefined}>
                     <span className="sr-only">{step.done ? t('step_done') : t('step_todo')}</span>
-                  </span>
+                  </StampBox>
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span className="font-medium text-foreground">
                       {t(`step_${step.key}_title`)}
