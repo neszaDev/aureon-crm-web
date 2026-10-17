@@ -1,4 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
@@ -71,6 +72,13 @@ describe(MembersTable, () => {
 
       await expect.element(page.getByLabelText('Role of Mia Manager')).toHaveValue('MANAGER');
       await expect.element(page.getByRole('button', { name: 'Remove Mia Manager' })).toBeVisible();
+      // The roles an admin gives are there, so "no Owner" isn't true of an empty list.
+      const options = page.getByLabelText('Role of Mia Manager').getByRole('option');
+      expect(options.elements().map((option) => option.textContent)).toStrictEqual([
+        'Admin',
+        'Manager',
+        'Sales rep',
+      ]);
       expect(page.getByRole('option', { name: 'Owner' }).elements()).toHaveLength(0);
     });
 
@@ -115,6 +123,43 @@ describe(MembersTable, () => {
 
       expect(changeRole).toHaveBeenCalledWith(ADMIN.userId, 'MANAGER');
       await expect.poll(() => page.getByRole('alertdialog').elements()).toHaveLength(0);
+    });
+
+    it('moves the focus to your name when the new role takes the select away', async () => {
+      // As after the page refreshes: a sales rep manages no one, so the rows lose their selects.
+      const Refreshing = () => {
+        const [role, setRole] = useState<WorkspaceRole>('ADMIN');
+
+        return (
+          <MembersTable
+            members={[OWNER, { ...ADMIN, role }, MANAGER]}
+            me={ADMIN.userId}
+            callerRole={role}
+            canManage={role === 'ADMIN'}
+            workspaceName="Acme"
+            actions={{
+              changeRole: async (_userId, next) => {
+                setRole(next);
+                return await Promise.resolve({ ok: true });
+              },
+              remove: vi.fn<Remove>(),
+            }}
+          />
+        );
+      };
+      await render(
+        <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+          <Refreshing />
+        </NextIntlClientProvider>,
+      );
+
+      await page.getByLabelText('Role of Adam Admin').selectOptions('SALES_REP');
+      await page.getByRole('button', { name: 'Change my role' }).click();
+
+      await expect.poll(() => page.getByRole('alertdialog').elements()).toHaveLength(0);
+      expect(page.getByLabelText('Role of Adam Admin').elements()).toHaveLength(0);
+      // Not the page's start: the name itself (the body would contain the name too).
+      await expect.poll(() => document.activeElement?.textContent).toBe('Adam Admin · You');
     });
   });
 

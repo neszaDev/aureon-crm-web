@@ -66,17 +66,19 @@ const MemberTableRow = (props: {
   const [ownRole, setOwnRole] = useState<WorkspaceRole>();
   const [confirmingOwnRole, setConfirmingOwnRole] = useState(false);
   const select = useRef<HTMLSelectElement>(null);
+  const nameRef = useRef<HTMLSpanElement>(null);
   const name = props.member.displayName ?? props.member.email;
 
   return (
-    <TableRow>
+    // Below sm the row stacks: name and email, then role and actions on one line.
+    <TableRow className="max-sm:grid max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:items-center max-sm:gap-x-3 max-sm:gap-y-2 max-sm:px-4 max-sm:py-3">
       {/* Takes the free width; long names wrap and emails truncate instead of widening the
-          table (an email broken over three lines on a phone reads as noise). */}
-      <TableCell className="w-full max-w-0 py-2.5 whitespace-normal">
+          table. */}
+      <TableCell className="w-full max-w-0 py-2.5 whitespace-normal max-sm:col-span-2 max-sm:w-auto max-sm:max-w-none max-sm:p-0">
         <span className="flex min-w-0 items-center gap-3">
           <Seal name={props.member.displayName} email={props.member.email} size="sm" />
           <span className="flex min-w-0 flex-col">
-            <span className="font-medium break-words">
+            <span ref={nameRef} tabIndex={-1} className="rounded-sm font-medium break-words">
               {name}
               {props.isMe && (
                 <span className="font-normal text-muted-foreground"> · {t('you')}</span>
@@ -93,7 +95,7 @@ const MemberTableRow = (props: {
           </span>
         </span>
       </TableCell>
-      <TableCell>
+      <TableCell className="max-sm:p-0">
         {props.manageable ? (
           <span className="flex items-center gap-2">
             <NativeSelect
@@ -134,37 +136,39 @@ const MemberTableRow = (props: {
                 <span className="sr-only">{t('saving')}</span>
               </span>
             )}
-            {props.isMe && (
-              <ConfirmAction
-                open={confirmingOwnRole}
-                onOpenChange={setConfirmingOwnRole}
-                returnFocus={select}
-                title={t('self_role_title', { role: ownRole ? tRole(`role_${ownRole}`) : '' })}
-                description={t('self_role_text')}
-                confirmLabel={t('self_role_confirm')}
-                cancelLabel={t('cancel')}
-                action={async () =>
-                  ownRole
-                    ? await props.actions.changeRole(props.member.userId, ownRole)
-                    : { ok: true }
-                }
-              />
-            )}
           </span>
         ) : (
           tRole(`role_${role}`)
+        )}
+        {/* Outside the select's branch, so it closes normally when the new role removes the
+            select. */}
+        {props.isMe && (
+          <ConfirmAction
+            open={confirmingOwnRole}
+            onOpenChange={setConfirmingOwnRole}
+            // After a change that took away your right to manage, the select is gone:
+            // the focus goes to your name instead of the page's start.
+            returnFocus={() => select.current ?? nameRef.current}
+            title={t('self_role_title', { role: ownRole ? tRole(`role_${ownRole}`) : '' })}
+            description={t('self_role_text')}
+            confirmLabel={t('self_role_confirm')}
+            cancelLabel={t('cancel')}
+            action={async () =>
+              ownRole ? await props.actions.changeRole(props.member.userId, ownRole) : { ok: true }
+            }
+          />
         )}
       </TableCell>
       <TableCell className="hidden text-muted-foreground tabular-nums sm:table-cell">
         {props.member.joined}
       </TableCell>
-      <TableCell className="w-px text-right">
+      <TableCell className="w-px text-right max-sm:w-auto max-sm:p-0">
         {props.isMe ? (
           <ConfirmAction
             trigger={
               <Button variant="ghost" size="sm" aria-label={t('leave')}>
                 <LogOutIcon data-icon="inline-start" />
-                <span className="max-md:sr-only">{t('leave')}</span>
+                <span className="sm:max-md:sr-only">{t('leave')}</span>
               </Button>
             }
             title={t('leave_title', { workspace: props.workspaceName })}
@@ -190,7 +194,7 @@ const MemberTableRow = (props: {
               trigger={
                 <Button variant="ghost" size="sm" aria-label={t('remove_label', { name })}>
                   <UserMinusIcon data-icon="inline-start" />
-                  <span className="max-md:sr-only">{t('remove')}</span>
+                  <span className="sm:max-md:sr-only">{t('remove')}</span>
                 </Button>
               }
               title={t('remove_title', { name, workspace: props.workspaceName })}
@@ -236,7 +240,7 @@ export const MembersTable = (props: {
 
   return (
     <Table>
-      <TableHeader>
+      <TableHeader className="max-sm:sr-only">
         <TableRow>
           <TableHead>{t('member')}</TableHead>
           <TableHead>{t('role')}</TableHead>

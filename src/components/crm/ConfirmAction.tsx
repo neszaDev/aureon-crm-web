@@ -24,7 +24,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
  * @param props.trigger The button that opens the dialog.
  * @param props.open Whether it is open, when the caller controls it.
  * @param props.onOpenChange Called when it opens or closes.
- * @param props.returnFocus Takes the focus back on close when there is no trigger.
+ * @param props.returnFocus Without a trigger: the element that takes the focus back on close.
  * @param props.title The question.
  * @param props.description What happens.
  * @param props.children A note under the description.
@@ -37,7 +37,7 @@ export const ConfirmAction = (props: {
   trigger?: React.ReactElement;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  returnFocus?: React.RefObject<HTMLElement | null>;
+  returnFocus?: () => HTMLElement | null | undefined;
   title: string;
   description: string;
   children?: React.ReactNode;
@@ -63,7 +63,7 @@ export const ConfirmAction = (props: {
           props.returnFocus &&
           ((event) => {
             event.preventDefault();
-            props.returnFocus?.current?.focus();
+            props.returnFocus?.()?.focus();
           })
         }
       >
