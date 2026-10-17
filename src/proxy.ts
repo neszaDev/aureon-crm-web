@@ -12,11 +12,12 @@ import {
 import { Env } from '@/libs/Env';
 import { routing } from '@/libs/I18nRouting';
 import { logger } from '@/libs/Logger';
+import { safeNextPath } from '@/libs/SafeRedirect';
 
 const handleI18nRouting = createMiddleware(routing);
 
 const localeGroup = routing.locales.join('|');
-const PROTECTED_PATH = new RegExp(`^(/(?:${localeGroup}))?/dashboard(?:/|$)`, 'u');
+const PROTECTED_PATH = new RegExp(`^(/(?:${localeGroup}))?/(?:app|dashboard)(?:/|$)`, 'u');
 const AUTH_PAGE_PATH = new RegExp(`^(/(?:${localeGroup}))?/sign-(?:in|up)(?:/|$)`, 'u');
 
 /**
@@ -65,7 +66,8 @@ export default async function proxy(request: NextRequest) {
 
   const authPageMatch = AUTH_PAGE_PATH.exec(pathname);
   if (authPageMatch && hasAccessToken) {
-    return NextResponse.redirect(new URL(`${authPageMatch[1] ?? ''}/dashboard`, request.url));
+    const next = safeNextPath(request.nextUrl.searchParams.get('next')) ?? '/app';
+    return NextResponse.redirect(new URL(`${authPageMatch[1] ?? ''}${next}`, request.url));
   }
 
   return handleI18nRouting(request);

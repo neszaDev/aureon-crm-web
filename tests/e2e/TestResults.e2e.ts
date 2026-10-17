@@ -4,6 +4,7 @@ import { signUp } from './helpers';
 test.describe('Test results', () => {
   test('creates, lists, summarizes and deletes a result', async ({ page }) => {
     await signUp(page);
+    await page.goto('/dashboard');
     await page.getByRole('link', { name: 'Test results' }).click();
     await expect(page.getByText('No test results yet')).toBeVisible();
 

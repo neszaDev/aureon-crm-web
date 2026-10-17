@@ -15,15 +15,17 @@ import {
 } from '@/libs/Auth';
 import { Env } from '@/libs/Env';
 import { redirect } from '@/libs/I18nNavigation';
+import { safeNextPath } from '@/libs/SafeRedirect';
 import type { AuthValues } from '@/validations/AuthValidation';
 import { SignInValidation, SignUpValidation } from '@/validations/AuthValidation';
 
 /**
- * Stores the backend tokens as httpOnly cookies and sends the user to the dashboard.
+ * Stores the backend tokens as httpOnly cookies and sends the user to the CRM.
  * @param body Token response from the backend.
+ * @param next Where the user was going; followed only if `safeNextPath` accepts it.
  * @returns Only returns (with an error) if the response has no usable tokens.
  */
-const startSession = async (body: Parameters<typeof toSessionTokens>[0]) => {
+const startSession = async (body: Parameters<typeof toSessionTokens>[0], next: unknown) => {
   const tokens = toSessionTokens(body);
   if (!tokens) {
     const t = await getTranslations('AuthForm');
@@ -35,7 +37,7 @@ const startSession = async (body: Parameters<typeof toSessionTokens>[0]) => {
     jar.set(cookie);
   }
 
-  return redirect({ href: '/dashboard', locale: await getLocale() });
+  return redirect({ href: safeNextPath(next) ?? '/app', locale: await getLocale() });
 };
 
 /**
@@ -69,9 +71,10 @@ const rateLimited = async (response: Response) => {
 /**
  * Signs in through the backend (`POST /auth/login`).
  * @param values Email and password from the form.
+ * @param next The page's `next` query parameter (untrusted; checked before use).
  * @returns Field or form errors; on success it redirects instead of returning.
  */
-export async function signIn(values: AuthValues): Promise<ActionResult> {
+export async function signIn(values: AuthValues, next?: unknown): Promise<ActionResult> {
   const t = await getTranslations('AuthForm');
   const parsed = SignInValidation.safeParse(values);
   if (!parsed.success) {
@@ -91,15 +94,16 @@ export async function signIn(values: AuthValues): Promise<ActionResult> {
       : toActionError(error, t('error_generic'));
   }
 
-  return await startSession(data);
+  return await startSession(data, next);
 }
 
 /**
  * Creates an account through the backend (`POST /auth/register`) and signs in.
  * @param values Email and password from the form.
+ * @param next The page's `next` query parameter (untrusted; checked before use).
  * @returns Field or form errors; on success it redirects instead of returning.
  */
-export async function signUp(values: AuthValues): Promise<ActionResult> {
+export async function signUp(values: AuthValues, next?: unknown): Promise<ActionResult> {
   const t = await getTranslations('AuthForm');
   const parsed = SignUpValidation.safeParse(values);
   if (!parsed.success) {
@@ -119,7 +123,7 @@ export async function signUp(values: AuthValues): Promise<ActionResult> {
       : toActionError(error, t('error_generic'));
   }
 
-  return await startSession(data);
+  return await startSession(data, next);
 }
 
 /** Revokes the refresh token on the backend, clears the session cookies and goes home. */

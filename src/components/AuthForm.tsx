@@ -25,8 +25,10 @@ export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(undefined);
+    // Read at submit so the auth pages stay static; the action checks it with safeNextPath.
+    const next = new URLSearchParams(window.location.search).get('next');
     // On success the action redirects, so a result means something went wrong.
-    const result = await (isSignUp ? signUp(values) : signIn(values));
+    const result = await (isSignUp ? signUp(values, next) : signIn(values, next));
 
     for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
       if (field === 'email' || field === 'password') {

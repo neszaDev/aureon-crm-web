@@ -141,6 +141,10 @@
     "close_menu": "Close menu",
     "signed_in_as": "Signed in as"
   },
+  "AppPage": {
+    "title": "Welcome to Aureon CRM",
+    "dashboard_link": "Go to the dashboard"
+  },
   "DashboardPage": {
     "title": "Overview",
     "hello_message": "Hello {email}!",

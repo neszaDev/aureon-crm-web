@@ -17,7 +17,7 @@ export const ADMIN = {
 export const uniqueEmail = () => `e2e-${randomUUID()}@example.com`;
 
 /**
- * Registers a new account through the UI and waits for the dashboard.
+ * Registers a new account through the UI and waits for the CRM home (`/app`).
  * @param page Playwright page.
  * @returns The email of the new account.
  */
@@ -27,13 +27,13 @@ export const signUp = async (page: Page) => {
   await page.getByLabel('Email address').fill(email);
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Create account' }).click();
-  await expect(page.getByText(`Hello ${email}!`)).toBeVisible();
+  await expect(page).toHaveURL(/\/app$/u);
 
   return email;
 };
 
 /**
- * Signs in through the UI and waits for the dashboard.
+ * Signs in through the UI and waits for the CRM home (`/app`).
  * @param page Playwright page.
  * @param credentials Email and password.
  * @param credentials.email Email address.
@@ -44,15 +44,16 @@ export const signIn = async (page: Page, credentials: { email: string; password:
   await page.getByLabel('Email address').fill(credentials.email);
   await page.getByLabel('Password').fill(credentials.password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.getByText(`Hello ${credentials.email}!`)).toBeVisible();
+  await expect(page).toHaveURL(/\/app$/u);
 };
 
 /**
- * Signs out through the UI and waits until the session cookies are gone (the action
- * finishes by redirecting home), so the next navigation is really signed out.
+ * Signs out with the dashboard's button and waits until the session cookies are gone (the
+ * action finishes by redirecting home), so the next navigation is really signed out.
  * @param page Playwright page.
  */
 export const signOut = async (page: Page) => {
+  await page.goto('/dashboard');
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/$/u);
 };

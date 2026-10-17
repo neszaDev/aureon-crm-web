@@ -23,7 +23,7 @@ src/actions/                    server actions: the only place that mutates via 
 src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for pages),
                                 ApiError.ts, schema.d.ts (GENERATED, see below)
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
-src/proxy.ts                    i18n routing + auth: protects /dashboard, refreshes tokens
+src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens
 src/validations/                zod schemas mirroring the backend's request rules
 src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx shadcn add`)
 src/components/report/          Marksheet domain UI: marks, totals, results table

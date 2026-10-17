@@ -141,6 +141,10 @@
     "close_menu": "ปิดเมนู",
     "signed_in_as": "เข้าสู่ระบบเป็น"
   },
+  "AppPage": {
+    "title": "ยินดีต้อนรับสู่ Aureon CRM",
+    "dashboard_link": "ไปที่แดชบอร์ด"
+  },
   "DashboardPage": {
     "title": "ภาพรวม",
     "hello_message": "สวัสดี {email}!",

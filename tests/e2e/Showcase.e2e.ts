@@ -134,6 +134,7 @@ test.describe('Showcase navigation', () => {
   test('opens a sidebar group and navigates to one of its pages', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await signUp(page);
+    await page.goto('/dashboard');
 
     const nav = page.getByRole('navigation', { name: 'App navigation' });
     await nav.getByRole('button', { name: 'Base' }).click();
