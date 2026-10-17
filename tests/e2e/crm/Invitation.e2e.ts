@@ -1,42 +1,12 @@
 import { execFileSync } from 'node:child_process';
-import type { APIRequestContext, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signOut, signUp, uniqueEmail } from '../helpers';
-import { expectNoA11yViolations } from './helpers';
+import { BACKEND_URL, expectNoA11yViolations, invite } from './helpers';
 
-const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8080';
 // The backend's database, for the one state the API can't produce: an expired link. Defaults to
 // the API repository's local Compose project.
 const POSTGRES_CONTAINER = process.env.E2E_POSTGRES_CONTAINER ?? 'aureon-crm-api-postgres-1';
-
-/**
- * Through the API: registers an owner, creates "Acme" and invites `email` as a manager.
- * @param request Playwright API client.
- * @param email The invited email.
- * @returns The link's path and token, the workspace, the invitation and the owner's headers.
- */
-const invite = async (request: APIRequestContext, email: string) => {
-  const owner = await request.post(`${BACKEND_URL}/api/v1/auth/register`, {
-    data: { email: uniqueEmail(), password: PASSWORD },
-  });
-  expect(owner.status()).toBe(201);
-  const { accessToken } = await owner.json();
-  const headers = { Authorization: `Bearer ${accessToken}` };
-  const workspace = await request.post(`${BACKEND_URL}/api/v1/workspaces`, {
-    headers,
-    data: { name: 'Acme', defaultCurrency: 'EUR', timezone: 'Europe/Paris' },
-  });
-  expect(workspace.status()).toBe(201);
-  const { id: workspaceId }: { id: number } = await workspace.json();
-  const invitation = await request.post(
-    `${BACKEND_URL}/api/v1/workspaces/${workspaceId}/invitations`,
-    { headers, data: { email, role: 'MANAGER' } },
-  );
-  expect(invitation.status()).toBe(201);
-  const { id, token }: { id: number; token: string } = await invitation.json();
-
-  return { path: `/invite/${token}`, token, workspaceId, invitationId: id, headers };
-};
 
 /**
  * Moves an invitation's expiry into the past, in the database (only this test's row).

@@ -1,6 +1,20 @@
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { createWorkspace, expectNoA11yViolations } from './crm/helpers';
-import { signUp } from './helpers';
+import { createWorkspace, expectNoA11yViolations, invite } from './crm/helpers';
+import { PASSWORD, signUp, uniqueEmail } from './helpers';
+
+/**
+ * Registers through an invitation link and waits for the workspace it opens.
+ * @param page Playwright page, signed out.
+ * @param path The link.
+ * @param workspaceId The invitation's workspace.
+ */
+const joinThrough = async (page: Page, path: string, workspaceId: number) => {
+  await page.goto(path);
+  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByRole('button', { name: 'Create account and join' }).click();
+  await expect(page).toHaveURL(new RegExp(`/app/${workspaceId}$`, 'u'));
+};
 
 test.describe('Workspaces', () => {
   test('creates the first workspace and opens it in the shell', async ({ page }) => {
@@ -82,6 +96,61 @@ test.describe('Workspaces', () => {
     await expect(notFound).toBeVisible();
     await page.getByRole('link', { name: 'Go to your workspaces' }).click();
     await expect(page).toHaveURL(/\/app$/u);
+  });
+
+  test('shows the pipeline read-only to an invited manager', async ({ page, request }) => {
+    const { path, workspaceId } = await invite(request, uniqueEmail());
+    await joinThrough(page, path, workspaceId);
+
+    await page
+      .getByRole('navigation', { name: 'Workspace navigation' })
+      .getByRole('link', { name: 'Settings' })
+      .click();
+    await page.getByRole('link', { name: 'Pipeline', exact: true }).click();
+    await expect(page).toHaveURL(/\/settings\/pipeline$/u);
+
+    await expect(page.getByText('Only owners and admins can change the pipeline.')).toBeVisible();
+    await expect(page.locator('[data-stage-name]')).toHaveCount(6);
+    await expect(page.getByRole('button', { name: /^(Drag|Move|Edit|Delete) /u })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Add stage' })).toHaveCount(0);
+    await expect(page.getByLabel('Stage name')).toHaveCount(0);
+    await expect(page).toHaveTitle('Pipeline');
+    await expectNoA11yViolations(page);
+  });
+
+  test("ends a removed member's access at their next page", async ({
+    page,
+    browser,
+    request,
+    baseURL,
+  }) => {
+    const email = uniqueEmail();
+    const { path, workspaceId, ownerEmail } = await invite(request, email);
+    await joinThrough(page, path, workspaceId);
+
+    // The owner, in a browser of their own, removes the manager.
+    const ownerContext = await browser.newContext({ baseURL });
+    const owner = await ownerContext.newPage();
+    await owner.goto('/sign-in');
+    await owner.getByLabel('Email address').fill(ownerEmail);
+    await owner.getByLabel('Password').fill(PASSWORD);
+    await owner.getByRole('button', { name: 'Sign in' }).click();
+    await expect(owner).toHaveURL(new RegExp(`/app/${workspaceId}$`, 'u'));
+    await owner.goto(`/app/${workspaceId}/settings/members`);
+    await expect(owner.getByRole('heading', { name: '2 members' })).toBeVisible();
+    await owner.getByRole('button', { name: `Remove ${email}` }).click();
+    await owner.getByRole('alertdialog').getByRole('button', { name: 'Remove' }).click();
+    await expect(owner.getByRole('heading', { name: '1 member' })).toBeVisible();
+    await ownerContext.close();
+
+    // The manager's next navigation inside the workspace.
+    await page
+      .getByRole('navigation', { name: 'Workspace navigation' })
+      .getByRole('link', { name: 'Settings' })
+      .click();
+    await expect(
+      page.getByRole('heading', { name: "Workspace not found or you're not a member" }),
+    ).toBeVisible();
   });
 
   test('opens the rail as a drawer on a phone, in Thai', async ({ page }) => {
