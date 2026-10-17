@@ -7,10 +7,11 @@ import { InviteDialog } from '@/components/crm/settings/InviteDialog';
 import { MembersTable } from '@/components/crm/settings/MembersTable';
 import { PendingInvitations } from '@/components/crm/settings/PendingInvitations';
 import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
-import { getInvitations, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
+import { getInvitations, getMembers } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import type { components } from '@/libs/api/schema';
 import { endRejectedSession } from '@/libs/api/Session';
+import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { can } from '@/libs/crm/Permissions';
 import { assignableRoles } from '@/validations/crm/MemberValidation';
@@ -109,10 +110,11 @@ export default async function MembersPage(props: MembersPageProps) {
   const t = await getTranslations({ locale, namespace: 'MembersPage' });
   const format = await getFormatter({ locale });
 
-  // The layout has loaded the user and the workspace (cached calls) and handled their failures.
+  // The user and the workspace (cached calls); a lost workspace is "not found" even on a
+  // client navigation, which renders the page without its layout.
   const [{ user }, { workspace }] = await Promise.all([
     getCurrentUser(),
-    getWorkspace(workspaceId),
+    getOpenWorkspace(locale, workspaceId),
   ]);
   if (user?.id === undefined || workspace?.id === undefined || !workspace.role) {
     throw new Error('Could not load the workspace');

@@ -8,8 +8,9 @@ import {
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { SourceList } from '@/components/crm/settings/SourceList';
-import { getLeadSources, getWorkspace } from '@/libs/api/CrmQueries';
+import { getLeadSources } from '@/libs/api/CrmQueries';
 import { endRejectedSession } from '@/libs/api/Session';
+import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { can } from '@/libs/crm/Permissions';
 
@@ -30,9 +31,9 @@ export default async function SourcesPage(props: SourcesPageProps) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'SourcesPage' });
 
-  // The layout has loaded the workspace (a cached call) and handled its failures.
+  // The workspace (a cached call); a lost one is "not found" even on a client navigation.
   const [{ workspace }, sources] = await Promise.all([
-    getWorkspace(workspaceId),
+    getOpenWorkspace(locale, workspaceId),
     getLeadSources(workspaceId),
   ]);
   if (sources.unauthorized) {

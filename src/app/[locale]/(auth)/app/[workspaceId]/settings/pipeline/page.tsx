@@ -9,8 +9,9 @@ import {
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { StageList } from '@/components/crm/settings/StageList';
-import { getStages, getWorkspace } from '@/libs/api/CrmQueries';
+import { getStages } from '@/libs/api/CrmQueries';
 import { endRejectedSession } from '@/libs/api/Session';
+import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { can } from '@/libs/crm/Permissions';
 import { toStages } from '@/libs/crm/Stages';
@@ -32,9 +33,9 @@ export default async function PipelinePage(props: PipelinePageProps) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'PipelinePage' });
 
-  // The layout has loaded the workspace (a cached call) and handled its failures.
+  // The workspace (a cached call); a lost one is "not found" even on a client navigation.
   const [{ workspace }, stages] = await Promise.all([
-    getWorkspace(workspaceId),
+    getOpenWorkspace(locale, workspaceId),
     getStages(workspaceId),
   ]);
   if (stages.unauthorized) {

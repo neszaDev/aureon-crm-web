@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RolesMatrix } from '@/components/crm/settings/RolesMatrix';
 import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
-import { getWorkspace } from '@/libs/api/CrmQueries';
+import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 
 type RolesPageProps = {
@@ -22,8 +22,8 @@ export default async function RolesPage(props: RolesPageProps) {
   const { locale, workspaceId } = await props.params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'RolesPage' });
-  // The layout has loaded the workspace (a cached call) and handled its failures.
-  const { workspace } = await getWorkspace(workspaceId);
+  // The workspace (a cached call); a lost one is "not found" even on a client navigation.
+  const { workspace } = await getOpenWorkspace(locale, workspaceId);
 
   return (
     <>

@@ -7,6 +7,7 @@ import { Seal } from '@/components/crm/Seal';
 import { getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
+import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { can } from '@/libs/crm/Permissions';
 import { Link } from '@/libs/I18nNavigation';
 
@@ -37,10 +38,11 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
   const t = await getTranslations({ locale, namespace: 'WorkspacePage' });
   const tRole = await getTranslations({ locale, namespace: 'Roles' });
 
-  // The layout has loaded the user and the workspace (cached calls) and handled their failures.
+  // The user and the workspace (cached calls); a lost workspace is "not found" even on a
+  // client navigation, which renders the page without its layout.
   const [{ user }, { workspace }, members] = await Promise.all([
     getCurrentUser(),
-    getWorkspace(workspaceId),
+    getOpenWorkspace(locale, workspaceId),
     getMembers(workspaceId),
   ]);
   if (members.unauthorized) {

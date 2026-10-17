@@ -4,7 +4,7 @@ import { updateWorkspace } from '@/actions/crm/WorkspaceActions';
 import { currencyOptions } from '@/components/crm/CreateWorkspaceForm';
 import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { WorkspaceForm } from '@/components/crm/WorkspaceForm';
-import { getWorkspace } from '@/libs/api/CrmQueries';
+import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { can } from '@/libs/crm/Permissions';
 import { TIME_ZONES } from '@/validations/crm/WorkspaceValidation';
@@ -26,8 +26,8 @@ export default async function WorkspaceSettingsPage(props: WorkspaceSettingsPage
   const t = await getTranslations({ locale, namespace: 'WorkspaceSettingsPage' });
   const tForm = await getTranslations({ locale, namespace: 'WorkspaceForm' });
 
-  // The layout has loaded the workspace (a cached call) and handled its failures.
-  const { workspace } = await getWorkspace(workspaceId);
+  // The workspace (a cached call); a lost one is "not found" even on a client navigation.
+  const { workspace } = await getOpenWorkspace(locale, workspaceId);
   if (workspace?.id === undefined || workspace.version === undefined) {
     throw new Error('Could not load the workspace');
   }
