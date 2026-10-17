@@ -91,13 +91,25 @@ test.describe('Settings', () => {
     await expectNoA11yViolations(page);
     const message = 'A workspace needs an owner; make someone else an owner first';
 
+    // Your own role asks first, then shows the backend's refusal.
     const role = page.getByLabel(`Role of ${email}`);
     await role.selectOption('ADMIN');
-    await expect(page.getByText(message)).toBeVisible();
+    const dialog = page.getByRole('alertdialog');
+    await expect(
+      dialog.getByRole('heading', { name: 'Change your own role to Admin?' }),
+    ).toBeVisible();
+    await dialog.getByRole('button', { name: 'Change my role' }).click();
+    await expect(dialog.getByText(message)).toBeVisible();
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
     await expect(role).toHaveValue('OWNER');
+    await expect(role).toBeFocused();
 
     await page.getByRole('button', { name: 'Leave workspace' }).click();
-    const dialog = page.getByRole('alertdialog');
+    await expect(
+      dialog.getByText(
+        'No one else owns this workspace. Make another member an owner before you leave.',
+      ),
+    ).toBeVisible();
     await dialog.getByRole('button', { name: 'Leave workspace' }).click();
     await expect(dialog.getByText(message)).toBeVisible();
     await dialog.getByRole('button', { name: 'Cancel' }).click();
@@ -120,6 +132,9 @@ test.describe('Settings', () => {
     await expect(link).toHaveValue(new RegExp(`^${baseURL}/invite/[^/]+$`, 'u'));
     await expect(page.getByRole('button', { name: 'Copy link' })).toBeFocused();
     await expectNoA11yViolations(page);
+    // The link is shown once: Escape doesn't close it, Done does.
+    await page.keyboard.press('Escape');
+    await expect(link).toBeVisible();
     await page.getByRole('button', { name: 'Done' }).click();
 
     const pending = page.getByRole('region', { name: 'Pending invitations' });
@@ -216,6 +231,47 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'Delete Demo booked' }).click();
     await page.getByRole('alertdialog').getByRole('button', { name: 'Delete stage' }).click();
     await expect.poll(async () => await stageOrder(page)).toEqual([...defaults, 'Won', 'Lost']);
+  });
+
+  test('asks to reload a pipeline that changed in another tab', async ({ page }) => {
+    const { workspace } = await startAcme(page);
+    await page.goto(`${workspace}/settings/pipeline`);
+    await expect(page.getByRole('button', { name: 'Move Proposal up' })).toBeVisible();
+    const other = await page.context().newPage();
+    await other.goto(`${workspace}/settings/pipeline`);
+    await other.getByLabel('Stage name').fill('Demo');
+    await other.getByRole('button', { name: 'Add stage' }).click();
+    await expect(other.locator('[data-stage-name]', { hasText: 'Demo' })).toBeVisible();
+
+    // This tab still lists the stages without Demo.
+    await page.getByRole('button', { name: 'Move Proposal up' }).click();
+
+    await expect(
+      page.getByText('The pipeline changed. Reload to see the current stages.'),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Reload' }).click();
+    await expect(page.locator('[data-stage-name]', { hasText: 'Demo' })).toBeVisible();
+  });
+
+  test('asks to reload a source that changed in another tab', async ({ page }) => {
+    const { workspace } = await startAcme(page);
+    await page.goto(`${workspace}/settings/sources`);
+    await expect(page.getByRole('button', { name: 'Archive Website' })).toBeVisible();
+    const other = await page.context().newPage();
+    await other.goto(`${workspace}/settings/sources`);
+    await other.getByRole('button', { name: 'Rename Website' }).click();
+    await other.getByRole('list', { name: 'Lead sources' }).getByLabel('Source name').fill('Web');
+    await other.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(other.getByRole('button', { name: 'Archive Web', exact: true })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Archive Website' }).click();
+
+    const toast = page.getByRole('listitem').filter({
+      hasText: 'Someone else changed this. Reload to see their version.',
+    });
+    await expect(toast).toBeVisible();
+    await toast.getByRole('button', { name: 'Reload' }).click();
+    await expect(page.getByRole('button', { name: 'Archive Web', exact: true })).toBeVisible();
   });
 
   test('adds, archives and deletes a lead source', async ({ page }) => {

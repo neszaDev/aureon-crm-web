@@ -26,6 +26,7 @@ import {
   LoaderCircleIcon,
   LockIcon,
   PencilIcon,
+  RotateCwIcon,
   Trash2Icon,
 } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -116,6 +117,8 @@ const StageForm = (props: {
             autoFocus={props.autoFocus}
             aria-invalid={errors.name ? true : undefined}
             aria-describedby={describedBy(nameId)}
+            // In the server's HTML too, not only once hydrated.
+            defaultValue={props.defaults.name}
             {...form.register('name')}
           />
         </FormField>
@@ -134,6 +137,7 @@ const StageForm = (props: {
             step={1}
             aria-invalid={errors.probability ? true : undefined}
             aria-describedby={describedBy(probabilityId)}
+            defaultValue={props.defaults.probability}
             {...form.register('probability', { valueAsNumber: true })}
           />
         </FormField>
@@ -361,8 +365,9 @@ export const StageList = (props: {
   // The server's answer to the last reorder, valid while the page still shows the stages that
   // reorder started from (a refresh brings the server's list anyway).
   const [saved, setSaved] = useState<{ from: Stage[]; stages: Stage[] }>();
+  const tError = useTranslations('ActionError');
   const [saving, setSaving] = useState(false);
-  const [status, setStatus] = useState<{ text: string; failed?: boolean }>();
+  const [status, setStatus] = useState<{ text: string; failed?: boolean; conflict?: boolean }>();
   const [focusKey, setFocusKey] = useState<string>();
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -377,14 +382,23 @@ export const StageList = (props: {
     setSaving(true);
     setFocusKey(undefined);
     setStatus({ text: t('order_saving') });
-    const result = await props.actions.reorder(stageIds);
-    setSaving(false);
-    setFocusKey(nextFocus);
-    if (result.ok && result.stages) {
-      setSaved({ from, stages: result.stages });
-      setStatus({ text: t('order_saved') });
-    } else {
-      setStatus({ text: result.message ?? t('error_generic'), failed: true });
+    let result: Awaited<ReturnType<StageActions['reorder']>> = { ok: false };
+    try {
+      result = await props.actions.reorder(stageIds);
+    } finally {
+      // Also when the action throws, so "Saving the order…" never stays on screen.
+      setSaving(false);
+      setFocusKey(nextFocus);
+      if (result.ok && result.stages) {
+        setSaved({ from, stages: result.stages });
+        setStatus({ text: t('order_saved') });
+      } else {
+        setStatus({
+          text: result.message ?? t('error_generic'),
+          failed: true,
+          conflict: result.conflict,
+        });
+      }
     }
   };
 
@@ -393,15 +407,30 @@ export const StageList = (props: {
       {props.canManage && (
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 pb-3 sm:px-5">
           <p className="text-sm text-muted-foreground">{t('reorder_hint')}</p>
-          <output
-            className={cn(
-              'flex items-center gap-1.5 text-sm font-medium',
-              status?.failed ? 'text-danger' : 'text-muted-foreground',
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <output
+              className={cn(
+                'flex items-center gap-1.5 text-sm font-medium',
+                status?.failed ? 'text-danger' : 'text-muted-foreground',
+              )}
+            >
+              {status?.failed && <CircleAlertIcon aria-hidden="true" className="size-4 shrink-0" />}
+              {status?.text}
+            </output>
+            {status?.conflict && (
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                onClick={() => {
+                  window.location.reload();
+                }}
+              >
+                <RotateCwIcon data-icon="inline-start" />
+                {tError('reload')}
+              </Button>
             )}
-          >
-            {status?.failed && <CircleAlertIcon aria-hidden="true" className="size-4 shrink-0" />}
-            {status?.text}
-          </output>
+          </span>
         </div>
       )}
       <DndContext

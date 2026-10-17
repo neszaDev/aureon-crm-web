@@ -1,8 +1,8 @@
 'use client';
 
-import { LoaderCircleIcon, LogOutIcon, UserMinusIcon } from 'lucide-react';
+import { InfoIcon, LoaderCircleIcon, LogOutIcon, UserMinusIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useOptimistic, useTransition } from 'react';
+import { useOptimistic, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
 import { Seal } from '@/components/crm/Seal';
@@ -36,10 +36,12 @@ type MemberActions = {
 
 /**
  * One member: seal and name, role (a select when the caller may change it), when they joined,
- * and remove (or leave, on your own row).
+ * and remove (or leave, on your own row). Changing your own role asks first: it can take away
+ * your right to change it back.
  * @param props Component props.
  * @param props.member The member.
  * @param props.isMe Whether it is the signed-in user.
+ * @param props.lastOwner Whether it is your row and you are the only owner.
  * @param props.manageable Whether the caller may change this member's role or remove them.
  * @param props.roles The roles the caller may give.
  * @param props.workspaceName The workspace, named in the confirmations.
@@ -49,6 +51,7 @@ type MemberActions = {
 const MemberTableRow = (props: {
   member: MemberRow;
   isMe: boolean;
+  lastOwner: boolean;
   manageable: boolean;
   roles: readonly WorkspaceRole[];
   workspaceName: string;
@@ -59,6 +62,10 @@ const MemberTableRow = (props: {
   const [isPending, startTransition] = useTransition();
   // Shows the chosen role while it saves; it falls back to the saved one if the backend refuses.
   const [role, setRole] = useOptimistic(props.member.role);
+  // Your own new role, waiting for your confirmation.
+  const [ownRole, setOwnRole] = useState<WorkspaceRole>();
+  const [confirmingOwnRole, setConfirmingOwnRole] = useState(false);
+  const select = useRef<HTMLSelectElement>(null);
   const name = props.member.displayName ?? props.member.email;
 
   return (
@@ -86,6 +93,7 @@ const MemberTableRow = (props: {
         {props.manageable ? (
           <span className="flex items-center gap-2">
             <NativeSelect
+              ref={select}
               size="sm"
               aria-label={t('role_of', { name })}
               value={role}
@@ -93,6 +101,12 @@ const MemberTableRow = (props: {
               onChange={(event) => {
                 const next = props.roles.find((item) => item === event.target.value);
                 if (!next) {
+                  return;
+                }
+                if (props.isMe) {
+                  // The select keeps the saved role until the dialog's answer.
+                  setOwnRole(next);
+                  setConfirmingOwnRole(true);
                   return;
                 }
                 startTransition(async () => {
@@ -116,6 +130,22 @@ const MemberTableRow = (props: {
                 <span className="sr-only">{t('saving')}</span>
               </span>
             )}
+            {props.isMe && (
+              <ConfirmAction
+                open={confirmingOwnRole}
+                onOpenChange={setConfirmingOwnRole}
+                returnFocus={select}
+                title={t('self_role_title', { role: ownRole ? tRole(`role_${ownRole}`) : '' })}
+                description={t('self_role_text')}
+                confirmLabel={t('self_role_confirm')}
+                cancelLabel={t('cancel')}
+                action={async () =>
+                  ownRole
+                    ? await props.actions.changeRole(props.member.userId, ownRole)
+                    : { ok: true }
+                }
+              />
+            )}
           </span>
         ) : (
           tRole(`role_${role}`)
@@ -138,7 +168,18 @@ const MemberTableRow = (props: {
             confirmLabel={t('leave')}
             cancelLabel={t('cancel')}
             action={async () => await props.actions.remove(props.member.userId)}
-          />
+          >
+            {/* The backend refuses it anyway; saying so first saves a try. */}
+            {props.lastOwner && (
+              <p className="flex items-start gap-2.5 rounded-md border border-rule bg-muted px-3.5 py-3 text-sm font-medium">
+                <InfoIcon
+                  aria-hidden="true"
+                  className="mt-px size-4 shrink-0 text-muted-foreground"
+                />
+                {t('leave_last_owner')}
+              </p>
+            )}
+          </ConfirmAction>
         ) : (
           props.manageable && (
             <ConfirmAction
@@ -186,6 +227,8 @@ export const MembersTable = (props: {
   const t = useTranslations('MembersTable');
   const ownerRules = props.callerRole === 'OWNER';
   const roles = assignableRoles(props.callerRole);
+  const lastOwner =
+    ownerRules && props.members.filter((member) => member.role === 'OWNER').length === 1;
 
   return (
     <Table>
@@ -205,6 +248,7 @@ export const MembersTable = (props: {
             key={member.userId}
             member={member}
             isMe={member.userId === props.me}
+            lastOwner={lastOwner && member.userId === props.me}
             manageable={props.canManage && (ownerRules || member.role !== 'OWNER')}
             roles={roles}
             workspaceName={props.workspaceName}

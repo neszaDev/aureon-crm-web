@@ -75,6 +75,8 @@ export const ProfileForm = (props: {
           autoComplete="name"
           aria-invalid={errors.displayName ? true : undefined}
           aria-describedby={describedBy('display-name')}
+          // In the server's HTML too, so the field isn't empty until the form hydrates.
+          defaultValue={props.displayName ?? ''}
           {...form.register('displayName')}
         />
       </FormField>

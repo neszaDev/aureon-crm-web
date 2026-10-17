@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { refresh } from 'next/cache';
 import { actionFailure } from '@/libs/api/ActionFailure';
 import type { ActionResult } from '@/libs/api/ApiError';
-import { isStaleVersion } from '@/libs/api/ApiError';
+import { isApiError, isStaleVersion } from '@/libs/api/ApiError';
 import { authedBackend } from '@/libs/api/Backend';
 import type { Stage } from '@/libs/crm/Stages';
 import { toStages } from '@/libs/crm/Stages';
@@ -90,7 +90,8 @@ export async function updateStage(
  * Lost stay last.
  * @param workspaceId The workspace.
  * @param stageIds Every open stage id, once, in the new order.
- * @returns The whole pipeline in the server's order, or the backend's message.
+ * @returns The whole pipeline in the server's order, a reload conflict when the pipeline changed
+ *   meanwhile, or the backend's message.
  */
 export async function reorderStages(
   workspaceId: number,
@@ -102,6 +103,13 @@ export async function reorderStages(
     { params: { path: { workspaceId } }, body: { stageIds } },
   );
   if (!response.ok || !data) {
+    // The ids no longer match the open stages: another tab added or deleted one meanwhile.
+    // (The spec declares no error body, so it is checked as unknown.)
+    const body: unknown = error;
+    if (response.status === 400 && isApiError(body) && body.fieldErrors?.stageIds) {
+      const t = await getTranslations('StageList');
+      return { ok: false, conflict: true, message: t('error_order_stale') };
+    }
     return await actionFailure(response, error);
   }
 

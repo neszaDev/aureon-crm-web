@@ -125,6 +125,7 @@ const SourceForm = (props: {
  */
 const SourceItem = (props: { source: Source; canManage: boolean; actions: SourceActions }) => {
   const t = useTranslations('SourceList');
+  const tError = useTranslations('ActionError');
   const [editing, setEditing] = useState(false);
   // Once an editor has closed, its Rename button takes the focus back when it reappears.
   const [edited, setEdited] = useState(false);
@@ -201,7 +202,17 @@ const SourceItem = (props: { source: Source; canManage: boolean; actions: Source
                       },
                     );
                     if (!result.ok) {
-                      toast.error(result.message ?? t('error_generic'));
+                      // Someone else changed the source first: reloading shows their version.
+                      toast.error(result.message ?? t('error_generic'), {
+                        action: result.conflict
+                          ? {
+                              label: tError('reload'),
+                              onClick: () => {
+                                window.location.reload();
+                              },
+                            }
+                          : undefined,
+                      });
                     }
                   });
                 }}

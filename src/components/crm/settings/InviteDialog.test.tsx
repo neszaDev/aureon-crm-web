@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { CreatedInvitation } from '@/actions/crm/InvitationActions';
 import type { ActionResult } from '@/libs/api/ApiError';
 import messages from '@/locales/en.json';
@@ -68,6 +68,47 @@ describe(InviteDialog, () => {
 
     await expect.element(page.getByLabelText('Email address')).toHaveValue('');
     expect(page.getByLabelText('Invitation link', { exact: true }).elements()).toHaveLength(0);
+  });
+
+  it('keeps the link open on Escape and an outside click, closing only on purpose', async () => {
+    await renderDialog(
+      vi.fn<Invite>().mockResolvedValue({
+        ok: true,
+        invitation: {
+          email: 'ana@example.com',
+          role: 'MANAGER',
+          expiresAt: '2026-10-25T03:00:00Z',
+          link: LINK,
+        },
+      }),
+    );
+    await invite('ana@example.com');
+    const link = page.getByLabelText('Invitation link', { exact: true });
+    await expect.element(link).toHaveValue(LINK);
+
+    // A closing dialog stays in the DOM while it fades out: its state tells.
+    const dialog = page.getByRole('dialog');
+
+    await userEvent.keyboard('{Escape}');
+    await expect.element(dialog).toHaveAttribute('data-state', 'open');
+
+    // A click on the overlay, just above the dialog.
+    await dialog.click({ position: { x: 8, y: -12 }, force: true });
+    await expect.element(dialog).toHaveAttribute('data-state', 'open');
+    await expect.element(link).toHaveValue(LINK);
+
+    await page.getByRole('button', { name: 'Close' }).click();
+    await expect.poll(() => link.elements()).toHaveLength(0);
+  });
+
+  it('closes the form on Escape before a link exists', async () => {
+    await renderDialog(vi.fn<Invite>());
+    await page.getByRole('button', { name: 'Invite member' }).click();
+    await expect.element(page.getByLabelText('Email address')).toBeVisible();
+
+    await userEvent.keyboard('{Escape}');
+
+    await expect.poll(() => page.getByLabelText('Email address').elements()).toHaveLength(0);
   });
 
   it('offers only the roles the caller may give', async () => {

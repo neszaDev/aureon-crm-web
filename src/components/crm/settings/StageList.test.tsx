@@ -76,6 +76,44 @@ describe(StageList, () => {
     expect(shownOrder()).toStrictEqual(['New', 'Qualified', 'Proposal', 'Won', 'Lost']);
   });
 
+  it('offers a reload when the pipeline changed since the page loaded', async () => {
+    await renderList(
+      vi.fn<Reorder>().mockResolvedValue({
+        ok: false,
+        conflict: true,
+        message: 'The pipeline changed. Reload to see the current stages.',
+      }),
+    );
+
+    await page.getByRole('button', { name: 'Move Qualified up' }).click();
+
+    await expect
+      .element(page.getByText('The pipeline changed. Reload to see the current stages.'))
+      .toBeVisible();
+    await expect.element(page.getByRole('button', { name: 'Reload' })).toBeVisible();
+  });
+
+  it('stops saying it saves when the action throws', async () => {
+    const failure = new Error('Network down');
+    const rejections: unknown[] = [];
+    // The error still surfaces (unhandled); the listener records it instead of failing the run.
+    const record = (event: PromiseRejectionEvent) => {
+      rejections.push(event.reason);
+    };
+    window.addEventListener('unhandledrejection', record);
+    await renderList(vi.fn<Reorder>().mockRejectedValue(failure));
+
+    await page.getByRole('button', { name: 'Move Qualified up' }).click();
+
+    await expect.element(page.getByText("The order wasn't saved. Try again.")).toBeVisible();
+    expect(page.getByText('Saving the order…').elements()).toHaveLength(0);
+    await expect
+      .element(page.getByRole('button', { name: 'Move Qualified up' }))
+      .not.toHaveAttribute('aria-disabled');
+    await expect.poll(() => rejections).toContain(failure);
+    window.removeEventListener('unhandledrejection', record);
+  });
+
   it('pins Won and Lost at the end, where they move and delete no more', async () => {
     const reorder = vi.fn<Reorder>();
     await renderList(reorder);

@@ -272,7 +272,11 @@
     "remove": "Retirer",
     "remove_label": "Retirer {name}",
     "remove_title": "Retirer {name} de {workspace} ?",
-    "remove_text": "Cette personne perd l'accès immédiatement. Ses fiches restent, marquées non attribuées, et un responsable peut les confier à quelqu'un d'autre."
+    "remove_text": "Cette personne perd l'accès immédiatement. Ses fiches restent, marquées non attribuées, et un responsable peut les confier à quelqu'un d'autre.",
+    "self_role_title": "Changer votre propre rôle en {role} ?",
+    "self_role_text": "Vos accès changent tout de suite, et vous ne pourrez peut-être pas revenir en arrière vous-même.",
+    "self_role_confirm": "Changer mon rôle",
+    "leave_last_owner": "Personne d'autre ne possède cet espace de travail. Faites d'un autre membre un propriétaire avant de partir."
   },
   "InviteDialog": {
     "open": "Inviter un membre",
@@ -405,7 +409,8 @@
     "delete": "Supprimer {name}",
     "delete_title": "Supprimer l'étape {name} ?",
     "delete_text": "C'est définitif. Une étape qui contient des affaires ne peut pas être supprimée.",
-    "delete_confirm": "Supprimer l'étape"
+    "delete_confirm": "Supprimer l'étape",
+    "error_order_stale": "Le pipeline a changé. Rechargez pour voir les étapes actuelles."
   },
   "SourcesPage": {
     "title": "Sources de prospects",

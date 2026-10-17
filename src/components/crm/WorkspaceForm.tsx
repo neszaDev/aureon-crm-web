@@ -52,11 +52,16 @@ export const WorkspaceForm = (props: {
     preferredZone === null || props.timeZones.includes(preferredZone)
       ? props.timeZones
       : [...props.timeZones, preferredZone].toSorted();
+  const initial = props.defaults ?? {
+    name: '',
+    defaultCurrency: 'USD',
+    timezone: zone ?? 'UTC',
+  };
   const form = useForm<WorkspaceValues>({
     resolver: zodResolver(WorkspaceValidation),
     // `values` rather than defaults: they follow the zone once known (or the saved values once
     // refreshed), keeping what the user changed.
-    values: props.defaults ?? { name: '', defaultCurrency: 'USD', timezone: zone ?? 'UTC' },
+    values: initial,
     resetOptions: { keepDirtyValues: true },
   });
   const { errors, isSubmitting } = form.formState;
@@ -64,6 +69,8 @@ export const WorkspaceForm = (props: {
     id,
     'aria-invalid': errors[name] ? true : undefined,
     'aria-describedby': describedBy(id),
+    // In the server's HTML too, so the fields aren't empty until the form hydrates.
+    defaultValue: initial[name],
     ...form.register(name),
   });
 

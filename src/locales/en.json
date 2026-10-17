@@ -272,7 +272,11 @@
     "remove": "Remove",
     "remove_label": "Remove {name}",
     "remove_title": "Remove {name} from {workspace}?",
-    "remove_text": "They lose access right away. Their records stay, shown as unassigned, so a manager can hand them on."
+    "remove_text": "They lose access right away. Their records stay, shown as unassigned, so a manager can hand them on.",
+    "self_role_title": "Change your own role to {role}?",
+    "self_role_text": "Your access changes right away, and you may not be able to change it back yourself.",
+    "self_role_confirm": "Change my role",
+    "leave_last_owner": "No one else owns this workspace. Make another member an owner before you leave."
   },
   "InviteDialog": {
     "open": "Invite member",
@@ -405,7 +409,8 @@
     "delete": "Delete {name}",
     "delete_title": "Delete the stage {name}?",
     "delete_text": "This can't be undone. A stage that has deals in it can't be deleted.",
-    "delete_confirm": "Delete stage"
+    "delete_confirm": "Delete stage",
+    "error_order_stale": "The pipeline changed. Reload to see the current stages."
   },
   "SourcesPage": {
     "title": "Lead sources",

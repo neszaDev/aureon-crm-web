@@ -240,7 +240,22 @@ export const InviteDialog = (props: {
           {t('open')}
         </Button>
       </DialogTrigger>
-      <DialogContent closeLabel={t('close')} className="sm:max-w-md">
+      <DialogContent
+        closeLabel={t('close')}
+        className="sm:max-w-md"
+        // The link is shown only once: a stray Escape or click outside must not lose it. Done
+        // and the close button still close.
+        onEscapeKeyDown={(event) => {
+          if (created) {
+            event.preventDefault();
+          }
+        }}
+        onInteractOutside={(event) => {
+          if (created) {
+            event.preventDefault();
+          }
+        }}
+      >
         {created ? (
           <InvitationLink invitation={created} timeZone={props.timeZone} />
         ) : (
