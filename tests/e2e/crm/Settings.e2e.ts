@@ -131,6 +131,8 @@ test.describe('Settings', () => {
     const link = page.getByLabel('Invitation link', { exact: true });
     await expect(link).toHaveValue(new RegExp(`^${baseURL}/invite/[^/]+$`, 'u'));
     await expect(page.getByRole('button', { name: 'Copy link' })).toBeFocused();
+    // Next streams the title after a client-side navigation: wait for it before axe looks.
+    await expect(page).toHaveTitle(/Members/u);
     await expectNoA11yViolations(page);
     // The link is shown once: Escape doesn't close it, Done does.
     await page.keyboard.press('Escape');
