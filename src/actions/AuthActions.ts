@@ -1,56 +1,17 @@
 'use server';
 
 import { getLocale, getTranslations } from 'next-intl/server';
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { toActionError } from '@/libs/api/ApiError';
 import { backend } from '@/libs/api/Backend';
-import { clientIpFrom } from '@/libs/api/ClientIp';
 import { rateLimited } from '@/libs/api/RateLimit';
-import {
-  ACCESS_TOKEN_COOKIE,
-  isSecureAppUrl,
-  REFRESH_TOKEN_COOKIE,
-  sessionCookies,
-  toSessionTokens,
-} from '@/libs/Auth';
-import { Env } from '@/libs/Env';
+import { forwardedFor, startSession } from '@/libs/api/Session';
+import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '@/libs/Auth';
 import { redirect } from '@/libs/I18nNavigation';
 import { safeNextPath } from '@/libs/SafeRedirect';
 import type { AuthValues } from '@/validations/AuthValidation';
 import { SignInValidation, SignUpValidation } from '@/validations/AuthValidation';
-
-/**
- * Stores the backend tokens as httpOnly cookies and sends the user to the CRM.
- * @param body Token response from the backend.
- * @param next Where the user was going; followed only if `safeNextPath` accepts it.
- * @returns Only returns (with an error) if the response has no usable tokens.
- */
-const startSession = async (body: Parameters<typeof toSessionTokens>[0], next: unknown) => {
-  const tokens = toSessionTokens(body);
-  if (!tokens) {
-    const t = await getTranslations('AuthForm');
-    return { ok: false, message: t('error_generic') } satisfies ActionResult;
-  }
-
-  const jar = await cookies();
-  for (const cookie of sessionCookies(tokens, isSecureAppUrl(Env.APP_URL))) {
-    jar.set(cookie);
-  }
-
-  return redirect({ href: safeNextPath(next) ?? '/app', locale: await getLocale() });
-};
-
-/**
- * Passes the browser's address on, so the backend rate-limits each client and not this server.
- * @returns Headers for the backend's sign-in and registration calls.
- */
-const forwardedFor = async () => {
-  const incoming = await headers();
-  const ip = clientIpFrom(incoming.get('x-forwarded-for'));
-
-  return ip ? { 'X-Forwarded-For': ip } : {};
-};
 
 /**
  * Signs in through the backend (`POST /auth/login`).
@@ -110,8 +71,12 @@ export async function signUp(values: AuthValues, next?: unknown): Promise<Action
   return await startSession(data, next);
 }
 
-/** Revokes the refresh token on the backend, clears the session cookies and goes home. */
-export async function signOut() {
+/**
+ * Revokes the refresh token on the backend, clears the session cookies and goes home.
+ * @param next Where to go instead (untrusted; only what `safeNextPath` accepts), e.g. back to
+ *   an invitation to use it with another account. A form passes its `FormData`: ignored.
+ */
+export async function signOut(next?: unknown) {
   const jar = await cookies();
   const refreshToken = jar.get(REFRESH_TOKEN_COOKIE)?.value;
 
@@ -122,5 +87,5 @@ export async function signOut() {
 
   jar.delete(ACCESS_TOKEN_COOKIE);
   jar.delete(REFRESH_TOKEN_COOKIE);
-  redirect({ href: '/', locale: await getLocale() });
+  redirect({ href: safeNextPath(next) ?? '/', locale: await getLocale() });
 }

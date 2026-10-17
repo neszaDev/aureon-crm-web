@@ -24,13 +24,18 @@ Next.js server, which holds the session in two **httpOnly** cookies.
 | `access_token` | backend JWT (15 min by default) | token lifetime − 30 s |
 | `refresh_token` | backend refresh token (rotates on use) | refresh-token lifetime |
 
-- **Sign-in/sign-up** (`src/actions/AuthActions.ts`) call the backend, set both cookies and go
-  to `/app`, or to the page's `?next=` when `safeNextPath` (`src/libs/SafeRedirect.ts`) accepts
-  it (only `/app/**` and `/invite/**`; this is what keeps it from being an open redirect).
+- **Sign-in/sign-up** (`src/actions/AuthActions.ts`, and sign-up through an invitation in
+  `src/actions/crm/InvitationAcceptActions.ts`) call the backend, set both cookies
+  (`startSession` in `src/libs/api/Session.ts`) and go to `/app`, or to the page's `?next=` when
+  `safeNextPath` (`src/libs/SafeRedirect.ts`) accepts it (only `/app/**` and `/invite/**`; this
+  is what keeps it from being an open redirect).
 - **Protected pages** (`/app/**` and `/dashboard/**`, any locale) go through `src/proxy.ts`.
   With no access cookie but a refresh cookie, it calls `/auth/refresh`, sets the new cookies on
   the request (so this render already uses them) and on the response (so the browser keeps
-  them). With neither, it redirects to `/sign-in`.
+  them). With neither, it redirects to `/sign-in`, with `?next=` back to the page for `/app/**`.
+- **Invitation pages** (`/invite/<token>`) are public. The proxy refreshes the session there too,
+  but never redirects, so a signed-in visitor is still recognised. The token is a secret: the
+  page sends no `Referer`, and nothing logs it (`redactPath` in `ApiError.ts`).
 - Because each cookie expires with its token, "is the access cookie present?" is the only check
   needed: no JWT decoding in the frontend.
 - **A failed refresh does not delete cookies.** Two tabs can refresh at once and, with rotation,

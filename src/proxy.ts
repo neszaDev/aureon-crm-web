@@ -19,6 +19,7 @@ const handleI18nRouting = createMiddleware(routing);
 const localeGroup = routing.locales.join('|');
 const PROTECTED_PATH = new RegExp(`^(/(?:${localeGroup}))?/(?:app|dashboard)(?:/|$)`, 'u');
 const AUTH_PAGE_PATH = new RegExp(`^(/(?:${localeGroup}))?/sign-(?:in|up)(?:/|$)`, 'u');
+const INVITE_PATH = new RegExp(`^(?:/(?:${localeGroup}))?/invite/`, 'u');
 
 /**
  * Exchanges a refresh token for new tokens. Never throws: a failure means "not signed in".
@@ -42,14 +43,24 @@ export default async function proxy(request: NextRequest) {
   const hasAccessToken = Boolean(request.cookies.get(ACCESS_TOKEN_COOKIE)?.value);
 
   const protectedMatch = PROTECTED_PATH.exec(pathname);
-  if (protectedMatch && !hasAccessToken) {
-    const localePrefix = protectedMatch[1] ?? '';
+  // Invitation pages are public, but they tell a signed-in visitor apart: refresh their session
+  // too, without sending anyone to sign in.
+  if ((protectedMatch || INVITE_PATH.test(pathname)) && !hasAccessToken) {
     const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
     const tokens = refreshToken ? await refreshSession(refreshToken) : undefined;
 
+    if (!tokens && !protectedMatch) {
+      return handleI18nRouting(request);
+    }
     if (!tokens) {
       // Don't delete cookies here: a parallel request may have just rotated them successfully.
-      return NextResponse.redirect(new URL(`${localePrefix}/sign-in`, request.url));
+      const signIn = new URL(`${protectedMatch?.[1] ?? ''}/sign-in`, request.url);
+      // Back here after signing in (`/dashboard` isn't an allowed `next`: plain sign-in).
+      const next = safeNextPath(`${pathname}${request.nextUrl.search}`);
+      if (next) {
+        signIn.searchParams.set('next', next);
+      }
+      return NextResponse.redirect(signIn);
     }
 
     const cookies = sessionCookies(tokens, isSecureAppUrl(Env.APP_URL));

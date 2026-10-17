@@ -1,5 +1,6 @@
 import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import { createWorkspace } from './crm/helpers';
 import { ADMIN, PASSWORD, signOut, signUp, uniqueEmail } from './helpers';
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8080';
@@ -44,10 +45,28 @@ test.describe('Auth', () => {
       await expect(page).toHaveURL(/\/sign-in$/u);
     });
 
-    test('redirects signed-out visitors of the CRM to sign-in', async ({ page }) => {
+    test('redirects signed-out visitors of the CRM to sign-in, then back', async ({
+      page,
+      baseURL,
+    }) => {
       await page.goto('/app');
 
-      await expect(page).toHaveURL(/\/sign-in$/u);
+      await expect(page).toHaveURL(`${baseURL}/sign-in?next=%2Fapp`);
+
+      // A deep link survives signing in, in its language.
+      const email = await signUp(page);
+      const workspace = await createWorkspace(page, 'Acme');
+      await signOut(page);
+      const deepLink = `${workspace.replace(`${baseURL}/app/`, '/fr/app/')}?tab=x`;
+      await page.goto(deepLink);
+      await expect(page).toHaveURL(
+        `${baseURL}/fr/sign-in?next=${encodeURIComponent(deepLink.replace('/fr', ''))}`,
+      );
+      await page.getByLabel('Adresse e-mail').fill(email);
+      await page.getByLabel('Mot de passe').fill(PASSWORD);
+      await page.getByRole('button', { name: 'Se connecter' }).click();
+
+      await expect(page).toHaveURL(`${baseURL}${deepLink}`);
     });
 
     test('keeps the locale when redirecting', async ({ page }) => {
@@ -161,6 +180,16 @@ test.describe('Auth', () => {
       await page.goto(`/sign-up?next=${encodeURIComponent('/app?from=proxy')}`);
 
       await expect(page).toHaveURL(`${baseURL}/app?from=proxy`);
+    });
+
+    test('keeps next when switching between sign-in and sign-up', async ({ page, baseURL }) => {
+      const next = encodeURIComponent('/invite/abc');
+      await page.goto(`/sign-in?next=${next}`);
+
+      await page.getByRole('link', { name: 'Create one' }).click();
+      await expect(page).toHaveURL(`${baseURL}/sign-up?next=${next}`);
+      await page.getByRole('link', { name: 'Sign in' }).click();
+      await expect(page).toHaveURL(`${baseURL}/sign-in?next=${next}`);
     });
 
     test('ignores a next that leaves the site', async ({ page, baseURL }) => {

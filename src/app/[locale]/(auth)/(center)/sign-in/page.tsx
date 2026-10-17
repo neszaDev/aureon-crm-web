@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Suspense } from 'react';
 import { AuthForm } from '@/components/AuthForm';
+import { AuthSwitchLink } from '@/components/AuthSwitchLink';
 import { SessionExpiredNotice } from '@/components/SessionExpiredNotice';
-import { Link } from '@/libs/I18nNavigation';
 
 type SignInPageProps = {
   params: Promise<{ locale: string }>;
@@ -37,13 +37,7 @@ export default async function SignInPage(props: SignInPageProps) {
         <AuthForm mode="sign-in" />
       </div>
       <p className="text-sm text-ink-600">
-        {t('switch_prompt')}{' '}
-        <Link
-          href="/sign-up/"
-          className="font-semibold text-seal-ink underline decoration-seal-ink/40 underline-offset-4 hover:decoration-seal-ink"
-        >
-          {t('switch_link')}
-        </Link>
+        {t('switch_prompt')} <AuthSwitchLink href="/sign-up">{t('switch_link')}</AuthSwitchLink>
       </p>
     </div>
   );

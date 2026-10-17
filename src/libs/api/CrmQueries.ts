@@ -1,7 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
 import { toWorkspaceId } from '@/libs/crm/WorkspaceId';
-import { authedBackend } from './Backend';
+import { authedBackend, backend } from './Backend';
 
 // Read-side CRM calls for server components, like `Queries.ts`. Each returns the data plus
 // `unauthorized` (401: the session is gone), `forbidden` (403) and `notFound` (404: unknown,
@@ -130,3 +130,18 @@ export const getLeadSources = cache(async (segment: string) => {
 
   return { sources: data, ...flags(response.status) };
 });
+
+/**
+ * Previews an invitation link (`GET /invitations/{token}`, public, so without the session: a
+ * rejected access token must not hide the invitation).
+ * @param token The link's token, already checked with `InvitationTokenValidation`. A secret:
+ *   never log it.
+ * @returns The invitation (workspace, email, role, status) and `notFound` (unknown token).
+ */
+export const getInvitationPreview = async (token: string) => {
+  const { data, response } = await backend.GET('/api/v1/invitations/{token}', {
+    params: { path: { token } },
+  });
+
+  return { invitation: data, notFound: response.status === 404 };
+};

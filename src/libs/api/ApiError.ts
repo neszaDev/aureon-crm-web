@@ -47,8 +47,8 @@ export const isStaleVersion = (body?: unknown) =>
 
 /**
  * Hides the invitation token in a backend path before it is logged: tokens are secrets. The
- * backend already sends route patterns; this guards against a raw URI.
- * @param path A backend request path.
+ * backend already sends route patterns; this guards against a raw URI (in a path or any text).
+ * @param path A backend request path, or text that may contain one.
  * @returns The path with `/api/v1/invitations/<token>` as `/api/v1/invitations/{token}`.
  */
 export const redactPath = (path: string) =>
@@ -62,7 +62,7 @@ export const redactPath = (path: string) =>
  */
 export const toActionError = (body: unknown, fallback: string): ActionResult => {
   if (!isApiError(body)) {
-    logger.warn('Unexpected backend error response', { body: String(body) });
+    logger.warn('Unexpected backend error response', { body: redactPath(String(body)) });
     return { ok: false, message: fallback };
   }
   if (body.status >= 500) {

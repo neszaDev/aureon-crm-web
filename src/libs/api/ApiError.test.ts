@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { logger } from '@/libs/Logger';
 import { isApiError, isStaleVersion, redactPath, toActionError } from './ApiError';
 
 const apiError = {
@@ -43,6 +44,20 @@ describe('ApiError', () => {
         ok: false,
         message: 'fallback',
       });
+    });
+
+    it('never logs an invitation token', () => {
+      const warn = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+      const error = vi.spyOn(logger, 'error').mockImplementation(() => {});
+
+      toActionError('<p>No route for /api/v1/invitations/secret-token/accept</p>', 'fallback');
+      toActionError({ ...apiError, status: 502, path: '/api/v1/invitations/secret-token' }, 'x');
+
+      expect(JSON.stringify([warn.mock.calls, error.mock.calls])).not.toContain('secret-token');
+      expect(warn).toHaveBeenCalledOnce();
+      expect(error).toHaveBeenCalledOnce();
+      warn.mockRestore();
+      error.mockRestore();
     });
   });
 
