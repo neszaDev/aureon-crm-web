@@ -70,7 +70,8 @@ const MemberTableRow = (props: {
 
   return (
     <TableRow>
-      {/* Takes the free width; long names and emails wrap instead of widening the table. */}
+      {/* Takes the free width; long names wrap and emails truncate instead of widening the
+          table (an email broken over three lines on a phone reads as noise). */}
       <TableCell className="w-full max-w-0 py-2.5 whitespace-normal">
         <span className="flex min-w-0 items-center gap-3">
           <Seal name={props.member.displayName} email={props.member.email} size="sm" />
@@ -82,7 +83,10 @@ const MemberTableRow = (props: {
               )}
             </span>
             {props.member.displayName && (
-              <span className="text-[0.8125rem] break-all text-muted-foreground">
+              <span
+                title={props.member.email}
+                className="truncate text-[0.8125rem] text-muted-foreground"
+              >
                 {props.member.email}
               </span>
             )}
