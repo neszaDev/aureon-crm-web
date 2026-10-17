@@ -6,6 +6,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import { toActionError } from '@/libs/api/ApiError';
 import { backend } from '@/libs/api/Backend';
 import { clientIpFrom } from '@/libs/api/ClientIp';
+import { rateLimited } from '@/libs/api/RateLimit';
 import {
   ACCESS_TOKEN_COOKIE,
   isSecureAppUrl,
@@ -49,23 +50,6 @@ const forwardedFor = async () => {
   const ip = clientIpFrom(incoming.get('x-forwarded-for'));
 
   return ip ? { 'X-Forwarded-For': ip } : {};
-};
-
-/**
- * The form message for a backend 429: how long to wait, rounded up to whole minutes.
- * @param response The backend response.
- * @returns The translated message.
- */
-const rateLimited = async (response: Response) => {
-  const t = await getTranslations('AuthForm');
-  const seconds = Number(response.headers.get('Retry-After'));
-
-  return {
-    ok: false,
-    message: t('error_rate_limited', {
-      minutes: Math.max(1, Math.ceil((Number.isFinite(seconds) ? seconds : 60) / 60)),
-    }),
-  } satisfies ActionResult;
 };
 
 /**

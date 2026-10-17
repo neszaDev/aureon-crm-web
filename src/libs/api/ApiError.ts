@@ -29,7 +29,30 @@ export type ActionResult = {
   ok: boolean;
   message?: string;
   fieldErrors?: Record<string, string>;
+  /** Someone else saved the record first (stale `version`): the form offers a reload. */
+  conflict?: boolean;
 };
+
+// The backend's message for an outdated `version` (`Versions.check` and its optimistic-lock
+// handler). Its other 409s (a duplicate name, a rule) carry their own messages.
+const STALE_VERSION_MESSAGE = 'Changed by another request; reload and try again';
+
+/**
+ * Tells whether a failed update was refused because the record changed since it was read.
+ * @param body Parsed JSON body of the failed response.
+ * @returns Whether it is the backend's stale-version conflict.
+ */
+export const isStaleVersion = (body?: unknown) =>
+  isApiError(body) && body.status === 409 && body.message === STALE_VERSION_MESSAGE;
+
+/**
+ * Hides the invitation token in a backend path before it is logged: tokens are secrets. The
+ * backend already sends route patterns; this guards against a raw URI.
+ * @param path A backend request path.
+ * @returns The path with `/api/v1/invitations/<token>` as `/api/v1/invitations/{token}`.
+ */
+export const redactPath = (path: string) =>
+  path.replaceAll(/(\/api\/v1\/invitations\/)[^/?#]+/gu, '$1{token}');
 
 /**
  * Converts a failed backend response into a form-friendly result.
@@ -43,7 +66,7 @@ export const toActionError = (body: unknown, fallback: string): ActionResult => 
     return { ok: false, message: fallback };
   }
   if (body.status >= 500) {
-    logger.error('Backend error', { status: body.status, path: body.path });
+    logger.error('Backend error', { status: body.status, path: redactPath(body.path) });
   }
 
   const fieldErrors =

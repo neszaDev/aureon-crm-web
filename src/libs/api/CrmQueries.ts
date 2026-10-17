@@ -52,11 +52,12 @@ export const getWorkspace = cache(async (segment: string) => {
 });
 
 /**
- * Loads the members of a workspace (`GET /workspaces/{id}/members`).
+ * Loads the members of a workspace (`GET /workspaces/{id}/members`). Cached for the request, so
+ * a page and its metadata share one call.
  * @param segment The `[workspaceId]` route segment.
  * @returns The members and the outcome flags.
  */
-export const getMembers = async (segment: string) => {
+export const getMembers = cache(async (segment: string) => {
   const workspaceId = toWorkspaceId(segment);
   if (workspaceId === undefined) {
     return { members: undefined, ...NOT_FOUND };
@@ -68,4 +69,64 @@ export const getMembers = async (segment: string) => {
   });
 
   return { members: data, ...flags(response.status) };
+});
+
+/**
+ * Loads the pending invitations, newest first (`GET /workspaces/{id}/invitations`, needs
+ * `MEMBERS_MANAGE`).
+ * @param segment The `[workspaceId]` route segment.
+ * @returns The invitations and the outcome flags.
+ */
+export const getInvitations = async (segment: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { invitations: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/invitations', {
+    params: { path: { workspaceId } },
+  });
+
+  return { invitations: data, ...flags(response.status) };
 };
+
+/**
+ * Loads the pipeline stages by position: the open ones, then Won and Lost
+ * (`GET /workspaces/{id}/pipeline-stages`). Cached for the request.
+ * @param segment The `[workspaceId]` route segment.
+ * @returns The stages and the outcome flags.
+ */
+export const getStages = cache(async (segment: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { stages: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/pipeline-stages', {
+    params: { path: { workspaceId } },
+  });
+
+  return { stages: data, ...flags(response.status) };
+});
+
+/**
+ * Loads every lead source, archived ones included (`GET /workspaces/{id}/lead-sources`). Cached
+ * for the request.
+ * @param segment The `[workspaceId]` route segment.
+ * @returns The sources and the outcome flags.
+ */
+export const getLeadSources = cache(async (segment: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { sources: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/lead-sources', {
+    params: { path: { workspaceId }, query: { includeArchived: true } },
+  });
+
+  return { sources: data, ...flags(response.status) };
+});

@@ -4,6 +4,7 @@ import { CrmNav } from '@/components/crm/shell/CrmNav';
 import { MobileCrmNav } from '@/components/crm/shell/MobileCrmNav';
 import { WorkspaceSwitcher } from '@/components/crm/shell/WorkspaceSwitcher';
 import { WorkspaceMark } from '@/components/crm/WorkspaceMark';
+import { Toaster } from '@/components/ui/sonner';
 import type { components } from '@/libs/api/schema';
 
 type Schemas = components['schemas'];
@@ -41,7 +42,7 @@ export const CrmShell = (props: {
     <div className="min-h-dvh lg:grid lg:grid-cols-[14.5rem_minmax(0,1fr)]">
       <a
         href="#crm-main"
-        className="sr-only rounded-md bg-field text-sm font-semibold text-foreground shadow-sheet focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2"
+        className="sr-only rounded-md bg-field text-sm font-semibold text-foreground shadow-sheet focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus-visible:outline-on-seal"
       >
         {t('skip_to_content')}
       </a>
@@ -63,12 +64,15 @@ export const CrmShell = (props: {
             className="ml-auto focus-visible:outline-on-seal lg:focus-visible:outline-ring"
           />
         </header>
+        {/* Focusable so the skip link moves focus here in Safari too; a container needs no ring. */}
         <main
           id="crm-main"
-          className="min-w-0 flex-1 scroll-mt-14 px-4 pt-5 pb-12 sm:px-7 lg:scroll-mt-0 lg:pt-1"
+          tabIndex={-1}
+          className="min-w-0 flex-1 scroll-mt-14 px-4 pt-5 pb-12 outline-none sm:px-7 lg:scroll-mt-0 lg:pt-1"
         >
           {props.children}
         </main>
+        <Toaster position="bottom-right" />
       </div>
     </div>
   );

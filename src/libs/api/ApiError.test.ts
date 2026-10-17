@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isApiError, toActionError } from './ApiError';
+import { isApiError, isStaleVersion, redactPath, toActionError } from './ApiError';
 
 const apiError = {
   timestamp: '2026-09-30T00:00:00Z',
@@ -43,6 +43,47 @@ describe('ApiError', () => {
         ok: false,
         message: 'fallback',
       });
+    });
+  });
+
+  describe(redactPath, () => {
+    it('hides an invitation token in a path', () => {
+      expect(redactPath('/api/v1/invitations/abc-DEF_123/register')).toBe(
+        '/api/v1/invitations/{token}/register',
+      );
+      expect(redactPath('/api/v1/invitations/abc')).toBe('/api/v1/invitations/{token}');
+    });
+
+    it('leaves other paths alone', () => {
+      expect(redactPath('/api/v1/workspaces/7/invitations/12')).toBe(
+        '/api/v1/workspaces/7/invitations/12',
+      );
+      expect(redactPath('/api/v1/workspaces/7/invitations')).toBe(
+        '/api/v1/workspaces/7/invitations',
+      );
+    });
+  });
+
+  describe(isStaleVersion, () => {
+    it('recognizes the backend answer to an outdated version', () => {
+      expect(
+        isStaleVersion({
+          ...apiError,
+          status: 409,
+          message: 'Changed by another request; reload and try again',
+        }),
+      ).toBeTruthy();
+    });
+
+    it('does not mistake another conflict for it', () => {
+      expect(
+        isStaleVersion({
+          ...apiError,
+          status: 409,
+          message: 'A stage with this name already exists',
+        }),
+      ).toBeFalsy();
+      expect(isStaleVersion()).toBeFalsy();
     });
   });
 });

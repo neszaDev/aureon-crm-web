@@ -23,6 +23,18 @@ describe('Validation', () => {
         ),
       ).toBe('password_too_long');
     });
+
+    it('rejects passwords over 72 UTF-8 bytes, as BCrypt does', () => {
+      // 24 Thai characters are 72 bytes; 25 are 75.
+      expect(
+        SignUpValidation.safeParse({ email: 'a@example.com', password: 'ก'.repeat(24) }).success,
+      ).toBeTruthy();
+      expect(
+        firstMessage(
+          SignUpValidation.safeParse({ email: 'a@example.com', password: 'ก'.repeat(25) }),
+        ),
+      ).toBe('password_too_many_bytes');
+    });
   });
 
   describe('sign-in rules', () => {
