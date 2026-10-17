@@ -8,7 +8,7 @@ export const AppConfig = {
   // The sample product's name. Replace it (and the copy in src/locales) with your own.
   name: 'Marksheet',
   i18n: {
-    locales: ['en', 'fr'],
+    locales: ['en', 'fr', 'th'],
     defaultLocale: 'en',
     localePrefix,
   },

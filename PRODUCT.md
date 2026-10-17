@@ -50,12 +50,12 @@ and CI runs end-to-end tests of the real frontend image against the real backend
 - Test results: create (name, status `PENDING`/`PASSED`/`FAILED`, score 0–100, tested-at date,
   notes), list with pagination, per-status summary, delete. Owner-scoped.
 - Stack: Next.js 16 App Router, React 19 with the React compiler, TypeScript, Tailwind v4,
-  next-intl (en, fr; `as-needed` locale prefix), react-hook-form + zod, Storybook, Vitest,
+  next-intl (en, fr, th; `as-needed` locale prefix), react-hook-form + zod, Storybook, Vitest,
   Playwright.
 - Only the server talks to the backend: `src/actions/*` for writes and
   `src/libs/api/Queries.ts` for reads. Client components never call it.
-- All user-visible text lives in `src/locales/*.json`, and every string must exist in both en
-  and fr.
+- All user-visible text lives in `src/locales/*.json`, and every string must exist in every
+  locale (en, fr, th).
 - No SaaS integrations and no frontend database. Re-adding one needs a recorded decision.
 - Terminology: "test results" is the example resource. It is a placeholder domain, and derived
   products are expected to replace it.
@@ -68,7 +68,7 @@ Next.js Boilerplate (MIT) must stay on the about page.
 
 ## Evidence on Hand
 
-- Real, working features: auth with token refresh, dashboard, test-results CRUD, en/fr.
+- Real, working features: auth with token refresh, dashboard, test-results CRUD, en/fr/th.
 - No users, customers, testimonials, metrics or adoption numbers. Future work must not invent
   them.
 

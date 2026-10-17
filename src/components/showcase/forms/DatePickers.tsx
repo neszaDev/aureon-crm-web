@@ -1,7 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import { enUS, fr } from 'date-fns/locale';
+import { enUS, fr, th } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -11,7 +11,9 @@ import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-const useCalendarLocale = () => (useLocale() === 'fr' ? fr : enUS);
+const CALENDAR_LOCALES: Record<string, typeof enUS> = { en: enUS, fr, th };
+
+const useCalendarLocale = () => CALENDAR_LOCALES[useLocale()] ?? enUS;
 
 // Calendar days are local dates, so they are printed in local time (no time zone shift).
 const printDate = (date: Date, locale: typeof enUS) => format(date, 'PP', { locale });

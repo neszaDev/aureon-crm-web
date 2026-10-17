@@ -18,5 +18,13 @@ test.describe('I18n', () => {
 
       await expect(page.getByLabel('Adresse e-mail')).toBeVisible();
     });
+
+    test('shows the Thai homepage under /th', async ({ page }) => {
+      await page.goto('/th');
+
+      await expect(
+        page.getByRole('heading', { name: 'ทุกการทดสอบ ให้คะแนนในบัตรใบเดียว' }),
+      ).toBeVisible();
+    });
   });
 });

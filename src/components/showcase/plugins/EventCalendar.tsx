@@ -24,7 +24,7 @@ import {
   parseISO,
   startOfDay,
 } from 'date-fns';
-import { enUS, fr } from 'date-fns/locale';
+import { enUS, fr, th } from 'date-fns/locale';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -48,7 +48,7 @@ import {
 import type { CalendarEvent, EventTone } from './data';
 import { buildSampleEvents } from './data';
 
-const DATE_LOCALES: Record<string, Locale> = { en: enUS, fr };
+const DATE_LOCALES: Record<string, Locale> = { en: enUS, fr, th };
 
 const TONES: Record<EventTone, string> = {
   muted: 'border-ink-300 bg-ink-100 text-ink-900',
