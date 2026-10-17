@@ -32,6 +32,20 @@ describe(WorkspaceForm, () => {
     await expect.element(page.getByLabelText('Time zone')).toHaveValue(browserZone);
   });
 
+  it('starts with the browser time zone even when the list spells it differently', async () => {
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <WorkspaceForm
+          action={vi.fn<Action>()}
+          currencies={CURRENCIES}
+          timeZones={TIME_ZONES.filter((zone) => zone !== browserZone)}
+        />
+      </NextIntlClientProvider>,
+    );
+
+    await expect.element(page.getByLabelText('Time zone')).toHaveValue(browserZone);
+  });
+
   it('asks for a name before calling the action', async () => {
     const action = vi.fn<Action>();
     await renderForm(action);

@@ -7,8 +7,9 @@ import type { Placement } from './data';
 type LazyNode = { $$typeof: symbol; _payload: PromiseLike<React.ReactNode> };
 
 /**
- * Tells whether a node is a lazy element: what a server component child (such as next-intl's
- * `Link`) can arrive as while it renders, sometimes nested.
+ * Tells whether a node is a lazy element whose payload can be unwrapped with `use()`: what a
+ * server component child (such as next-intl's `Link`) can arrive as, sometimes nested. The same
+ * test as Radix's Slot, which checks that the payload is a thenable.
  * @param node The node.
  * @returns Whether it is lazy.
  */
@@ -17,7 +18,10 @@ const isLazy = (node: unknown): node is LazyNode =>
   node !== null &&
   '$$typeof' in node &&
   node.$$typeof === Symbol.for('react.lazy') &&
-  '_payload' in node;
+  '_payload' in node &&
+  typeof node._payload === 'object' &&
+  node._payload !== null &&
+  'then' in node._payload;
 
 /**
  * A tooltip around any focusable trigger. It opens on hover and focus; with `openOnClick` a

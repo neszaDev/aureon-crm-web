@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircleIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { useForm } from 'react-hook-form';
 import { FormAlert } from '@/components/FormAlert';
 import { describedBy, FormField } from '@/components/FormField';
@@ -17,9 +17,14 @@ import { WorkspaceValidation } from '@/validations/crm/WorkspaceValidation';
 const isFormField = (field: string): field is keyof WorkspaceValues =>
   field in WorkspaceValidation.shape;
 
+const subscribeNever = () => () => {
+  // Nothing to unsubscribe: the zone doesn't change while the page is open.
+};
+const browserTimeZone = () => new Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 /**
  * Name, default currency and time zone of a new workspace. The time zone starts as the
- * browser's and the currency as USD.
+ * browser's (added to the options if the list lacks it) and the currency as USD.
  * @param props Component props.
  * @param props.action Saves the values; it redirects on success, so a result is a failure.
  * @param props.currencies Currency options (ISO code and a label), from the server so the
@@ -34,15 +39,18 @@ export const WorkspaceForm = (props: {
 }) => {
   const t = useTranslations('WorkspaceForm');
   const [formError, setFormError] = useState<string>();
-  // Only applied in the browser (react-hook-form fills fields on mount), so it is the user's zone.
-  const zone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+  // The browser's zone, known once hydrated (the server can't know it). It is the default, and an
+  // option of its own when the server lists it under another spelling (Asia/Kolkata, Calcutta).
+  const zone = useSyncExternalStore(subscribeNever, browserTimeZone, () => null);
+  const timeZones =
+    zone === null || props.timeZones.includes(zone)
+      ? props.timeZones
+      : [...props.timeZones, zone].toSorted();
   const form = useForm<WorkspaceValues>({
     resolver: zodResolver(WorkspaceValidation),
-    defaultValues: {
-      name: '',
-      defaultCurrency: 'USD',
-      timezone: props.timeZones.includes(zone) ? zone : 'UTC',
-    },
+    // `values` rather than defaults: they follow the zone once known, keeping what the user changed.
+    values: { name: '', defaultCurrency: 'USD', timezone: zone ?? 'UTC' },
+    resetOptions: { keepDirtyValues: true },
   });
   const { errors, isSubmitting } = form.formState;
   const field = (name: keyof WorkspaceValues, id: string) => ({
@@ -100,7 +108,7 @@ export const WorkspaceForm = (props: {
           error={errors.timezone}
         >
           <NativeSelect {...field('timezone', 'workspace-timezone')}>
-            {props.timeZones.map((timeZone) => (
+            {timeZones.map((timeZone) => (
               <NativeSelectOption key={timeZone} value={timeZone}>
                 {timeZone.replaceAll('_', ' ')}
               </NativeSelectOption>

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { AccountMenu } from '@/components/crm/shell/AccountMenu';
 import { CrmNav } from '@/components/crm/shell/CrmNav';
 import { MobileCrmNav } from '@/components/crm/shell/MobileCrmNav';
@@ -9,7 +10,8 @@ type Schemas = components['schemas'];
 
 /**
  * The CRM's frame: the vermilion seal rail (workspace switcher, sections) on large screens, a
- * vermilion bar opening the rail as a drawer below that, and your seal for the account menu.
+ * vermilion bar opening the rail as a drawer below that, and your seal for the account menu. A
+ * skip link, first in the tab order, jumps past the rail to the page.
  * @param props Component props.
  * @param props.workspace The open workspace.
  * @param props.workspace.id Its id.
@@ -25,6 +27,7 @@ export const CrmShell = (props: {
   user: { email: string; displayName?: string };
   children: React.ReactNode;
 }) => {
+  const t = useTranslations('CrmShell');
   const rail = (
     <div className="flex h-full flex-col gap-6 px-2.5 py-4">
       <WorkspaceSwitcher current={props.workspace} workspaces={props.workspaces} />
@@ -36,6 +39,12 @@ export const CrmShell = (props: {
 
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[14.5rem_minmax(0,1fr)]">
+      <a
+        href="#crm-main"
+        className="sr-only rounded-md bg-field text-sm font-semibold text-foreground shadow-sheet focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2"
+      >
+        {t('skip_to_content')}
+      </a>
       <aside className="hidden bg-seal text-on-seal lg:block">
         <div className="sticky top-0 h-dvh">{rail}</div>
       </aside>
@@ -54,7 +63,12 @@ export const CrmShell = (props: {
             className="ml-auto focus-visible:outline-on-seal lg:focus-visible:outline-ring"
           />
         </header>
-        <main className="min-w-0 flex-1 px-4 pt-5 pb-12 sm:px-7 lg:pt-1">{props.children}</main>
+        <main
+          id="crm-main"
+          className="min-w-0 flex-1 scroll-mt-14 px-4 pt-5 pb-12 sm:px-7 lg:scroll-mt-0 lg:pt-1"
+        >
+          {props.children}
+        </main>
       </div>
     </div>
   );

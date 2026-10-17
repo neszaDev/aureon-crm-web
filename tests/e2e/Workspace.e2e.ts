@@ -39,6 +39,8 @@ test.describe('Workspaces', () => {
     await signUp(page);
     await expect(page.getByRole('heading', { name: 'Create your first workspace' })).toBeVisible();
     await expect(page.getByLabel('Default currency')).toHaveValue('USD');
+    // Next streams the title after a client-side navigation: wait for it before axe looks.
+    await expect(page).toHaveTitle('Your workspaces');
     await expectNoA11yViolations(page);
 
     await createWorkspace(page, 'Acme');
@@ -50,12 +52,33 @@ test.describe('Workspaces', () => {
       'page',
     );
     await expect(page.getByText('Europe/Paris')).toBeVisible();
+    await expect(page).toHaveTitle('Dashboard');
     await expectNoA11yViolations(page);
 
     // With one workspace, the CRM home opens it.
     const workspaceUrl = page.url();
     await page.goto('/app');
     await expect(page).toHaveURL(workspaceUrl);
+
+    // A skip link comes first in the tab order and jumps past the rail.
+    const skip = page.getByRole('link', { name: 'Skip to content' });
+    expect(await page.evaluate(() => document.querySelector('a[href], button')?.textContent)).toBe(
+      'Skip to content',
+    );
+    await skip.focus();
+    await expect(skip).toBeVisible();
+    await skip.press('Enter');
+    await expect(page).toHaveURL(/#crm-main$/u);
+  });
+
+  test.describe('in another time zone', () => {
+    test.use({ timezoneId: 'America/Sao_Paulo' });
+
+    test("defaults the time zone to the browser's", async ({ page }) => {
+      await signUp(page);
+
+      await expect(page.getByLabel('Time zone')).toHaveValue('America/Sao_Paulo');
+    });
   });
 
   test('switches between workspaces from the rail', async ({ page }) => {
@@ -75,6 +98,7 @@ test.describe('Workspaces', () => {
     await page.goto('/app');
     await expect(page.getByRole('heading', { name: 'Your workspaces' })).toBeVisible();
     await expect(page.getByRole('link', { name: /Beta/u })).toBeVisible();
+    await expect(page).toHaveTitle('Your workspaces');
     await expectNoA11yViolations(page);
   });
 
@@ -101,6 +125,7 @@ test.describe('Workspaces', () => {
     await page.getByRole('button', { name: 'เปิดเมนู' }).click();
     const nav = page.getByRole('navigation', { name: 'เมนูพื้นที่ทำงาน' });
     await expect(nav.getByRole('link', { name: 'แดชบอร์ด' })).toBeVisible();
+    await expect(page).toHaveTitle('แดชบอร์ด');
     await expectNoA11yViolations(page);
   });
 });

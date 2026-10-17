@@ -28,7 +28,7 @@ export default async function WorkspaceLayout(props: {
   if (current.forbidden) {
     return (
       <PickerFrame user={user}>
-        <ForbiddenNotice />
+        <ForbiddenNotice page />
       </PickerFrame>
     );
   }

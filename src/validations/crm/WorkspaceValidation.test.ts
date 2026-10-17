@@ -41,8 +41,15 @@ describe('workspace validation', () => {
       expect(firstMessage({ timezone: 'UTC' })).toBeUndefined();
     });
 
+    it('accepts the current and the legacy spelling of a renamed zone', () => {
+      expect(firstMessage({ timezone: 'Asia/Kolkata' })).toBeUndefined();
+      expect(firstMessage({ timezone: 'Asia/Calcutta' })).toBeUndefined();
+      expect(firstMessage({ timezone: 'Europe/Kyiv' })).toBeUndefined();
+      expect(firstMessage({ timezone: 'Europe/Kiev' })).toBeUndefined();
+    });
+
     it('rejects an unknown zone', () => {
-      expect(firstMessage({ timezone: 'Mars/Olympus_Mons' })).toBe('invalid_time_zone');
+      expect(firstMessage({ timezone: 'Mars/Base' })).toBe('invalid_time_zone');
       expect(firstMessage({ timezone: '' })).toBe('invalid_time_zone');
     });
   });

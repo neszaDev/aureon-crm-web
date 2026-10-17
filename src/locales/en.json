@@ -182,7 +182,8 @@
     "workspaces": "Workspaces",
     "current": "Current",
     "create_workspace": "Create workspace",
-    "all_workspaces": "Your workspaces"
+    "all_workspaces": "Your workspaces",
+    "skip_to_content": "Skip to content"
   },
   "AccountMenu": {
     "label": "Your account",

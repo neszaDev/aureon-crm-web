@@ -37,11 +37,20 @@ export const CrmNav = (props: { workspaceId: number }) => {
                 aria-current={current ? 'page' : undefined}
                 className={cn(
                   'flex min-h-9 items-center gap-2.5 rounded-md px-3 py-1.5 text-[0.9375rem] font-medium no-underline transition-colors duration-150 focus-visible:outline-on-seal',
-                  current ? 'bg-seal-deep text-white' : 'text-on-seal hover:bg-black/10',
+                  current
+                    ? 'bg-seal-deep font-semibold text-white'
+                    : 'text-on-seal hover:bg-black/10',
                 )}
               >
                 <item.icon aria-hidden="true" className="size-4 shrink-0" />
                 {t(`nav_${item.key}`)}
+                {/* Marks the current section by shape too, not only by its darker fill. */}
+                {current && (
+                  <span
+                    aria-hidden="true"
+                    className="ml-auto size-1.5 shrink-0 rounded-full bg-white"
+                  />
+                )}
               </Link>
             </li>
           );

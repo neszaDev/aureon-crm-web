@@ -17,7 +17,13 @@ type WorkspacePageProps = {
 const MEMBERS_SHOWN = 8;
 
 export async function generateMetadata(props: WorkspacePageProps): Promise<Metadata> {
-  const { locale } = await props.params;
+  const { locale, workspaceId } = await props.params;
+  // The layout shows ForbiddenNotice instead of the page on a 403 (the same, cached call).
+  const { forbidden } = await getWorkspace(workspaceId);
+  if (forbidden) {
+    const tForbidden = await getTranslations({ locale, namespace: 'ForbiddenNotice' });
+    return { title: tForbidden('title') };
+  }
   const t = await getTranslations({ locale, namespace: 'WorkspacePage' });
 
   return { title: t('title') };
