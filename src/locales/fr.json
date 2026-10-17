@@ -81,15 +81,19 @@
     "credits": "Basé sur <upstream>Next.js Boilerplate</upstream> par ixartz (licence MIT)."
   },
   "AuthLayout": {
-    "aside_title": "Un seul bulletin pour tous vos tests.",
-    "aside_text": "Des coches pour ce qui est réussi, des cercles pour ce qui mérite un nouvel essai.",
-    "back_home": "Retour à l'accueil"
+    "aside_title": "Chaque étape d'une relation est signée.",
+    "aside_text": "Aureon CRM montre à chacun ce qu'il reste à faire et qui s'en charge.",
+    "back_home": "Retour à l'accueil",
+    "aside_workspaces": "Un espace de travail par entreprise, avec un rôle pour chaque personne.",
+    "aside_pipeline": "Les affaires avancent étape par étape dans le pipeline, et chaque passage reste dans l'historique des étapes.",
+    "aside_follow_ups": "Les relances et les rappels montrent ce qui arrive à échéance et qui s'en charge.",
+    "aside_languages": "En anglais, en français et en thaï."
   },
   "SignInPage": {
     "meta_title": "Se connecter",
     "meta_description": "Connectez-vous à votre compte.",
     "title": "Se connecter",
-    "subtitle": "Bon retour. Votre bulletin vous attend là où vous l'avez laissé.",
+    "subtitle": "Bon retour. Vos espaces de travail vous attendent là où vous les avez laissés.",
     "switch_prompt": "Pas encore de compte ?",
     "switch_link": "En créer un",
     "session_expired": "Votre session a pris fin. Reconnectez-vous."
@@ -98,7 +102,7 @@
     "meta_title": "Créer un compte",
     "meta_description": "Créez un compte.",
     "title": "Créer un compte",
-    "subtitle": "Ouvrez un bulletin pour vos tests. Une adresse e-mail et un mot de passe suffisent.",
+    "subtitle": "Une adresse e-mail et un mot de passe suffisent. Créez ensuite un espace de travail, ou rejoignez-en un avec un lien d'invitation.",
     "switch_prompt": "Vous avez déjà un compte ?",
     "switch_link": "Se connecter"
   },

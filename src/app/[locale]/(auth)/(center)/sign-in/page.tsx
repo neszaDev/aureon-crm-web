@@ -27,16 +27,16 @@ export default async function SignInPage(props: SignInPageProps) {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-ink-950">{t('title')}</h1>
-        <p className="text-[0.9375rem] leading-relaxed text-ink-600">{t('subtitle')}</p>
+        <h1 className="text-3xl font-extrabold tracking-[-0.03em]">{t('title')}</h1>
+        <p className="text-[0.9375rem] leading-relaxed text-muted-foreground">{t('subtitle')}</p>
       </div>
       <Suspense>
         <SessionExpiredNotice />
       </Suspense>
-      <div className="paper p-6 sm:p-7">
+      <div className="rounded-lg border border-rule bg-card p-6 shadow-sheet sm:p-7">
         <AuthForm mode="sign-in" />
       </div>
-      <p className="text-sm text-ink-600">
+      <p className="text-sm text-muted-foreground">
         {t('switch_prompt')} <AuthSwitchLink href="/sign-up">{t('switch_link')}</AuthSwitchLink>
       </p>
     </div>

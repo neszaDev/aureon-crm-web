@@ -81,15 +81,19 @@
     "credits": "Based on <upstream>Next.js Boilerplate</upstream> by ixartz (MIT licence)."
   },
   "AuthLayout": {
-    "aside_title": "One card for every test.",
-    "aside_text": "Ticks for what passed, circles for what needs another go.",
-    "back_home": "Back to home"
+    "aside_title": "Every step of a relationship is signed.",
+    "aside_text": "Aureon CRM shows each person what needs doing next and who owns it.",
+    "back_home": "Back to home",
+    "aside_workspaces": "One workspace per business, with a role for each person in it.",
+    "aside_pipeline": "Deals move through the pipeline stage by stage, and every move stays in the stage history.",
+    "aside_follow_ups": "Follow-ups and reminders show what is due and who owns it.",
+    "aside_languages": "In English, French and Thai."
   },
   "SignInPage": {
     "meta_title": "Sign in",
     "meta_description": "Sign in to your account.",
     "title": "Sign in",
-    "subtitle": "Welcome back. Your card is where you left it.",
+    "subtitle": "Welcome back. Your workspaces are where you left them.",
     "switch_prompt": "No account yet?",
     "switch_link": "Create one",
     "session_expired": "Your session has ended. Sign in again."
@@ -98,7 +102,7 @@
     "meta_title": "Create an account",
     "meta_description": "Create an account.",
     "title": "Create an account",
-    "subtitle": "Start a card for your tests. An email and a password is all it takes.",
+    "subtitle": "An email and a password is all it takes. Then create a workspace, or join one with an invitation link.",
     "switch_prompt": "Already have an account?",
     "switch_link": "Sign in"
   },
