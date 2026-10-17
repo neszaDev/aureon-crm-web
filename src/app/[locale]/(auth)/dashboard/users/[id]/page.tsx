@@ -7,7 +7,8 @@ import { DeleteUserButton } from '@/components/users/DeleteUserButton';
 import { EditUserForm } from '@/components/users/EditUserForm';
 import { RoleBadge } from '@/components/users/RoleBadge';
 import { getCurrentUser, getUser } from '@/libs/api/Queries';
-import { Link, redirect } from '@/libs/I18nNavigation';
+import { endRejectedSession } from '@/libs/api/Session';
+import { Link } from '@/libs/I18nNavigation';
 
 type UserPageProps = {
   params: Promise<{ locale: string; id: string }>;
@@ -28,7 +29,7 @@ export default async function UserPage(props: UserPageProps) {
     getCurrentUser(),
   ]);
   if (unauthorized) {
-    return redirect({ href: '/sign-in', locale });
+    return endRejectedSession(locale);
   }
   if (forbidden) {
     return (

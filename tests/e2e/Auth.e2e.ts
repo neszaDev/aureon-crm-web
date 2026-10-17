@@ -1,6 +1,8 @@
-import type { Page } from '@playwright/test';
+import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { PASSWORD, signOut, signUp, uniqueEmail } from './helpers';
+import { ADMIN, PASSWORD, signOut, signUp, uniqueEmail } from './helpers';
+
+const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8080';
 
 /**
  * Registers a user, signs out, then signs in from the given sign-in URL.
@@ -14,6 +16,24 @@ const signInFrom = async (page: Page, url: string) => {
   await page.getByLabel('Email address').fill(email);
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
+};
+
+/**
+ * Deletes an account through the backend, as the admin.
+ * @param request Playwright API client.
+ * @param accessToken The account's access token, to look up its id.
+ */
+const deleteAccount = async (request: APIRequestContext, accessToken: string) => {
+  const me = await request.get(`${BACKEND_URL}/api/v1/users/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const { id } = await me.json();
+  const login = await request.post(`${BACKEND_URL}/api/v1/auth/login`, { data: ADMIN });
+  const admin = await login.json();
+  const deleted = await request.delete(`${BACKEND_URL}/api/v1/users/${id}`, {
+    headers: { Authorization: `Bearer ${admin.accessToken}` },
+  });
+  expect(deleted.status()).toBe(204);
 };
 
 test.describe('Auth', () => {
@@ -126,11 +146,12 @@ test.describe('Auth', () => {
   });
 
   test.describe('Next', () => {
-    // Whole URLs: `/sign-in?next=/app` itself ends in `/app`. The query proves `next` was used.
+    // Whole URLs: `/sign-in?next=/app` itself ends in `/app`. The query proves `next` was used;
+    // Thai in it must come out encoded (it travels in a response header).
     test('follows a safe next after sign-in', async ({ page, baseURL }) => {
-      await signInFrom(page, `/sign-in?next=${encodeURIComponent('/app?from=sign-in')}`);
+      await signInFrom(page, `/sign-in?next=${encodeURIComponent('/app?q=บริษัท')}`);
 
-      await expect(page).toHaveURL(`${baseURL}/app?from=sign-in`);
+      await expect(page).toHaveURL(`${baseURL}/app?q=${encodeURIComponent('บริษัท')}`);
 
       // Signed in already: the proxy follows it too.
       await page.goto('/sign-in?next=/app');
@@ -150,6 +171,29 @@ test.describe('Auth', () => {
       await page.goto('/sign-up?next=//evil.example');
 
       await expect(page).toHaveURL(`${baseURL}/app`);
+    });
+  });
+
+  test.describe('Session ended by the backend', () => {
+    test('signs out a deleted account without a redirect loop', async ({
+      page,
+      context,
+      request,
+      baseURL,
+    }) => {
+      await signUp(page);
+      const cookies = await context.cookies();
+      await deleteAccount(request, cookies.find((c) => c.name === 'access_token')?.value ?? '');
+
+      // The access cookie is still there: the proxy lets /app through and the backend says 401.
+      await page.reload();
+
+      await expect(page).toHaveURL(`${baseURL}/sign-in?expired=1`);
+      await expect(page.getByRole('status')).toHaveText('Your session has ended. Sign in again.');
+      const after = await context.cookies();
+      expect(after.filter((c) => c.name === 'access_token' || c.name === 'refresh_token')).toEqual(
+        [],
+      );
     });
   });
 

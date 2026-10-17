@@ -36,7 +36,11 @@ Next.js server, which holds the session in two **httpOnly** cookies.
 - **A failed refresh does not delete cookies.** Two tabs can refresh at once and, with rotation,
   the second one loses; deleting would sign out the tab that just succeeded.
 - **Sign-out** revokes the refresh token on the backend (best effort) and clears both cookies.
-- A backend **401** anywhere else (e.g. a deleted account) redirects to `/sign-in`.
+- A backend **401** anywhere else (e.g. a deleted account) ends the session: pages and layouts
+  redirect to `/api/session/expired` (outside the proxy), which deletes both cookies and goes to
+  `/sign-in?expired=1` with a notice; server actions delete them themselves. Sending the user
+  straight to `/sign-in` would loop, since the proxy still sees the access cookie. This is not
+  the refresh race above: the backend's 401 is final.
 - Cookies are `Secure` when `APP_URL` is `https://`.
 
 ## Where code goes

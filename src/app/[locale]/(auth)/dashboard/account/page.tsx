@@ -5,6 +5,7 @@ import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { getCurrentUser } from '@/libs/api/Queries';
+import { endRejectedSession } from '@/libs/api/Session';
 import { redirect } from '@/libs/I18nNavigation';
 import { parseTheme, THEME_COOKIE } from '@/libs/Theme';
 
@@ -19,7 +20,10 @@ export default async function AccountPage(props: AccountPageProps) {
   const format = await getFormatter({ locale });
 
   const { user, unauthorized } = await getCurrentUser();
-  if (unauthorized || !user) {
+  if (unauthorized) {
+    return endRejectedSession(locale);
+  }
+  if (!user) {
     return redirect({ href: '/sign-in', locale });
   }
 

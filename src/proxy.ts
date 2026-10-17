@@ -38,7 +38,8 @@ const refreshSession = async (refreshToken: string) => {
 
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasAccessToken = request.cookies.has(ACCESS_TOKEN_COOKIE);
+  // An empty cookie is no session (a server action that ends one forwards `access_token=`).
+  const hasAccessToken = Boolean(request.cookies.get(ACCESS_TOKEN_COOKIE)?.value);
 
   const protectedMatch = PROTECTED_PATH.exec(pathname);
   if (protectedMatch && !hasAccessToken) {

@@ -91,7 +91,8 @@
     "title": "Se connecter",
     "subtitle": "Bon retour. Votre bulletin vous attend là où vous l'avez laissé.",
     "switch_prompt": "Pas encore de compte ?",
-    "switch_link": "En créer un"
+    "switch_link": "En créer un",
+    "session_expired": "Votre session a pris fin. Reconnectez-vous."
   },
   "SignUpPage": {
     "meta_title": "Créer un compte",

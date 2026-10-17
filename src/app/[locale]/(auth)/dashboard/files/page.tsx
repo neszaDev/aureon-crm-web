@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { Pagination } from '@/components/Pagination';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { listFiles } from '@/libs/api/Queries';
-import { redirect } from '@/libs/I18nNavigation';
+import { endRejectedSession } from '@/libs/api/Session';
 
 const PAGE_SIZE = 20;
 
@@ -23,7 +23,7 @@ export default async function FilesPage(props: FilesPageProps) {
 
   const { files, unauthorized } = await listFiles(page, PAGE_SIZE);
   if (unauthorized) {
-    return redirect({ href: '/sign-in', locale });
+    return endRejectedSession(locale);
   }
 
   return (

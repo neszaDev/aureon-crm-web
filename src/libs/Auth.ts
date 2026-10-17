@@ -73,6 +73,27 @@ export const sessionCookies = (tokens: SessionTokens, secure: boolean): SessionC
 };
 
 /**
+ * Builds cookies that delete the session: same names and flags as `sessionCookies`, expired.
+ * @param secure Whether the session cookies were set with `Secure`.
+ * @returns The expired access and refresh cookies.
+ */
+export const clearedSessionCookies = (secure: boolean): SessionCookie[] => {
+  const base = {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure,
+    path: '/',
+    value: '',
+    maxAge: 0,
+  } as const;
+
+  return [
+    { ...base, name: ACCESS_TOKEN_COOKIE },
+    { ...base, name: REFRESH_TOKEN_COOKIE },
+  ];
+};
+
+/**
  * Tells whether auth cookies must be `Secure`.
  * @param appUrl Public URL of the app.
  * @returns True when the app is served over https.

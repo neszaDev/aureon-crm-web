@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { getCurrentUser } from '@/libs/api/Queries';
+import { endRejectedSession } from '@/libs/api/Session';
 import { redirect } from '@/libs/I18nNavigation';
 import { AppShell } from '@/templates/AppShell';
 
@@ -27,7 +28,10 @@ export default async function DashboardLayout(props: DashboardLayoutProps) {
   setRequestLocale(locale);
 
   const { user, unauthorized } = await getCurrentUser();
-  if (unauthorized || !user) {
+  if (unauthorized) {
+    return endRejectedSession(locale);
+  }
+  if (!user) {
     return redirect({ href: '/sign-in', locale });
   }
 

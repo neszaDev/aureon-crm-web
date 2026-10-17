@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ACCESS_TOKEN_COOKIE,
+  clearedSessionCookies,
   isSecureAppUrl,
   REFRESH_TOKEN_COOKIE,
   sessionCookies,
@@ -38,6 +39,15 @@ describe('Auth', () => {
       const [access] = sessionCookies({ ...tokens, expiresIn: 10 }, false);
 
       expect(access?.maxAge).toBe(1);
+    });
+  });
+
+  describe(clearedSessionCookies, () => {
+    it('expires both session cookies with the flags they were set with', () => {
+      const secure = sessionCookies(tokens, true);
+      const cleared = clearedSessionCookies(true);
+
+      expect(cleared).toStrictEqual(secure.map((cookie) => ({ ...cookie, value: '', maxAge: 0 })));
     });
   });
 

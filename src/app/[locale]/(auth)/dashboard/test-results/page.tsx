@@ -8,7 +8,7 @@ import { TotalsStrip } from '@/components/report/TotalsStrip';
 import { TestResultForm } from '@/components/TestResultForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { listTestResults } from '@/libs/api/Queries';
-import { redirect } from '@/libs/I18nNavigation';
+import { endRejectedSession } from '@/libs/api/Session';
 
 const PAGE_SIZE = 10;
 
@@ -26,7 +26,7 @@ export default async function TestResultsPage(props: TestResultsPageProps) {
 
   const { results, summary, readAt, unauthorized } = await listTestResults(page, PAGE_SIZE);
   if (unauthorized) {
-    return redirect({ href: '/sign-in', locale });
+    return endRejectedSession(locale);
   }
 
   const rows = results?.content ?? [];

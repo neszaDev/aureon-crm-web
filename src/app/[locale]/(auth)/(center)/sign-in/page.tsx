@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Suspense } from 'react';
 import { AuthForm } from '@/components/AuthForm';
+import { SessionExpiredNotice } from '@/components/SessionExpiredNotice';
 import { Link } from '@/libs/I18nNavigation';
 
 type SignInPageProps = {
@@ -28,6 +30,9 @@ export default async function SignInPage(props: SignInPageProps) {
         <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-ink-950">{t('title')}</h1>
         <p className="text-[0.9375rem] leading-relaxed text-ink-600">{t('subtitle')}</p>
       </div>
+      <Suspense>
+        <SessionExpiredNotice />
+      </Suspense>
       <div className="paper p-6 sm:p-7">
         <AuthForm mode="sign-in" />
       </div>

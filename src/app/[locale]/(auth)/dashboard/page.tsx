@@ -7,6 +7,7 @@ import { TotalsStrip } from '@/components/report/TotalsStrip';
 import { Button } from '@/components/ui/button';
 import { Card, CardAction, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser, listTestResults } from '@/libs/api/Queries';
+import { endRejectedSession } from '@/libs/api/Session';
 import { Link, redirect } from '@/libs/I18nNavigation';
 
 const LATEST_COUNT = 5;
@@ -22,7 +23,10 @@ export default async function DashboardPage(props: { params: Promise<{ locale: s
     getCurrentUser(),
     listTestResults(0, LATEST_COUNT),
   ]);
-  if (unauthorized || latest.unauthorized || !user) {
+  if (unauthorized || latest.unauthorized) {
+    return endRejectedSession(locale);
+  }
+  if (!user) {
     return redirect({ href: '/sign-in', locale });
   }
 

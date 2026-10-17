@@ -33,12 +33,33 @@ describe('SafeRedirect', () => {
       expect(safeNextPath(value)).toBeUndefined();
     });
 
-    it.each(['/dashboard/x', '/', '/apple', '/invite', '/fr', '/fr/fr/app'])(
-      'rejects %s, which is not an allowed root',
-      (value) => {
-        expect(safeNextPath(value)).toBeUndefined();
-      },
-    );
+    // Encoded so it is safe in a header (next-intl's redirect sends it in `x-action-redirect`).
+    it.each([
+      ['/app?q=บริษัท', `/app?q=${encodeURIComponent('บริษัท')}`],
+      ['/app/companies/บริษัท', `/app/companies/${encodeURIComponent('บริษัท')}`],
+      ['/fr/app?q=a b', '/app?q=a%20b'],
+      // A fullwidth solidus is not a separator: it stays one encoded segment under /app.
+      ['/app/／evil.example', '/app/%EF%BC%8Fevil.example'],
+      ['/app/a\u2028b', '/app/a%E2%80%A8b'],
+      ['/app?q=a\u3000b', '/app?q=a%E3%80%80b'],
+      // An encoded slash is not a separator either: one segment, same origin, still under /app.
+      ['/app/..%2F..%2Fdashboard', '/app/..%2F..%2Fdashboard'],
+    ])('accepts %j and returns it percent-encoded', (value, expected) => {
+      expect(safeNextPath(value)).toBe(expected);
+    });
+
+    it.each([
+      '/dashboard/x',
+      '/',
+      '/apple',
+      '/invite',
+      '/invite/',
+      '/invite//x',
+      '/fr',
+      '/fr/fr/app',
+    ])('rejects %s, which is not an allowed root', (value) => {
+      expect(safeNextPath(value)).toBeUndefined();
+    });
 
     it.each([
       '/app/../dashboard',

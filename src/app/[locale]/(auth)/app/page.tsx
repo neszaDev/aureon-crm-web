@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { getCurrentUser } from '@/libs/api/Queries';
+import { endRejectedSession } from '@/libs/api/Session';
 import { Link, redirect } from '@/libs/I18nNavigation';
 
 type AppPageProps = {
@@ -25,7 +26,10 @@ export default async function AppPage(props: AppPageProps) {
   const t = await getTranslations({ locale, namespace: 'AppPage' });
 
   const { user, unauthorized } = await getCurrentUser();
-  if (unauthorized || !user) {
+  if (unauthorized) {
+    return endRejectedSession(locale);
+  }
+  if (!user) {
     return redirect({ href: '/sign-in', locale });
   }
 

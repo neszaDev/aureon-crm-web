@@ -91,7 +91,8 @@
     "title": "Sign in",
     "subtitle": "Welcome back. Your card is where you left it.",
     "switch_prompt": "No account yet?",
-    "switch_link": "Create one"
+    "switch_link": "Create one",
+    "session_expired": "Your session has ended. Sign in again."
   },
   "SignUpPage": {
     "meta_title": "Create an account",
