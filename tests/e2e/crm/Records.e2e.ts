@@ -61,7 +61,13 @@ test.describe('Records', () => {
 
     // A call logged on Ada.
     await page.goto(`${owner.path}/contacts/${ada}`);
-    await waitForHydration(page.locator('form'));
+    // The composer is behind a button, which opens it on the Subject.
+    await expect(page.getByLabel('Subject')).toBeHidden();
+    await waitForHydration(page.getByRole('button', { name: 'Log activity' }));
+    await page.getByRole('button', { name: 'Log activity' }).click();
+    await expect(page.getByLabel('Subject')).toBeFocused();
+    // Another type first, so choosing Call is a real change.
+    await page.getByRole('radio', { name: 'Email' }).click();
     const type = page.getByRole('radio', { name: 'Call' });
     await type.click();
     await expect(type).toBeChecked();
@@ -71,14 +77,17 @@ test.describe('Records', () => {
     await expect(page.getByText('Activity logged')).toBeVisible();
     const call = page.getByRole('listitem').filter({ hasText: 'Intro call' });
     await expect(call).toContainText('Call');
+    // Logged, it closes again.
+    await expect(page.getByLabel('Subject')).toBeHidden();
+
+    // And again: it opens empty every time, not only the first.
+    await page.getByRole('button', { name: 'Log activity' }).click();
     await expect(page.getByLabel('Subject')).toHaveValue('');
     await expect(page.getByRole('textbox', { name: 'Details' })).toHaveValue('');
-
-    // And again: the composer is ready for the next one every time, not only the first.
     await page.getByLabel('Subject').fill('Follow-up call');
     await page.getByRole('button', { name: 'Log activity' }).click();
     await expect(page.getByRole('listitem').filter({ hasText: 'Follow-up call' })).toBeVisible();
-    await expect(page.getByLabel('Subject')).toHaveValue('');
+    await expect(page.getByLabel('Subject')).toBeHidden();
 
     // The company's timeline holds its contacts' activities.
     await page.goto(`${owner.path}/companies/${acme}`);
@@ -394,18 +403,18 @@ test.describe('Records', () => {
         await open();
         const dialog = page.getByRole('dialog');
         const height = page.viewportSize()?.height ?? 0;
-        // Polled: the dialog is still opening (zooming in) when it first appears.
-        await expect
-          .poll(async () => {
-            const box = await dialog.boundingBox();
-
-            return Boolean(box && box.y >= 0 && box.y + box.height <= height);
-          })
-          .toBe(true);
-        await expect
-          .poll(async () => await dialog.evaluate((node) => node.scrollHeight > node.clientHeight))
-          .toBe(true);
-        await button.scrollIntoViewIfNeeded();
+        // Measured once it has finished opening: it zooms in, so its box changes until then.
+        await page.waitForFunction(() =>
+          document.getAnimations().every((animation) => animation.playState !== 'running'),
+        );
+        const box = await dialog.boundingBox();
+        expect(box && box.y >= 0 && box.y + box.height <= height).toBe(true);
+        expect(await dialog.evaluate((node) => node.scrollHeight > node.clientHeight)).toBe(true);
+        // The footer sticks to the bottom, so the button is in reach before any scrolling.
+        await expect(button).toBeInViewport({ ratio: 1 });
+        await dialog.evaluate((node) => {
+          node.scrollTo({ top: node.scrollHeight });
+        });
         await expect(button).toBeInViewport({ ratio: 1 });
       };
 

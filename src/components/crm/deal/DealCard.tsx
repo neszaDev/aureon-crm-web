@@ -107,8 +107,9 @@ export const DealCardBody = (props: {
 /**
  * One card of a board column. A deal the caller may move (`movable`) has a drag handle, which
  * the pointer and the keyboard both use (from 768 px up), and a menu with "Move to…", which is
- * how a phone moves it; both show on hover (where there is hover) or focus, and always on a touch screen. Without the right to move it the card has
- * neither. A deal whose move is on its way (`busy`) can't be picked up again, nor moved from its menu.
+ * how a phone moves it; both show on hover (where there is hover) or focus, and always on a
+ * touch screen. Without the right to move it the card has neither. A deal whose move is on its
+ * way (`busy`) can't be picked up again, nor moved from its menu.
  * @param props Component props.
  * @param props.deal The deal.
  * @param props.workspaceId The workspace.

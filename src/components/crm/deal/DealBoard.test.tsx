@@ -477,6 +477,7 @@ describe(DealBoard, () => {
 
     await expect.element(page.getByText('Required')).toBeVisible();
     expect(DealActions.moveDeal).not.toHaveBeenCalled();
+    await expect.element(page.getByLabelText('Reason')).toHaveAttribute('maxlength', '500');
 
     await page.getByLabelText('Reason').fill('Went with a rival');
     await page.getByRole('button', { name: 'Mark as lost' }).click();
@@ -735,6 +736,10 @@ describe(DealBoard, () => {
   });
 
   it('keeps the deal’s name in the Lost dialog’s title while it closes', async () => {
+    // Slowed down, so the dialog is still on screen, fading out, when it is looked at.
+    const slow = document.createElement('style');
+    slow.textContent = '[data-slot="dialog-content"] { animation-duration: 2s !important; }';
+    document.head.append(slow);
     await renderBoard();
     await drag('D-0101 Mine to move', 3);
     await expect
@@ -743,8 +748,13 @@ describe(DealBoard, () => {
 
     await page.getByRole('button', { name: 'Cancel' }).click();
 
-    // Right after the click the dialog is still fading out, with its title as it was.
-    expect(document.body.textContent).not.toContain('Mark  as lost');
+    // Closing, with its title as it was: the deal's name, not a blank.
+    const title = document.querySelector(
+      '[data-slot="dialog-content"][data-state="closed"] [data-slot="dialog-title"]',
+    );
+
+    expect(title?.textContent).toBe('Mark Mine to move as lost');
+    slow.remove();
   });
 
   it('gives the focus back to the card’s handle when the Lost dialog is cancelled', async () => {

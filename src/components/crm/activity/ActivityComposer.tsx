@@ -16,6 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { toLocalInput } from '@/libs/crm/ZonedTime';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { onEscape } from '@/utils/Focus';
 import { useSettle } from '@/utils/SettleAction';
 import type { ActivityFormValues } from '@/validations/crm/ActivityValidation';
 import { ACTIVITY_TYPES, ActivityFormValidation } from '@/validations/crm/ActivityValidation';
@@ -48,7 +49,8 @@ export const ActivityTypeIcon = (props: { type: ActivityFormValues['type'] }) =>
  * @param props.savedMessage The toast once saved.
  * @param props.submitLabel The submit button's label.
  * @param props.onSaved Called once saved; without it the form clears for the next activity.
- * @param props.onCancel Called by "Cancel", when the form has one (editing).
+ * @param props.onCancel Called by "Cancel" and by Escape, when the form has one (editing, and the
+ *   timeline's, which opens from a button).
  * @returns The form.
  */
 export const ActivityComposer = (props: {
@@ -95,7 +97,13 @@ export const ActivityComposer = (props: {
   });
 
   return (
-    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+    <form
+      ref={props.onCancel ? onEscape(props.onCancel) : undefined}
+      method="post"
+      onSubmit={onSubmit}
+      className="flex flex-col gap-4"
+      noValidate
+    >
       <ActionAlert result={failure} />
       <div className="flex flex-col gap-2">
         <span

@@ -7,6 +7,8 @@ import { convertLead } from '@/actions/crm/LeadActions';
 import { searchRecords } from '@/actions/crm/RecordSearchActions';
 import type { components } from '@/libs/api/schema';
 import messages from '@/locales/en.json';
+// The dialog's height, its scrolling and its sticky footer are styles.
+import '@/styles/global.css';
 import { ConvertDialog } from './ConvertDialog';
 
 type Lead = components['schemas']['LeadResponse'];
@@ -92,6 +94,35 @@ const summaryLink = (name: string) =>
   page.getByRole('dialog').getByRole('link', { name, exact: true });
 
 describe(ConvertDialog, () => {
+  it('keeps Convert in view on a phone, however far the dialog scrolls', async () => {
+    await page.viewport(390, 560);
+    await openDialog();
+    const dialog = page.getByRole('dialog').element();
+    const footer = dialog.querySelector('[data-slot="dialog-footer"]');
+    const inView = () => (footer?.getBoundingClientRect().bottom ?? Infinity) <= window.innerHeight;
+
+    // The dialog is taller than the screen, so it scrolls.
+    expect(dialog.scrollHeight).toBeGreaterThan(dialog.clientHeight);
+    dialog.scrollTo({ top: 0 });
+    await expect.poll(inView).toBe(true);
+    await expect.element(submit()).toBeVisible();
+    expect(submit().element().getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      window.innerHeight,
+    );
+  });
+
+  it('sets the footer on paper with a hairline above it, not a tinted band', async () => {
+    await page.viewport(390, 560);
+    await openDialog();
+    const footer = page.getByRole('dialog').element().querySelector('[data-slot="dialog-footer"]');
+    const style = getComputedStyle(footer ?? document.body);
+
+    expect(style.position).toBe('sticky');
+    expect(style.borderTopWidth).toBe('1px');
+    expect(footer).toHaveClass('bg-card', 'border-rule');
+    expect(footer).not.toHaveClass('bg-muted/50');
+  });
+
   it('starts from the lead: its company, a contact made from it, a deal of its value in the first open stage', async () => {
     await openDialog();
 

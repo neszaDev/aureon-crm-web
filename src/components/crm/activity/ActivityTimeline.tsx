@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDownIcon, InboxIcon, LoaderCircleIcon } from 'lucide-react';
+import { ChevronDownIcon, InboxIcon, LoaderCircleIcon, PlusIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -13,9 +13,18 @@ import { PAGE_SIZES } from '@/libs/crm/ListQuery';
 import type { Permission } from '@/libs/crm/Permissions';
 import { canEditRecord } from '@/libs/crm/RecordAccess';
 import { toInstant, toLocalInput } from '@/libs/crm/ZonedTime';
+import { focusOnMount } from '@/utils/Focus';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
 
 type Activity = components['schemas']['ActivityResponse'];
+
+/**
+ * A ref callback that focuses the Subject field of the composer it is on, once, as it opens.
+ * @param node The composer's wrapper, or null when it unmounts.
+ */
+const focusSubject = (node: HTMLElement | null) => {
+  node?.querySelector<HTMLElement>('input[name="subject"]')?.focus();
+};
 
 const newestFirst = (a: Activity, b: Activity) =>
   Date.parse(b.occurredAt) - Date.parse(a.occurredAt) || b.id - a.id;
@@ -50,8 +59,9 @@ const timelineOf = (shown: Activity[], saved: Activity[], deleted: number[]) => 
 };
 
 /**
- * A record's activity: the composer that logs a call, email, meeting or note on it, then what
- * was logged, newest first (a company's includes its contacts' and deals'). The first page comes
+ * A record's activity: a "Log activity" button that opens the composer for a call, email,
+ * meeting or note on it (it closes once logged, cancelled or on Escape), then what was logged,
+ * newest first (a company's includes its contacts' and deals'). The first page comes
  * from the server; "Show older" adds the next ones, each activity once even when the pages moved
  * meanwhile, and the focus goes to the first one it added. Edit and delete show for the author
  * and with `RECORDS_EDIT_ANY`.
@@ -85,6 +95,14 @@ export const ActivityTimeline = (props: {
   const [firstAdded, setFirstAdded] = useState<number>();
   const [isLoading, startLoading] = useTransition();
   const [firstShown, setFirstShown] = useState(props.first);
+  // The composer opens from "Log activity" and goes again once logged or cancelled; the button
+  // that comes back takes the focus.
+  const [composing, setComposing] = useState(false);
+  const [composed, setComposed] = useState(false);
+  const closeComposer = () => {
+    setComposing(false);
+    setComposed(true);
+  };
   // A refreshed first page (an activity logged) pushes its last ones onto the next page: once
   // older ones show, they stay, so the list has no gap (each once, as the pages overlap).
   if (props.first !== firstShown) {
@@ -134,31 +152,48 @@ export const ActivityTimeline = (props: {
         </span>
       </h2>
       <div className="border-t border-rule px-5 py-4">
-        <ActivityComposer
-          defaults={{
-            type: 'CALL',
-            subject: '',
-            body: '',
-            occurredAt: toLocalInput(props.now, props.timeZone),
-          }}
-          timeZone={props.timeZone}
-          // Untouched, "When" is left to the backend: the moment it is logged.
-          save={async (values, whenChanged) =>
-            await logActivity(props.workspaceId, {
-              ...values,
-              occurredAt: whenChanged
-                ? (toInstant(values.occurredAt, props.timeZone) ?? null)
-                : null,
-              companyId: null,
-              contactId: null,
-              leadId: null,
-              dealId: null,
-              ...props.link,
-            })
-          }
-          savedMessage={t('logged')}
-          submitLabel={t('log')}
-        />
+        {composing ? (
+          <div ref={focusSubject}>
+            <ActivityComposer
+              defaults={{
+                type: 'CALL',
+                subject: '',
+                body: '',
+                occurredAt: toLocalInput(props.now, props.timeZone),
+              }}
+              timeZone={props.timeZone}
+              // Untouched, "When" is left to the backend: the moment it is logged.
+              save={async (values, whenChanged) =>
+                await logActivity(props.workspaceId, {
+                  ...values,
+                  occurredAt: whenChanged
+                    ? (toInstant(values.occurredAt, props.timeZone) ?? null)
+                    : null,
+                  companyId: null,
+                  contactId: null,
+                  leadId: null,
+                  dealId: null,
+                  ...props.link,
+                })
+              }
+              savedMessage={t('logged')}
+              submitLabel={t('log')}
+              onSaved={closeComposer}
+              onCancel={closeComposer}
+            />
+          </div>
+        ) : (
+          <Button
+            ref={composed ? focusOnMount : undefined}
+            variant="outline"
+            onClick={() => {
+              setComposing(true);
+            }}
+          >
+            <PlusIcon data-icon="inline-start" />
+            {t('log')}
+          </Button>
+        )}
       </div>
       {items.length > 0 ? (
         // oxlint-disable-next-line jsx-a11y/no-redundant-roles -- Safari drops the list role

@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type {
   deleteActivity,
   loadActivities,
@@ -74,7 +74,57 @@ const FIRST_PAGE = Array.from({ length: 20 }, (_, index) => activity(index + 1, 
 
 const item = (subject: string) => page.getByRole('listitem').filter({ hasText: subject });
 
+const logButton = () => page.getByRole('button', { name: 'Log activity' });
+const subject = () => page.getByLabelText('Subject');
+
 describe(ActivityTimeline, () => {
+  it('keeps the composer behind a "Log activity" button, which opens it on the Subject', async () => {
+    await renderTimeline([activity(1, 'Mia called')], 1);
+
+    expect(subject().elements()).toHaveLength(0);
+    await logButton().click();
+
+    await expect.element(subject()).toBeVisible();
+    await expect.element(subject()).toHaveFocus();
+    // The button that opened it is gone: the submit has its name now.
+    expect(page.getByRole('button', { name: 'Log activity' }).elements()).toHaveLength(1);
+  });
+
+  it('closes the composer on Escape and on Cancel, handing the focus back to the button', async () => {
+    await renderTimeline([activity(1, 'Mia called')], 1);
+    await logButton().click();
+    await subject().fill('half typed');
+
+    await userEvent.keyboard('{Escape}');
+
+    await expect.element(subject()).not.toBeInTheDocument();
+    await expect.element(logButton()).toHaveFocus();
+
+    await logButton().click();
+    // Typed again from nothing: the closed one kept nothing.
+    await expect.element(subject()).toHaveValue('');
+    await page.getByRole('button', { name: 'Cancel' }).click();
+
+    await expect.element(subject()).not.toBeInTheDocument();
+    await expect.element(logButton()).toHaveFocus();
+  });
+
+  it('closes the composer once the activity is logged, and opens ready for the next', async () => {
+    vi.mocked(ActivityActions.logActivity).mockResolvedValue({ ok: true });
+    await renderTimeline([activity(1, 'Mia called')], 1);
+    await logButton().click();
+    await subject().fill('Intro call');
+    await page.getByRole('button', { name: 'Log activity' }).click();
+
+    await expect.element(subject()).not.toBeInTheDocument();
+    expect(ActivityActions.logActivity).toHaveBeenCalledExactlyOnceWith(
+      1,
+      expect.objectContaining({ subject: 'Intro call', companyId: 7 }),
+    );
+    await logButton().click();
+    await expect.element(subject()).toHaveValue('');
+  });
+
   it("offers edit and delete only on the caller's own activities without RECORDS_EDIT_ANY", async () => {
     await renderTimeline([activity(1, 'Riley called', RILEY), activity(2, 'Mia called')], 2);
 
