@@ -2,16 +2,26 @@ import * as z from 'zod';
 
 const optionalText = (max: number) => z.string().trim().max(max, 'too_long');
 
+/**
+ * A website as typed, with `https://` in front when it has no scheme (`acme.com`). Idempotent.
+ * @param value The trimmed website.
+ * @returns The website to check and send.
+ */
+const withScheme = (value: string) =>
+  value && !value.includes('://') ? `https://${value}` : value;
+
 // Mirrors the backend's CompanyInput (Create/UpdateCompanyRequest). Messages are `Validation`
 // translation keys. Fields hold what the inputs hold (text); an empty one is sent as absent.
 export const CompanyValidation = z.object({
   name: z.string().trim().min(1, 'required').max(200, 'too_long'),
   industry: optionalText(100),
-  // As CompanyInput.WEBSITE: an http(s) URL without spaces, in any case.
-  website: optionalText(255).refine(
-    (value) => value === '' || /^https?:\/\/\S+$/iu.test(value),
-    'website_format',
-  ),
+  // Then as CompanyInput.WEBSITE: an http(s) URL without spaces, in any case.
+  website: z
+    .string()
+    .trim()
+    .overwrite(withScheme)
+    .max(255, 'too_long')
+    .refine((value) => value === '' || /^https?:\/\/\S+$/iu.test(value), 'website_format'),
   phone: optionalText(50),
   address: optionalText(500),
   employeeCount: z
@@ -28,10 +38,11 @@ export const CompanyValidation = z.object({
 
 export type CompanyValues = z.infer<typeof CompanyValidation>;
 
-// What a duplicate check sends: the name and website as typed so far, valid or not yet.
+// What a duplicate check sends: the name and website as typed so far, valid or not yet, the
+// website with the scheme the save would add.
 export const CompanyDuplicateValidation = z.object({
   name: z.string().trim().max(200),
-  website: z.string().trim().max(255),
+  website: z.string().trim().overwrite(withScheme).max(255),
 });
 
 export type CompanyDuplicateValues = z.infer<typeof CompanyDuplicateValidation>;

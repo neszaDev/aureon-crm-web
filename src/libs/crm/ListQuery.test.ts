@@ -91,6 +91,15 @@ describe(parseListQuery, () => {
     ).toStrictEqual({});
   });
 
+  it('drops NUL characters from the search and text filters, which the backend refuses', () => {
+    expect(parseListQuery(SPEC, { q: 'ac\u0000me', industry: 'Re\u0000tail' })).toMatchObject({
+      q: 'acme',
+      filters: { industry: 'Retail' },
+      params: { q: 'acme', industry: 'Retail' },
+    });
+    expect(parseListQuery(SPEC, { q: '\u0000', industry: ' \u0000 ' }).params).toStrictEqual({});
+  });
+
   it('reads the search, the archived view, the sort and its direction', () => {
     const query = parseListQuery(SPEC, {
       q: '  acme ',

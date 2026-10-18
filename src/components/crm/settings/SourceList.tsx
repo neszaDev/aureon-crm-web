@@ -175,7 +175,12 @@ const SourceItem = (props: {
             >
               {props.source.name}
             </span>
-            {props.source.archived && <Badge variant="outline">{t('archived')}</Badge>}
+            {props.source.archived && (
+              // Sentence case: DESIGN.md's label rule (the primitive's uppercase is the demos').
+              <Badge variant="outline" className="text-xs font-medium tracking-normal normal-case">
+                {t('archived')}
+              </Badge>
+            )}
           </span>
           {props.canManage && (
             <span className="ml-auto flex shrink-0 items-center gap-0.5">

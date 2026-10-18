@@ -30,6 +30,8 @@ export type FilterOption = {
  * @param props.id The trigger's id.
  * @param props.label Its visible label.
  * @param props.anyLabel The label of the option without a filter.
+ * @param props.missingLabel The label of a valid value the options don't hold (an owner who left
+ *   the workspace, an id typed in the URL), so the filter never shows blank.
  * @param props.param The URL param it sets.
  * @param props.options The values, in order.
  * @param props.path The list's path.
@@ -40,6 +42,7 @@ export const FilterSelect = (props: {
   id: string;
   label: string;
   anyLabel: string;
+  missingLabel: string;
   param: string;
   options: FilterOption[];
   path: string;
@@ -47,12 +50,14 @@ export const FilterSelect = (props: {
 }) => {
   const router = useRouter();
   const current = props.query.params[props.param];
+  const value = typeof current === 'string' ? current : ANY;
+  const missing = value !== ANY && !props.options.some((option) => option.value === value);
 
   return (
     <div className="flex min-w-44 flex-1 basis-48 flex-col gap-2 sm:flex-none">
       <Label htmlFor={props.id}>{props.label}</Label>
       <Select
-        value={typeof current === 'string' ? current : ANY}
+        value={value}
         onValueChange={(next) => {
           router.push(
             listHref(props.path, props.query, { [props.param]: next === ANY ? undefined : next }),
@@ -65,6 +70,7 @@ export const FilterSelect = (props: {
         </SelectTrigger>
         <SelectContent position="popper" align="start">
           <SelectItem value={ANY}>{props.anyLabel}</SelectItem>
+          {missing && <SelectItem value={value}>{props.missingLabel}</SelectItem>}
           {props.options.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.person && (

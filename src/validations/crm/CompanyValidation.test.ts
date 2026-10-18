@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CompanyValues } from './CompanyValidation';
-import { CompanyValidation } from './CompanyValidation';
+import { CompanyDuplicateValidation, CompanyValidation } from './CompanyValidation';
 
 /**
  * A website of a given length.
@@ -61,14 +61,31 @@ describe('company validation', () => {
     for (const value of ['', 'https://acme.co.th', 'HTTP://ACME.COM/about', ' http://a.b ']) {
       expect(messageFor('website', value)).toBeUndefined();
     }
-    for (const value of ['acme.com', 'ftp://acme.com', 'https://', 'https://acme .com']) {
+    for (const value of ['ftp://acme.com', 'https://', 'https://acme .com', 'acme .com']) {
       expect(messageFor('website', value)).toBe('website_format');
     }
   });
 
-  it('takes a website of at most 255 characters', () => {
+  it('adds https:// to a website without a scheme, once', () => {
+    const parse = (value: string) => CompanyValidation.parse({ ...VALID, website: value }).website;
+
+    expect(parse(' acme.com ')).toBe('https://acme.com');
+    expect(parse('https://acme.com')).toBe('https://acme.com');
+    expect(parse(parse('acme.com'))).toBe('https://acme.com');
+    expect(parse('')).toBe('');
+  });
+
+  it('takes a website of at most 255 characters, the added scheme included', () => {
     expect(messageFor('website', website(255))).toBeUndefined();
     expect(messageFor('website', website(256))).toBe('too_long');
+    expect(messageFor('website', 'a'.repeat(247))).toBeUndefined();
+    expect(messageFor('website', 'a'.repeat(248))).toBe('too_long');
+  });
+
+  it('sends the duplicate check the website with its scheme', () => {
+    expect(CompanyDuplicateValidation.parse({ name: ' Acme ', website: 'acme.com' })).toStrictEqual(
+      { name: 'Acme', website: 'https://acme.com' },
+    );
   });
 
   it('takes a whole number of employees from 0 to 10,000,000, or none', () => {

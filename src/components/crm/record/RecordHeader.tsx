@@ -32,7 +32,12 @@ export const RecordHeader = (props: {
           <span className="font-mono text-[0.8125rem] text-muted-foreground tabular-nums">
             {props.number}
           </span>
-          {props.archived && <Badge variant="outline">{t('archived')}</Badge>}
+          {props.archived && (
+            // Sentence case: DESIGN.md's label rule (the primitive's uppercase is the demos').
+            <Badge variant="outline" className="text-xs font-medium tracking-normal normal-case">
+              {t('archived')}
+            </Badge>
+          )}
         </p>
         <h1
           id={props.headingId}

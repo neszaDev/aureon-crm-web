@@ -57,6 +57,9 @@ export type ListQuery<S extends ListSpec = ListSpec> = {
 
 const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
+// Searched text without NUL characters, which the backend refuses (400 on `q`, 500 on others).
+const withoutNul = (value: string) => value.replaceAll('\u0000', '');
+
 /**
  * Tells whether a value is a calendar date that exists (`2024-02-29`, not `2026-02-30`).
  * @param value The URL value.
@@ -103,7 +106,7 @@ const READERS: Record<Exclude<FilterKind, object>, (value: string) => Read> = {
   bool: (value) =>
     value === 'true' || value === 'false' ? { value: value === 'true', param: value } : null,
   text: (value) => {
-    const text = value.trim();
+    const text = withoutNul(value).trim();
     return text ? { value: text, param: text } : null;
   },
 };
@@ -173,7 +176,7 @@ export const parseListQuery = <S extends ListSpec>(
 ): ListQuery<S> => {
   // In the order links write them: search, filters, view, sort, page.
   const params: Record<string, string | string[]> = {};
-  const q = first(searchParams.q)?.trim();
+  const q = withoutNul(first(searchParams.q) ?? '').trim();
   if (q) {
     params.q = q;
   }

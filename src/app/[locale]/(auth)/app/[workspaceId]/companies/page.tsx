@@ -60,12 +60,14 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
   // A page past the end (a hand-edited link, or rows archived meanwhile): the last one instead.
   if (page && page.content.length === 0 && page.totalPages > 0) {
     return redirect({
-      href: listHref(path, query, { page: String(page.totalPages - 1) }),
+      href: listHref(path, query, {
+        page: page.totalPages > 1 ? String(page.totalPages - 1) : undefined,
+      }),
       locale,
     });
   }
   const filtered =
-    [query.q, query.archived, query.unassigned].some((value) => value !== undefined) ||
+    [query.q, query.unassigned].some((value) => value !== undefined) ||
     Object.keys(query.filters).length > 0;
   const ownerOptions: FilterOption[] = [
     { value: String(user.id), label: t('owner_me'), person: user },
@@ -86,6 +88,17 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
       </Link>
     </Button>
   );
+  // Without rows: nothing matches the search and filters, the archive is empty, or nothing yet.
+  let empty = (
+    <ListEmpty variant="none" title={t('empty_title')} text={t('empty_text')} action={newCompany} />
+  );
+  if (filtered) {
+    empty = <ListEmpty variant="filtered" clearHref={path} />;
+  } else if (query.archived) {
+    empty = (
+      <ListEmpty variant="none" title={t('archived_empty_title')} text={t('archived_empty_text')} />
+    );
+  }
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -112,6 +125,7 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
           id="companies-owner"
           label={t('owner_label')}
           anyLabel={t('owner_any')}
+          missingLabel={t('owner_former')}
           param="ownerId"
           options={ownerOptions}
           path={path}
@@ -143,17 +157,7 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
               <ListPager path={path} query={query} total={page.totalElements} />
             </>
           )}
-          {page.content.length === 0 &&
-            (filtered ? (
-              <ListEmpty variant="filtered" clearHref={path} />
-            ) : (
-              <ListEmpty
-                variant="none"
-                title={t('empty_title')}
-                text={t('empty_text')}
-                action={newCompany}
-              />
-            ))}
+          {page.content.length === 0 && empty}
         </section>
       ) : (
         <InvalidFilterNotice resetHref={path} />

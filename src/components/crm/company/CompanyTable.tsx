@@ -74,7 +74,10 @@ export const CompanyTable = (props: {
               {company.owner ? (
                 <span className="flex items-center gap-2">
                   <Seal name={company.owner.displayName} email={company.owner.email} size="sm" />
-                  <span className="max-w-40 truncate">
+                  <span
+                    title={company.owner.displayName ?? company.owner.email}
+                    className="block max-w-40 min-w-0 truncate"
+                  >
                     {company.owner.displayName ?? company.owner.email}
                   </span>
                 </span>

@@ -34,17 +34,22 @@ export const SearchBox = (props: {
   const current = props.query.params[props.param];
   const value = typeof current === 'string' ? current : '';
   const [text, setText] = useState(value);
-  // The URL value this box last followed, and the one it last asked for.
+  // The URL value this box last followed, and the values it asked for that haven't shown yet.
   const [shown, setShown] = useState(value);
-  const [requested, setRequested] = useState(value);
+  const [pending, setPending] = useState<string[]>([]);
   const timer = useRef(0);
 
-  // The URL changed: unless this box asked for it, show the new value (Back, "Clear filters").
+  // The URL changed. One of this box's requests landing leaves the text alone, as the user may
+  // have typed on (even back to an earlier value); any other change (Back, "Clear filters")
+  // replaces it.
   if (value !== shown) {
     setShown(value);
-    if (value !== requested) {
+    const landed = pending.indexOf(value);
+    if (landed === -1) {
       setText(value);
-      setRequested(value);
+      setPending([]);
+    } else {
+      setPending(pending.slice(landed + 1));
     }
   }
 
@@ -68,12 +73,12 @@ export const SearchBox = (props: {
             setText(input.value);
             window.clearTimeout(timer.current);
             timer.current = window.setTimeout(() => {
-              const next = input.value.trim();
-              // Gone (the user followed a link meanwhile), or nothing new to ask for.
-              if (!input.isConnected || next === value) {
+              // Gone: the user followed a link meanwhile.
+              if (!input.isConnected) {
                 return;
               }
-              setRequested(next);
+              const next = input.value.trim();
+              setPending((asked) => [...asked, next]);
               router.replace(
                 listHref(props.path, props.query, { [props.param]: next || undefined }),
                 { scroll: false },
