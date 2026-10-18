@@ -23,6 +23,7 @@ import type { components } from '@/libs/api/schema';
 import { formatInstant, recordNumber } from '@/libs/crm/Format';
 import { Link } from '@/libs/I18nNavigation';
 import { toastActionFailure } from '@/utils/ActionToast';
+import { useSettle } from '@/utils/SettleAction';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
 
 type Task = components['schemas']['TaskResponse'];
@@ -88,6 +89,7 @@ export const TaskRow = (props: {
 }) => {
   const t = useTranslations('TaskRow');
   const tError = useTranslations('ActionError');
+  const settle = useSettle();
   const isOpen = props.task.status === 'OPEN';
   const [ticked, setTicked] = useOptimistic(props.task.status === 'COMPLETED');
   const [isPending, startTransition] = useTransition();
@@ -114,7 +116,7 @@ export const TaskRow = (props: {
       if (tick) {
         setTicked(true);
       }
-      const result = await action(props.workspaceId, props.task.id, props.task.version);
+      const result = await settle(action(props.workspaceId, props.task.id, props.task.version));
       if (!result.ok) {
         toastActionFailure(result, t('error_generic'), tError('reload'));
       }

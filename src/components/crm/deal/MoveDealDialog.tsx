@@ -24,6 +24,8 @@ import { Textarea } from '@/components/ui/textarea';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { StageRef } from '@/libs/crm/Stages';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { useInFlight } from '@/utils/InFlight';
+import { useSettle } from '@/utils/SettleAction';
 import type { MoveFormValues } from '@/validations/crm/DealValidation';
 import { MoveFormValidation, REASON_MAX } from '@/validations/crm/DealValidation';
 
@@ -43,10 +45,14 @@ const FIELDS: Record<string, keyof MoveFormValues> = {
  * deal's own. Won and Lost say that the deal closes; Lost asks for its reason.
  * @param props The dialog's props.
  * @param props.onDone Closes the dialog once the move is saved.
+ * @param props.once Runs the save unless one is on its way (the dialog stays open meanwhile).
  * @returns The form.
  */
-const MoveForm = (props: MoveProps & { onDone: () => void }) => {
+const MoveForm = (
+  props: MoveProps & { onDone: () => void; once: (run: () => Promise<void>) => Promise<void> },
+) => {
   const t = useTranslations('MoveDealDialog');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const choices = props.stages.filter((stage) => stage.id !== props.deal.stageId);
   // The stage after the deal's own, else the first other one.
@@ -63,23 +69,35 @@ const MoveForm = (props: MoveProps & { onDone: () => void }) => {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
-    const result = await moveDeal(props.workspaceId, props.deal.id, {
-      stageId: values.stageId,
-      version: props.deal.version,
-      lostReason: values.lost ? values.lostReason : undefined,
-    });
+    const result = await settle(
+      moveDeal(props.workspaceId, props.deal.id, {
+        stageId: values.stageId,
+        version: props.deal.version,
+        lostReason: values.lost ? values.lostReason : undefined,
+      }),
+    );
     if (result.ok) {
       toast.success(t('done', { name: props.deal.name, stage: chosen?.name ?? '' }));
       props.onDone();
       return;
     }
 
-    applyFieldErrors(form, result.fieldErrors, (name) => FIELDS[name]);
-    setFailure(result);
+    setFailure(applyFieldErrors(form, result, (name) => FIELDS[name]));
   });
 
   return (
-    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+    <form
+      method="post"
+      onSubmit={(event) => {
+        // Not a native POST, whether or not a request is already on its way.
+        event.preventDefault();
+        void props.once(async () => {
+          await onSubmit(event);
+        });
+      }}
+      className="flex flex-col gap-4"
+      noValidate
+    >
       <DialogHeader>
         <DialogTitle>{t('title', { name: props.deal.name })}</DialogTitle>
         <DialogDescription>{t('description')}</DialogDescription>
@@ -163,6 +181,7 @@ export const MoveDealDialog = (
 ) => {
   const t = useTranslations('MoveDealDialog');
   const [ownOpen, setOwnOpen] = useState(false);
+  const inFlight = useInFlight();
   const open = props.open ?? ownOpen;
   const setOpen = (next: boolean) => {
     setOwnOpen(next);
@@ -170,7 +189,15 @@ export const MoveDealDialog = (
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        // Closing would lose the answer: a refusal, or a move that has landed.
+        if (next || !inFlight.busy()) {
+          setOpen(next);
+        }
+      }}
+    >
       {props.trigger && <DialogTrigger asChild>{props.trigger}</DialogTrigger>}
       <DialogContent
         closeLabel={t('close')}
@@ -185,6 +212,7 @@ export const MoveDealDialog = (
       >
         <MoveForm
           {...props}
+          once={inFlight.once}
           onDone={() => {
             setOpen(false);
           }}

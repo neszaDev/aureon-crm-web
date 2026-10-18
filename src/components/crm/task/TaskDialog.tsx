@@ -30,6 +30,8 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import { toInstant, toLocalInput } from '@/libs/crm/ZonedTime';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { useInFlight } from '@/utils/InFlight';
+import { useSettle } from '@/utils/SettleAction';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
 import type { TaskFormValues, TaskValues } from '@/validations/crm/TaskValidation';
 import { TASK_PRIORITIES, TaskFormValidation } from '@/validations/crm/TaskValidation';
@@ -127,11 +129,18 @@ const startingValues = (props: TaskDialogProps): TaskFormValues => {
  * The task's fields, mounted each time the dialog opens, so it starts from the saved values.
  * @param props The dialog's props.
  * @param props.onDone Closes the dialog once saved.
+ * @param props.once Runs the save unless one is on its way (the dialog stays open meanwhile).
  * @returns The form.
  */
-const TaskForm = (props: TaskDialogProps & { onDone: () => void }) => {
+const TaskForm = (
+  props: TaskDialogProps & {
+    onDone: () => void;
+    once: (run: () => Promise<void>) => Promise<void>;
+  },
+) => {
   const t = useTranslations('TaskDialog');
   const tRow = useTranslations('TaskRow');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(TaskFormValidation),
@@ -145,24 +154,38 @@ const TaskForm = (props: TaskDialogProps & { onDone: () => void }) => {
       dueAt: form.getFieldState('dueAt').isDirty ? undefined : props.task?.dueAt,
       company: !form.getFieldState('company').isDirty,
     });
-    const result = props.task
-      ? await updateTask(props.workspaceId, props.task.id, props.task.version, body)
-      : await createTask(props.workspaceId, body);
+    const result = await settle(
+      props.task
+        ? updateTask(props.workspaceId, props.task.id, props.task.version, body)
+        : createTask(props.workspaceId, body),
+    );
     if (result.ok) {
       toast.success(props.task ? t('saved') : t('created'));
       props.onDone();
       return;
     }
 
-    applyFieldErrors(form, result.fieldErrors, (name) => {
-      const field = LINKS.find((item) => item.id === name)?.field ?? name;
-      return isFormField(field) ? field : undefined;
-    });
-    setFailure(result);
+    setFailure(
+      applyFieldErrors(form, result, (name) => {
+        const field = LINKS.find((item) => item.id === name)?.field ?? name;
+        return isFormField(field) ? field : undefined;
+      }),
+    );
   });
 
   return (
-    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+    <form
+      method="post"
+      onSubmit={(event) => {
+        // Not a native POST, whether or not a request is already on its way.
+        event.preventDefault();
+        void props.once(async () => {
+          await onSubmit(event);
+        });
+      }}
+      className="flex flex-col gap-4"
+      noValidate
+    >
       <DialogHeader>
         <DialogTitle>{props.task ? t('edit_title') : t('new_title')}</DialogTitle>
         <DialogDescription>
@@ -302,9 +325,18 @@ const TaskForm = (props: TaskDialogProps & { onDone: () => void }) => {
 export const TaskDialog = (props: TaskDialogProps & { trigger: React.ReactElement }) => {
   const t = useTranslations('TaskDialog');
   const [open, setOpen] = useState(false);
+  const inFlight = useInFlight();
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        // Closing would lose the answer, and a second try would add the task twice.
+        if (next || !inFlight.busy()) {
+          setOpen(next);
+        }
+      }}
+    >
       <DialogTrigger asChild>{props.trigger}</DialogTrigger>
       <DialogContent
         closeLabel={t('close')}
@@ -312,6 +344,7 @@ export const TaskDialog = (props: TaskDialogProps & { trigger: React.ReactElemen
       >
         <TaskForm
           {...props}
+          once={inFlight.once}
           onDone={() => {
             setOpen(false);
           }}

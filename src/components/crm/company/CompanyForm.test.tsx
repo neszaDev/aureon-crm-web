@@ -160,6 +160,44 @@ describe(CompanyForm, () => {
     expect(findDuplicates).toHaveBeenCalledWith({ name: 'ACME', website: 'https://acme.test' }, 42);
   });
 
+  it('shows the alert and enables submit again when the request never gets through', async () => {
+    const action = vi.fn<Action>().mockRejectedValue(new Error('Failed to fetch'));
+    await renderForm({ action });
+    const submit = page.getByRole('button', { name: 'Save changes' });
+
+    await submit.click();
+
+    await expect
+      .element(page.getByRole('alert'))
+      .toHaveTextContent("Couldn't reach the server. Check your connection and try again.");
+    await expect.element(submit).toBeEnabled();
+    expect(page.getByText('Saved', { exact: true }).elements()).toHaveLength(0);
+  });
+
+  it('lists only the newest lookup, though an older one answers last', async () => {
+    const older = Promise.withResolvers<components['schemas']['CompanyRef'][]>();
+    const newer = Promise.withResolvers<components['schemas']['CompanyRef'][]>();
+    const findDuplicates = vi
+      .fn<FindDuplicates>()
+      .mockReturnValueOnce(older.promise)
+      .mockReturnValueOnce(newer.promise);
+    await renderForm({ action: vi.fn<Action>(), findDuplicates });
+
+    await page.getByLabelText('Company name').fill('ACME');
+    await page.getByLabelText('Industry').click();
+    await page.getByLabelText('Website').fill('acme.test');
+    await page.getByLabelText('Industry').click();
+    newer.resolve([{ id: 8, name: 'ACME Newer' }]);
+    await expect.element(page.getByRole('link', { name: /ACME Newer/u })).toBeVisible();
+    older.resolve([{ id: 7, name: 'ACME Older' }]);
+
+    // A moment for the older answer to be (wrongly) shown.
+    const start = performance.now();
+    await expect.poll(() => performance.now() - start, { interval: 20 }).toBeGreaterThan(80);
+    expect(page.getByRole('link', { name: /ACME Older/u }).elements()).toHaveLength(0);
+    await expect.element(page.getByRole('link', { name: /ACME Newer/u })).toBeVisible();
+  });
+
   it('sends what was typed since the last save, not the values saved before', async () => {
     const action = vi.fn<Action>().mockResolvedValue({ ok: true });
     await renderForm({ action });

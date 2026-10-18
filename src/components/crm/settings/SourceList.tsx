@@ -19,8 +19,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { ActionResult } from '@/libs/api/ApiError';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { toastActionFailure } from '@/utils/ActionToast';
 import { focusOnMount } from '@/utils/Focus';
+import { useSettle } from '@/utils/SettleAction';
 import type {
   LeadSourceUpdateValues,
   LeadSourceValues,
@@ -62,6 +64,7 @@ const SourceForm = (props: {
   onCancel?: () => void;
 }) => {
   const t = useTranslations('SourceList');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const form = useForm<LeadSourceValues>({
     resolver: zodResolver(LeadSourceValidation),
@@ -71,7 +74,7 @@ const SourceForm = (props: {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
-    const result = await props.onSubmit(values);
+    const result = await settle(props.onSubmit(values));
     if (result.ok) {
       // Field by field: `reset` finds the fields through registrations that the compiled form
       // makes only once, so it clears the inputs the first time and never again.
@@ -80,10 +83,7 @@ const SourceForm = (props: {
       return;
     }
 
-    if (result.fieldErrors?.name) {
-      form.setError('name', { type: 'server', message: result.fieldErrors.name });
-    }
-    setFailure(result);
+    setFailure(applyFieldErrors(form, result, (name) => (name === 'name' ? name : undefined)));
   });
 
   return (
@@ -139,6 +139,7 @@ const SourceItem = (props: {
 }) => {
   const t = useTranslations('SourceList');
   const tError = useTranslations('ActionError');
+  const settle = useSettle();
   const [editing, setEditing] = useState(false);
   // Once an editor has closed, its Rename button takes the focus back when it reappears.
   const [edited, setEdited] = useState(false);
@@ -211,13 +212,11 @@ const SourceItem = (props: {
                     return;
                   }
                   startTransition(async () => {
-                    const result = await props.actions.update(
-                      props.source.id,
-                      props.source.version,
-                      {
+                    const result = await settle(
+                      props.actions.update(props.source.id, props.source.version, {
                         name: props.source.name,
                         archived: !props.source.archived,
-                      },
+                      }),
                     );
                     if (!result.ok) {
                       // Someone else changed the source first: reloading shows their version.

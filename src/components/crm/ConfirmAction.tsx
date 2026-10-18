@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import type { ActionResult } from '@/libs/api/ApiError';
+import { useSettle } from '@/utils/SettleAction';
 
 /**
  * A destructive action behind a confirmation. The dialog stays open until the action succeeds,
@@ -50,6 +51,7 @@ export const ConfirmAction = (props: {
 }) => {
   const [ownOpen, setOwnOpen] = useState(false);
   const [failure, setFailure] = useState<ActionResult>();
+  const settle = useSettle();
   const [isPending, startTransition] = useTransition();
   // Set through the trigger's ref, so a trigger that doesn't forward its ref never counts as gone.
   const triggerGone = useRef(false);
@@ -61,7 +63,15 @@ export const ConfirmAction = (props: {
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(next) => {
+        // Closing would lose the answer (a refusal shows in the dialog).
+        if (next || !isPending) {
+          setOpen(next);
+        }
+      }}
+    >
       {props.trigger && (
         <AlertDialogTrigger
           asChild
@@ -100,7 +110,7 @@ export const ConfirmAction = (props: {
               event.preventDefault();
               setFailure(undefined);
               startTransition(async () => {
-                const result = await props.action();
+                const result = await settle(props.action());
                 if (result.ok) {
                   // A transition too (an update after `await` isn't one by itself), so the
                   // dialog closes in the same commit as the action's own updates (a refreshed

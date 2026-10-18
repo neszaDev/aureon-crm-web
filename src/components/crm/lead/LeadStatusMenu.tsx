@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { components } from '@/libs/api/schema';
 import { toastActionFailure } from '@/utils/ActionToast';
+import { useSettle } from '@/utils/SettleAction';
 import { LEAD_TARGETS } from '@/validations/crm/LeadValidation';
 
 /**
@@ -39,16 +40,19 @@ export const LeadStatusMenu = (props: {
   const t = useTranslations('LeadStatusMenu');
   const tStatus = useTranslations('LeadStatus');
   const tError = useTranslations('ActionError');
+  const settle = useSettle();
   const [isPending, startTransition] = useTransition();
   const [unqualifying, setUnqualifying] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
 
   const move = (status: (typeof LEAD_TARGETS)[number]) => {
     startTransition(async () => {
-      const result = await changeLeadStatus(props.workspaceId, props.lead.id, props.lead.version, {
-        status,
-        reason: '',
-      });
+      const result = await settle(
+        changeLeadStatus(props.workspaceId, props.lead.id, props.lead.version, {
+          status,
+          reason: '',
+        }),
+      );
       if (result.ok) {
         toast.success(t('moved', { status: tStatus(`status_${status}`) }));
       } else {

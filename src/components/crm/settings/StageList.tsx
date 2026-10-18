@@ -42,6 +42,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import type { Stage } from '@/libs/crm/Stages';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { focusOnMount } from '@/utils/Focus';
+import { useSettle } from '@/utils/SettleAction';
 import type { StageValues } from '@/validations/crm/PipelineValidation';
 import { StageValidation } from '@/validations/crm/PipelineValidation';
 
@@ -76,6 +77,7 @@ const StageForm = (props: {
   onCancel?: () => void;
 }) => {
   const t = useTranslations('StageList');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const form = useForm<StageValues>({
     resolver: zodResolver(StageValidation),
@@ -87,7 +89,7 @@ const StageForm = (props: {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
-    const result = await props.onSubmit(values);
+    const result = await settle(props.onSubmit(values));
     if (result.ok) {
       // Field by field: `reset` finds the fields through registrations that the compiled form
       // makes only once, so it clears the inputs the first time and never again.
@@ -97,8 +99,7 @@ const StageForm = (props: {
       return;
     }
 
-    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
-    setFailure(result);
+    setFailure(applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)));
   });
 
   return (
@@ -376,6 +377,7 @@ export const StageList = (props: {
   // reorder started from (a refresh brings the server's list anyway).
   const [saved, setSaved] = useState<{ from: Stage[]; stages: Stage[] }>();
   const tError = useTranslations('ActionError');
+  const settle = useSettle();
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ text: string; failed?: boolean; conflict?: boolean }>();
   const [focusKey, setFocusKey] = useState<string>();
@@ -394,7 +396,7 @@ export const StageList = (props: {
     setStatus({ text: t('order_saving') });
     let result: Awaited<ReturnType<StageActions['reorder']>> = { ok: false };
     try {
-      result = await props.actions.reorder(stageIds);
+      result = await settle(props.actions.reorder(stageIds));
     } finally {
       // Also when the action throws, so "Saving the order…" never stays on screen.
       setSaving(false);

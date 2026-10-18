@@ -33,6 +33,7 @@ import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import type { ActionResult } from '@/libs/api/ApiError';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { focusOnMount } from '@/utils/Focus';
+import { useSettle } from '@/utils/SettleAction';
 import type { InvitationValues } from '@/validations/crm/InvitationValidation';
 import { InvitationValidation } from '@/validations/crm/InvitationValidation';
 import type { WorkspaceRole } from '@/validations/crm/MemberValidation';
@@ -59,6 +60,7 @@ const InviteForm = (props: {
 }) => {
   const t = useTranslations('InviteDialog');
   const tRole = useTranslations('Roles');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const form = useForm<InvitationValues>({
     resolver: zodResolver(InvitationValidation),
@@ -69,14 +71,13 @@ const InviteForm = (props: {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
-    const result = await props.action(values);
-    if (result.invitation) {
+    const result = await settle(props.action(values));
+    if ('invitation' in result && result.invitation) {
       props.onCreated(result.invitation);
       return;
     }
 
-    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
-    setFailure(result);
+    setFailure(applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)));
   });
 
   return (

@@ -17,6 +17,12 @@ const box = (query: Record<string, string>) => (
 );
 
 describe(SearchBox, () => {
+  it('stops at 200 characters, which the backend would refuse as invalid filters', async () => {
+    await render(box({}));
+
+    await expect.element(page.getByLabelText('Search')).toHaveAttribute('maxlength', '200');
+  });
+
   it('replaces the URL once typing pauses, keeping the size and dropping the page', async () => {
     router.replace.mockClear();
     await render(box({ page: '3', size: '50' }));

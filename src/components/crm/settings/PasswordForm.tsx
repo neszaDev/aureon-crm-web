@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { useSettle } from '@/utils/SettleAction';
 import type { PasswordChangeValues } from '@/validations/ProfileValidation';
 import { PasswordChangeValidation } from '@/validations/ProfileValidation';
 
@@ -33,6 +34,7 @@ export const PasswordForm = (props: {
   action: (values: PasswordChangeValues) => Promise<ActionResult>;
 }) => {
   const t = useTranslations('PasswordForm');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const [changed, setChanged] = useState(false);
   const form = useForm<PasswordChangeValues>({
@@ -44,15 +46,14 @@ export const PasswordForm = (props: {
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
     setChanged(false);
-    const result = await props.action(values);
+    const result = await settle(props.action(values));
     if (result.ok) {
       form.reset();
       setChanged(true);
       return;
     }
 
-    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
-    setFailure(result);
+    setFailure(applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)));
   });
 
   return (

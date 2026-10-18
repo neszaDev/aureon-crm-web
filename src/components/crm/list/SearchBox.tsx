@@ -68,6 +68,8 @@ export const SearchBox = (props: {
           id={props.id}
           type="search"
           autoComplete="off"
+          // The backend refuses a longer search, which the page would call invalid filters.
+          maxLength={200}
           placeholder={props.placeholder}
           value={text}
           className="pl-9"

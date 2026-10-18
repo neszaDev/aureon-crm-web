@@ -52,8 +52,9 @@ export const EditUserForm = (props: { id: number; defaults: UpdateUserValues }) 
       setSaved(true);
       return;
     }
-    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
-    setFormError(result.message);
+    setFormError(
+      applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)).message,
+    );
   });
 
   return (

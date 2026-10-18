@@ -16,6 +16,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { Link } from '@/libs/I18nNavigation';
+import { useSettle } from '@/utils/SettleAction';
 import type { CompanyDuplicateValues, CompanyValues } from '@/validations/crm/CompanyValidation';
 import { CompanyValidation } from '@/validations/crm/CompanyValidation';
 
@@ -57,6 +58,7 @@ export const CompanyForm = (props: {
   submitLabel: string;
 }) => {
   const t = useTranslations('CompanyForm');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const [saved, setSaved] = useState(false);
   const [duplicates, setDuplicates] = useState<components['schemas']['CompanyRef'][]>([]);
@@ -67,9 +69,22 @@ export const CompanyForm = (props: {
   const { errors, isSubmitting } = form.formState;
   const checkDuplicates = async () => {
     const values = form.getValues();
-    setDuplicates(
-      await props.findDuplicates({ name: values.name, website: values.website }, props.recordId),
-    );
+    let found: components['schemas']['CompanyRef'][];
+    try {
+      found = await props.findDuplicates(
+        { name: values.name, website: values.website },
+        props.recordId,
+      );
+    } catch {
+      // Only a hint: without an answer there is none.
+      found = [];
+    }
+    // Only an answer to what is typed now counts: an older one that comes last would show the
+    // wrong list.
+    const now = form.getValues();
+    if (now.name === values.name && now.website === values.website) {
+      setDuplicates(found);
+    }
   };
   const field = (name: TextField, id: string) => ({
     id,
@@ -85,7 +100,7 @@ export const CompanyForm = (props: {
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
     setSaved(false);
-    const result = await props.action(values);
+    const result = await settle(props.action(values));
     if (result.ok) {
       // The fields show what was saved: trimmed, the website with its scheme.
       form.reset(values);
@@ -93,8 +108,7 @@ export const CompanyForm = (props: {
       return;
     }
 
-    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
-    setFailure(result);
+    setFailure(applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)));
   });
 
   return (

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { useSettle } from '@/utils/SettleAction';
 import type { WorkspaceValues } from '@/validations/crm/WorkspaceValidation';
 import { WorkspaceValidation } from '@/validations/crm/WorkspaceValidation';
 
@@ -43,6 +44,7 @@ export const WorkspaceForm = (props: {
   submitLabel?: string;
 }) => {
   const t = useTranslations('WorkspaceForm');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const [saved, setSaved] = useState(false);
   // The browser's zone, known once hydrated (the server can't know it). It is the default, and an
@@ -78,14 +80,13 @@ export const WorkspaceForm = (props: {
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
     setSaved(false);
-    const result = await props.action(values);
+    const result = await settle(props.action(values));
     if (result.ok) {
       setSaved(true);
       return;
     }
 
-    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
-    setFailure(result);
+    setFailure(applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)));
   });
 
   return (

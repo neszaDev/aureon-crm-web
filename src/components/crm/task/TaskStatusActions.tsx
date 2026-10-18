@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import type { components } from '@/libs/api/schema';
 import { toastActionFailure } from '@/utils/ActionToast';
 import { focusOnMount } from '@/utils/Focus';
+import { useSettle } from '@/utils/SettleAction';
 
 const REOPEN_ID = 'task-reopen';
 
@@ -28,6 +29,7 @@ export const TaskStatusActions = (props: {
 }) => {
   const t = useTranslations('TaskRow');
   const tError = useTranslations('ActionError');
+  const settle = useSettle();
   const [isPending, startTransition] = useTransition();
   const [moved, setMoved] = useState(false);
   const run = (action: typeof completeTask, done: string) => {
@@ -35,7 +37,7 @@ export const TaskStatusActions = (props: {
       return;
     }
     startTransition(async () => {
-      const result = await action(props.workspaceId, props.task.id, props.task.version);
+      const result = await settle(action(props.workspaceId, props.task.id, props.task.version));
       if (result.ok) {
         setMoved(true);
         toast.success(done);

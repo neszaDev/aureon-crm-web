@@ -167,7 +167,9 @@ export const DealCard = (props: {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-auto min-w-40">
-                  <DropdownMenuItem onSelect={props.onMoveTo}>{t('move_to')}</DropdownMenuItem>
+                  <DropdownMenuItem disabled={props.busy} onSelect={props.onMoveTo}>
+                    {t('move_to')}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </span>

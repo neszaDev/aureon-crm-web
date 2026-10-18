@@ -81,6 +81,26 @@ describe(TaskRow, () => {
     await expect.element(checkbox()).not.toBeChecked();
   });
 
+  it('un-ticks the box and toasts when the request never gets through, without the error boundary', async () => {
+    // A rejected action in a transition would throw to the page's error boundary: an uncaught error.
+    const uncaught: Event[] = [];
+    const record = (event: Event) => uncaught.push(event);
+    window.addEventListener('error', record);
+    window.addEventListener('unhandledrejection', record);
+    vi.mocked(TaskActions.completeTask).mockRejectedValue(new Error('Failed to fetch'));
+    await renderRow(TASK);
+
+    await checkbox().click();
+
+    await expect
+      .element(page.getByText("Couldn't reach the server. Check your connection and try again."))
+      .toBeVisible();
+    await expect.element(checkbox()).not.toBeChecked();
+    expect(uncaught).toHaveLength(0);
+    window.removeEventListener('error', record);
+    window.removeEventListener('unhandledrejection', record);
+  });
+
   it('offers a reload when the task changed meanwhile', async () => {
     vi.mocked(TaskActions.completeTask).mockResolvedValue({
       ok: false,

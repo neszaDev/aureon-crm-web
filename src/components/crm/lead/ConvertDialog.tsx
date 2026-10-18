@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRightLeftIcon, LoaderCircleIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { convertLead } from '@/actions/crm/LeadActions';
 import { ActionAlert } from '@/components/crm/ActionAlert';
@@ -32,6 +32,7 @@ import type { components } from '@/libs/api/schema';
 import { fullName } from '@/libs/crm/Format';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { useRouter } from '@/libs/I18nNavigation';
+import { useInFlight } from '@/utils/InFlight';
 import type { ConversionValues, ConvertFormValues } from '@/validations/crm/LeadValidation';
 import { ConvertFormValidation } from '@/validations/crm/LeadValidation';
 
@@ -162,8 +163,7 @@ const ConvertForm = (
         props.onDone(result.conversion);
         return;
       }
-      applyFieldErrors(form, result.fieldErrors, (name) => FIELDS[name]);
-      setFailure(result);
+      setFailure(applyFieldErrors(form, result, (name) => FIELDS[name]));
     } catch {
       // Nothing came back (the network): converting again is safe, a repeat gives the first result.
       setFailure({ ok: false, message: t('error_generic') });
@@ -442,28 +442,16 @@ export const ConvertDialog = (props: ConvertProps & { headingId: string }) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [conversion, setConversion] = useState<Conversion>();
-  const inFlight = useRef(false);
-
   // One conversion at a time: a second submit before the first has answered is the same
-  // conversion, dropped. A ref, as state only catches up on the next render.
-  const convertOnce = async (convert: () => Promise<void>) => {
-    if (inFlight.current) {
-      return;
-    }
-    inFlight.current = true;
-    try {
-      await convert();
-    } finally {
-      inFlight.current = false;
-    }
-  };
+  // conversion, dropped.
+  const inFlight = useInFlight();
 
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
         // Closing would lose the answer: the dialog stays until the conversion has one.
-        if (!next && inFlight.current) {
+        if (!next && inFlight.busy()) {
           return;
         }
         setOpen(next);
@@ -513,7 +501,7 @@ export const ConvertDialog = (props: ConvertProps & { headingId: string }) => {
             </DialogFooter>
           </>
         ) : (
-          <ConvertForm {...props} onDone={setConversion} convertOnce={convertOnce} />
+          <ConvertForm {...props} onDone={setConversion} convertOnce={inFlight.once} />
         )}
       </DialogContent>
     </Dialog>

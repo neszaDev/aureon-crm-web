@@ -149,9 +149,19 @@ and the tokens in `src/styles/global.css`; see `DESIGN.md`. Responsive. No unnec
 - Server components can't call capitalised functions (React compiler): put backend reads in
   `Queries.ts` instead of calling `api.GET(...)` in a page.
 - Show a server action's `fieldErrors` with `applyFieldErrors` (`src/libs/form/`), never a bare
-  `setError` loop: `setError` edits `errors` in place, which the compiled (production) form does
-  not see. Vitest compiles with the React Compiler too, so a test that asserts the error text and
-  `aria-invalid` catches it; the e2e suite should also pass against `pnpm build` + `next start`.
+  `setError` loop (`make lint` fails on `.setError(` outside `src/libs/form/`): `setError` edits
+  `errors` in place, which the compiled (production) form does not see. It returns the result for
+  the form's alert, which says what the backend said about an error that belongs to no field
+  (`setFailure(applyFieldErrors(form, result, toField))`). Vitest compiles with the React Compiler
+  too, so a test that asserts the error text and `aria-invalid` catches it; the e2e suite should
+  also pass against `pnpm build` + `next start`.
+- Await a server action in a client component through `useSettle` (`src/utils/SettleAction.ts`):
+  `await settle(action(...))`. An action rejects outright when the browser is offline or the API
+  can't be reached; from a transition that throws to the error boundary and blanks the page, and
+  in a form it leaves nothing on screen. `settle` turns it into a failed result with the
+  translated "couldn't reach the server" message, which the usual feedback shows (a toast for a
+  row action, `ActionAlert` in a form or dialog). A dialog that sends a request stays open while
+  it is on its way (`useInFlight`, `src/utils/InFlight.ts`).
 - A form that stays mounted after a save clears or rebases its fields in a way the compiled form
   keeps working, because react-hook-form finds a field's input through a registration the compiled
   form makes only once. To clear fields, call `form.resetField(name, { defaultValue })` for each

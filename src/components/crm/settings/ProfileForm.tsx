@@ -11,6 +11,8 @@ import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { ActionResult } from '@/libs/api/ApiError';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { useSettle } from '@/utils/SettleAction';
 import type { ProfileValues } from '@/validations/ProfileValidation';
 import { ProfileValidation } from '@/validations/ProfileValidation';
 
@@ -28,6 +30,7 @@ export const ProfileForm = (props: {
   action: (values: ProfileValues) => Promise<ActionResult>;
 }) => {
   const t = useTranslations('ProfileForm');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const [saved, setSaved] = useState(false);
   const form = useForm<ProfileValues>({
@@ -40,7 +43,7 @@ export const ProfileForm = (props: {
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
     setSaved(false);
-    const result = await props.action(values);
+    const result = await settle(props.action(values));
     if (result.ok) {
       // Keep the fields' registrations: dropped, the compiled form never registers them again.
       form.reset(values, { keepFieldsRef: true });
@@ -48,10 +51,9 @@ export const ProfileForm = (props: {
       return;
     }
 
-    if (result.fieldErrors?.displayName) {
-      form.setError('displayName', { type: 'server', message: result.fieldErrors.displayName });
-    }
-    setFailure(result);
+    setFailure(
+      applyFieldErrors(form, result, (field) => (field === 'displayName' ? field : undefined)),
+    );
   });
 
   return (

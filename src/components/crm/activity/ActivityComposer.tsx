@@ -16,6 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { toLocalInput } from '@/libs/crm/ZonedTime';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { useSettle } from '@/utils/SettleAction';
 import type { ActivityFormValues } from '@/validations/crm/ActivityValidation';
 import { ACTIVITY_TYPES, ActivityFormValidation } from '@/validations/crm/ActivityValidation';
 
@@ -61,6 +62,7 @@ export const ActivityComposer = (props: {
 }) => {
   const t = useTranslations('ActivityComposer');
   const id = useId();
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const form = useForm<ActivityFormValues>({
     resolver: zodResolver(ActivityFormValidation),
@@ -70,7 +72,7 @@ export const ActivityComposer = (props: {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
-    const result = await props.save(values, form.getFieldState('occurredAt').isDirty);
+    const result = await settle(props.save(values, form.getFieldState('occurredAt').isDirty));
     if (result.ok) {
       toast.success(props.savedMessage);
       if (props.onSaved) {
@@ -88,11 +90,8 @@ export const ActivityComposer = (props: {
       return;
     }
 
-    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
     // `links` is no field of the form: its error is the alert, not "check the highlighted fields".
-    setFailure(
-      result.fieldErrors?.links ? { ...result, message: result.fieldErrors.links } : result,
-    );
+    setFailure(applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)));
   });
 
   return (

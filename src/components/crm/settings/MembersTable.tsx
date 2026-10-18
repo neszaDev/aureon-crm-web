@@ -17,6 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { ActionResult } from '@/libs/api/ApiError';
+import { useSettle } from '@/utils/SettleAction';
 import type { WorkspaceRole } from '@/validations/crm/MemberValidation';
 import { assignableRoles } from '@/validations/crm/MemberValidation';
 
@@ -61,6 +62,7 @@ const MemberTableRow = (props: {
 }) => {
   const t = useTranslations('MembersTable');
   const tRole = useTranslations('Roles');
+  const settle = useSettle();
   const [isPending, startTransition] = useTransition();
   // Shows the chosen role while it saves; it falls back to the saved one if the backend refuses.
   const [role, setRole] = useOptimistic(props.member.role);
@@ -122,7 +124,7 @@ const MemberTableRow = (props: {
                 }
                 startTransition(async () => {
                   setRole(next);
-                  const result = await props.actions.changeRole(props.member.userId, next);
+                  const result = await settle(props.actions.changeRole(props.member.userId, next));
                   if (!result.ok) {
                     toast.error(result.message ?? t('error_generic'));
                   }

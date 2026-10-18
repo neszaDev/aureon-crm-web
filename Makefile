@@ -30,6 +30,8 @@ lint: ## Lint, type check, unused code/deps, i18n keys (no fixes)
 	pnpm run check:types
 	pnpm run check:deps
 	pnpm run check:i18n
+	@! grep -rnE '\.setError\(' src --include='*.ts' --include='*.tsx' | grep -v '^src/libs/form/' \
+		|| { echo 'Show server field errors with applyFieldErrors (src/libs/form/), never a bare setError (AGENTS.md).'; exit 1; }
 
 test: ## Unit + UI component tests (no backend needed)
 	pnpm run test

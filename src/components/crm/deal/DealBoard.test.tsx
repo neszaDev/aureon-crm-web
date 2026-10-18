@@ -538,6 +538,18 @@ describe(DealBoard, () => {
     answer.resolve({ ok: true, version: 4 });
   });
 
+  it('does not offer a menu move for a card whose drag move is on its way', async () => {
+    const answer = Promise.withResolvers<Move>();
+    vi.mocked(DealActions.moveDeal).mockReturnValue(answer.promise);
+    await renderBoard();
+
+    await drag('D-0101 Mine to move', 1);
+    await page.getByRole('button', { name: 'Actions for Mine to move' }).click();
+
+    await expect.element(page.getByRole('menuitem', { name: 'Move to…' })).toBeDisabled();
+    answer.resolve({ ok: true, version: 4 });
+  });
+
   it('reveals a card\u2019s handle and menu on hover only where there is hover', async () => {
     await renderBoard();
 

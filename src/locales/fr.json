@@ -246,7 +246,8 @@
     "text": "Votre rôle dans cet espace de travail ne le permet pas. Demandez à un propriétaire ou à un administrateur si vous en avez besoin."
   },
   "ActionError": {
-    "reload": "Recharger"
+    "reload": "Recharger",
+    "network": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez."
   },
   "ApiError": {
     "generic": "Cela n'a pas fonctionné. Réessayez.",
@@ -3048,8 +3049,7 @@
     "drag_away": "{name} n'est au-dessus d'aucune étape.",
     "drag_end": "{name} déposée sur {stage}.",
     "drag_cancel": "Le déplacement de {name} a été annulé.",
-    "error_generic": "L'affaire n'a pas été déplacée. Réessayez.",
-    "error_network": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez."
+    "error_generic": "L'affaire n'a pas été déplacée. Réessayez."
   },
   "BoardColumn": {
     "count": "{count, plural, one {# affaire} other {# affaires}}",

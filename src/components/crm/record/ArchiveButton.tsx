@@ -8,6 +8,7 @@ import { ConfirmAction } from '@/components/crm/ConfirmAction';
 import { Button } from '@/components/ui/button';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { focusOnMount } from '@/utils/Focus';
+import { useSettle } from '@/utils/SettleAction';
 
 /**
  * Archives a record after a confirmation (a refusal shows in the dialog), or restores an archived
@@ -29,6 +30,7 @@ export const ArchiveButton = (props: {
   restore: () => Promise<ActionResult>;
 }) => {
   const t = useTranslations('RecordActions');
+  const settle = useSettle();
   const [isPending, startTransition] = useTransition();
   // After a restore, the Archive button that replaces Restore takes the focus.
   const [restored, setRestored] = useState(false);
@@ -46,7 +48,7 @@ export const ArchiveButton = (props: {
               return;
             }
             startTransition(async () => {
-              const result = await props.restore();
+              const result = await settle(props.restore());
               if (result.ok) {
                 setRestored(true);
                 toast.success(t('restored', { name: props.name }));

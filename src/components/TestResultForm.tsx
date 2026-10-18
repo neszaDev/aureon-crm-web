@@ -55,8 +55,9 @@ export const TestResultForm = () => {
       setCreated(true);
       return;
     }
-    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
-    setFormError(result.message);
+    setFormError(
+      applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)).message,
+    );
   });
 
   return (

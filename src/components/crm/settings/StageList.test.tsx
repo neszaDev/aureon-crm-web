@@ -106,24 +106,25 @@ describe(StageList, () => {
     await expect.element(page.getByRole('button', { name: 'Reload' })).toBeVisible();
   });
 
-  it('stops saying it saves when the action throws', async () => {
-    const failure = new Error('Network down');
+  it('stops saying it saves, and says the server was not reached, when the action throws', async () => {
     const rejections: unknown[] = [];
-    // The error still surfaces (unhandled); the listener records it instead of failing the run.
     const record = (event: PromiseRejectionEvent) => {
       rejections.push(event.reason);
     };
     window.addEventListener('unhandledrejection', record);
-    await renderList(vi.fn<Reorder>().mockRejectedValue(failure));
+    await renderList(vi.fn<Reorder>().mockRejectedValue(new Error('Network down')));
 
     await page.getByRole('button', { name: 'Move Qualified up' }).click();
 
-    await expect.element(page.getByText("The order wasn't saved. Try again.")).toBeVisible();
+    await expect
+      .element(page.getByText("Couldn't reach the server. Check your connection and try again."))
+      .toBeVisible();
     expect(page.getByText('Saving the order…').elements()).toHaveLength(0);
     await expect
       .element(page.getByRole('button', { name: 'Move Qualified up' }))
       .not.toHaveAttribute('aria-disabled');
-    await expect.poll(() => rejections).toContain(failure);
+    // Handled: nothing is left to surface as an unhandled rejection.
+    expect(rejections).toStrictEqual([]);
     window.removeEventListener('unhandledrejection', record);
   });
 

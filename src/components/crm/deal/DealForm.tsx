@@ -21,6 +21,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { Link } from '@/libs/I18nNavigation';
+import { useSettle } from '@/utils/SettleAction';
 import type { DealValues } from '@/validations/crm/DealValidation';
 import { DealValidation } from '@/validations/crm/DealValidation';
 
@@ -77,6 +78,7 @@ export const DealForm = (props: {
   submitLabel: string;
 }) => {
   const t = useTranslations('DealForm');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const [saved, setSaved] = useState(false);
   const [company, setCompany] = useState(props.company);
@@ -100,7 +102,7 @@ export const DealForm = (props: {
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
     setSaved(false);
-    const result = await props.action(values);
+    const result = await settle(props.action(values));
     if (result.ok) {
       // The fields show what was saved: trimmed.
       form.reset(values);
@@ -108,8 +110,7 @@ export const DealForm = (props: {
       return;
     }
 
-    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
-    setFailure(result);
+    setFailure(applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)));
   });
 
   return (

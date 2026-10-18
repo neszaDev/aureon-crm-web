@@ -24,6 +24,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { Link } from '@/libs/I18nNavigation';
+import { useSettle } from '@/utils/SettleAction';
 import type { InvitationRegisterValues } from '@/validations/crm/InvitationValidation';
 import { InvitationRegisterValidation } from '@/validations/crm/InvitationValidation';
 
@@ -142,6 +143,7 @@ const RegisterForm = (props: {
   register: (token: string, values: InvitationRegisterValues) => Promise<ActionResult>;
 }) => {
   const t = useTranslations('InvitationCard');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const form = useForm<InvitationRegisterValues>({
     resolver: zodResolver(InvitationRegisterValidation),
@@ -153,11 +155,12 @@ const RegisterForm = (props: {
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
     // On success the action redirects, so a result means something went wrong.
-    const result = await props.register(props.token, values);
-    applyFieldErrors(form, result.fieldErrors, (field) =>
-      field === 'displayName' || field === 'password' ? field : undefined,
+    const result = await settle(props.register(props.token, values));
+    setFailure(
+      applyFieldErrors(form, result, (field) =>
+        field === 'displayName' || field === 'password' ? field : undefined,
+      ),
     );
-    setFailure(result);
   });
 
   return (
@@ -228,6 +231,7 @@ export const InvitationCard = (props: {
 }) => {
   const t = useTranslations('InvitationCard');
   const tRole = useTranslations('Roles');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const [pending, startTransition] = useTransition();
 
@@ -308,7 +312,7 @@ export const InvitationCard = (props: {
             setFailure(undefined);
             startTransition(async () => {
               // On success the action redirects, so a result means something went wrong.
-              setFailure(await props.accept(props.token));
+              setFailure(await settle(props.accept(props.token)));
             });
           }}
         >

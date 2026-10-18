@@ -11,11 +11,13 @@ import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { useSettle } from '@/utils/SettleAction';
 import type { AuthValues } from '@/validations/AuthValidation';
 import { SignInValidation, SignUpValidation } from '@/validations/AuthValidation';
 
 export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
   const t = useTranslations('AuthForm');
+  const settle = useSettle();
   const [formError, setFormError] = useState<string>();
   const form = useForm<AuthValues>({
     resolver: zodResolver(props.mode === 'sign-in' ? SignInValidation : SignUpValidation),
@@ -29,12 +31,13 @@ export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
     // Read at submit so the auth pages stay static; the action checks it with safeNextPath.
     const next = new URLSearchParams(window.location.search).get('next');
     // On success the action redirects, so a result means something went wrong.
-    const result = await (isSignUp ? signUp(values, next) : signIn(values, next));
+    const result = await settle(isSignUp ? signUp(values, next) : signIn(values, next));
 
-    applyFieldErrors(form, result.fieldErrors, (name) =>
-      name === 'email' || name === 'password' ? name : undefined,
+    setFormError(
+      applyFieldErrors(form, result, (name) =>
+        name === 'email' || name === 'password' ? name : undefined,
+      ).message,
     );
-    setFormError(result.message);
   });
 
   return (

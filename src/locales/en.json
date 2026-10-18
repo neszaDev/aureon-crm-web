@@ -246,7 +246,8 @@
     "text": "Your role in this workspace doesn't allow it. Ask an owner or admin if you need it."
   },
   "ActionError": {
-    "reload": "Reload"
+    "reload": "Reload",
+    "network": "Couldn't reach the server. Check your connection and try again."
   },
   "ApiError": {
     "generic": "That didn't work. Try again.",
@@ -3048,8 +3049,7 @@
     "drag_away": "{name} is not over a stage.",
     "drag_end": "{name} dropped on {stage}.",
     "drag_cancel": "Moving {name} was cancelled.",
-    "error_generic": "The deal wasn't moved. Try again.",
-    "error_network": "Couldn't reach the server. Check your connection and try again."
+    "error_generic": "The deal wasn't moved. Try again."
   },
   "BoardColumn": {
     "count": "{count, plural, one {# deal} other {# deals}}",

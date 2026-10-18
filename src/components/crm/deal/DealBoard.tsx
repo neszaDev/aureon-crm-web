@@ -206,7 +206,7 @@ export const DealBoard = (props: {
       });
     } catch {
       // Nothing came back: the deal is where the server last said, so the card goes back.
-      result = { ok: false, message: t('error_network') };
+      result = { ok: false, message: tError('network') };
     }
     inFlight.current.delete(deal.id);
     if (result.ok) {

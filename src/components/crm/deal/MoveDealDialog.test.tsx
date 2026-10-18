@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { moveDeal } from '@/actions/crm/DealActions';
 import * as DealActions from '@/actions/crm/DealActions';
 import { Toaster } from '@/components/ui/sonner';
@@ -89,6 +89,46 @@ describe(MoveDealDialog, () => {
       version: 3,
       lostReason: undefined,
     });
+  });
+
+  it('stays open while the move is on its way, then closes with it', async () => {
+    const answer = Promise.withResolvers<Awaited<ReturnType<typeof moveDeal>>>();
+    vi.mocked(DealActions.moveDeal).mockReturnValue(answer.promise);
+    await openDialog();
+    await submit().click();
+
+    await userEvent.keyboard('{Escape}');
+    await page.getByRole('button', { name: 'Close' }).click();
+
+    await expect.element(page.getByRole('dialog', { name: 'Move Acme renewal' })).toBeVisible();
+    answer.resolve({ ok: true, version: 4 });
+
+    await expect.poll(() => page.getByRole('dialog').elements()).toHaveLength(0);
+  });
+
+  it('shows the refusal that lands while the dialog was asked to close', async () => {
+    const answer = Promise.withResolvers<Awaited<ReturnType<typeof moveDeal>>>();
+    vi.mocked(DealActions.moveDeal).mockReturnValue(answer.promise);
+    await openDialog();
+    await submit().click();
+
+    await userEvent.keyboard('{Escape}');
+    answer.resolve({ ok: false, message: 'Your role doesn’t allow this.' });
+
+    await expect.element(page.getByText('Your role doesn’t allow this.')).toBeVisible();
+    await expect.element(submit()).toBeEnabled();
+  });
+
+  it('shows the alert inside the dialog when the request never gets through', async () => {
+    vi.mocked(DealActions.moveDeal).mockRejectedValue(new Error('Failed to fetch'));
+    await openDialog();
+
+    await submit().click();
+
+    await expect
+      .element(page.getByRole('alert'))
+      .toHaveTextContent("Couldn't reach the server. Check your connection and try again.");
+    await expect.element(submit()).toBeEnabled();
   });
 
   it('limits the reason field to 500 characters', async () => {

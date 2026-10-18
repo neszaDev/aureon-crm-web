@@ -174,6 +174,32 @@ describe(ConfirmAction, () => {
     expect(fallbackFocus).not.toHaveBeenCalled();
   });
 
+  it('shows the failure in the dialog, which stays open, when the request never gets through', async () => {
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <ConfirmAction
+          trigger={<button type="button">Delete Demo</button>}
+          title="Delete Demo?"
+          description="It goes for good."
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          action={async () => await Promise.reject(new Error('Failed to fetch'))}
+        />
+      </NextIntlClientProvider>,
+    );
+
+    await page.getByRole('button', { name: 'Delete Demo' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click();
+
+    await expect
+      .element(page.getByRole('alert'))
+      .toHaveTextContent("Couldn't reach the server. Check your connection and try again.");
+    await expect.element(page.getByRole('alertdialog')).toBeVisible();
+    await expect
+      .element(page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }))
+      .toBeEnabled();
+  });
+
   it('gives the focus back to the trigger when cancelled', async () => {
     await renderRows();
     const trigger = page.getByRole('button', { name: 'Delete Demo' });

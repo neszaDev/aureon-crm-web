@@ -20,6 +20,9 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import type { ActionResult } from '@/libs/api/ApiError';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { useInFlight } from '@/utils/InFlight';
+import { useSettle } from '@/utils/SettleAction';
 import type { UnqualifyValues } from '@/validations/crm/LeadValidation';
 import { UnqualifyValidation } from '@/validations/crm/LeadValidation';
 
@@ -35,10 +38,14 @@ type UnqualifyProps = {
  * The reason field, mounted each time the dialog opens, so it starts empty.
  * @param props The dialog's props.
  * @param props.onDone Closes the dialog once saved.
+ * @param props.once Runs the save unless one is on its way (the dialog stays open meanwhile).
  * @returns The form.
  */
-const UnqualifyForm = (props: UnqualifyProps & { onDone: () => void }) => {
+const UnqualifyForm = (
+  props: UnqualifyProps & { onDone: () => void; once: (run: () => Promise<void>) => Promise<void> },
+) => {
   const t = useTranslations('UnqualifyDialog');
+  const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const form = useForm<UnqualifyValues>({
     resolver: zodResolver(UnqualifyValidation),
@@ -48,25 +55,34 @@ const UnqualifyForm = (props: UnqualifyProps & { onDone: () => void }) => {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
-    const result = await changeLeadStatus(props.workspaceId, props.leadId, props.version, {
-      status: 'UNQUALIFIED',
-      reason: values.reason,
-    });
+    const result = await settle(
+      changeLeadStatus(props.workspaceId, props.leadId, props.version, {
+        status: 'UNQUALIFIED',
+        reason: values.reason,
+      }),
+    );
     if (result.ok) {
       toast.success(t('done'));
       props.onDone();
       return;
     }
 
-    const message = result.fieldErrors?.reason;
-    if (message) {
-      form.setError('reason', { type: 'server', message });
-    }
-    setFailure(result);
+    setFailure(applyFieldErrors(form, result, (name) => (name === 'reason' ? name : undefined)));
   });
 
   return (
-    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+    <form
+      method="post"
+      onSubmit={(event) => {
+        // Not a native POST, whether or not a request is already on its way.
+        event.preventDefault();
+        void props.once(async () => {
+          await onSubmit(event);
+        });
+      }}
+      className="flex flex-col gap-4"
+      noValidate
+    >
       <DialogHeader>
         <DialogTitle>{t('title', { name: props.name })}</DialogTitle>
         <DialogDescription>{t('description')}</DialogDescription>
@@ -114,9 +130,18 @@ export const UnqualifyDialog = (
   props: UnqualifyProps & { open: boolean; onOpenChange: (open: boolean) => void },
 ) => {
   const t = useTranslations('UnqualifyDialog');
+  const inFlight = useInFlight();
 
   return (
-    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+    <Dialog
+      open={props.open}
+      onOpenChange={(next) => {
+        // Closing would lose the answer: a refusal, or a status that has landed.
+        if (next || !inFlight.busy()) {
+          props.onOpenChange(next);
+        }
+      }}
+    >
       <DialogContent
         closeLabel={t('close')}
         className="max-h-[calc(100dvh-2rem)] overflow-y-auto"
@@ -130,6 +155,7 @@ export const UnqualifyDialog = (
       >
         <UnqualifyForm
           {...props}
+          once={inFlight.once}
           onDone={() => {
             props.onOpenChange(false);
           }}
