@@ -76,13 +76,18 @@ export const ActivityComposer = (props: {
       if (props.onSaved) {
         props.onSaved();
       } else {
-        // Ready for the next one, of the same type, happening now.
-        form.reset({
-          type: values.type,
-          subject: '',
-          body: '',
-          occurredAt: toLocalInput(new Date().toISOString(), props.timeZone),
-        });
+        // Ready for the next one, of the same type, happening now. The fields keep their
+        // registrations: dropped, the compiled form never registers them again and the inputs
+        // would keep what was typed.
+        form.reset(
+          {
+            type: values.type,
+            subject: '',
+            body: '',
+            occurredAt: toLocalInput(new Date().toISOString(), props.timeZone),
+          },
+          { keepFieldsRef: true },
+        );
       }
       return;
     }

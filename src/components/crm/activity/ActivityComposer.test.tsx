@@ -6,7 +6,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import messages from '@/locales/en.json';
 import { ActivityComposer } from './ActivityComposer';
 
-const renderComposer = async (result: ActionResult) => {
+const renderForm = async (result: ActionResult) => {
   await render(
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
       <ActivityComposer
@@ -19,6 +19,10 @@ const renderComposer = async (result: ActionResult) => {
     </NextIntlClientProvider>,
   );
   await page.getByLabelText('Subject').fill('Called Pat');
+};
+
+const renderComposer = async (result: ActionResult) => {
+  await renderForm(result);
   await page.getByRole('button', { name: 'Log' }).click();
 };
 
@@ -44,5 +48,14 @@ describe(ActivityComposer, () => {
     await expect
       .element(page.getByRole('alert'))
       .toHaveTextContent('You can only edit your own activities.');
+  });
+
+  it('clears the subject and details once logged, ready for the next activity', async () => {
+    await renderForm({ ok: true });
+    await page.getByLabelText('Details').fill('Wants a quote');
+    await page.getByRole('button', { name: 'Log' }).click();
+
+    await expect.element(page.getByLabelText('Subject')).toHaveValue('');
+    await expect.element(page.getByLabelText('Details')).toHaveValue('');
   });
 });
