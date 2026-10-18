@@ -402,6 +402,28 @@
   }
 }
 
+/*
+ * The box that becomes current after a move is pressed like a stamp: it lands a little large and
+ * the ink settles, in 220 ms. Not at all under reduced motion.
+ */
+@keyframes stamp-press {
+  from {
+    transform: scale(1.06);
+    opacity: 0.6;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stamp-press {
+    animation: stamp-press 220ms var(--ease-out-expo) both;
+  }
+}
+
 /* The key's marks draw on as they scroll into view (no JS; skipped where unsupported). */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {

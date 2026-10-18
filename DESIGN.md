@@ -369,7 +369,10 @@ The signature of the system. A stamp row is a line of `StampBox`es, 4px apart, o
 - **Signed** (a stage the deal has passed): seal-tint fill holding a 28px seal of the member who moved the deal, tilted −8°.
 - **Open** (the current stage): field fill, a 2px ink outline, and the exact days in the stage in the stamp style ("8d"), never a rounded "about a week".
 - **Blank** (not reached): field fill, a 1px seal-ink outline at 40%.
-- **Won:** the WON stage, once reached, fills solid with the seal and its impression draws in `on-seal`. Add this as a state of `StampBox` when deals ship; never build a second box.
+- **Reached, unsigned:** a stage passed over without a signature (a deal created further along, a move whose member has left) is filled with the seal tint and ticked, with no seal: a seal is only ever someone's.
+- **Won:** the WON stage, once reached, fills solid with the seal and its impression (the winner's seal, or a tick) draws in `on-seal`. It is the `won` state of `StampBox`; never build a second box.
+- **Lost:** the LOST stage, once reached, is marked in solid ink with the word "Lost", never in the seal colour and never with a seal (`lost` state).
+- **Press:** the box that becomes current after a move plays a 220 ms stamp-press (scale 1.06 to 1, the ink settling); none under reduced motion.
 
 **The Fixed Box Rule.** Stamp boxes are always 36px, whatever the stage name or language. Stage names live outside the box.
 

@@ -200,7 +200,8 @@
     "all_workspaces": "Your workspaces",
     "skip_to_content": "Skip to content",
     "nav_tasks": "Tasks",
-    "nav_leads": "Leads"
+    "nav_leads": "Leads",
+    "nav_deals": "Deals"
   },
   "AccountMenu": {
     "label": "Your account",
@@ -529,7 +530,8 @@
     "invalid_text": "The link holds a search or filters the list can't apply. Reset the list to start again.",
     "invalid_reset": "Reset the list",
     "view_active_link": "Back to the active list",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "sort_label": "Sort by"
   },
   "OwnerFilter": {
     "label": "Owner",
@@ -3025,5 +3027,175 @@
     "state_unknown": "{name}: not shown",
     "reason_label": "Reason:",
     "hint": "A lead moves from New to Contacted to Qualified, or is marked Unqualified with a reason. Convert a qualified lead to make it a contact, with a company and a deal if you want them."
+  },
+  "StampRow": {
+    "label": "Deal progress",
+    "state_reached": "{name}: reached",
+    "state_signed": "{name}: reached, signed by {signer}",
+    "state_current": "{name}: current, {count, plural, one {# day} other {# days}}",
+    "state_blank": "{name}: not reached",
+    "state_unknown": "{name}: not shown",
+    "state_lost": "{name}: closed as lost",
+    "days_short": "{count}d",
+    "lost_word": "Lost"
+  },
+  "DealBoard": {
+    "stage_select": "Stage shown",
+    "stage_option": "{name} ({count})",
+    "drag_instructions": "To pick up a deal, press Space or Enter on its handle. Move it to another stage with the left and right arrow keys, then press Space or Enter to drop it, or Escape to cancel.",
+    "drag_start": "Picked up {name}.",
+    "drag_over": "{name} is over {stage}.",
+    "drag_away": "{name} is not over a stage.",
+    "drag_end": "{name} dropped on {stage}.",
+    "drag_cancel": "Moving {name} was cancelled.",
+    "error_generic": "The deal wasn't moved. Try again.",
+    "error_network": "Couldn't reach the server. Check your connection and try again."
+  },
+  "BoardColumn": {
+    "count": "{count, plural, one {# deal} other {# deals}}",
+    "totals": "Total value",
+    "empty": "No deals",
+    "more": "Showing {shown} of {count} — <link>open the list</link>"
+  },
+  "DealCard": {
+    "close": "Closes {date}",
+    "drag_role": "draggable deal",
+    "drag": "Drag {number} {name}",
+    "actions": "Actions for {name}",
+    "move_to": "Move to…"
+  },
+  "MoveDealDialog": {
+    "close": "Close",
+    "title": "Move {name}",
+    "description": "Choose the stage this deal goes to.",
+    "stage_label": "Stage",
+    "closes_won": "Moving it here closes the deal as won. You can move it back to an open stage later.",
+    "closes_lost": "Moving it here closes the deal as lost. Say why below.",
+    "reason_label": "Reason",
+    "reason_hint": "Up to 500 characters.",
+    "submit": "Move deal",
+    "done": "{name} moved to {stage}",
+    "error_invalid_input": "Check the highlighted fields"
+  },
+  "LostReasonDialog": {
+    "close": "Close",
+    "title": "Mark {name} as lost",
+    "description": "Say why this deal was lost. The reason stays on the deal. You can move it back to an open stage later.",
+    "reason_label": "Reason",
+    "reason_hint": "Up to 500 characters.",
+    "cancel": "Cancel",
+    "submit": "Mark as lost"
+  },
+  "DealStatus": {
+    "status_OPEN": "Open",
+    "status_WON": "Won",
+    "status_LOST": "Lost"
+  },
+  "DealTable": {
+    "name": "Name",
+    "company": "Company",
+    "stage": "Stage",
+    "amount": "Amount",
+    "close": "Expected close",
+    "owner": "Owner",
+    "status": "Status",
+    "updated": "Updated"
+  },
+  "DealsPage": {
+    "title": "Deals",
+    "description": "Every deal in your pipeline, by stage. Drag a card to move it, or open the list to filter and sort.",
+    "new": "New deal",
+    "views_label": "View",
+    "view_board": "Board",
+    "view_list": "List",
+    "toolbar_label": "Search deals",
+    "search_label": "Search",
+    "search_placeholder": "Deal or company name",
+    "company_label": "Company",
+    "company_any": "Any company",
+    "company_unknown": "Unknown company",
+    "contact_label": "Contact",
+    "contact_any": "Any contact",
+    "contact_unknown": "Unknown contact",
+    "stage_label": "Stage",
+    "stage_any": "Any stage",
+    "stage_unknown": "Unknown stage",
+    "status_label": "Status",
+    "status_any": "Any status",
+    "close_from_label": "Expected close from",
+    "close_to_label": "Expected close until",
+    "sort_UPDATED_AT": "Last updated",
+    "sort_CREATED_AT": "Date created",
+    "sort_NAME": "Name",
+    "sort_AMOUNT": "Amount",
+    "sort_EXPECTED_CLOSE_DATE": "Expected close",
+    "list_heading": "{count, plural, =0 {No deals} one {# deal} other {# deals}}",
+    "archived_heading": "{count, plural, =0 {No archived deals} one {# archived deal} other {# archived deals}}",
+    "empty_title": "No deals yet",
+    "empty_text": "Add a deal, or convert a qualified lead into one. Each deal moves from stage to stage, and every move is signed.",
+    "archived_empty_text": "Deals you archive show here, ready to restore."
+  },
+  "NewDealPage": {
+    "title": "New deal",
+    "description": "Give the deal a value and a stage. You can move it along the pipeline from the board.",
+    "submit": "Create deal"
+  },
+  "EditDealPage": {
+    "title": "Edit {name}",
+    "description": "Change the deal's details. To move it to another stage, use Move on the deal's page.",
+    "submit": "Save changes"
+  },
+  "DealPage": {
+    "back": "Back to deals",
+    "progress": "Where the deal stands",
+    "details": "Deal details",
+    "move": "Move",
+    "edit": "Edit",
+    "lost_reason": "Why it was lost",
+    "company": "Company",
+    "contact": "Contact",
+    "source": "Source",
+    "lead": "Lead",
+    "probability": "Probability",
+    "from_stage": "(from the stage)",
+    "expected_close": "Expected close",
+    "closed_on": "Closed on",
+    "notes": "Notes"
+  },
+  "DealForm": {
+    "name_label": "Deal name",
+    "amount_label": "Amount",
+    "amount_hint": "Digits with an optional dot and up to 2 decimals.",
+    "currency_label": "Currency",
+    "currency_default": "Workspace currency ({code})",
+    "stage_label": "Stage",
+    "stage_read_only": "Change it with Move on the deal's page.",
+    "probability_label": "Probability (%)",
+    "probability_hint": "Leave empty to use the stage's probability.",
+    "close_label": "Expected close date",
+    "company_label": "Company",
+    "contact_label": "Contact",
+    "owner_label": "Owner",
+    "source_label": "Source",
+    "notes_label": "Notes",
+    "cancel": "Cancel",
+    "saved": "Saved",
+    "error_invalid_input": "Check the highlighted fields",
+    "error_generic": "The deal wasn't created. Try again."
+  },
+  "StageHistory": {
+    "title": "Stage history",
+    "empty": "No moves recorded yet.",
+    "created": "Created in {stage}",
+    "to": "to",
+    "stage_deleted": "{name} (deleted stage)",
+    "former_member": "Former member"
+  },
+  "RecordDeals": {
+    "title": "Deals",
+    "count": "{count, number}",
+    "new": "New deal",
+    "empty": "No deals yet.",
+    "view_all": "{count, plural, one {View # deal in the list} other {View all # deals}}"
   }
 }

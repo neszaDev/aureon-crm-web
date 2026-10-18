@@ -40,6 +40,17 @@ const renderList = async (reorder: Reorder, canManage = true) => {
 const shownOrder = () =>
   [...document.querySelectorAll('[data-stage-name]')].map((node) => node.textContent);
 
+/**
+ * Finds a stage's 36 px box.
+ * @param name The stage's name.
+ * @returns The box.
+ */
+const boxOf = (name: string) =>
+  [...document.querySelectorAll('[data-stage-name]')]
+    .find((node) => node.textContent === name)
+    ?.closest('li')
+    ?.querySelector('.size-9');
+
 describe(StageList, () => {
   it('moves a stage with the buttons and shows the order the server saved', async () => {
     // The server's answer: the open stages in the order asked for, then Won and Lost.
@@ -114,6 +125,16 @@ describe(StageList, () => {
       .not.toHaveAttribute('aria-disabled');
     await expect.poll(() => rejections).toContain(failure);
     window.removeEventListener('unhandledrejection', record);
+  });
+
+  it('draws the stage boxes 36 px: Won filled with the seal, Lost in ink, the rest blank', async () => {
+    await renderList(vi.fn<Reorder>());
+
+    expect(boxOf('Won')).toHaveClass('bg-seal');
+    expect(boxOf('Lost')).toHaveClass('bg-foreground');
+    expect(boxOf('Lost')?.outerHTML).not.toMatch(/seal/u);
+    expect(boxOf('Qualified')).toHaveClass('bg-field');
+    expect(boxOf('Qualified')?.outerHTML).not.toMatch(/bg-seal(?!-)/u);
   });
 
   it('pins Won and Lost at the end, where they move and delete no more', async () => {

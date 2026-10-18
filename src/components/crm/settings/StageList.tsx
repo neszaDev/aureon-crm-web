@@ -34,6 +34,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ActionAlert } from '@/components/crm/ActionAlert';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
+import { StampBox } from '@/components/crm/StampBox';
 import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -270,16 +271,13 @@ const StageItem = (props: {
             <LockIcon aria-hidden="true" className="size-4" />
           </span>
         ))}
-      {/* The stage box of the stamp row, numbered with the stage's place. */}
-      <span
-        aria-hidden="true"
-        className={cn(
-          'grid size-8 shrink-0 place-items-center rounded-[3px] border border-seal-ink/40 font-mono text-[0.8125rem] tabular-nums',
-          isOpen ? 'bg-field' : 'bg-seal-tint text-seal-ink',
-        )}
-      >
-        {props.position}
-      </span>
+      {/* The stage box of the stamp row (36 px, as on a deal), numbered with the stage's place:
+          Won filled with the seal, Lost in ink. */}
+      <StampBox won={props.stage.kind === 'WON'} lost={props.stage.kind === 'LOST'}>
+        <span aria-hidden="true" className="font-mono text-[0.8125rem] tabular-nums">
+          {props.position}
+        </span>
+      </StampBox>
       {editing ? (
         <StageForm
           id={`stage-${props.stage.id}`}

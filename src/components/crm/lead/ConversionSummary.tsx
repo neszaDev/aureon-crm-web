@@ -50,10 +50,11 @@ export const ConversionSummary = (props: {
         },
         {
           label: t('deal'),
-          // The deal's page ships with the deals (Task 6): until then it is named, not linked.
           value: props.deal ? (
             <span className="flex flex-wrap items-baseline gap-x-2">
-              {props.deal.name}
+              <Link href={`${base}/deals/${props.deal.id}`} className="text-seal-ink">
+                {props.deal.name}
+              </Link>
               <span className="font-mono text-[0.8125rem] text-muted-foreground tabular-nums">
                 {recordNumber('deal', props.deal.id)}
               </span>

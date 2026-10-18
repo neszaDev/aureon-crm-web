@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { archiveContact, restoreContact } from '@/actions/crm/ContactActions';
 import { TagBadge } from '@/components/crm/contact/TagBadge';
+import { RecordDeals } from '@/components/crm/deal/RecordDeals';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { ArchiveButton } from '@/components/crm/record/ArchiveButton';
 import { RecordFacts } from '@/components/crm/record/RecordFacts';
@@ -10,7 +11,7 @@ import { RecordHeader } from '@/components/crm/record/RecordHeader';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { RecordWork } from '@/components/crm/record/RecordWork';
 import { Button } from '@/components/ui/button';
-import { getContact } from '@/libs/api/CrmQueries';
+import { getContact, getDealsOf } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
 import { recordNumber } from '@/libs/crm/Format';
@@ -42,12 +43,14 @@ export default async function ContactPage(props: ContactPageProps) {
   const t = await getTranslations({ locale, namespace: 'ContactPage' });
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
-  const [{ workspace }, { user }, result] = await Promise.all([
+  const [{ workspace }, { user }, result, deals] = await Promise.all([
     getOpenWorkspace(locale, workspaceId),
     getCurrentUser(),
     getContact(workspaceId, id),
+    // Its first 10 active deals, most recently updated first.
+    getDealsOf(workspaceId, 'contactId', id),
   ]);
-  if (result.unauthorized) {
+  if (result.unauthorized || deals.unauthorized) {
     return endRejectedSession(locale);
   }
   if (!workspace) {
@@ -61,7 +64,7 @@ export default async function ContactPage(props: ContactPageProps) {
     return <ForbiddenNotice page />;
   }
   const { contact } = result;
-  if (!contact || !user) {
+  if (!contact || !user || !deals.deals) {
     throw new Error('Could not load the contact');
   }
 
@@ -151,6 +154,13 @@ export default async function ContactPage(props: ContactPageProps) {
             value: contact.notes && <span className="whitespace-pre-line">{contact.notes}</span>,
           },
         ]}
+      />
+      <RecordDeals
+        deals={deals.deals.content}
+        total={deals.deals.totalElements}
+        dealsPath={`/app/${workspace.id}/deals`}
+        filter={{ param: 'contactId', id: contact.id }}
+        headingId="contact-deals-heading"
       />
       {/* Its tasks and activity; they show on its company's page too. */}
       <RecordWork

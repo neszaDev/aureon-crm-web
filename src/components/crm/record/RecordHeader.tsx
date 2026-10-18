@@ -6,7 +6,7 @@ import type { components } from '@/libs/api/schema';
 /**
  * The top of a record page: its number in mono, its name (the page's `h1`, focusable so focus
  * can land there after an action), "Archived" or its status when it is, its owner's seal (a
- * task's assignee), and its actions.
+ * task's assignee), a figure under the name (a deal's amount), and its actions.
  * @param props Component props.
  * @param props.number The record number, such as `C-0042`.
  * @param props.name The record's name.
@@ -15,6 +15,7 @@ import type { components } from '@/libs/api/schema';
  * @param props.assigned Whether the owner is an assignee ("Assigned to"), as a task's.
  * @param props.archived Whether the record is archived.
  * @param props.status A status to show beside its number, such as "Completed".
+ * @param props.figure A value shown large under the name, such as a deal's amount.
  * @param props.actions Edit, archive or restore, when the caller may.
  * @returns The header.
  */
@@ -26,6 +27,7 @@ export const RecordHeader = (props: {
   assigned?: boolean;
   archived: boolean;
   status?: string;
+  figure?: React.ReactNode;
   actions?: React.ReactNode;
 }) => {
   const t = useTranslations('RecordHeader');
@@ -56,6 +58,7 @@ export const RecordHeader = (props: {
         >
           {props.name}
         </h1>
+        {props.figure && <p className="text-lg font-semibold tabular-nums">{props.figure}</p>}
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           {props.owner ? (
             <>

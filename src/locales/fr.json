@@ -200,7 +200,8 @@
     "all_workspaces": "Vos espaces de travail",
     "skip_to_content": "Aller au contenu",
     "nav_tasks": "Tâches",
-    "nav_leads": "Prospects"
+    "nav_leads": "Prospects",
+    "nav_deals": "Affaires"
   },
   "AccountMenu": {
     "label": "Votre compte",
@@ -529,7 +530,8 @@
     "invalid_text": "Le lien contient une recherche ou des filtres que la liste ne peut pas appliquer. Réinitialisez la liste pour recommencer.",
     "invalid_reset": "Réinitialiser la liste",
     "view_active_link": "Revenir aux fiches actives",
-    "unassigned": "Sans propriétaire"
+    "unassigned": "Sans propriétaire",
+    "sort_label": "Trier par"
   },
   "OwnerFilter": {
     "label": "Propriétaire",
@@ -3025,5 +3027,175 @@
     "state_unknown": "{name} : non affiché",
     "reason_label": "Motif :",
     "hint": "Un prospect passe de Nouveau à Contacté puis à Qualifié, ou est marqué Non qualifié avec un motif. Convertissez un prospect qualifié pour en faire un contact, avec une entreprise et une affaire si vous le souhaitez."
+  },
+  "StampRow": {
+    "label": "Avancement de l'affaire",
+    "state_reached": "{name} : atteinte",
+    "state_signed": "{name} : atteinte, signée par {signer}",
+    "state_current": "{name} : en cours, {count, plural, one {# jour} other {# jours}}",
+    "state_blank": "{name} : pas encore atteinte",
+    "state_unknown": "{name} : non affichée",
+    "state_lost": "{name} : clôturée comme perdue",
+    "days_short": "{count}j",
+    "lost_word": "Perdu"
+  },
+  "DealBoard": {
+    "stage_select": "Étape affichée",
+    "stage_option": "{name} ({count})",
+    "drag_instructions": "Pour saisir une affaire, appuyez sur Espace ou Entrée sur sa poignée. Déplacez-la vers une autre étape avec les flèches gauche et droite, puis appuyez sur Espace ou Entrée pour la déposer, ou sur Échap pour annuler.",
+    "drag_start": "{name} saisie.",
+    "drag_over": "{name} est au-dessus de {stage}.",
+    "drag_away": "{name} n'est au-dessus d'aucune étape.",
+    "drag_end": "{name} déposée sur {stage}.",
+    "drag_cancel": "Le déplacement de {name} a été annulé.",
+    "error_generic": "L'affaire n'a pas été déplacée. Réessayez.",
+    "error_network": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez."
+  },
+  "BoardColumn": {
+    "count": "{count, plural, one {# affaire} other {# affaires}}",
+    "totals": "Valeur totale",
+    "empty": "Aucune affaire",
+    "more": "{shown} affichées sur {count} — <link>ouvrir la liste</link>"
+  },
+  "DealCard": {
+    "close": "Clôture le {date}",
+    "drag_role": "affaire déplaçable",
+    "drag": "Faire glisser {number} {name}",
+    "actions": "Actions pour {name}",
+    "move_to": "Déplacer vers…"
+  },
+  "MoveDealDialog": {
+    "close": "Fermer",
+    "title": "Déplacer {name}",
+    "description": "Choisissez l'étape où va cette affaire.",
+    "stage_label": "Étape",
+    "closes_won": "La déplacer ici clôture l'affaire comme gagnée. Vous pourrez la remettre dans une étape ouverte plus tard.",
+    "closes_lost": "La déplacer ici clôture l'affaire comme perdue. Dites pourquoi ci-dessous.",
+    "reason_label": "Motif",
+    "reason_hint": "500 caractères au plus.",
+    "submit": "Déplacer l'affaire",
+    "done": "{name} déplacée vers {stage}",
+    "error_invalid_input": "Vérifiez les champs signalés"
+  },
+  "LostReasonDialog": {
+    "close": "Fermer",
+    "title": "Marquer {name} comme perdue",
+    "description": "Dites pourquoi cette affaire a été perdue. Le motif reste sur l'affaire. Vous pourrez la remettre dans une étape ouverte plus tard.",
+    "reason_label": "Motif",
+    "reason_hint": "500 caractères au plus.",
+    "cancel": "Annuler",
+    "submit": "Marquer comme perdue"
+  },
+  "DealStatus": {
+    "status_OPEN": "En cours",
+    "status_WON": "Gagnée",
+    "status_LOST": "Perdue"
+  },
+  "DealTable": {
+    "name": "Nom",
+    "company": "Entreprise",
+    "stage": "Étape",
+    "amount": "Montant",
+    "close": "Clôture prévue",
+    "owner": "Propriétaire",
+    "status": "Statut",
+    "updated": "Modifiée"
+  },
+  "DealsPage": {
+    "title": "Affaires",
+    "description": "Toutes les affaires de votre pipeline, par étape. Faites glisser une carte pour la déplacer, ou ouvrez la liste pour filtrer et trier.",
+    "new": "Nouvelle affaire",
+    "views_label": "Vue",
+    "view_board": "Tableau",
+    "view_list": "Liste",
+    "toolbar_label": "Rechercher des affaires",
+    "search_label": "Rechercher",
+    "search_placeholder": "Nom de l'affaire ou de l'entreprise",
+    "company_label": "Entreprise",
+    "company_any": "Toutes les entreprises",
+    "company_unknown": "Entreprise inconnue",
+    "contact_label": "Contact",
+    "contact_any": "Tous les contacts",
+    "contact_unknown": "Contact inconnu",
+    "stage_label": "Étape",
+    "stage_any": "Toutes les étapes",
+    "stage_unknown": "Étape inconnue",
+    "status_label": "Statut",
+    "status_any": "Tous les statuts",
+    "close_from_label": "Clôture prévue à partir du",
+    "close_to_label": "Clôture prévue jusqu'au",
+    "sort_UPDATED_AT": "Dernière modification",
+    "sort_CREATED_AT": "Date de création",
+    "sort_NAME": "Nom",
+    "sort_AMOUNT": "Montant",
+    "sort_EXPECTED_CLOSE_DATE": "Clôture prévue",
+    "list_heading": "{count, plural, =0 {Aucune affaire} one {# affaire} other {# affaires}}",
+    "archived_heading": "{count, plural, =0 {Aucune affaire archivée} one {# affaire archivée} other {# affaires archivées}}",
+    "empty_title": "Aucune affaire pour l'instant",
+    "empty_text": "Ajoutez une affaire, ou convertissez un prospect qualifié. Chaque affaire passe d'étape en étape, et chaque passage est signé.",
+    "archived_empty_text": "Les affaires que vous archivez apparaissent ici, prêtes à être restaurées."
+  },
+  "NewDealPage": {
+    "title": "Nouvelle affaire",
+    "description": "Donnez à l'affaire une valeur et une étape. Vous pourrez la faire avancer dans le pipeline depuis le tableau.",
+    "submit": "Créer l'affaire"
+  },
+  "EditDealPage": {
+    "title": "Modifier {name}",
+    "description": "Modifiez les détails de l'affaire. Pour la déplacer vers une autre étape, utilisez Déplacer sur la page de l'affaire.",
+    "submit": "Enregistrer les modifications"
+  },
+  "DealPage": {
+    "back": "Retour aux affaires",
+    "progress": "Où en est l'affaire",
+    "details": "Détails de l'affaire",
+    "move": "Déplacer",
+    "edit": "Modifier",
+    "lost_reason": "Pourquoi elle a été perdue",
+    "company": "Entreprise",
+    "contact": "Contact",
+    "source": "Source",
+    "lead": "Prospect",
+    "probability": "Probabilité",
+    "from_stage": "(celle de l'étape)",
+    "expected_close": "Clôture prévue",
+    "closed_on": "Clôturée le",
+    "notes": "Notes"
+  },
+  "DealForm": {
+    "name_label": "Nom de l'affaire",
+    "amount_label": "Montant",
+    "amount_hint": "Des chiffres, avec un point et jusqu'à 2 décimales en option.",
+    "currency_label": "Devise",
+    "currency_default": "Devise de l'espace de travail ({code})",
+    "stage_label": "Étape",
+    "stage_read_only": "Changez-la avec Déplacer sur la page de l'affaire.",
+    "probability_label": "Probabilité (%)",
+    "probability_hint": "Laissez vide pour utiliser la probabilité de l'étape.",
+    "close_label": "Date de clôture prévue",
+    "company_label": "Entreprise",
+    "contact_label": "Contact",
+    "owner_label": "Propriétaire",
+    "source_label": "Source",
+    "notes_label": "Notes",
+    "cancel": "Annuler",
+    "saved": "Enregistré",
+    "error_invalid_input": "Vérifiez les champs signalés",
+    "error_generic": "L'affaire n'a pas été créée. Réessayez."
+  },
+  "StageHistory": {
+    "title": "Historique des étapes",
+    "empty": "Aucun passage enregistré pour l'instant.",
+    "created": "Créée à l'étape {stage}",
+    "to": "vers",
+    "stage_deleted": "{name} (étape supprimée)",
+    "former_member": "Ancien membre"
+  },
+  "RecordDeals": {
+    "title": "Affaires",
+    "count": "{count, number}",
+    "new": "Nouvelle affaire",
+    "empty": "Aucune affaire pour l'instant.",
+    "view_all": "{count, plural, one {Voir # affaire dans la liste} other {Voir les # affaires}}"
   }
 }

@@ -1,9 +1,10 @@
 import 'server-only';
 import { cache } from 'react';
 import type { ListQuery, ListSpec } from '@/libs/crm/ListQuery';
-import { PAGE_SIZES } from '@/libs/crm/ListQuery';
+import { PAGE_SIZES, parseListQuery } from '@/libs/crm/ListQuery';
 import { toRecordId, toWorkspaceId } from '@/libs/crm/WorkspaceId';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
+import { DEAL_STATUSES, DEAL_VIEWS } from '@/validations/crm/DealValidation';
 import { LEAD_PRIORITIES, LEAD_STATUSES } from '@/validations/crm/LeadValidation';
 import { authedBackend, backend } from './Backend';
 import type { paths } from './schema';
@@ -77,6 +78,26 @@ export const LEAD_LIST = {
     sourceId: 'id',
     priority: { enum: LEAD_PRIORITIES },
     followUpBefore: 'date',
+  },
+} as const satisfies ListSpec;
+
+/**
+ * The deals page's URL state (api.md, Deals): the view, which the board and the table share with
+ * the search, the owner and the company; the rest are the table's. `view` is the page's own, not
+ * the backend's.
+ */
+export const DEAL_LIST = {
+  sorts: ['UPDATED_AT', 'NAME', 'AMOUNT', 'EXPECTED_CLOSE_DATE', 'CREATED_AT'],
+  defaultSort: 'UPDATED_AT',
+  filters: {
+    view: { enum: DEAL_VIEWS },
+    stageId: 'id',
+    status: { enum: DEAL_STATUSES },
+    ownerId: 'id',
+    companyId: 'id',
+    contactId: 'id',
+    closeFrom: 'date',
+    closeTo: 'date',
   },
 } as const satisfies ListSpec;
 
@@ -355,6 +376,186 @@ export const getLead = cache(async (segment: string, id: string) => {
 
   return { lead: data, ...flags(response.status) };
 });
+
+/**
+ * Loads a page of the workspace's deals (`GET /workspaces/{id}/deals`).
+ * @param segment The `[workspaceId]` route segment.
+ * @param query The list query, read with `DEAL_LIST`.
+ * @returns The page and the outcome flags (`invalid`: the backend refused the query).
+ */
+export const getDeals = async (segment: string, query: ListQuery<typeof DEAL_LIST>) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { deals: undefined, ...NOT_FOUND };
+  }
+
+  // Not `view`, which only the page reads.
+  const { stageId, status, ownerId, companyId, contactId, closeFrom, closeTo } = query.filters;
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/deals', {
+    params: {
+      path: { workspaceId },
+      query: {
+        stageId,
+        status,
+        ownerId,
+        companyId,
+        contactId,
+        closeFrom,
+        closeTo,
+        q: query.q,
+        archived: query.archived,
+        unassigned: query.unassigned,
+        page: query.page,
+        size: query.size,
+        sort: query.sort,
+        direction: query.direction,
+      },
+    },
+  });
+
+  return { deals: data, ...flags(response.status) };
+};
+
+/**
+ * Loads the first 10 active deals of a company or a contact, most recently updated first, for
+ * its page.
+ * @param segment The `[workspaceId]` route segment.
+ * @param param The link: `companyId` or `contactId`.
+ * @param id The `[id]` route segment of the company or contact (a malformed one finds none).
+ * @returns The page and the outcome flags.
+ */
+export const getDealsOf = async (segment: string, param: 'companyId' | 'contactId', id: string) => {
+  const query = { ...parseListQuery(DEAL_LIST, { [param]: id }), size: 10 };
+
+  // Without a valid id the query would list every deal.
+  return query.filters[param] === undefined
+    ? { deals: undefined, ...NOT_FOUND }
+    : await getDeals(segment, query);
+};
+
+/**
+ * Loads what a company's page lists besides its details: its first 10 active contacts by name and
+ * its first 10 active deals, most recently updated first.
+ * @param segment The `[workspaceId]` route segment.
+ * @param id The `[id]` route segment (a malformed id finds none).
+ * @returns The two pages and `unauthorized` (either 401).
+ */
+export const getCompanyLinks = async (segment: string, id: string) => {
+  const contactsQuery = { ...parseListQuery(CONTACT_LIST, { companyId: id }), size: 10 };
+  const [contacts, deals] = await Promise.all([
+    // Without a valid id the query would list every contact.
+    contactsQuery.filters.companyId === undefined ? undefined : getContacts(segment, contactsQuery),
+    getDealsOf(segment, 'companyId', id),
+  ]);
+
+  return {
+    contacts: contacts?.contacts,
+    deals: deals.deals,
+    unauthorized: contacts?.unauthorized === true || deals.unauthorized,
+  };
+};
+
+/**
+ * Looks up the company and contact a new deal is linked to from the page it was opened on
+ * (`?companyId=`, `?contactId=`): each as a picker's record. A contact brings its company along
+ * when none was named; an unknown or malformed record is left out rather than refused.
+ * @param segment The `[workspaceId]` route segment.
+ * @param params The page's `companyId` and `contactId` search params.
+ * @returns The records the form starts with, and `unauthorized` (a lookup 401).
+ */
+export const getDealPrefill = async (
+  segment: string,
+  params: { companyId?: string | string[]; contactId?: string | string[] },
+) => {
+  const [companyId, contactId] = [params.companyId, params.contactId].map((value) =>
+    typeof value === 'string' ? toRecordId(value) : undefined,
+  );
+  const [company, contact] = await Promise.all([
+    companyId === undefined ? undefined : getCompany(segment, String(companyId)),
+    contactId === undefined ? undefined : getContact(segment, String(contactId)),
+  ]);
+  const companyRef = company?.company ?? contact?.contact?.company;
+
+  return {
+    company: companyRef ? { id: companyRef.id, label: companyRef.name } : null,
+    contact: contact?.contact ? { id: contact.contact.id, label: contact.contact.fullName } : null,
+    unauthorized: company?.unauthorized === true || contact?.unauthorized === true,
+  };
+};
+
+/**
+ * Loads the deal board (`GET /workspaces/{id}/deals/board`): every stage in order with its
+ * count, its totals per currency and up to 50 active deals, most recently updated first.
+ * @param segment The `[workspaceId]` route segment.
+ * @param query The list query, read with `DEAL_LIST`: the board takes the search, the owner
+ *   (Unassigned too) and the company.
+ * @returns The columns and the outcome flags (`invalid`: the backend refused the query).
+ */
+export const getBoard = async (segment: string, query: ListQuery<typeof DEAL_LIST>) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { board: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/deals/board', {
+    params: {
+      path: { workspaceId },
+      query: {
+        q: query.q,
+        ownerId: query.filters.ownerId,
+        unassigned: query.unassigned,
+        companyId: query.filters.companyId,
+      },
+    },
+  });
+
+  return { board: data, ...flags(response.status) };
+};
+
+/**
+ * Loads one deal (`GET /workspaces/{id}/deals/{id}`). Cached for the request, so the page and
+ * its metadata share one call.
+ * @param segment The `[workspaceId]` route segment.
+ * @param id The `[id]` route segment.
+ * @returns The deal and the outcome flags (`notFound` for a malformed id too).
+ */
+export const getDeal = cache(async (segment: string, id: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  const dealId = toRecordId(id);
+  if (workspaceId === undefined || dealId === undefined) {
+    return { deal: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/deals/{id}', {
+    params: { path: { workspaceId, id: dealId } },
+  });
+
+  return { deal: data, ...flags(response.status) };
+});
+
+/**
+ * Loads a deal's stage history, newest first (`GET /workspaces/{id}/deals/{id}/history`).
+ * @param segment The `[workspaceId]` route segment.
+ * @param id The `[id]` route segment.
+ * @returns The entries and the outcome flags (`notFound` for a malformed id too).
+ */
+export const getDealHistory = async (segment: string, id: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  const dealId = toRecordId(id);
+  if (workspaceId === undefined || dealId === undefined) {
+    return { history: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/deals/{id}/history', {
+    params: { path: { workspaceId, id: dealId } },
+  });
+
+  return { history: data, ...flags(response.status) };
+};
 
 /**
  * Loads the tags of the workspace's active contacts, each once, sorted

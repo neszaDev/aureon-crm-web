@@ -200,7 +200,8 @@
     "all_workspaces": "พื้นที่ทำงานของคุณ",
     "skip_to_content": "ข้ามไปที่เนื้อหา",
     "nav_tasks": "งาน",
-    "nav_leads": "ลีด"
+    "nav_leads": "ลีด",
+    "nav_deals": "ดีล"
   },
   "AccountMenu": {
     "label": "บัญชีของคุณ",
@@ -529,7 +530,8 @@
     "invalid_text": "ลิงก์นี้มีคำค้นหาหรือตัวกรองที่รายการใช้ไม่ได้ รีเซ็ตรายการเพื่อเริ่มใหม่",
     "invalid_reset": "รีเซ็ตรายการ",
     "view_active_link": "กลับไปที่รายการที่ใช้งานอยู่",
-    "unassigned": "ยังไม่มีผู้รับผิดชอบ"
+    "unassigned": "ยังไม่มีผู้รับผิดชอบ",
+    "sort_label": "เรียงตาม"
   },
   "OwnerFilter": {
     "label": "ผู้รับผิดชอบ",
@@ -3025,5 +3027,175 @@
     "state_unknown": "{name}: ไม่แสดง",
     "reason_label": "เหตุผล:",
     "hint": "ลีดเดินจากใหม่ไปติดต่อแล้วและผ่านเกณฑ์ หรือถูกทำเครื่องหมายว่าไม่ผ่านเกณฑ์พร้อมเหตุผล แปลงลีดที่ผ่านเกณฑ์เพื่อสร้างผู้ติดต่อ พร้อมบริษัทและดีลหากต้องการ"
+  },
+  "StampRow": {
+    "label": "ความคืบหน้าของดีล",
+    "state_reached": "{name}: ผ่านแล้ว",
+    "state_signed": "{name}: ผ่านแล้ว ลงนามโดย {signer}",
+    "state_current": "{name}: ขั้นปัจจุบัน {count, plural, other {# วัน}}",
+    "state_blank": "{name}: ยังไม่ถึง",
+    "state_unknown": "{name}: ไม่แสดง",
+    "state_lost": "{name}: ปิดเป็นดีลที่เสียไป",
+    "days_short": "{count}วัน",
+    "lost_word": "แพ้"
+  },
+  "DealBoard": {
+    "stage_select": "ขั้นตอนที่แสดง",
+    "stage_option": "{name} ({count})",
+    "drag_instructions": "หากต้องการหยิบดีล ให้กด Space หรือ Enter ที่จุดจับ ย้ายไปขั้นตอนอื่นด้วยลูกศรซ้ายและขวา แล้วกด Space หรือ Enter เพื่อวาง หรือกด Escape เพื่อยกเลิก",
+    "drag_start": "หยิบ {name} แล้ว",
+    "drag_over": "{name} อยู่เหนือ {stage}",
+    "drag_away": "{name} ไม่ได้อยู่เหนือขั้นตอนใด",
+    "drag_end": "วาง {name} ที่ {stage} แล้ว",
+    "drag_cancel": "ยกเลิกการย้าย {name} แล้ว",
+    "error_generic": "ยังย้ายดีลไม่สำเร็จ ลองอีกครั้ง",
+    "error_network": "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
+  },
+  "BoardColumn": {
+    "count": "{count, plural, other {# ดีล}}",
+    "totals": "มูลค่ารวม",
+    "empty": "ยังไม่มีดีล",
+    "more": "แสดง {shown} จาก {count} ดีล — <link>เปิดรายการ</link>"
+  },
+  "DealCard": {
+    "close": "คาดว่าจะปิด {date}",
+    "drag_role": "ดีลที่ลากได้",
+    "drag": "ลาก {number} {name}",
+    "actions": "การทำงานสำหรับ {name}",
+    "move_to": "ย้ายไปที่…"
+  },
+  "MoveDealDialog": {
+    "close": "ปิด",
+    "title": "ย้าย {name}",
+    "description": "เลือกขั้นตอนที่ดีลนี้จะไปต่อ",
+    "stage_label": "ขั้นตอน",
+    "closes_won": "ย้ายมาที่นี่จะปิดดีลว่าชนะ ภายหลังย้ายกลับไปขั้นตอนที่เปิดอยู่ได้",
+    "closes_lost": "ย้ายมาที่นี่จะปิดดีลว่าแพ้ บอกเหตุผลด้านล่าง",
+    "reason_label": "เหตุผล",
+    "reason_hint": "ไม่เกิน 500 ตัวอักษร",
+    "submit": "ย้ายดีล",
+    "done": "ย้าย {name} ไปที่ {stage} แล้ว",
+    "error_invalid_input": "ตรวจสอบช่องที่ทำเครื่องหมายไว้"
+  },
+  "LostReasonDialog": {
+    "close": "ปิด",
+    "title": "ทำเครื่องหมาย {name} ว่าแพ้",
+    "description": "บอกเหตุผลที่ดีลนี้แพ้ เหตุผลจะเก็บไว้กับดีล ภายหลังย้ายกลับไปขั้นตอนที่เปิดอยู่ได้",
+    "reason_label": "เหตุผล",
+    "reason_hint": "ไม่เกิน 500 ตัวอักษร",
+    "cancel": "ยกเลิก",
+    "submit": "ทำเครื่องหมายว่าแพ้"
+  },
+  "DealStatus": {
+    "status_OPEN": "เปิดอยู่",
+    "status_WON": "ชนะ",
+    "status_LOST": "แพ้"
+  },
+  "DealTable": {
+    "name": "ชื่อ",
+    "company": "บริษัท",
+    "stage": "ขั้นตอน",
+    "amount": "จำนวนเงิน",
+    "close": "คาดว่าจะปิด",
+    "owner": "ผู้รับผิดชอบ",
+    "status": "สถานะ",
+    "updated": "แก้ไขล่าสุด"
+  },
+  "DealsPage": {
+    "title": "ดีล",
+    "description": "ดีลทั้งหมดในไปป์ไลน์ของคุณ แยกตามขั้นตอน ลากการ์ดเพื่อย้าย หรือเปิดรายการเพื่อกรองและเรียงลำดับ",
+    "new": "เพิ่มดีล",
+    "views_label": "มุมมอง",
+    "view_board": "บอร์ด",
+    "view_list": "รายการ",
+    "toolbar_label": "ค้นหาดีล",
+    "search_label": "ค้นหา",
+    "search_placeholder": "ชื่อดีลหรือชื่อบริษัท",
+    "company_label": "บริษัท",
+    "company_any": "ทุกบริษัท",
+    "company_unknown": "ไม่รู้จักบริษัท",
+    "contact_label": "ผู้ติดต่อ",
+    "contact_any": "ทุกผู้ติดต่อ",
+    "contact_unknown": "ไม่รู้จักผู้ติดต่อ",
+    "stage_label": "ขั้นตอน",
+    "stage_any": "ทุกขั้นตอน",
+    "stage_unknown": "ไม่รู้จักขั้นตอน",
+    "status_label": "สถานะ",
+    "status_any": "ทุกสถานะ",
+    "close_from_label": "คาดว่าจะปิดตั้งแต่",
+    "close_to_label": "คาดว่าจะปิดภายใน",
+    "sort_UPDATED_AT": "แก้ไขล่าสุด",
+    "sort_CREATED_AT": "วันที่สร้าง",
+    "sort_NAME": "ชื่อ",
+    "sort_AMOUNT": "จำนวนเงิน",
+    "sort_EXPECTED_CLOSE_DATE": "วันที่คาดว่าจะปิด",
+    "list_heading": "{count, plural, =0 {ไม่มีดีล} other {# ดีล}}",
+    "archived_heading": "{count, plural, =0 {ไม่มีดีลที่เก็บถาวร} other {# ดีลที่เก็บถาวร}}",
+    "empty_title": "ยังไม่มีดีล",
+    "empty_text": "เพิ่มดีล หรือแปลงลีดที่ผ่านเกณฑ์เป็นดีล แต่ละดีลเดินจากขั้นตอนหนึ่งไปอีกขั้นตอนหนึ่ง และทุกการย้ายมีผู้ลงนาม",
+    "archived_empty_text": "ดีลที่คุณเก็บถาวรจะแสดงที่นี่ พร้อมให้กู้คืน"
+  },
+  "NewDealPage": {
+    "title": "เพิ่มดีล",
+    "description": "ระบุมูลค่าและขั้นตอนของดีล คุณย้ายดีลไปตามไปป์ไลน์ได้จากบอร์ด",
+    "submit": "สร้างดีล"
+  },
+  "EditDealPage": {
+    "title": "แก้ไข {name}",
+    "description": "แก้ไขรายละเอียดของดีล หากต้องการย้ายไปขั้นตอนอื่น ให้ใช้ปุ่มย้ายในหน้าดีล",
+    "submit": "บันทึกการเปลี่ยนแปลง"
+  },
+  "DealPage": {
+    "back": "กลับไปที่ดีล",
+    "progress": "ดีลนี้อยู่ตรงไหน",
+    "details": "รายละเอียดดีล",
+    "move": "ย้าย",
+    "edit": "แก้ไข",
+    "lost_reason": "เหตุผลที่แพ้",
+    "company": "บริษัท",
+    "contact": "ผู้ติดต่อ",
+    "source": "แหล่งที่มา",
+    "lead": "ลีด",
+    "probability": "โอกาสปิดการขาย",
+    "from_stage": "(ตามขั้นตอน)",
+    "expected_close": "คาดว่าจะปิด",
+    "closed_on": "ปิดเมื่อ",
+    "notes": "บันทึก"
+  },
+  "DealForm": {
+    "name_label": "ชื่อดีล",
+    "amount_label": "จำนวนเงิน",
+    "amount_hint": "ตัวเลข จุดทศนิยมได้ไม่บังคับ และทศนิยมไม่เกิน 2 ตำแหน่ง",
+    "currency_label": "สกุลเงิน",
+    "currency_default": "สกุลเงินของพื้นที่ทำงาน ({code})",
+    "stage_label": "ขั้นตอน",
+    "stage_read_only": "เปลี่ยนได้ด้วยปุ่มย้ายในหน้าดีล",
+    "probability_label": "โอกาสปิดการขาย (%)",
+    "probability_hint": "เว้นว่างไว้เพื่อใช้โอกาสของขั้นตอน",
+    "close_label": "วันที่คาดว่าจะปิดดีล",
+    "company_label": "บริษัท",
+    "contact_label": "ผู้ติดต่อ",
+    "owner_label": "ผู้รับผิดชอบ",
+    "source_label": "แหล่งที่มา",
+    "notes_label": "บันทึก",
+    "cancel": "ยกเลิก",
+    "saved": "บันทึกแล้ว",
+    "error_invalid_input": "ตรวจสอบช่องที่ทำเครื่องหมายไว้",
+    "error_generic": "ยังสร้างดีลไม่สำเร็จ ลองอีกครั้ง"
+  },
+  "StageHistory": {
+    "title": "ประวัติขั้นตอน",
+    "empty": "ยังไม่มีการย้ายที่บันทึกไว้",
+    "created": "สร้างที่ขั้นตอน {stage}",
+    "to": "ไปยัง",
+    "stage_deleted": "{name} (ขั้นตอนที่ลบแล้ว)",
+    "former_member": "อดีตสมาชิก"
+  },
+  "RecordDeals": {
+    "title": "ดีล",
+    "count": "{count, number}",
+    "new": "เพิ่มดีล",
+    "empty": "ยังไม่มีดีล",
+    "view_all": "{count, plural, other {ดูดีลทั้ง # รายการในรายการ}}"
   }
 }

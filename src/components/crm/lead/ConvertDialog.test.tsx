@@ -88,7 +88,8 @@ const openDialog = async (lead: Lead = LEAD) => {
 };
 
 const submit = () => page.getByRole('button', { name: 'Convert', exact: true });
-const summaryLink = (name: string) => page.getByRole('dialog').getByRole('link', { name });
+const summaryLink = (name: string) =>
+  page.getByRole('dialog').getByRole('link', { name, exact: true });
 
 describe(ConvertDialog, () => {
   it('starts from the lead: its company, a contact made from it, a deal of its value in the first open stage', async () => {
@@ -280,7 +281,7 @@ describe(ConvertDialog, () => {
 
       await expect.element(summaryLink('Acme')).toHaveAttribute('href', '/app/1/companies/7');
       await expect.element(summaryLink('Mia Chan')).toHaveAttribute('href', '/app/1/contacts/9');
-      await expect.element(page.getByRole('dialog').getByText('Acme — deal')).toBeVisible();
+      await expect.element(summaryLink('Acme — deal')).toHaveAttribute('href', '/app/1/deals/5');
       const note = page.getByText('This lead was already converted');
       await expect.poll(() => note.elements().length).toBe(alreadyConverted ? 1 : 0);
       // The page behind catches up when the dialog is done with.
