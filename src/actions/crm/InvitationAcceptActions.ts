@@ -7,7 +7,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import { toActionError } from '@/libs/api/ApiError';
 import { authedBackend, backend } from '@/libs/api/Backend';
 import { rateLimited } from '@/libs/api/RateLimit';
-import { forwardedFor, startSession } from '@/libs/api/Session';
+import { forwardedFor, redirectIfUnauthorized, startSession } from '@/libs/api/Session';
 import { redirect } from '@/libs/I18nNavigation';
 import type { InvitationRegisterValues } from '@/validations/crm/InvitationValidation';
 import {
@@ -21,7 +21,8 @@ import {
  * Joins the workspace as the signed-in user (`POST /invitations/{token}/accept`), then opens it.
  * @param token The link's token.
  * @returns Only on failure. A 403 (another account) or 409 (no longer pending) also refreshes
- *   the page, which then shows the invitation as it is now; a 401 ends the session.
+ *   the page, which then shows the invitation as it is now; a 401 ends the session and signs in
+ *   back to this link.
  */
 export async function acceptInvitation(token: string): Promise<ActionResult> {
   if (!InvitationTokenValidation.safeParse(token).success) {
@@ -34,6 +35,8 @@ export async function acceptInvitation(token: string): Promise<ActionResult> {
     params: { path: { token } },
   });
   if (data?.workspaceId === undefined) {
+    // A 401 signs in again and comes back to this link.
+    await redirectIfUnauthorized(response.status, `/invite/${token}`);
     refresh();
     return await actionFailure(response, error);
   }

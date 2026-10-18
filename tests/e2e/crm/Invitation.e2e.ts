@@ -102,6 +102,31 @@ test.describe('Invitation links', () => {
     await expectRole(page, 'Manager');
   });
 
+  test('sends a join the backend refuses to sign in, then back to the link', async ({
+    page,
+    context,
+    request,
+    baseURL,
+  }) => {
+    const email = await signUp(page);
+    const { path, workspaceId } = await invite(request, email);
+    await page.goto(path);
+    await expect(page.getByRole('button', { name: 'Join Acme' })).toBeVisible();
+    // The backend no longer accepts the access token.
+    await context.addCookies([{ name: 'access_token', value: 'expired', url: baseURL }]);
+
+    await page.getByRole('button', { name: 'Join Acme' }).click();
+    await expect(page).toHaveURL(`${baseURL}/sign-in?expired=1&next=${encodeURIComponent(path)}`);
+    await page.getByLabel('Email address').fill(email);
+    await page.getByLabel('Password').fill(PASSWORD);
+    await page.getByRole('button', { name: 'Sign in' }).click();
+
+    await expect(page).toHaveURL(`${baseURL}${path}`);
+    await page.getByRole('button', { name: 'Join Acme' }).click();
+    await expect(page).toHaveURL(`${baseURL}/app/${workspaceId}`);
+    await expectRole(page, 'Manager');
+  });
+
   test('explains a link for another email and signs out back to it', async ({
     page,
     context,

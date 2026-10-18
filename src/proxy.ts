@@ -37,6 +37,31 @@ const refreshSession = async (refreshToken: string) => {
   return toSessionTokens(result?.data);
 };
 
+/**
+ * Tells a server action call (a POST carrying its id) from a page request.
+ * @param request The request.
+ * @returns Whether it calls a server action.
+ */
+const isServerAction = (request: NextRequest) =>
+  request.method === 'POST' && request.headers.has('next-action');
+
+/**
+ * Sends a visitor without a session to sign in, and back to this page afterwards.
+ * @param request The request for a protected page.
+ * @param localePrefix The page's locale prefix (`/fr`), if any.
+ * @returns The redirect.
+ */
+const redirectToSignIn = (request: NextRequest, localePrefix = '') => {
+  const signIn = new URL(`${localePrefix}/sign-in`, request.url);
+  // Back here after signing in (`/dashboard` isn't an allowed `next`: plain sign-in).
+  const next = safeNextPath(`${request.nextUrl.pathname}${request.nextUrl.search}`);
+  if (next) {
+    signIn.searchParams.set('next', next);
+  }
+
+  return NextResponse.redirect(signIn);
+};
+
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   // An empty cookie is no session (a server action that ends one forwards `access_token=`).
@@ -49,18 +74,13 @@ export default async function proxy(request: NextRequest) {
     const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
     const tokens = refreshToken ? await refreshSession(refreshToken) : undefined;
 
-    if (!tokens && !protectedMatch) {
-      return handleI18nRouting(request);
-    }
     if (!tokens) {
       // Don't delete cookies here: a parallel request may have just rotated them successfully.
-      const signIn = new URL(`${protectedMatch?.[1] ?? ''}/sign-in`, request.url);
-      // Back here after signing in (`/dashboard` isn't an allowed `next`: plain sign-in).
-      const next = safeNextPath(`${pathname}${request.nextUrl.search}`);
-      if (next) {
-        signIn.searchParams.set('next', next);
-      }
-      return NextResponse.redirect(signIn);
+      // A server action runs anyway: its own 401 handling sends the browser to sign in, while a
+      // redirect here makes the client re-post the action to sign-in and throw.
+      return protectedMatch && !isServerAction(request)
+        ? redirectToSignIn(request, protectedMatch[1])
+        : handleI18nRouting(request);
     }
 
     const cookies = sessionCookies(tokens, isSecureAppUrl(Env.APP_URL));

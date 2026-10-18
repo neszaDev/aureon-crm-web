@@ -362,6 +362,24 @@ test.describe('Settings', () => {
     await expect(page).toHaveURL(workspace);
   });
 
+  test('sends an action to sign in when another tab signed out', async ({ page }) => {
+    const { workspace } = await startAcme(page);
+    await page.goto(`${workspace}/settings/workspace`);
+    const other = await page.context().newPage();
+    await other.goto(`${workspace}/settings/workspace`);
+    await expect(other.getByLabel('Workspace name')).toHaveValue('Acme');
+
+    await page.getByRole('button', { name: 'Your account' }).click();
+    await page.getByRole('menuitem', { name: 'Sign out' }).click();
+    await expect(page).toHaveURL(/\/$/u);
+
+    // No session cookie at all now: the action itself must end on sign-in.
+    await other.getByLabel('Workspace name').fill('Acme Trading');
+    await other.getByRole('button', { name: 'Save changes' }).click();
+    await expect(other).toHaveURL(/\/sign-in\?expired=1$/u);
+    await expect(other.getByText('Your session has ended. Sign in again.')).toBeVisible();
+  });
+
   test('switches to dark and to Thai from the account menu', async ({ page }) => {
     const { workspace } = await startAcme(page);
     await page.goto(`${workspace}/settings/pipeline`);

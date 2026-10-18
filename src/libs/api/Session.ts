@@ -5,6 +5,7 @@ import { redirect as redirectToUrl } from 'next/navigation';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { clientIpFrom } from '@/libs/api/ClientIp';
 import {
+  ACCESS_TOKEN_COOKIE,
   clearedSessionCookies,
   isSecureAppUrl,
   sessionCookies,
@@ -62,13 +63,23 @@ export const endRejectedSession = (locale: string) =>
  * Ends the session when the backend no longer accepts it (HTTP 401) in a server action: deletes
  * the session cookies and sends the user to sign in with a notice.
  * @param status HTTP status of the backend response.
+ * @param next Where to come back to after signing in (only what `safeNextPath` accepts).
  */
-export const redirectIfUnauthorized = async (status: number) => {
+export const redirectIfUnauthorized = async (status: number, next?: string) => {
   if (status === 401) {
     const jar = await cookies();
-    for (const cookie of clearedSessionCookies(isSecureAppUrl(Env.APP_URL))) {
-      jar.set(cookie);
+    // Only the token this request sent was rejected. Without one, the cookies the browser holds
+    // now may be newer (a parallel request won the refresh race): keep them.
+    if (jar.get(ACCESS_TOKEN_COOKIE)?.value) {
+      for (const cookie of clearedSessionCookies(isSecureAppUrl(Env.APP_URL))) {
+        jar.set(cookie);
+      }
     }
-    redirect({ href: '/sign-in?expired=1', locale: await getLocale() });
+    const query = new URLSearchParams({ expired: '1' });
+    const back = safeNextPath(next);
+    if (back) {
+      query.set('next', back);
+    }
+    redirect({ href: `/sign-in?${query.toString()}`, locale: await getLocale() });
   }
 };
