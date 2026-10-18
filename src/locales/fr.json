@@ -139,7 +139,8 @@
     "invalid_currency": "Choisissez une devise dans la liste",
     "invalid_time_zone": "Choisissez un fuseau horaire dans la liste",
     "password_too_many_bytes": "Trop long. Utilisez moins de caractères : les lettres thaïes et accentuées comptent pour plus d'un (limite 72).",
-    "probability_range": "Utilisez un nombre entier de 0 à 100"
+    "probability_range": "Utilisez un nombre entier de 0 à 100",
+    "money_format": "Saisissez un montant comme 1250.50 : des chiffres, un point facultatif et jusqu'à 2 décimales"
   },
   "DashboardLayout": {
     "meta_title": "Tableau de bord",

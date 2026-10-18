@@ -31,7 +31,8 @@ src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for
                                 ActionFailure.ts, Session.ts, schema.d.ts (GENERATED, see below)
 src/libs/api/CrmQueries.ts      CRM reads for pages (workspaces, members, invitations, stages, sources)
 src/libs/crm/*                  CRM logic: Permissions (`can`), WorkspaceId, Stages, PageMetadata,
-                                OpenWorkspace (`getOpenWorkspace`: a page's workspace, 401 and 404 handled)
+                                OpenWorkspace (`getOpenWorkspace`: a page's workspace, 401 and 404 handled),
+                                Format (money, dates, record numbers), ZonedTime (workspace-zone inputs)
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
 src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens
 src/validations/                zod schemas mirroring the backend's request rules (CRM: crm/*)

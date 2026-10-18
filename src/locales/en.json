@@ -139,7 +139,8 @@
     "invalid_currency": "Choose a currency from the list",
     "invalid_time_zone": "Choose a time zone from the list",
     "password_too_many_bytes": "Too long. Use fewer characters: Thai and accented letters count as more than one (limit 72).",
-    "probability_range": "Use a whole number from 0 to 100"
+    "probability_range": "Use a whole number from 0 to 100",
+    "money_format": "Enter an amount like 1250.50: digits, an optional dot and up to 2 decimals"
   },
   "DashboardLayout": {
     "meta_title": "Dashboard",
