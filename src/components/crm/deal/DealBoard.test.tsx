@@ -102,6 +102,10 @@ const renderBoard = async (
   columns: Column[] = COLUMNS,
 ) => await render(board(over, columns));
 
+// The fade at the board's edge: it shows (1) while more is there to scroll to.
+const fadeOpacity = () =>
+  getComputedStyle(document.querySelector('.board-fade') ?? document.body).opacity;
+
 const column = (name: string) => page.getByRole('region', { name, exact: true });
 const card = (name: string) => page.getByRole('link', { name, exact: true });
 const handle = (name: string) => page.getByRole('button', { name: `Drag ${name}` });
@@ -183,6 +187,171 @@ describe(DealBoard, () => {
     await expect.element(qualification.getByText('2 deals')).toBeVisible();
     await expect.element(card('Mine to move')).toBeVisible();
     await expect.element(column('Proposal').getByText('No deals')).toBeVisible();
+  });
+
+  it('draws Won and Lost slim: name, count, totals without their cents, a link to the list, no cards', async () => {
+    await renderBoard({}, [
+      FIRST_COLUMN,
+      { stage: PROPOSAL, count: 0, totals: [], deals: [] },
+      {
+        stage: WON,
+        count: 1,
+        totals: [
+          { currency: 'USD', amount: '47000.00' },
+          { currency: 'EUR', amount: '1250.50' },
+        ],
+        deals: [deal({ id: 103, name: 'Won big', stage: WON, status: 'WON' })],
+      },
+      { stage: LOST, count: 0, totals: [], deals: [] },
+    ]);
+
+    const won = column('Won');
+    const totals = won.getByRole('list', { name: 'Total value' });
+
+    await expect.element(won.getByText('1 deal')).toBeVisible();
+    // Whole amounts lose only the zeros after the point: 1,250.50 keeps every digit.
+    await expect.element(totals.getByText('$47,000', { exact: true })).toBeVisible();
+    await expect.element(totals.getByText('€1,250.50')).toBeVisible();
+    await expect
+      .element(won.getByRole('link', { name: 'View in list: Won' }))
+      .toHaveAttribute('href', '/app/1/deals?q=acme&view=list&stageId=13');
+    expect(won.getByRole('link', { name: 'Won big' }).elements()).toHaveLength(0);
+    // The open columns keep their cards and exact totals.
+    await expect
+      .element(
+        column('Qualification').getByRole('list', { name: 'Total value' }).getByText('€1,000.00'),
+      )
+      .toBeVisible();
+    expect(
+      column('Qualification')
+        .getByRole('link', { name: /View in list/u })
+        .elements(),
+    ).toHaveLength(0);
+    expect(won.element().getBoundingClientRect().width).toBeLessThan(
+      column('Qualification').element().getBoundingClientRect().width / 2,
+    );
+  });
+
+  it('shows Won in full on a phone, cards and all', async () => {
+    await page.viewport(390, 800);
+    await renderBoard({}, [
+      FIRST_COLUMN,
+      { stage: PROPOSAL, count: 0, totals: [], deals: [] },
+      {
+        stage: WON,
+        count: 1,
+        totals: [{ currency: 'USD', amount: '47000.00' }],
+        deals: [deal({ id: 103, name: 'Won big', stage: WON, status: 'WON' })],
+      },
+      { stage: LOST, count: 0, totals: [], deals: [] },
+    ]);
+
+    await page.getByLabelText('Stage shown').selectOptions('13');
+
+    await expect.element(column('Won').getByRole('link', { name: 'Won big' })).toBeVisible();
+    await expect.element(column('Won').getByText('$47,000', { exact: true })).toBeVisible();
+    expect(
+      column('Won')
+        .getByRole('link', { name: /View in list/u })
+        .elements(),
+    ).toHaveLength(0);
+  });
+
+  it('fits the default pipeline in the 1152 px content column of a 1440 px screen, stamp rows on one line', async () => {
+    await page.viewport(1440, 900);
+    const open = (id: number, name: string) => stage(id, name, 'OPEN');
+    const columns: Column[] = [
+      { stage: open(11, 'Qualification'), count: 1, totals: [], deals: [MINE] },
+      { stage: open(12, 'Needs analysis'), count: 0, totals: [], deals: [] },
+      { stage: open(15, 'Proposal'), count: 0, totals: [], deals: [] },
+      { stage: open(16, 'Negotiation'), count: 0, totals: [], deals: [] },
+      { stage: WON, count: 0, totals: [], deals: [] },
+      { stage: LOST, count: 0, totals: [], deals: [] },
+    ];
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <div style={{ width: 1152 }}>
+          <DealBoard
+            workspaceId={1}
+            columns={columns}
+            me={1}
+            permissions={[]}
+            path="/app/1/deals"
+            query={{ params: {} }}
+            now={NOW}
+          />
+        </div>
+      </NextIntlClientProvider>,
+    );
+
+    const scroller = document.querySelector('.board-scroll');
+
+    expect(scroller?.scrollWidth).toBe(scroller?.clientWidth);
+    expect(fadeOpacity()).toBe('0');
+    // Five boxes (four stages and Won) in the card, on one line.
+    expect(
+      page.getByRole('list', { name: 'Deal progress' }).element().getBoundingClientRect().height,
+    ).toBe(36);
+  });
+
+  it('scrolls sideways when the stages do not fit, with a fade at the edge until the end is in view', async () => {
+    await page.viewport(1440, 900);
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <div style={{ width: 640 }}>
+          <DealBoard
+            workspaceId={1}
+            columns={COLUMNS}
+            me={1}
+            permissions={[]}
+            path="/app/1/deals"
+            query={{ params: {} }}
+            now={NOW}
+          />
+        </div>
+      </NextIntlClientProvider>,
+    );
+    const scroller = document.querySelector<HTMLElement>('.board-scroll');
+
+    expect(scroller?.scrollWidth).toBeGreaterThan(scroller?.clientWidth ?? 0);
+    expect(getComputedStyle(scroller ?? document.body).overflowX).toBe('auto');
+    await expect.poll(fadeOpacity).toBe('1');
+
+    scroller?.scrollTo({ left: scroller.scrollWidth });
+
+    await expect.poll(fadeOpacity).toBe('0');
+  });
+
+  it('draws the columns with the hairline only, no tinted fill', async () => {
+    await renderBoard();
+
+    expect(getComputedStyle(column('Qualification').element()).backgroundColor).toBe(
+      'rgba(0, 0, 0, 0)',
+    );
+    expect(getComputedStyle(column('Qualification').element()).borderTopWidth).toBe('1px');
+  });
+
+  it('signs a card’s reached stages with the seal of whoever moved the deal there', async () => {
+    const signed = deal({
+      id: 103,
+      name: 'Signed deal',
+      stage: { id: 12, name: 'Proposal', kind: 'OPEN' },
+      signatures: [{ stageId: 11, by: RILEY }],
+    });
+    await renderBoard({}, [
+      { ...FIRST_COLUMN, count: 0, deals: [] },
+      { stage: PROPOSAL, count: 1, totals: [], deals: [signed] },
+      ...COLUMNS.slice(2),
+    ]);
+
+    const box = column('Proposal').getByRole('listitem').first().element().querySelector('.size-9');
+
+    // Riley moved it into Qualification: her seal, with its words on hover; Mia, the owner, signed nothing.
+    expect(box?.textContent).toContain('RR');
+    expect(box).toHaveAttribute('title', 'Moved here by Riley Rep');
+    await expect
+      .element(column('Proposal').getByText('Qualification: reached, moved here by Riley Rep'))
+      .toBeInTheDocument();
   });
 
   it('shows a card with its number, company, amount and owner', async () => {
@@ -312,7 +481,11 @@ describe(DealBoard, () => {
     await page.getByLabelText('Reason').fill('Went with a rival');
     await page.getByRole('button', { name: 'Mark as lost' }).click();
 
-    await expect.element(column('Lost').getByRole('link', { name: 'Mine to move' })).toBeVisible();
+    // Lost is a slim column: the card has left Qualification and shows nowhere.
+    await expect
+      .element(column('Qualification').getByRole('link', { name: 'Mine to move' }))
+      .not.toBeInTheDocument();
+    expect(column('Lost').getByRole('link', { name: 'Mine to move' }).elements()).toHaveLength(0);
     expect(DealActions.moveDeal).toHaveBeenCalledExactlyOnceWith(1, 101, {
       stageId: 14,
       version: 3,
@@ -431,21 +604,22 @@ describe(DealBoard, () => {
       .toBeVisible();
   });
 
-  it('closes a deal as won with a drop on Won, and the card shows it', async () => {
+  it('closes a deal as won with a drop on Won: the card leaves for the slim column, which takes the focus', async () => {
     vi.mocked(DealActions.moveDeal).mockResolvedValue({ ok: true, version: 4 });
     await renderBoard();
 
     await drag('D-0101 Mine to move', 2);
 
-    const won = column('Won').getByRole('link', { name: 'Mine to move' });
-
-    await expect.element(won).toBeVisible();
     expect(DealActions.moveDeal).toHaveBeenCalledExactlyOnceWith(1, 101, {
       stageId: 13,
       version: 3,
       lostReason: undefined,
     });
-    await expect.element(column('Won').getByText('Won: reached')).toBeInTheDocument();
+    await expect
+      .element(column('Qualification').getByRole('link', { name: 'Mine to move' }))
+      .not.toBeInTheDocument();
+    // The card's handle is gone with it, so the focus goes to the column's heading.
+    await expect.element(page.getByRole('heading', { name: 'Won', exact: true })).toHaveFocus();
   });
 
   it('puts a card back, with the toast, when a move to Lost with its reason is refused', async () => {
@@ -476,7 +650,7 @@ describe(DealBoard, () => {
 
     await drag('D-0101 Mine to move', 1);
 
-    await expect.element(column('Won').getByRole('link', { name: 'Mine to move' })).toBeVisible();
+    await expect.poll(() => vi.mocked(DealActions.moveDeal).mock.calls).toHaveLength(2);
     expect(DealActions.moveDeal).toHaveBeenLastCalledWith(1, 101, {
       stageId: 13,
       version: 4,
@@ -508,7 +682,8 @@ describe(DealBoard, () => {
       ]),
     );
 
-    await expect.element(column('Won').getByRole('link', { name: 'Mine to move' })).toBeVisible();
+    // Won is slim: it counts the deal, and the card is nowhere else.
+    await expect.element(column('Won').getByText('1 deal')).toBeVisible();
     expect(column('Proposal').getByRole('link', { name: 'Mine to move' }).elements()).toHaveLength(
       0,
     );
@@ -584,7 +759,7 @@ describe(DealBoard, () => {
     await expect.element(handle('D-0101 Mine to move')).toHaveFocus();
   });
 
-  it('puts the focus on the handle of the card moved to Lost, once its reason is given', async () => {
+  it('puts the focus on the Lost column once the reason is given, as the card has left the screen', async () => {
     vi.mocked(DealActions.moveDeal).mockResolvedValue({ ok: true, version: 4 });
     await renderBoard();
     await drag('D-0101 Mine to move', 3);
@@ -592,7 +767,6 @@ describe(DealBoard, () => {
     await page.getByLabelText('Reason').fill('Went with a rival');
     await page.getByRole('button', { name: 'Mark as lost' }).click();
 
-    await expect.element(column('Lost').getByRole('link', { name: 'Mine to move' })).toBeVisible();
-    await expect.element(handle('D-0101 Mine to move')).toHaveFocus();
+    await expect.element(page.getByRole('heading', { name: 'Lost', exact: true })).toHaveFocus();
   });
 });

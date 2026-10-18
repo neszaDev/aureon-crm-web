@@ -8,12 +8,27 @@ const RECORD_PREFIXES = { company: 'C', contact: 'P', lead: 'L', deal: 'D', task
  * @param amount The amount as the backend sends it (`1250.50`).
  * @param currency Its ISO 4217 code.
  * @param locale The page's locale.
+ * @param opts Options.
+ * @param opts.short Leaves off the cents of a whole amount (`$1,250`), for a tight place; any
+ *   other amount keeps its cents, so no digit is lost.
  * @returns The amount, e.g. `$1,250.50`.
  */
-export const formatMoney = (amount: string, currency: string, locale: string) =>
+export const formatMoney = (
+  amount: string,
+  currency: string,
+  locale: string,
+  opts?: { short?: boolean },
+) => {
+  const format = new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    trailingZeroDisplay: opts?.short ? 'stripIfInteger' : 'auto',
+  });
+
   // Intl reads a decimal string exactly, every digit kept; its type only names `${number}`.
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- see above
-  new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount as `${number}`);
+  return format.format(amount as `${number}`);
+};
 
 /**
  * Shows an instant (a date and time) in the workspace's time zone.

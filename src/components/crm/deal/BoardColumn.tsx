@@ -12,8 +12,10 @@ import { Link } from '@/libs/I18nNavigation';
 /**
  * One stage of the board: its name, how many deals it holds and their total in each currency
  * (never added across currencies), then the cards, or a note that it is empty, and a link to the
- * list when it holds more than the cards shown. It is where a card can be dropped. Below 768 px
- * only the chosen column shows.
+ * list when it holds more than the cards shown. It is where a card can be dropped. From 768 px
+ * the Won and Lost stages are slim: the name, count and totals (whole amounts without their
+ * cents) and a link to the list instead of cards, so the default pipeline fits in one frame.
+ * Below 768 px only the chosen column shows, in full.
  * @param props Component props.
  * @param props.column The stage, its count and its totals, as the server counted them.
  * @param props.shown How many cards the server sent for it (at most 50).
@@ -35,54 +37,83 @@ export const BoardColumn = (props: {
   const locale = useLocale();
   const { setNodeRef, isOver } = useDroppable({ id: props.column.stage.id });
   const headingId = `board-stage-${props.column.stage.id}`;
+  const slim = props.column.stage.kind !== 'OPEN';
+  const listLink = listHref(props.path, props.query, {
+    view: 'list',
+    stageId: String(props.column.stage.id),
+  });
 
   return (
     <section
       ref={setNodeRef}
       aria-labelledby={headingId}
       className={cn(
-        'flex min-w-0 flex-col gap-3 rounded-lg border border-rule bg-muted/50 p-3 transition-colors duration-150 motion-reduce:transition-none max-md:w-full md:w-72 md:shrink-0',
+        'flex min-w-0 flex-col gap-3 rounded-lg border border-rule p-1.5 transition-colors duration-150 motion-reduce:transition-none max-md:w-full',
+        slim ? 'md:w-20 md:shrink-0' : 'md:max-w-80 md:min-w-[14.75rem] md:flex-1 md:basis-0',
         isOver && 'border-foreground bg-muted',
         !props.selected && 'max-md:hidden',
       )}
     >
-      <header className="flex flex-col gap-1 px-0.5">
-        <div className="flex items-baseline justify-between gap-2">
-          <h2 id={headingId} className="font-semibold break-words">
+      <header className={cn('flex flex-col gap-1 px-2.5', slim && 'md:px-0.5')}>
+        <div
+          className={cn(
+            'flex items-baseline justify-between gap-2',
+            slim && 'md:flex-col md:items-start md:gap-0',
+          )}
+        >
+          <h2
+            id={headingId}
+            // Focusable: a card dropped here (slim, so it leaves the screen) hands the focus on.
+            tabIndex={-1}
+            className="rounded-sm font-semibold break-words"
+          >
             {props.column.stage.name}
           </h2>
-          <span className="shrink-0 text-sm text-muted-foreground tabular-nums">
+          <span
+            className={cn(
+              'shrink-0 text-sm text-muted-foreground tabular-nums',
+              slim && 'md:text-xs',
+            )}
+          >
             {t('count', { count: props.column.count })}
           </span>
         </div>
         {props.column.totals.length > 0 && (
           <ul aria-label={t('totals')} className="flex flex-col">
             {props.column.totals.map((total) => (
-              <li key={total.currency} className="text-[0.9375rem] font-medium tabular-nums">
-                {formatMoney(total.amount, total.currency, locale)}
+              <li
+                key={total.currency}
+                className={cn('text-[0.9375rem] font-medium tabular-nums', slim && 'md:text-xs')}
+              >
+                {formatMoney(total.amount, total.currency, locale, { short: slim })}
               </li>
             ))}
           </ul>
         )}
+        {slim && (
+          <Link
+            href={listLink}
+            aria-label={t('view_list_label', { name: props.column.stage.name })}
+            className="text-xs font-medium break-words text-seal-ink max-md:hidden"
+          >
+            {t('view_list')}
+          </Link>
+        )}
       </header>
       {props.shown > 0 ? (
-        <ul className="flex flex-col gap-2">{props.children}</ul>
+        <ul className={cn('flex flex-col gap-2', slim && 'md:hidden')}>{props.children}</ul>
       ) : (
-        <p className="px-0.5 text-sm text-muted-foreground">{t('empty')}</p>
+        <p className={cn('px-2.5 text-sm text-muted-foreground', slim && 'md:hidden')}>
+          {t('empty')}
+        </p>
       )}
       {props.column.count > props.column.deals.length && (
-        <p className="px-0.5 text-sm text-muted-foreground">
+        <p className={cn('px-2.5 text-sm text-muted-foreground', slim && 'md:hidden')}>
           {t.rich('more', {
             shown: props.column.deals.length,
             count: props.column.count,
             link: (chunks) => (
-              <Link
-                href={listHref(props.path, props.query, {
-                  view: 'list',
-                  stageId: String(props.column.stage.id),
-                })}
-                className="font-medium text-seal-ink"
-              >
+              <Link href={listLink} className="font-medium text-seal-ink">
                 {chunks}
               </Link>
             ),

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { components } from '@/libs/api/schema';
-import { stageSignatures } from './DealHistory';
+import { signaturesOf, stageSignatures } from './DealHistory';
 
 type Change = components['schemas']['StageChangeResponse'];
 
@@ -65,5 +65,20 @@ describe(stageSignatures, () => {
     const left: Change[] = [{ ...MOVED, changedBy: undefined }, CREATED];
 
     expect(stageSignatures(left)).toStrictEqual({ 1: MIA });
+  });
+});
+
+describe(signaturesOf, () => {
+  it('keys each stage with the member who signed it, whatever the order', () => {
+    expect(
+      signaturesOf([
+        { stageId: 2, by: RILEY },
+        { stageId: 1, by: MIA },
+      ]),
+    ).toStrictEqual({ 1: MIA, 2: RILEY });
+  });
+
+  it('leaves a stage whose last mover has left without a signer', () => {
+    expect(signaturesOf([{ stageId: 1, by: MIA }, { stageId: 2 }])).toStrictEqual({ 1: MIA });
   });
 });

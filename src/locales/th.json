@@ -3032,7 +3032,8 @@
   "StampRow": {
     "label": "ความคืบหน้าของดีล",
     "state_reached": "{name}: ผ่านแล้ว",
-    "state_signed": "{name}: ผ่านแล้ว ลงนามโดย {signer}",
+    "state_signed": "{name}: ผ่านแล้ว ย้ายมาที่นี่โดย {signer}",
+    "moved_by": "ย้ายมาที่นี่โดย {signer}",
     "state_current": "{name}: ขั้นปัจจุบัน {count, plural, other {# วัน}}",
     "state_blank": "{name}: ยังไม่ถึง",
     "state_unknown": "{name}: ไม่แสดง",
@@ -3055,7 +3056,9 @@
     "count": "{count, plural, other {# ดีล}}",
     "totals": "มูลค่ารวม",
     "empty": "ยังไม่มีดีล",
-    "more": "แสดง {shown} จาก {count} ดีล — <link>เปิดรายการ</link>"
+    "more": "แสดง {shown} จาก {count} ดีล — <link>เปิดรายการ</link>",
+    "view_list": "ดูในรายการ",
+    "view_list_label": "ดูในรายการ: {name}"
   },
   "DealCard": {
     "close": "คาดว่าจะปิด {date}",

@@ -3032,7 +3032,8 @@
   "StampRow": {
     "label": "Deal progress",
     "state_reached": "{name}: reached",
-    "state_signed": "{name}: reached, signed by {signer}",
+    "state_signed": "{name}: reached, moved here by {signer}",
+    "moved_by": "Moved here by {signer}",
     "state_current": "{name}: current, {count, plural, one {# day} other {# days}}",
     "state_blank": "{name}: not reached",
     "state_unknown": "{name}: not shown",
@@ -3055,7 +3056,9 @@
     "count": "{count, plural, one {# deal} other {# deals}}",
     "totals": "Total value",
     "empty": "No deals",
-    "more": "Showing {shown} of {count} — <link>open the list</link>"
+    "more": "Showing {shown} of {count} — <link>open the list</link>",
+    "view_list": "View in list",
+    "view_list_label": "View in list: {name}"
   },
   "DealCard": {
     "close": "Closes {date}",

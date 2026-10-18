@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { archiveDeal, restoreDeal } from '@/actions/crm/DealActions';
 import { DealFacts } from '@/components/crm/deal/DealFacts';
+import { DealStatusBadge } from '@/components/crm/deal/DealStatusBadge';
 import { MoveDealDialog } from '@/components/crm/deal/MoveDealDialog';
 import { StageHistory } from '@/components/crm/deal/StageHistory';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
@@ -45,7 +46,6 @@ export default async function DealPage(props: DealPageProps) {
   const { locale, workspaceId, id } = await props.params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'DealPage' });
-  const tStatus = await getTranslations({ locale, namespace: 'DealStatus' });
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
   const [{ workspace }, { user }, result, history, stages] = await Promise.all([
@@ -116,7 +116,7 @@ export default async function DealPage(props: DealPageProps) {
         headingId={HEADING_ID}
         owner={deal.owner}
         archived={deal.archived}
-        status={tStatus(`status_${deal.status}`)}
+        status={<DealStatusBadge status={deal.status} />}
         figure={formatMoney(deal.amount, deal.currency, locale)}
         actions={actions}
       />

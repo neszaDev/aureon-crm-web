@@ -23,6 +23,12 @@ describe(formatMoney, () => {
     // As a Number this would round to 12,345,678,901,234,568.00.
     expect(formatMoney('12345678901234567.89', 'USD', 'en')).toBe('$12,345,678,901,234,567.89');
   });
+
+  it('leaves the cents off a whole amount when asked to be short, and only then', () => {
+    expect(formatMoney('47000.00', 'USD', 'en', { short: true })).toBe('$47,000');
+    expect(formatMoney('1250.50', 'EUR', 'en', { short: true })).toBe('€1,250.50');
+    expect(formatMoney('47000.00', 'USD', 'en')).toBe('$47,000.00');
+  });
 });
 
 describe(formatDate, () => {

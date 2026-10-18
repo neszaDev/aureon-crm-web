@@ -53,7 +53,7 @@ describe(StampRow, () => {
     await expect.element(page.getByRole('list', { name: 'Deal progress' })).toBeVisible();
     // One box for each open stage and one closing box (Won while the deal is open).
     expect(names()).toStrictEqual([
-      'Qualification: reached, signed by Mia Manager',
+      'Qualification: reached, moved here by Mia Manager',
       'Proposal: current, 8 days',
       'Negotiation: not reached',
       'Won: not reached',
@@ -83,18 +83,86 @@ describe(StampRow, () => {
     expect(boxes()[1]?.textContent).toContain('8d');
   });
 
-  it('fills reached boxes without seals in a compact row, and no stage names', async () => {
+  it('draws the signers in a compact row too, and no stage names', async () => {
     await renderRow(row({ size: 'compact', signatures: { 1: MIA } }));
 
     expect(names()).toStrictEqual([
-      'Qualification: reached',
+      'Qualification: reached, moved here by Mia Manager',
       'Proposal: current, 8 days',
       'Negotiation: not reached',
       'Won: not reached',
     ]);
-    expect(boxes()[0]?.textContent).not.toContain('MM');
+    expect(boxes()[0]?.textContent).toContain('MM');
     // The stage names are only in the boxes' screen-reader text, not printed under them.
     expect(page.getByText('Negotiation', { exact: true }).elements()).toHaveLength(0);
+  });
+
+  it('fills a reached stage nobody signed with a tick, not a seal, in a compact row', async () => {
+    await renderRow(row({ size: 'compact', signatures: {} }));
+
+    const reached = boxes()[0]?.querySelector('.size-9');
+
+    expect(reached?.textContent).not.toMatch(/[A-Z]{2}/u);
+    expect(reached?.querySelector('svg')).not.toBeNull();
+    expect(reached).toHaveClass('bg-seal-tint');
+    expect(reached).not.toHaveAttribute('title');
+  });
+
+  it('says on hover who moved the deal into a stage, as the screen-reader label does', async () => {
+    await renderRow(row({ signatures: { 1: MIA } }));
+
+    const signed = boxes()[0]?.querySelector('.size-9');
+
+    expect(signed).toHaveAttribute('title', 'Moved here by Mia Manager');
+    expect(names()[0]).toContain('moved here by Mia Manager');
+    // The open and blank boxes have no signer to name.
+    expect(boxes()[1]?.querySelector('.size-9')).not.toHaveAttribute('title');
+    expect(boxes()[2]?.querySelector('.size-9')).not.toHaveAttribute('title');
+  });
+
+  it('translates the hover text', async () => {
+    await render(
+      <NextIntlClientProvider locale="fr" messages={fr} timeZone="UTC">
+        <StampRow {...row({ signatures: { 1: MIA } })} />
+      </NextIntlClientProvider>,
+    );
+
+    expect(boxes()[0]?.querySelector('.size-9')).toHaveAttribute(
+      'title',
+      'Déplacée ici par Mia Manager',
+    );
+  });
+
+  it('keeps a full row of five stages on one line at 390 px, names wrapping under their boxes', async () => {
+    await page.viewport(390, 800);
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <div style={{ width: 318 }}>
+          <StampRow
+            {...row({
+              stages: [
+                { id: 1, name: 'Qualification', kind: 'OPEN' },
+                { id: 2, name: 'Needs analysis', kind: 'OPEN' },
+                { id: 3, name: 'Proposal', kind: 'OPEN' },
+                { id: 4, name: 'Negotiation', kind: 'OPEN' },
+                { id: 5, name: 'Won', kind: 'WON' },
+                { id: 6, name: 'Lost', kind: 'LOST' },
+              ],
+              current: { stageId: 3, kind: 'OPEN', enteredAt: ENTERED },
+            })}
+          />
+        </div>
+      </NextIntlClientProvider>,
+    );
+
+    const tops = new Set(boxes().map((item) => Math.round(item.getBoundingClientRect().top)));
+    const analysis = page.getByText('Needs analysis', { exact: true }).element();
+
+    // One line of boxes; a name of two words takes two lines under its box.
+    expect(tops.size).toBe(1);
+    expect(analysis.getBoundingClientRect().height).toBeGreaterThan(
+      page.getByText('Proposal', { exact: true }).element().getBoundingClientRect().height,
+    );
   });
 
   it('draws every box 36 px, whatever the stage name or the count of days', async () => {
@@ -126,10 +194,10 @@ describe(StampRow, () => {
     );
 
     expect(names()).toStrictEqual([
-      'Qualification: reached, signed by Mia Manager',
-      'Proposal: reached, signed by Riley Rep',
+      'Qualification: reached, moved here by Mia Manager',
+      'Proposal: reached, moved here by Riley Rep',
       'Negotiation: reached',
-      'Won: reached, signed by Riley Rep',
+      'Won: reached, moved here by Riley Rep',
     ]);
     const won = boxes().at(-1)?.querySelector('.size-9');
 
@@ -146,7 +214,7 @@ describe(StampRow, () => {
     );
 
     expect(names()).toStrictEqual([
-      'Qualification: reached, signed by Mia Manager',
+      'Qualification: reached, moved here by Mia Manager',
       // The history says nothing of a stage it never entered.
       'Proposal: not shown',
       'Negotiation: not shown',

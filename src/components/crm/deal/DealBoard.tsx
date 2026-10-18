@@ -92,6 +92,17 @@ const columnCoordinates: KeyboardCoordinateGetter = (event, args) => {
 };
 
 /**
+ * Puts the focus on a column's heading once the drop has been drawn: from 768 px Won and Lost are
+ * slim, so a card dropped there has left the screen and its handle can't take the focus.
+ * @param stage The column's stage.
+ */
+const focusColumn = (stage: Stage) => {
+  requestAnimationFrame(() => {
+    document.querySelector<HTMLElement>(`#board-stage-${stage.id}`)?.focus();
+  });
+};
+
+/**
  * The column under the pointer: a pointer drag released over anything else (the header, the
  * filters, the space beside the board) is over no column, and moves nothing. The keyboard has no
  * pointer, so it takes the column nearest to the card.
@@ -109,7 +120,10 @@ const collideColumns: typeof closestCenter = (args) =>
  * puts the card back and says why in a toast (a stale version with a reload). A drop on Lost asks
  * for the reason first: the card stays where it was until it is given, and cancelling moves
  * nothing. Once saved, the server's refresh brings the counts, totals and cards as they are.
- * Below 768 px one column shows at a time, chosen with a select, and the menu moves cards.
+ * From 768 px the Won and Lost columns are slim (name, count, totals, a link to the list) so the
+ * default pipeline fits one screen; wider pipelines scroll sideways, with a fade at the edge while
+ * more is there. Below 768 px one column shows at a time, in full, chosen with a select, and the
+ * menu moves cards.
  * @param props Component props.
  * @param props.workspaceId The workspace.
  * @param props.columns The board from the server: every stage in order with up to 50 deals.
@@ -285,10 +299,15 @@ export const DealBoard = (props: {
             setAsking({ deal, stage, open: true });
           } else {
             void startMove(deal, stage);
+            if (stage.kind === 'WON') {
+              focusColumn(stage);
+            }
           }
         }}
       >
-        <div className="flex items-stretch gap-3 md:overflow-x-auto md:pb-2">
+        {/* Relative, so the screen-reader texts inside the scrolled-away columns are clipped with
+            them (an absolute one would widen the page). */}
+        <div className="board-scroll relative flex items-stretch gap-2 md:overflow-x-auto md:pb-3">
           {props.columns.map((column) => {
             const cards = placed
               .filter((item) => item.deal.stage.id === column.stage.id)
@@ -324,6 +343,10 @@ export const DealBoard = (props: {
               </BoardColumn>
             );
           })}
+          <div
+            aria-hidden="true"
+            className="board-fade pointer-events-none sticky right-0 -ml-12 w-12 shrink-0 self-stretch max-md:hidden"
+          />
         </div>
         {/* No glide home after a drop: the card has already moved, or been put back, and a glide
             toward a card that moved again (a refused move) leaves the copy stuck on screen. */}
@@ -347,9 +370,14 @@ export const DealBoard = (props: {
           }
         }}
         dealName={asking?.deal.name ?? ''}
-        returnFocus={() =>
-          document.querySelector<HTMLElement>(`#deal-handle-${asking?.deal.id ?? ''}`)
-        }
+        returnFocus={() => {
+          // Moved to Lost, the card has left the screen (a slim column): the focus goes to the
+          // column. Cancelled, it goes back to the card's handle.
+          const moved = asking && moves[asking.deal.id]?.stageId === asking.stage.id;
+          return document.querySelector<HTMLElement>(
+            moved ? `#board-stage-${asking.stage.id}` : `#deal-handle-${asking?.deal.id ?? ''}`,
+          );
+        }}
         onConfirm={(reason) => {
           if (asking) {
             void startMove(asking.deal, asking.stage, reason);

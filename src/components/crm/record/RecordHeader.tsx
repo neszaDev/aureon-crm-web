@@ -14,7 +14,8 @@ import type { components } from '@/libs/api/schema';
  * @param props.owner The owner, if any.
  * @param props.assigned Whether the owner is an assignee ("Assigned to"), as a task's.
  * @param props.archived Whether the record is archived.
- * @param props.status A status to show beside its number, such as "Completed".
+ * @param props.status A status to show beside its number: its word, such as "Completed", in an
+ *   outlined badge, or a badge of its own, such as a deal's `DealStatusBadge`.
  * @param props.figure A value shown large under the name, such as a deal's amount.
  * @param props.actions Edit, archive or restore, when the caller may.
  * @returns The header.
@@ -26,7 +27,7 @@ export const RecordHeader = (props: {
   owner?: components['schemas']['MemberRef'];
   assigned?: boolean;
   archived: boolean;
-  status?: string;
+  status?: React.ReactNode;
   figure?: React.ReactNode;
   actions?: React.ReactNode;
 }) => {
@@ -45,10 +46,12 @@ export const RecordHeader = (props: {
               {t('archived')}
             </Badge>
           )}
-          {props.status && (
+          {typeof props.status === 'string' ? (
             <Badge variant="outline" className="text-xs font-medium tracking-normal normal-case">
               {props.status}
             </Badge>
+          ) : (
+            props.status
           )}
         </p>
         <h1

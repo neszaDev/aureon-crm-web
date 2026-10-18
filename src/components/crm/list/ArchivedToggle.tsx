@@ -40,7 +40,7 @@ export const ArchivedToggle = (props: { path: string; query: ListQuery }) => {
             className={cn(
               'flex items-center rounded-sm px-3 text-sm font-medium no-underline transition-colors duration-150',
               view.current
-                ? 'bg-seal-tint font-semibold text-seal-ink'
+                ? 'bg-muted font-semibold text-foreground'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',
             )}
           >

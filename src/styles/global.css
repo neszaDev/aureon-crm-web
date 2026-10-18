@@ -424,6 +424,40 @@
   }
 }
 
+/*
+ * The deal board scrolls sideways when its stages don't fit. Its scrollbar stays in view, drawn
+ * in the palette (the control stroke on the muted track); a fade at the right edge, in the
+ * ground's own colour, says there is more, and goes once the end is in view. Where scroll-driven
+ * animations are unsupported the fade is skipped and the scrollbar says it.
+ */
+.board-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--input) var(--muted);
+}
+
+@keyframes board-fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.board-fade {
+  opacity: 0;
+  background-image: linear-gradient(to left, var(--ground), transparent);
+}
+
+@supports (animation-timeline: scroll()) {
+  .board-fade {
+    animation: board-fade linear both;
+    animation-timeline: scroll(nearest inline);
+    animation-range: max(0%, calc(100% - 3rem)) 100%;
+  }
+}
+
 /* The key's marks draw on as they scroll into view (no JS; skipped where unsupported). */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {

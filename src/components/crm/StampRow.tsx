@@ -36,23 +36,35 @@ const StampRowBox = (props: {
   press: boolean;
 }) => {
   const t = useTranslations('StampRow');
-  const { name } = props.stage;
   const signer = props.member && (props.member.displayName ?? props.member.email);
   const seal = props.member && initialsOf(props.member.displayName, props.member.email);
+  const signed = signer
+    ? t('state_signed', { name: props.stage.name, signer })
+    : t('state_reached', { name: props.stage.name });
   const label = {
-    reached: signer ? t('state_signed', { name, signer }) : t('state_reached', { name }),
-    won: signer ? t('state_signed', { name, signer }) : t('state_reached', { name }),
-    current: t('state_current', { name, count: props.days }),
-    blank: t('state_blank', { name }),
-    unknown: t('state_unknown', { name }),
-    lost: t('state_lost', { name }),
+    reached: signed,
+    won: signed,
+    current: t('state_current', { name: props.stage.name, count: props.days }),
+    blank: t('state_blank', { name: props.stage.name }),
+    unknown: t('state_unknown', { name: props.stage.name }),
+    lost: t('state_lost', { name: props.stage.name }),
   }[props.state];
   const ticked = (props.state === 'reached' || props.state === 'won') && !seal;
 
   return (
-    <li className={props.full ? 'flex w-20 flex-col items-center gap-1.5 sm:w-24' : undefined}>
+    <li
+      className={
+        props.full ? 'flex w-[3.75rem] flex-col items-center gap-1.5 sm:w-[4.5rem]' : undefined
+      }
+    >
       <StampBox
         seal={seal}
+        // The seal's own words, as seen on hover: the same as the screen-reader label says.
+        title={
+          signer && (props.state === 'reached' || props.state === 'won')
+            ? t('moved_by', { signer })
+            : undefined
+        }
         days={props.state === 'current' ? t('days_short', { count: props.days }) : undefined}
         filled={props.state === 'reached'}
         won={props.state === 'won'}
@@ -78,9 +90,9 @@ const StampRowBox = (props: {
       {props.full && (
         <span
           aria-hidden="true"
-          className="text-center text-[0.8125rem] leading-snug font-medium break-words"
+          className="text-center text-xs leading-snug font-medium break-words hyphens-auto"
         >
-          {name}
+          {props.stage.name}
         </span>
       )}
     </li>
@@ -123,12 +135,12 @@ const stateOf = (
 
 /**
  * A deal's progress as a stamp row: one fixed 36 px box for each open stage and one closing box.
- * The stages before the current one are reached; with `signatures` (full size) each carries the
- * seal of whoever moved the deal into it, tilted as pressed. The current open stage is outlined
+ * The stages before the current one are reached; with `signatures` each carries the seal of
+ * whoever moved the deal into it, tilted as pressed, and says so on hover. The current open stage is outlined
  * in ink with its exact days ("8d"). A won deal fills the closing box with the seal colour; a
  * lost one marks it in solid ink with the word "Lost", never in the seal colour, and shows only
- * the stages the history signed. A compact row (a board card) fills the reached boxes without
- * seals or stage names. Every box says its state to assistive technology. The box that becomes
+ * the stages the history signed. A compact row (a board card) is the same without the stage
+ * names. Every box says its state to assistive technology. The box that becomes
  * current after a move (a refresh with a new stage) is pressed (full size only).
  * @param props Component props.
  * @param props.stages The pipeline's stages, in order: the open ones, then Won and Lost.
@@ -139,7 +151,7 @@ const stateOf = (
  * @param props.signatures Who moved the deal into each stage (`stageSignatures`); a stage
  *   without one is filled, or left blank for a lost deal, and carries no seal.
  * @param props.now The current time, which the days run to.
- * @param props.size `full` (stage names under the boxes, seals) or `compact`.
+ * @param props.size `full` (stage names under the boxes) or `compact`.
  * @returns The row.
  */
 export const StampRow = (props: {
@@ -193,13 +205,8 @@ export const StampRow = (props: {
           stage={stage}
           state={state}
           days={days}
-          // A compact row draws no seals, so it names no signer either; the open box shows days,
-          // and a lost deal's closing box is never signed.
-          member={
-            full && (state === 'reached' || state === 'won')
-              ? props.signatures?.[stage.id]
-              : undefined
-          }
+          // The open box shows days, and a lost deal's closing box is never signed.
+          member={state === 'reached' || state === 'won' ? props.signatures?.[stage.id] : undefined}
           full={full}
           press={full && state !== 'blank' && stage.id === pressed}
         />

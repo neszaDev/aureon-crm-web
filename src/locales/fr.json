@@ -3032,7 +3032,8 @@
   "StampRow": {
     "label": "Avancement de l'affaire",
     "state_reached": "{name} : atteinte",
-    "state_signed": "{name} : atteinte, signée par {signer}",
+    "state_signed": "{name} : atteinte, déplacée ici par {signer}",
+    "moved_by": "Déplacée ici par {signer}",
     "state_current": "{name} : en cours, {count, plural, one {# jour} other {# jours}}",
     "state_blank": "{name} : pas encore atteinte",
     "state_unknown": "{name} : non affichée",
@@ -3055,7 +3056,9 @@
     "count": "{count, plural, one {# affaire} other {# affaires}}",
     "totals": "Valeur totale",
     "empty": "Aucune affaire",
-    "more": "{shown} affichées sur {count} — <link>ouvrir la liste</link>"
+    "more": "{shown} affichées sur {count} — <link>ouvrir la liste</link>",
+    "view_list": "Voir dans la liste",
+    "view_list_label": "Voir dans la liste : {name}"
   },
   "DealCard": {
     "close": "Clôture le {date}",

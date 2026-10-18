@@ -28,3 +28,21 @@ export const stageSignatures = (history: Change[]) => {
 
   return signatures;
 };
+
+/**
+ * Who signs each stage of a deal's stamp row, from the board's deal summaries: the API sends one
+ * signature for each stage the deal has a move into (the newest decides), without a member when
+ * that one has left. Their order doesn't matter.
+ * @param signatures The summary's `signatures`.
+ * @returns The signer by stage id; a stage without one has no key.
+ */
+export const signaturesOf = (signatures: components['schemas']['StageSignature'][]) => {
+  const signers: Record<number, Member | undefined> = {};
+  for (const signature of signatures) {
+    if (signature.by) {
+      signers[signature.stageId] = signature.by;
+    }
+  }
+
+  return signers;
+};

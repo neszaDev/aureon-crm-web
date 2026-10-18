@@ -14,6 +14,7 @@ import { cn } from 'cn';
  *   (the seal, when signed) drawn in `on-seal`.
  * @param props.lost The LOST stage, reached: solid ink, never the seal colour; whatever it holds
  *   (the word "Lost") is drawn in the page colour.
+ * @param props.title What hovering the box says, such as who signed it.
  * @param props.press Plays the stamp-press (220 ms, none under reduced motion): the box that
  *   just became current.
  * @param props.children Extra content, such as a screen-reader label: the initials and days are
@@ -28,6 +29,7 @@ export const StampBox = (props: {
   won?: boolean;
   lost?: boolean;
   press?: boolean;
+  title?: string;
   children?: React.ReactNode;
 }) => {
   let look = 'border border-seal-ink/40 bg-field text-seal-ink';
@@ -43,6 +45,7 @@ export const StampBox = (props: {
 
   return (
     <span
+      title={props.title}
       className={cn(
         'grid size-9 shrink-0 place-items-center rounded-[3px]',
         look,
