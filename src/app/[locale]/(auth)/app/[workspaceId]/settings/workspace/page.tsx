@@ -28,13 +28,13 @@ export default async function WorkspaceSettingsPage(props: WorkspaceSettingsPage
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
   const { workspace } = await getOpenWorkspace(locale, workspaceId);
-  if (workspace?.id === undefined || workspace.version === undefined) {
+  if (!workspace) {
     throw new Error('Could not load the workspace');
   }
   const values = {
-    name: workspace.name ?? '',
-    defaultCurrency: workspace.defaultCurrency ?? 'USD',
-    timezone: workspace.timezone ?? 'UTC',
+    name: workspace.name,
+    defaultCurrency: workspace.defaultCurrency,
+    timezone: workspace.timezone,
   };
   const currencyName = new Intl.DisplayNames(locale, { type: 'currency' }).of(
     values.defaultCurrency,

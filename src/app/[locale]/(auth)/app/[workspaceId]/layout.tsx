@@ -40,7 +40,7 @@ export default async function WorkspaceLayout(props: {
 
   return (
     <CrmShell
-      workspace={{ id: workspace.id, name: workspace.name ?? '' }}
+      workspace={{ id: workspace.id, name: workspace.name }}
       workspaces={mine.workspaces}
       user={{ email: user.email, displayName: user.displayName }}
     >

@@ -1,6 +1,6 @@
 import type { components } from '@/libs/api/schema';
 
-/** A pipeline stage with the fields the settings use (the generated type has them optional). */
+/** A pipeline stage with the fields the settings use. */
 export type Stage = {
   id: number;
   name: string;
@@ -10,22 +10,15 @@ export type Stage = {
 };
 
 /**
- * Reads the backend's stages, keeping their order. Rows without an id or version (which the
- * backend never sends) are dropped.
+ * Keeps the fields the settings use of the backend's stages, in their order.
  * @param rows The backend's stages.
  * @returns The stages.
  */
 export const toStages = (rows: components['schemas']['StageResponse'][]): Stage[] =>
-  rows.flatMap((row) =>
-    row.id === undefined || row.version === undefined
-      ? []
-      : [
-          {
-            id: row.id,
-            name: row.name ?? '',
-            probability: row.probability ?? 0,
-            kind: row.kind ?? 'OPEN',
-            version: row.version,
-          },
-        ],
-  );
+  rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    probability: row.probability,
+    kind: row.kind,
+    version: row.version,
+  }));

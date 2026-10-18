@@ -108,7 +108,7 @@ const Person = (props: { label: string; email: string; name?: string }) => {
 const ClosedInvitation = (props: { invitation?: Invitation }) => {
   const t = useTranslations('InvitationCard');
   const status = props.invitation?.status;
-  // A pending invitation lands here only when the preview is incomplete: treat it as unknown.
+  // Without an invitation (an unknown link) there is no status; a pending one never comes here.
   const kind = status && status !== 'PENDING' ? status : 'unknown';
   const accepted = kind === 'ACCEPTED';
 
@@ -232,11 +232,11 @@ export const InvitationCard = (props: {
   const [failure, setFailure] = useState<ActionResult>();
   const [pending, startTransition] = useTransition();
 
-  if (props.invitation?.status !== 'PENDING' || !props.invitation.email || !props.invitation.role) {
+  if (props.invitation?.status !== 'PENDING') {
     return <ClosedInvitation invitation={props.invitation} />;
   }
 
-  const workspace = props.invitation.workspaceName ?? '';
+  const workspace = props.invitation.workspaceName;
   const role = tRole(`role_${props.invitation.role}`);
   const userEmail = props.user?.email;
 

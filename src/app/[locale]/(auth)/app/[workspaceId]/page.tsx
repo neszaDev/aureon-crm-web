@@ -96,7 +96,7 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <header className="flex flex-col gap-1.5">
         <h1 className="text-2xl font-bold tracking-[-0.01em] break-words">
-          {t('heading', { name: workspace.name ?? '' })}
+          {t('heading', { name: workspace.name })}
         </h1>
         <p className="text-muted-foreground">{t('intro')}</p>
       </header>

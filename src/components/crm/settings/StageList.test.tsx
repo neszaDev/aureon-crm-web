@@ -1,4 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
@@ -138,5 +139,48 @@ describe(StageList, () => {
 
     expect(shownOrder()).toStrictEqual(['New', 'Qualified', 'Proposal', 'Won', 'Lost']);
     expect(page.getByRole('button').elements()).toHaveLength(0);
+  });
+
+  it('gives the focus to the heading after a delete, whatever characters its id has', async () => {
+    // A useId() id, as React writes it: not a valid CSS selector as it stands.
+    const headingId = ':r1:';
+    const Pipeline = () => {
+      const [stages, setStages] = useState(STAGES);
+
+      return (
+        <section>
+          <h2 id={headingId} tabIndex={-1}>
+            Pipeline
+          </h2>
+          <StageList
+            stages={stages}
+            canManage
+            headingId={headingId}
+            actions={{
+              create: done,
+              update: done,
+              reorder: vi.fn<Reorder>(),
+              remove: async (stageId) => {
+                setStages((current) => current.filter((stage) => stage.id !== stageId));
+                return await Promise.resolve({ ok: true });
+              },
+            }}
+          />
+        </section>
+      );
+    };
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <Pipeline />
+      </NextIntlClientProvider>,
+    );
+
+    await page.getByRole('button', { name: 'Delete Qualified' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Delete stage' }).click();
+
+    await expect
+      .element(page.getByRole('button', { name: 'Delete Qualified' }))
+      .not.toBeInTheDocument();
+    await expect.element(page.getByRole('heading', { name: 'Pipeline' })).toHaveFocus();
   });
 });

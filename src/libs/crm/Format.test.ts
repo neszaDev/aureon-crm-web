@@ -11,6 +11,11 @@ describe(formatMoney, () => {
   it('keeps every digit of the largest amount', () => {
     expect(formatMoney('9999999999999.99', 'THB', 'th')).toContain('9,999,999,999,999.99');
   });
+
+  it('keeps the cents of an amount past the precision of a float', () => {
+    // As a Number this would round to 12,345,678,901,234,568.00.
+    expect(formatMoney('12345678901234567.89', 'USD', 'en')).toBe('$12,345,678,901,234,567.89');
+  });
 });
 
 describe(formatDate, () => {

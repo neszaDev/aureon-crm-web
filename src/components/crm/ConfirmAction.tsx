@@ -18,7 +18,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 
 /**
  * A destructive action behind a confirmation. The dialog stays open until the action succeeds,
- * and shows the backend's message when it refuses (the last owner, a stage in use, ...).
+ * and shows the translated refusal when the backend refuses (the last owner, a stage in use, ...).
  * Without a trigger, the caller opens it (`open`, `onOpenChange`), e.g. after a select changed.
  * @param props Component props.
  * @param props.trigger The button that opens the dialog.

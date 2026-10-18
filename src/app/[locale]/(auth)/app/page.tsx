@@ -70,7 +70,7 @@ export default async function AppPage(props: AppPageProps) {
               href={`/app/${workspace.id}`}
               className="group flex min-h-16 items-center gap-3.5 px-4 py-3 no-underline transition-colors duration-150 hover:bg-muted focus-visible:-outline-offset-2 sm:px-5"
             >
-              <WorkspaceMark name={workspace.name ?? ''} className="size-9" />
+              <WorkspaceMark name={workspace.name} className="size-9" />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="font-semibold break-words text-foreground">{workspace.name}</span>
                 {workspace.role && (

@@ -9,11 +9,14 @@ export type ApiError = components['schemas']['ApiError'];
 type ApiErrorCode = NonNullable<ApiError['code']>;
 
 /**
- * Narrows an unknown response body to the backend error shape.
+ * Narrows an unknown response body to a JSON error: the backend's `ApiError`, or a proxy's
+ * (`{ status, message }`), so only those two fields are sure to be there.
  * @param body Parsed JSON body of a failed response.
- * @returns Whether the body is an `ApiError`.
+ * @returns Whether the body is a JSON error.
  */
-export const isApiError = (body?: unknown): body is ApiError =>
+export const isApiError = (
+  body?: unknown,
+): body is Partial<ApiError> & Pick<ApiError, 'status' | 'message'> =>
   typeof body === 'object' &&
   body !== null &&
   typeof (body as { status?: unknown }).status === 'number' &&
@@ -71,19 +74,25 @@ export const toActionError = (
     return { ok: false, message: t('generic') };
   }
   if (body.status >= 500) {
-    logger.error('Backend error', { status: body.status, path: redactPath(body.path) });
+    logger.error('Backend error', {
+      status: body.status,
+      path: body.path && redactPath(body.path),
+    });
   }
 
+  // Only the backend's own errors always have the map; a proxy's JSON error may not.
+  const fieldErrors = Object.keys(body.fieldErrors ?? {}).length > 0 ? body.fieldErrors : undefined;
   let message: string;
-  if (body.code) {
+  if (body.code === 'VALIDATION_FAILED' && !fieldErrors) {
+    // Its translation points at highlighted fields: there are none to point at.
+    message = t('status_400');
+  } else if (body.code) {
     // A code newer than this build has no translation: its English message beats nothing.
     message = t.has(`code_${body.code}`) ? t(`code_${body.code}`) : body.message;
   } else {
     const status = STATUSES.find((known) => known === body.status);
     message = status ? t(`status_${status}`) : t('generic');
   }
-  // Only the backend's own errors always have the map; a proxy's JSON error may not.
-  const fieldErrors = Object.keys(body.fieldErrors ?? {}).length > 0 ? body.fieldErrors : undefined;
 
   return { ok: false, message, fieldErrors };
 };

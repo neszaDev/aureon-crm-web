@@ -168,7 +168,7 @@ export default async function MembersPage(props: MembersPageProps) {
           me={user.id}
           callerRole={workspace.role}
           canManage={canManage}
-          workspaceName={workspace.name ?? ''}
+          workspaceName={workspace.name}
           headingId="members-heading"
           actions={{
             changeRole: changeMemberRole.bind(null, workspace.id),

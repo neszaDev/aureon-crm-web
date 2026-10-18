@@ -47,7 +47,7 @@ export const WorkspaceSwitcher = (props: {
         <DropdownMenuLabel>{t('workspaces')}</DropdownMenuLabel>
         {props.workspaces.map((workspace) => {
           const current = workspace.id === props.current.id;
-          const name = workspace.name ?? '';
+          const { name } = workspace;
 
           return (
             <DropdownMenuItem key={workspace.id} asChild className="gap-2.5 py-2">

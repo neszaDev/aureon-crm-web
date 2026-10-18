@@ -85,6 +85,24 @@ describe('ApiError', () => {
       error.mockRestore();
     });
 
+    it('says it went wrong for a proxy error without the backend fields', () => {
+      const error = vi.spyOn(logger, 'error').mockImplementation(() => {});
+
+      expect(toActionError({ status: 502, message: 'Bad gateway' }, t)).toStrictEqual({
+        ok: false,
+        message: "That didn't work. Try again.",
+        fieldErrors: undefined,
+      });
+      expect(error).toHaveBeenCalledOnce();
+      error.mockRestore();
+    });
+
+    it("doesn't point at highlighted fields when there are none", () => {
+      expect(toActionError({ ...apiError, fieldErrors: {} }, t).message).toBe(
+        "Something in the request isn't valid. Check it and try again.",
+      );
+    });
+
     it('drops an empty field error map', () => {
       expect(toActionError({ ...apiError, fieldErrors: {} }, t).fieldErrors).toBeUndefined();
     });
