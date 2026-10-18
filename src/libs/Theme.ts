@@ -45,3 +45,16 @@ export const applyTheme = (theme: Theme) => {
     classes.add(theme);
   }
 };
+
+/**
+ * Shows a chosen theme and remembers it for a year, without a server round trip: the class on
+ * `<html>` now, the theme cookie for `THEME_SCRIPT` on the next load. Browser only.
+ * @param theme The chosen theme.
+ */
+export const chooseTheme = (theme: Theme) => {
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  // The Cookie Store API is async and needs a secure context; THEME_SCRIPT reads this one back.
+  // oxlint-disable-next-line unicorn/no-document-cookie -- see above
+  document.cookie = `${THEME_COOKIE}=${theme}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax${secure}`;
+  applyTheme(theme);
+};

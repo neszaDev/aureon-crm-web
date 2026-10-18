@@ -2,24 +2,23 @@
 
 import { MonitorIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { startTransition, useOptimistic } from 'react';
-import { setTheme } from '@/actions/ThemeActions';
+import { useState } from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { Theme } from '@/libs/Theme';
-import { applyTheme, parseTheme, THEMES } from '@/libs/Theme';
+import { chooseTheme, parseTheme, THEMES } from '@/libs/Theme';
 
 const ICONS = { light: SunIcon, dark: MoonIcon, system: MonitorIcon };
 
 /**
- * Picks the colour theme: light, dark or the system's. The class on `<html>` changes at once; the
- * choice is then stored in the theme cookie for the next page load.
+ * Picks the colour theme: light, dark or the system's. The class on `<html>` changes at once and
+ * the theme cookie keeps the choice for the next page load, both in the browser.
  * @param props Component props.
  * @param props.theme The current theme, read from the cookie on the server.
  * @returns The theme picker.
  */
 export const ThemeSwitcher = (props: { theme: Theme }) => {
   const t = useTranslations('ThemeSwitcher');
-  const [theme, setOptimisticTheme] = useOptimistic(props.theme);
+  const [theme, setTheme] = useState(props.theme);
 
   return (
     <ToggleGroup
@@ -35,11 +34,8 @@ export const ThemeSwitcher = (props: { theme: Theme }) => {
         }
 
         const next = parseTheme(value);
-        startTransition(async () => {
-          setOptimisticTheme(next);
-          applyTheme(next);
-          await setTheme(next);
-        });
+        setTheme(next);
+        chooseTheme(next);
       }}
     >
       {THEMES.map((item) => {

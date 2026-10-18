@@ -14,7 +14,6 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { signOut } from '@/actions/AuthActions';
-import { setTheme } from '@/actions/ThemeActions';
 import { Seal } from '@/components/crm/Seal';
 import {
   DropdownMenu,
@@ -31,7 +30,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Link, usePathname, useRouter } from '@/libs/I18nNavigation';
 import { routing } from '@/libs/I18nRouting';
-import { applyTheme, parseTheme, themeFromCookie, THEMES } from '@/libs/Theme';
+import { chooseTheme, parseTheme, themeFromCookie, THEMES } from '@/libs/Theme';
 
 const THEME_ICONS = { light: SunIcon, dark: MoonIcon, system: MonitorIcon };
 
@@ -58,11 +57,10 @@ const ThemeChoices = () => {
   return (
     <DropdownMenuRadioGroup
       value={chosen}
-      onValueChange={async (value) => {
+      onValueChange={(value) => {
         const next = parseTheme(value);
         setChosen(next);
-        applyTheme(next);
-        await setTheme(next);
+        chooseTheme(next);
       }}
     >
       {THEMES.map((item) => {
