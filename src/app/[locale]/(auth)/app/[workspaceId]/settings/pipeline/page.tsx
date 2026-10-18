@@ -56,7 +56,11 @@ export default async function PipelinePage(props: PipelinePageProps) {
         aria-labelledby="stages-heading"
         className="overflow-hidden rounded-lg border border-rule bg-card"
       >
-        <h2 id="stages-heading" tabIndex={-1} className="px-4 pt-4 pb-2 font-semibold sm:px-5">
+        <h2
+          id="stages-heading"
+          tabIndex={-1}
+          className="px-4 pt-4 pb-2 font-semibold focus-visible:-outline-offset-2 sm:px-5"
+        >
           {t('stages_heading')}
         </h2>
         {!canManage && (

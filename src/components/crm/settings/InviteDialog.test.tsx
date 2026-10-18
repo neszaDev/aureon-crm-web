@@ -133,6 +133,15 @@ describe(InviteDialog, () => {
     await expect.poll(() => page.getByLabelText('Email address').elements()).toHaveLength(0);
   });
 
+  it('posts its form, so a submit before hydration keeps the email out of the URL', async () => {
+    await renderDialog(vi.fn<Invite>());
+    await page.getByRole('button', { name: 'Invite member' }).click();
+    const email = page.getByLabelText('Email address');
+    await expect.element(email).toBeVisible();
+
+    expect(email.element().closest('form')?.method).toBe('post');
+  });
+
   it('offers only the roles the caller may give', async () => {
     await renderDialog(vi.fn<Invite>());
 

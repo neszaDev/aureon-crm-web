@@ -82,7 +82,9 @@ export const PendingInvitations = (props: {
               description={t('revoke_text')}
               confirmLabel={t('revoke')}
               cancelLabel={t('cancel')}
-              fallbackFocus={() => document.querySelector<HTMLElement>(`#${props.headingId}`)}
+              fallbackFocus={() =>
+                document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
+              }
               action={async () => await props.revoke(invitation.id)}
             />
           )}

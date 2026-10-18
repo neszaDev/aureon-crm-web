@@ -156,7 +156,11 @@ export default async function MembersPage(props: MembersPageProps) {
         aria-labelledby="members-heading"
         className="overflow-hidden rounded-lg border border-rule bg-card"
       >
-        <h2 id="members-heading" tabIndex={-1} className="px-5 pt-4 pb-2 font-semibold">
+        <h2
+          id="members-heading"
+          tabIndex={-1}
+          className="px-5 pt-4 pb-2 font-semibold focus-visible:-outline-offset-2"
+        >
           {t('members_heading', { count: rows.length })}
         </h2>
         <MembersTable
@@ -178,7 +182,11 @@ export default async function MembersPage(props: MembersPageProps) {
           aria-labelledby="invitations-heading"
           className="overflow-hidden rounded-lg border border-rule bg-card"
         >
-          <h2 id="invitations-heading" tabIndex={-1} className="px-5 pt-4 pb-3 font-semibold">
+          <h2
+            id="invitations-heading"
+            tabIndex={-1}
+            className="px-5 pt-4 pb-3 font-semibold focus-visible:-outline-offset-2"
+          >
             {t('invitations_heading')}
           </h2>
           {pending ? (

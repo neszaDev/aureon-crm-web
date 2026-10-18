@@ -66,7 +66,11 @@ export default async function SourcesPage(props: SourcesPageProps) {
         aria-labelledby="sources-heading"
         className="overflow-hidden rounded-lg border border-rule bg-card"
       >
-        <h2 id="sources-heading" tabIndex={-1} className="px-4 pt-4 pb-3 font-semibold sm:px-5">
+        <h2
+          id="sources-heading"
+          tabIndex={-1}
+          className="px-4 pt-4 pb-3 font-semibold focus-visible:-outline-offset-2 sm:px-5"
+        >
           {t('sources_heading', { count: rows.length })}
         </h2>
         {!canManage && (

@@ -25,7 +25,8 @@ const startAcme = async (page: Page) => {
 const stageOrder = async (page: Page) => await page.locator('[data-stage-name]').allTextContents();
 
 /**
- * Opens a page and checks that nothing is wider than the viewport (no sideways scrolling).
+ * Opens a page and checks that nothing is wider than the viewport (no sideways scrolling) and
+ * that its forms post.
  * @param page Playwright page, 390 px wide.
  * @param url The page.
  */
@@ -35,6 +36,8 @@ const expectFits = async (page: Page, url: string) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth), url).toBeLessThanOrEqual(
     390,
   );
+  // A submit before hydration must post: a GET would put what was typed in the URL.
+  await expect(page.locator('form:not([method="post"])'), url).toHaveCount(0);
 };
 
 test.describe('Settings', () => {

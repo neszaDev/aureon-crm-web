@@ -206,7 +206,9 @@ const MemberTableRow = (props: {
               description={t('remove_text')}
               confirmLabel={t('remove')}
               cancelLabel={t('cancel')}
-              fallbackFocus={() => document.querySelector<HTMLElement>(`#${props.headingId}`)}
+              fallbackFocus={() =>
+                document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
+              }
               action={async () => await props.actions.remove(props.member.userId)}
             />
           )

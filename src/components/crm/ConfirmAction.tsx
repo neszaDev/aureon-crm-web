@@ -51,7 +51,8 @@ export const ConfirmAction = (props: {
   const [ownOpen, setOwnOpen] = useState(false);
   const [failure, setFailure] = useState<ActionResult>();
   const [isPending, startTransition] = useTransition();
-  const trigger = useRef<HTMLButtonElement>(null);
+  // Set through the trigger's ref, so a trigger that doesn't forward its ref never counts as gone.
+  const triggerGone = useRef(false);
   const open = props.open ?? ownOpen;
   const setOpen = (next: boolean) => {
     setOwnOpen(next);
@@ -62,16 +63,21 @@ export const ConfirmAction = (props: {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       {props.trigger && (
-        <AlertDialogTrigger asChild ref={trigger}>
+        <AlertDialogTrigger
+          asChild
+          ref={(node) => {
+            triggerGone.current = node === null;
+          }}
+        >
           {props.trigger}
         </AlertDialogTrigger>
       )}
       <AlertDialogContent
         onCloseAutoFocus={(event) => {
           // A trigger still there takes the focus back by default; once its row is gone (a
-          // confirmed delete), the ref is empty and the fallback takes it.
+          // confirmed delete), the fallback takes it.
           const target =
-            props.returnFocus?.() ?? (trigger.current ? null : props.fallbackFocus?.());
+            props.returnFocus?.() ?? (triggerGone.current ? props.fallbackFocus?.() : null);
           if (target) {
             event.preventDefault();
             target.focus();

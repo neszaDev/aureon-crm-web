@@ -92,10 +92,12 @@ Use `pnpm` (version pinned in `package.json` → `packageManager`), never npm or
   and Server Function arguments (passwords) out of the dev log; invite pages send no `Referer`.
 - **`?next=` only through `safeNextPath`** (`src/libs/SafeRedirect.ts`, `/app/**` and
   `/invite/**`); never redirect to a raw query value.
-- **A backend 401 ends the session through `/api/session/expired`**: pages and layouts call
-  `endRejectedSession`, actions `actionFailure` (`redirectIfUnauthorized`). Never redirect
-  straight to `/sign-in` (the proxy still sees the cookie: a loop). A 5xx throws to the error
-  boundary; a 404 on the workspace is `notFound()`.
+- **A backend 401 ends the session**: pages and layouts can't delete cookies, so they call
+  `endRejectedSession` (`/api/session/expired`); never redirect a page straight to `/sign-in`
+  (the proxy still sees the cookie: a loop). Server actions end it through `actionFailure`
+  (`redirectIfUnauthorized`), which clears the cookies and goes to `/sign-in?expired=1`, but keeps
+  them when the request sent no access token (a parallel request may have just refreshed them).
+  A 5xx throws to the error boundary; a 404 on the workspace is `notFound()`.
 - **Record forms always send the `version` they read and the current owner** (`ownerId` /
   `assigneeId`; `null` unassigns). A stale version is `VERSION_CONFLICT`: `actionFailure` turns
   it into "Someone else changed this" with `conflict: true`, and the UI offers a reload.

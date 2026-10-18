@@ -1,6 +1,6 @@
 import { runInNewContext } from 'node:vm';
-import { describe, expect, it } from 'vitest';
-import { parseTheme, THEME_SCRIPT, themeFromCookie } from './Theme';
+import { describe, expect, it, vi } from 'vitest';
+import { chooseTheme, parseTheme, THEME_SCRIPT, themeFromCookie } from './Theme';
 
 /**
  * Runs the inline theme script against a fake document.
@@ -57,5 +57,32 @@ describe(themeFromCookie, () => {
     expect(themeFromCookie('a=1; theme=dark')).toBe('dark');
     expect(themeFromCookie('theme=darkish')).toBe('system');
     expect(themeFromCookie('')).toBe('system');
+  });
+});
+
+/**
+ * Chooses the dark theme on a fake page.
+ * @param protocol The page's protocol.
+ * @returns The cookie string it wrote.
+ */
+const chooseDarkOn = (protocol: string) => {
+  const document = {
+    cookie: '',
+    documentElement: { classList: { add: () => {}, remove: () => {} } },
+  };
+  vi.stubGlobal('window', { location: { protocol } });
+  vi.stubGlobal('document', document);
+  chooseTheme('dark');
+  vi.unstubAllGlobals();
+
+  return document.cookie;
+};
+
+describe(chooseTheme, () => {
+  it('remembers the theme for a year, Secure on https only', () => {
+    expect(chooseDarkOn('https:')).toBe(
+      'theme=dark; path=/; max-age=31536000; SameSite=Lax; Secure',
+    );
+    expect(chooseDarkOn('http:')).toBe('theme=dark; path=/; max-age=31536000; SameSite=Lax');
   });
 });
