@@ -37,7 +37,7 @@ describe(KpiStrip, () => {
       'Contacts 1,234',
       'Open leads 9',
       'Open deals 16',
-      'Overdue tasks 8',
+      'All overdue tasks 8',
     ]);
   });
 
@@ -58,7 +58,7 @@ describe(KpiStrip, () => {
       .element(page.getByRole('link', { name: 'Open deals 16' }))
       .toHaveAttribute('href', '/app/7/deals?view=list&status=OPEN');
     await expect
-      .element(page.getByRole('link', { name: 'Overdue tasks 8' }))
+      .element(page.getByRole('link', { name: 'All overdue tasks 8' }))
       .toHaveAttribute('href', '/app/7/tasks?view=overdue');
   });
 
@@ -66,11 +66,11 @@ describe(KpiStrip, () => {
     await strip({ ...COUNTS, companies: 0, overdueTasks: 0 });
 
     await expect.element(page.getByRole('link', { name: 'Companies 0' })).toBeVisible();
-    const none = page.getByRole('link', { name: 'Overdue tasks 0' }).element();
+    const none = page.getByRole('link', { name: 'All overdue tasks 0' }).element();
     expect(none.querySelector('svg')).toBeNull();
 
     await strip(COUNTS);
-    const late = page.getByRole('link', { name: 'Overdue tasks 8' }).element();
+    const late = page.getByRole('link', { name: 'All overdue tasks 8' }).element();
     expect(late.querySelector('svg')).not.toBeNull();
   });
 

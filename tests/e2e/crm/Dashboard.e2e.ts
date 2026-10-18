@@ -159,7 +159,7 @@ test.describe('Dashboard', () => {
       totals(page).getByRole('link', { name: `Open deals ${counts.openDeals}` }),
     ).toBeVisible();
     await expect(
-      totals(page).getByRole('link', { name: `Overdue tasks ${counts.overdueTasks}` }),
+      totals(page).getByRole('link', { name: `All overdue tasks ${counts.overdueTasks}` }),
     ).toBeVisible();
     // Each currency apart: the open pipeline and the won total, never added.
     expect(api.openPipeline.map((entry) => entry.currency).toSorted()).toStrictEqual([
@@ -183,9 +183,7 @@ test.describe('Dashboard', () => {
     await expect(wonLost).toContainText(`${api.won.count} deal`);
     await Promise.all(
       api.won.totals.map(async (total) => {
-        await expect(wonLost).toContainText(
-          `${money(total.amount, total.currency)} ${total.currency}`,
-        );
+        await expect(wonLost).toContainText(money(total.amount, total.currency));
       }),
     );
     await expect(wonLost).toContainText(`${api.lost.count} deal`);
@@ -198,9 +196,7 @@ test.describe('Dashboard', () => {
         return [
           expect(row).toContainText(String(bucket.count)),
           ...bucket.totals.map(async (total) => {
-            await expect(row).toContainText(
-              `${money(total.amount, total.currency)} ${total.currency}`,
-            );
+            await expect(row).toContainText(money(total.amount, total.currency));
           }),
         ];
       }),
@@ -329,7 +325,7 @@ test.describe('Dashboard', () => {
     await overdue('Call Globex');
     await signIn(page, { email: owner.email, password: PASSWORD });
     await page.goto(owner.path);
-    await expect(totals(page).getByRole('link', { name: 'Overdue tasks 2' })).toBeVisible();
+    await expect(totals(page).getByRole('link', { name: 'All overdue tasks 2' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Reminders: 2' })).toBeVisible();
     const checkbox = page.getByRole('checkbox', { name: 'Complete Send the proposal' });
     await waitForHydration(checkbox);
@@ -338,7 +334,7 @@ test.describe('Dashboard', () => {
 
     // The task leaves the list, the strip counts one, the bell one, and the API agrees.
     await expect(page.getByRole('checkbox', { name: 'Complete Send the proposal' })).toHaveCount(0);
-    await expect(totals(page).getByRole('link', { name: 'Overdue tasks 1' })).toBeVisible();
+    await expect(totals(page).getByRole('link', { name: 'All overdue tasks 1' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Reminders: 1' })).toBeVisible();
     const after = await dashboardOf(request, owner);
     expect(after.counts.overdueTasks).toBe(1);

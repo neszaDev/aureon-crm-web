@@ -255,7 +255,7 @@
     "cell_contacts": "Contacts",
     "cell_open_leads": "Open leads",
     "cell_open_deals": "Open deals",
-    "cell_overdue_tasks": "Overdue tasks"
+    "cell_overdue_tasks": "All overdue tasks"
   },
   "MyDeals": {
     "title": "My deals",
@@ -267,9 +267,9 @@
   },
   "FollowUps": {
     "title": "Follow-ups",
-    "overdue": "Overdue tasks",
-    "upcoming": "Coming up",
-    "leads": "Leads to follow up",
+    "overdue": "My overdue tasks",
+    "upcoming": "My upcoming tasks",
+    "leads": "My leads to follow up",
     "count": "{count, number}",
     "count_capped": "{count, number}+",
     "overdue_none": "No overdue tasks.",

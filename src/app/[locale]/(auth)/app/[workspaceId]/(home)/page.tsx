@@ -147,22 +147,24 @@ export default async function DashboardPage(props: DashboardPageProps) {
         />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-        <PipelineSummary totals={data.openPipeline} />
-        <WonLostSummary
-          won={data.won}
-          lost={data.lost}
-          action={
-            <PeriodPicker
-              period={data.period}
-              path={path}
-              params={{}}
-              today={today}
-              timeZone={workspace.timezone}
-            />
-          }
-        />
-        <StageDistribution stages={data.byStage} className="lg:col-span-2 xl:col-span-1" />
+      <div className="grid gap-5 xl:grid-cols-2">
+        <div className="flex min-w-0 flex-col gap-5">
+          <PipelineSummary totals={data.openPipeline} />
+          <WonLostSummary
+            won={data.won}
+            lost={data.lost}
+            action={
+              <PeriodPicker
+                period={data.period}
+                path={path}
+                params={{}}
+                today={today}
+                timeZone={workspace.timezone}
+              />
+            }
+          />
+        </div>
+        <StageDistribution stages={data.byStage} />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">

@@ -1,3 +1,4 @@
+import { cn } from 'cn';
 import { useLocale, useTranslations } from 'next-intl';
 import { Seal } from '@/components/crm/Seal';
 import type { components } from '@/libs/api/schema';
@@ -92,7 +93,7 @@ const FIELDS = [
 // A label that differs for one kind of record (`field_<TYPE>_<name>`).
 const TYPED_FIELDS = ['ACTIVITY_occurredAt', 'DEAL_name'] as const;
 // The fields whose values are words from a fixed list, translated (`value_<VALUE>`).
-const WORD_FIELDS = new Set(['status', 'priority', 'type', 'role']);
+const WORD_FIELDS = new Set(['status', 'priority', 'type', 'role', 'kind']);
 const WORDS = [
   'OPEN',
   'WON',
@@ -190,6 +191,18 @@ export const AuditEventItem = (props: {
   const actorName = event.actor?.displayName ?? event.actor?.email;
   const changes: Record<string, unknown> = event.changes;
 
+  // A text or a name held to 80 characters, cut between characters as the language writes them
+  // (Thai marks stay with their letters), so nothing floods the list.
+  const cut = (text: string) => {
+    const characters = [...new Intl.Segmenter(locale).segment(text)];
+
+    return characters.length > TEXT_LIMIT
+      ? `${characters
+          .slice(0, TEXT_LIMIT - 1)
+          .map((character) => character.segment)
+          .join('')}…`
+      : text;
+  };
   const label = (field: string) => {
     const typed = `${event.entityType}_${field}`;
     if (isOneOf(TYPED_FIELDS, typed)) {
@@ -223,7 +236,9 @@ export const AuditEventItem = (props: {
         : value.map((item) => show(field, item, currency) ?? t('value_changed')).join(', ');
     }
     if (typeof value === 'object') {
-      return nameOf(value);
+      const name = nameOf(value);
+
+      return name === undefined ? undefined : cut(name);
     }
     if (typeof value !== 'string') {
       return undefined;
@@ -244,15 +259,8 @@ export const AuditEventItem = (props: {
     if (WORD_FIELDS.has(field) && isOneOf(WORDS, value)) {
       return t(`value_${value}`);
     }
-    // Cut between characters as the language writes them (Thai marks stay with their letters).
-    const characters = [...new Intl.Segmenter(locale).segment(value)];
 
-    return characters.length > TEXT_LIMIT
-      ? `${characters
-          .slice(0, TEXT_LIMIT - 1)
-          .map((character) => character.segment)
-          .join('')}…`
-      : value;
+    return cut(value);
   };
 
   const fields = Object.entries(changes).filter(([field]) => !SKIPPED_FIELDS.has(field));
@@ -283,6 +291,10 @@ export const AuditEventItem = (props: {
     });
   }
   const shown = props.compact ? lines.slice(0, SHORT_LINES) : lines;
+  const shownLabel =
+    event.entityLabel === undefined ? t(`entity_${event.entityType}`) : cut(event.entityLabel);
+  // The whole name, when the cut shortened it.
+  const fullLabel = shownLabel === event.entityLabel ? undefined : event.entityLabel;
   // A deleted record has no page to go to.
   const href =
     record && event.action !== 'DELETE'
@@ -300,17 +312,23 @@ export const AuditEventItem = (props: {
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <p className="text-[0.9375rem] break-words">
           {t.rich(`phrase_${event.action}`, {
-            actor: actorName ?? t('former_member'),
-            record: event.entityLabel ?? t(`entity_${event.entityType}`),
+            actor: actorName === undefined ? t('former_member') : cut(actorName),
+            record: shownLabel,
             who: (chunks) => <strong className="font-semibold">{chunks}</strong>,
             what: (chunks) => (
               <>
                 {href ? (
-                  <Link href={href} className="font-medium break-words text-foreground">
+                  <Link
+                    href={href}
+                    title={fullLabel}
+                    className="font-medium break-words text-foreground"
+                  >
                     {chunks}
                   </Link>
                 ) : (
-                  <span className="font-medium">{chunks}</span>
+                  <span title={fullLabel} className="font-medium">
+                    {chunks}
+                  </span>
                 )}
                 {record && (
                   <span className="ml-1.5 font-mono text-[0.8125rem] text-muted-foreground tabular-nums">
@@ -327,7 +345,7 @@ export const AuditEventItem = (props: {
         {shown.length > 0 && (
           <ul className="flex flex-col gap-0.5 text-sm text-muted-foreground">
             {shown.map((line) => (
-              <li key={line.field} className="break-words">
+              <li key={line.field} className={cn('break-words', props.compact && 'line-clamp-2')}>
                 {line.text}
               </li>
             ))}

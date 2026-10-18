@@ -54,6 +54,11 @@ test.describe('Workspaces', () => {
     await expect(skip).toBeVisible();
     await skip.press('Enter');
     await expect(page).toHaveURL(/#crm-main$/u);
+
+    // The time zone chosen in the form is the workspace's: Settings shows it.
+    await nav.getByRole('link', { name: 'Settings' }).click();
+    await expect(page).toHaveURL(/\/settings\/workspace$/u);
+    await expect(page.getByLabel('Time zone')).toHaveValue('Europe/Paris');
   });
 
   test.describe('in another time zone', () => {

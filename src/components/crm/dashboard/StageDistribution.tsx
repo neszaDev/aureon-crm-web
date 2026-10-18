@@ -26,20 +26,17 @@ const BAR_HEIGHT = 36;
  * listed too. The bars are the table's picture: assistive technology has the table.
  * @param props Component props.
  * @param props.stages The dashboard's `byStage`.
- * @param props.className Extra classes for the panel.
  * @returns The panel.
  */
-export const StageDistribution = (props: {
-  stages: components['schemas']['StageBucket'][];
-  className?: string;
-}) => {
+export const StageDistribution = (props: { stages: components['schemas']['StageBucket'][] }) => {
   const t = useTranslations('StageDistribution');
   const locale = useLocale();
+  const number = new Intl.NumberFormat(locale);
   const reducedMotion = usePrefersReducedMotion();
   const config = { count: { label: t('deals'), color: 'var(--chart-2)' } } satisfies ChartConfig;
 
   return (
-    <Panel id="stages" title={t('title')} className={props.className}>
+    <Panel id="stages" title={t('title')}>
       {props.stages.length > 0 ? (
         <>
           <div aria-hidden="true" className="px-4 pb-3 sm:px-5">
@@ -77,6 +74,7 @@ export const StageDistribution = (props: {
                   <LabelList
                     dataKey="count"
                     position="right"
+                    formatter={(count) => number.format(Number(count))}
                     className="fill-foreground text-xs font-medium tabular-nums"
                   />
                 </Bar>
@@ -101,13 +99,15 @@ export const StageDistribution = (props: {
                     >
                       {bucket.stage.name}
                     </TableHead>
-                    <TableCell className="text-right tabular-nums">{bucket.count}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {number.format(bucket.count)}
+                    </TableCell>
                     <TableCell className="px-4 text-right whitespace-normal tabular-nums sm:px-5">
                       {bucket.totals.length > 0 ? (
                         <ul className="flex flex-col gap-0.5">
                           {bucket.totals.map((total) => (
                             <li key={total.currency}>
-                              {formatMoney(total.amount, total.currency, locale)} {total.currency}
+                              {formatMoney(total.amount, total.currency, locale)}
                             </li>
                           ))}
                         </ul>

@@ -255,7 +255,7 @@
     "cell_contacts": "Contacts",
     "cell_open_leads": "Prospects ouverts",
     "cell_open_deals": "Affaires en cours",
-    "cell_overdue_tasks": "Tâches en retard"
+    "cell_overdue_tasks": "Toutes les tâches en retard"
   },
   "MyDeals": {
     "title": "Mes affaires",
@@ -267,9 +267,9 @@
   },
   "FollowUps": {
     "title": "À relancer",
-    "overdue": "Tâches en retard",
-    "upcoming": "À venir",
-    "leads": "Prospects à relancer",
+    "overdue": "Mes tâches en retard",
+    "upcoming": "Mes tâches à venir",
+    "leads": "Mes prospects à relancer",
     "count": "{count, number}",
     "count_capped": "{count, number}+",
     "overdue_none": "Aucune tâche en retard.",

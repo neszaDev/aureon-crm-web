@@ -61,9 +61,11 @@ describe(FollowUps, () => {
   it('groups the overdue tasks, the ones coming up and the leads to follow up, each with its count', async () => {
     await followUps(props());
 
-    await expect.element(page.getByRole('heading', { name: 'Overdue tasks 1' })).toBeVisible();
-    await expect.element(page.getByRole('heading', { name: 'Coming up 2' })).toBeVisible();
-    await expect.element(page.getByRole('heading', { name: 'Leads to follow up 1' })).toBeVisible();
+    await expect.element(page.getByRole('heading', { name: 'My overdue tasks 1' })).toBeVisible();
+    await expect.element(page.getByRole('heading', { name: 'My upcoming tasks 2' })).toBeVisible();
+    await expect
+      .element(page.getByRole('heading', { name: 'My leads to follow up 1' }))
+      .toBeVisible();
     await expect
       .element(page.getByRole('link', { name: 'Send the proposal' }))
       .toHaveAttribute('href', '/app/1/tasks/1');
@@ -86,7 +88,7 @@ describe(FollowUps, () => {
     const eight = Array.from({ length: 8 }, (_, index) => task(10 + index, `Task ${index}`));
     await followUps(props({ upcoming: eight }));
 
-    await expect.element(page.getByRole('heading', { name: 'Coming up 8+' })).toBeVisible();
+    await expect.element(page.getByRole('heading', { name: 'My upcoming tasks 8+' })).toBeVisible();
   });
 
   it('says so for an empty group, and that the leads could not be read when they could not', async () => {

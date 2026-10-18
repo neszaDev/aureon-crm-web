@@ -255,7 +255,7 @@
     "cell_contacts": "ผู้ติดต่อ",
     "cell_open_leads": "ลีดที่เปิดอยู่",
     "cell_open_deals": "ดีลที่เปิดอยู่",
-    "cell_overdue_tasks": "งานที่เกินกำหนด"
+    "cell_overdue_tasks": "งานเกินกำหนดทั้งหมด"
   },
   "MyDeals": {
     "title": "ดีลของฉัน",
@@ -267,9 +267,9 @@
   },
   "FollowUps": {
     "title": "สิ่งที่ต้องติดตาม",
-    "overdue": "งานที่เกินกำหนด",
-    "upcoming": "กำลังจะถึง",
-    "leads": "ลีดที่ต้องติดตาม",
+    "overdue": "งานเกินกำหนดของฉัน",
+    "upcoming": "งานที่กำลังจะถึงของฉัน",
+    "leads": "ลีดที่ฉันต้องติดตาม",
     "count": "{count, number}",
     "count_capped": "{count, number}+",
     "overdue_none": "ไม่มีงานที่เกินกำหนด",

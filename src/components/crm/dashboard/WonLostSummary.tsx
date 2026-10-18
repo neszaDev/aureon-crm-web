@@ -34,9 +34,7 @@ export const WonLostSummary = (props: {
             {props.won.totals.length > 0 ? (
               <ul className="flex flex-col gap-0.5 text-sm tabular-nums">
                 {props.won.totals.map((total) => (
-                  <li key={total.currency}>
-                    {formatMoney(total.amount, total.currency, locale)} {total.currency}
-                  </li>
+                  <li key={total.currency}>{formatMoney(total.amount, total.currency, locale)}</li>
                 ))}
               </ul>
             ) : (

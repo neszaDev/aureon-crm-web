@@ -1,4 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
+import { Suspense, use, useEffect, useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
@@ -16,6 +17,37 @@ vi.mock(import('@/libs/I18nNavigation'), async (importOriginal) => ({
   useRouter: () => ({ push }),
 }));
 
+// A navigation the test holds: the router's push sets a state that suspends, inside the picker's
+// transition, so the transition stays pending until `release` lets the promise go.
+const gate = vi.hoisted(() => ({
+  release: undefined as (() => void) | undefined,
+  start: undefined as ((promise: Promise<boolean>) => void) | undefined,
+}));
+
+const Waiting = (props: { promise?: Promise<boolean> }) => {
+  if (props.promise) {
+    use(props.promise);
+  }
+
+  return null;
+};
+
+const Navigation = (props: { children: React.ReactNode }) => {
+  const [promise, setPromise] = useState<Promise<boolean>>();
+  useEffect(() => {
+    gate.start = setPromise;
+  }, []);
+
+  return (
+    <>
+      {props.children}
+      <Suspense fallback={null}>
+        <Waiting promise={promise} />
+      </Suspense>
+    </>
+  );
+};
+
 const TODAY = '2026-10-18';
 const base = (props: Partial<Props> = {}): Props => ({
   period: { from: '2026-09-19', to: '2026-10-18' },
@@ -29,9 +61,13 @@ const base = (props: Partial<Props> = {}): Props => ({
 const picker = async (props: Props, locale: 'en' | 'fr' = 'en') =>
   await render(
     <NextIntlClientProvider locale={locale} messages={locale === 'fr' ? fr : en} timeZone="UTC">
-      <PeriodPicker {...props} />
+      <Navigation>
+        <PeriodPicker {...props} />
+      </Navigation>
     </NextIntlClientProvider>,
   );
+
+const trigger = () => page.getByRole('button', { name: /^Period/u });
 
 const link = (name: string) => page.getByRole('link', { name });
 
@@ -75,10 +111,45 @@ describe(PeriodPicker, () => {
     await expect
       .element(link('Last month'))
       .toHaveAttribute('href', '/app/1?tab=funnel&from=2026-09-01&to=2026-09-30');
-    // The response's period is the last 30 days: that one is current.
+    // The response's period is the last 30 days: that one is current, by a tick as well as by
+    // its weight.
     await expect.element(link('Last 30 days')).toHaveAttribute('aria-current', 'true');
+    expect(link('Last 30 days').element().querySelector('svg')).not.toBeNull();
     expect(link('Last 7 days').element().getAttribute('aria-current')).toBeNull();
+    expect(link('Last 7 days').element().querySelector('svg')).toBeNull();
     await expect.element(page.getByText('Days run in Asia/Bangkok time.')).toBeVisible();
+  });
+
+  it('shows the navigation is on its way until it settles, and keeps the label the response gave', async () => {
+    push.mockImplementation(() => {
+      const { promise, resolve } = Promise.withResolvers<boolean>();
+      gate.release = () => {
+        resolve(true);
+      };
+      gate.start?.(promise);
+    });
+    await picker(base());
+    await expect.element(trigger()).toHaveAttribute('aria-busy', 'false');
+
+    await trigger().click();
+    await link('Last 7 days').click();
+
+    // A plain click goes through the router, not the browser: one push, in a transition.
+    expect(push).toHaveBeenCalledExactlyOnceWith('/app/1?from=2026-10-12&to=2026-10-18', {
+      scroll: false,
+    });
+    await expect.element(trigger()).toHaveAttribute('aria-busy', 'true');
+    expect(trigger().element().querySelector('[data-slot="spinner"]')).not.toBeNull();
+    // The figures are still the old period's, and so is the label: never the requested range.
+    await expect.element(trigger()).toHaveAccessibleName('Period: Sep 19 – Oct 18, 2026');
+    // Nothing more to apply while it is on its way.
+    await trigger().click();
+    await expect.element(page.getByRole('button', { name: 'Apply' })).toBeDisabled();
+
+    gate.release?.();
+
+    await expect.element(trigger()).toHaveAttribute('aria-busy', 'false');
+    expect(trigger().element().querySelector('[data-slot="spinner"]')).toBeNull();
   });
 
   it('applies a custom range, and refuses one the API would', async () => {

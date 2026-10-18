@@ -191,6 +191,35 @@ describe(AuditEventItem, () => {
     expect(line).toBe(`Notes: ${'ก็'.repeat(79)}… → short`);
   });
 
+  it('cuts a long name of a member, a record or the history entry itself, as it cuts a text', async () => {
+    const long = 'N'.repeat(100);
+    await item(
+      event({
+        entityLabel: long,
+        changes: {
+          owner: { from: { userId: 1, email: 'a@x.test', displayName: long }, to: RILEY },
+        },
+      }),
+    );
+
+    const cut = `${'N'.repeat(79)}…`;
+    await expect.element(page.getByRole('link', { name: cut })).toBeVisible();
+    expect(lines()).toStrictEqual([`Owner: ${cut} → Riley Rep`]);
+  });
+
+  it('says the kind of a pipeline stage in words, not as stored', async () => {
+    await item(
+      event({
+        entityType: 'PIPELINE_STAGE',
+        entityId: 4,
+        entityLabel: 'Negotiation',
+        changes: { kind: { from: 'OPEN', to: 'WON' } },
+      }),
+    );
+
+    expect(lines()).toStrictEqual(['Kind: Open → Won']);
+  });
+
   it('shows what a DELETE removed: the last state, as it was', async () => {
     await item(
       event({
@@ -292,6 +321,15 @@ describe(AuditEventItem, () => {
 
     expect(lines()).toStrictEqual(['Name: a → b', 'Phone: 1 → 2']);
     await expect.element(page.getByText('and 2 more changes')).toBeVisible();
+    // A long value can't push the list: each line is held to two.
+    expect(
+      page
+        .getByRole('list')
+        .nth(1)
+        .getByRole('listitem')
+        .elements()
+        .map((line) => line.classList.contains('line-clamp-2')),
+    ).toStrictEqual([true, true]);
   });
 
   it('writes the phrase in the page language', async () => {

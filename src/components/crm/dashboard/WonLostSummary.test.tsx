@@ -32,10 +32,7 @@ describe(WonLostSummary, () => {
     await expect.element(won).toHaveTextContent('3 deals');
     // One figure for each currency, with its code.
     const totals = won.getByRole('listitem').elements();
-    expect(totals.map((item) => item.textContent)).toStrictEqual([
-      '€9,000.00 EUR',
-      '$35,000.00 USD',
-    ]);
+    expect(totals.map((item) => item.textContent)).toStrictEqual(['€9,000.00', '$35,000.00']);
     await expect.element(page.getByRole('definition').nth(1)).toHaveTextContent('1 deal');
     expect(document.body.textContent).not.toContain('44,000');
   });

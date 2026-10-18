@@ -48,10 +48,12 @@ export default function DashboardLoading() {
           <Outline rows={5} />
           <Outline rows={4} />
         </div>
-        <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-          <Outline rows={3} />
-          <Outline rows={3} />
-          <Outline rows={4} className="lg:col-span-2 xl:col-span-1" />
+        <div className="grid gap-5 xl:grid-cols-2">
+          <div className="flex flex-col gap-5">
+            <Outline rows={2} />
+            <Outline rows={2} />
+          </div>
+          <Outline rows={5} />
         </div>
         <div className="grid gap-5 lg:grid-cols-2">
           <Outline rows={4} />

@@ -58,10 +58,7 @@ describe(StageDistribution, () => {
     await distribution(STAGES);
 
     const cells = rowOf('Qualification').getByRole('listitem').elements();
-    expect(cells.map((cell) => cell.textContent)).toStrictEqual([
-      '€17,000.00 EUR',
-      '$50,000.00 USD',
-    ]);
+    expect(cells.map((cell) => cell.textContent)).toStrictEqual(['€17,000.00', '$50,000.00']);
     // No sum of the two, nor of the stages' USD, appears anywhere.
     const text = document.body.textContent;
     expect(text).not.toContain('67,000');
@@ -76,6 +73,16 @@ describe(StageDistribution, () => {
     const chart = document.querySelector('[data-slot="chart"]');
     expect(chart).not.toBeNull();
     expect(chart?.closest('[aria-hidden="true"]')).not.toBeNull();
+  });
+
+  it('writes the counts as numbers in the page language, in the table and on the bars', async () => {
+    await distribution([{ stage: stage(1, 'Qualification'), count: 12_345, totals: [] }]);
+
+    await expect.element(rowOf('Qualification')).toHaveTextContent('12,345');
+    // The bar's own label, drawn once the bar is.
+    await expect
+      .poll(() => document.querySelector('[data-slot="chart"]')?.textContent)
+      .toContain('12,345');
   });
 
   it('says so when there are no open stages', async () => {

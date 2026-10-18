@@ -1,13 +1,15 @@
 'use client';
 
 import { cn } from 'cn';
-import { CalendarIcon, ChevronDownIcon, TriangleAlertIcon } from 'lucide-react';
+import { CalendarIcon, CheckIcon, ChevronDownIcon, TriangleAlertIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { DateTimeField } from '@/components/crm/fields/DateTimeField';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Spinner } from '@/components/ui/spinner';
 import { formatPeriod } from '@/libs/crm/Format';
+import type { PeriodQuery } from '@/libs/crm/PeriodQuery';
 import { parsePeriod, periodHref, periodPresets } from '@/libs/crm/PeriodQuery';
 import { Link, useRouter } from '@/libs/I18nNavigation';
 
@@ -17,7 +19,9 @@ import { Link, useRouter } from '@/libs/I18nNavigation';
  * The button shows the period the API answered with, so the label is always the range the
  * figures are for, whatever the URL asked. Last 30 days is the default and leaves the dates out
  * of the URL. A custom range the API would refuse (the end before the start, or more than 366
- * days) can't be applied, and the picker says why.
+ * days) can't be applied, and the picker says why. Choosing a period closes the picker and goes
+ * through a transition: until the page answers, the button shows a spinner and `aria-busy`, Apply
+ * is off, and the label stays the period the figures are for, never the one asked.
  * @param props Component props.
  * @param props.period The response's `period`.
  * @param props.path The page's path.
@@ -36,12 +40,20 @@ export const PeriodPicker = (props: {
   const t = useTranslations('PeriodPicker');
   const locale = useLocale();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [from, setFrom] = useState(props.period.from);
   const [to, setTo] = useState(props.period.to);
   const label = formatPeriod(props.period, locale);
   const chosen = parsePeriod({ from, to });
   const valid = chosen.from !== undefined && chosen.to !== undefined;
+  // Without a period: the default one, with no dates in the URL.
+  const go = (period?: PeriodQuery) => {
+    setOpen(false);
+    startTransition(() => {
+      router.push(periodHref(props.path, props.params, period), { scroll: false });
+    });
+  };
 
   return (
     <Popover
@@ -54,39 +66,57 @@ export const PeriodPicker = (props: {
       }}
     >
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" aria-label={t('trigger', { period: label })}>
-          <CalendarIcon aria-hidden="true" />
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label={t('trigger', { period: label })}
+          aria-busy={isPending}
+        >
+          {isPending ? <Spinner aria-hidden="true" /> : <CalendarIcon aria-hidden="true" />}
           <span className="tabular-nums">{label}</span>
           <ChevronDownIcon aria-hidden="true" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 max-w-[calc(100vw-2rem)] gap-3 p-3">
+      <PopoverContent
+        align="end"
+        // On a short window the sheet scrolls inside the room Radix leaves, so Apply is never
+        // out of reach.
+        className="max-h-(--radix-popover-content-available-height) w-80 max-w-[calc(100vw-2rem)] gap-3 overflow-y-auto p-3"
+      >
         <nav aria-label={t('presets')}>
           <ul className="flex flex-col">
             {periodPresets(props.today).map((preset) => {
               const current =
                 preset.period.from === props.period.from && preset.period.to === props.period.to;
+              // The last 30 days are what the API answers without dates.
+              const period = preset.key === 'last30' ? undefined : preset.period;
 
               return (
                 <li key={preset.key}>
                   <Link
-                    href={periodHref(
-                      props.path,
-                      props.params,
-                      // The last 30 days are what the API answers without dates.
-                      preset.key === 'last30' ? undefined : preset.period,
-                    )}
+                    href={periodHref(props.path, props.params, period)}
                     aria-current={current ? 'true' : undefined}
                     scroll={false}
                     className={cn(
-                      'flex min-h-9 items-center rounded-md px-2 text-sm text-foreground no-underline transition-colors duration-150 hover:bg-muted',
-                      current && 'bg-seal-tint font-semibold',
+                      'flex min-h-9 items-center justify-between gap-2 rounded-md px-2 text-sm text-foreground no-underline transition-colors duration-150 hover:bg-muted',
+                      current && 'bg-muted font-semibold',
                     )}
-                    onClick={() => {
-                      setOpen(false);
+                    onClick={(event) => {
+                      // A plain click goes through the transition; a new tab or window keeps the link.
+                      if (
+                        event.button === 0 &&
+                        !event.metaKey &&
+                        !event.ctrlKey &&
+                        !event.shiftKey &&
+                        !event.altKey
+                      ) {
+                        event.preventDefault();
+                        go(period);
+                      }
                     }}
                   >
                     {t(`preset_${preset.key}`)}
+                    {current && <CheckIcon aria-hidden="true" className="size-4 shrink-0" />}
                   </Link>
                 </li>
               );
@@ -122,10 +152,9 @@ export const PeriodPicker = (props: {
               {t('zone', { zone: props.timeZone.replaceAll('_', ' ') })}
             </p>
             <Button
-              disabled={!valid}
+              disabled={!valid || isPending}
               onClick={() => {
-                setOpen(false);
-                router.push(periodHref(props.path, props.params, chosen), { scroll: false });
+                go(chosen);
               }}
             >
               {t('apply')}
