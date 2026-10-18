@@ -620,6 +620,27 @@ export const getTasks = async (segment: string, query: TaskQuery) => {
 };
 
 /**
+ * Loads the caller's reminders (`GET /workspaces/{id}/reminders`): their overdue tasks, their
+ * tasks due in the next 24 hours and their leads to follow up, at most 20 of each. Cached for
+ * the request, so the shell's bell and a page share one call.
+ * @param segment The `[workspaceId]` route segment.
+ * @returns The reminders and the outcome flags.
+ */
+export const getReminders = cache(async (segment: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { reminders: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reminders', {
+    params: { path: { workspaceId } },
+  });
+
+  return { reminders: data, ...flags(response.status) };
+});
+
+/**
  * Loads one task (`GET /workspaces/{id}/tasks/{id}`). Cached for the request, so the page and
  * its metadata share one call.
  * @param segment The `[workspaceId]` route segment.

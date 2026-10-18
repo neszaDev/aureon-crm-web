@@ -203,6 +203,32 @@
     "nav_leads": "Prospects",
     "nav_deals": "Affaires"
   },
+  "RecordSearch": {
+    "open": "Rechercher des fiches",
+    "title": "Rechercher des fiches",
+    "description": "Trouvez une entreprise, un contact, un prospect ou une affaire.",
+    "placeholder": "Rechercher entreprises, contacts, prospects et affaires",
+    "hint": "Saisissez au moins 2 caractères.",
+    "searching": "Recherche…",
+    "empty": "Aucune fiche ne correspond",
+    "error": "La recherche a échoué. Réessayez.",
+    "count": "{count, plural, one {# résultat} other {# résultats}}",
+    "group_companies": "Entreprises",
+    "group_contacts": "Contacts",
+    "group_leads": "Prospects",
+    "group_deals": "Affaires"
+  },
+  "RemindersBell": {
+    "label": "Rappels : {count}",
+    "title": "Rappels",
+    "overdue": "Tâches en retard",
+    "due_soon": "À faire dans les 24 prochaines heures",
+    "follow_up": "Prospects à relancer",
+    "empty": "Rien ne demande votre attention.",
+    "all_tasks": "Toutes les tâches",
+    "in_app": "Les rappels s'affichent ici, dans l'application.",
+    "error": "Impossible de charger vos rappels. Rechargez la page pour réessayer."
+  },
   "AccountMenu": {
     "label": "Votre compte",
     "profile": "Votre profil",

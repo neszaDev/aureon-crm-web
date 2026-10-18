@@ -297,7 +297,7 @@ Under `lang="th"` line heights open (1.6 at 12–14px, 1.65 for body) and negati
 
 ## Layout
 
-From 1024px the CRM shell is a two-column grid: a 232px vermilion rail, sticky and full height, then the work area on `ground`. The rail holds the workspace switcher at the top and the section list under it. The work area opens with a 56px top bar carrying your seal at the right; pages sit under it in a column up to 1152px wide, with 28px side padding (16px below 640px).
+From 1024px the CRM shell is a two-column grid: a 232px vermilion rail, sticky and full height, then the work area on `ground`. The rail holds the workspace switcher at the top and the section list under it. The work area opens with a 56px top bar carrying, at the right, the record search, the reminders bell and your seal; pages sit under it in a column up to 1152px wide, with 28px side padding (16px below 640px).
 
 Below 1024px the rail becomes a 56px vermilion top bar (menu button, workspace chop and name, your seal) that opens the rail as a 288px drawer from the left.
 
@@ -352,6 +352,8 @@ Firm and compact: one height for every primary action.
 - **Rail items:** 36px rows, 15px medium `on-seal` text with a 16px icon; hover darkens by 10% black; the current item fills seal-deep and turns semibold white (weight is the cue besides colour).
 - **Settings links:** a column from 1280px, a wrapping row of bordered paper links below it; the current link fills seal-tint with seal-ink text.
 - **Account:** your seal in the top bar opens the account menu (profile, theme, language, sign out).
+- **Record search:** from 768px a field-like button in the top bar ("Search records" and the shortcut, ⌘K or Ctrl K); below that an icon button. It opens a palette near the top of the screen (up to 512px wide) with 5 hits per kind under their headings, each a record number in mono, the name and a detail line.
+- **Reminders bell:** an icon button with a badge (white on the vermilion bar, seal on paper) counting overdue tasks, tasks due within 24 hours and leads whose follow-up is due; hidden at none, "20+" for a list the API may have cut. Its popover is a field sheet, 352px at most, with the three groups and a line saying reminders live in the app.
 
 ### Tables
 - Heads in the label-table style, 40px tall, sentence case; rows divided by rule, 12px cell padding, muted on hover; tabular figures.

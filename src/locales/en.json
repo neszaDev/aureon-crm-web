@@ -203,6 +203,32 @@
     "nav_leads": "Leads",
     "nav_deals": "Deals"
   },
+  "RecordSearch": {
+    "open": "Search records",
+    "title": "Search records",
+    "description": "Find a company, contact, lead or deal.",
+    "placeholder": "Search companies, contacts, leads and deals",
+    "hint": "Type at least 2 characters.",
+    "searching": "Searching…",
+    "empty": "No records match",
+    "error": "Couldn't search. Try again.",
+    "count": "{count, plural, one {# result} other {# results}}",
+    "group_companies": "Companies",
+    "group_contacts": "Contacts",
+    "group_leads": "Leads",
+    "group_deals": "Deals"
+  },
+  "RemindersBell": {
+    "label": "Reminders: {count}",
+    "title": "Reminders",
+    "overdue": "Overdue tasks",
+    "due_soon": "Due in the next 24 hours",
+    "follow_up": "Leads to follow up",
+    "empty": "Nothing needs your attention.",
+    "all_tasks": "All tasks",
+    "in_app": "Reminders appear here in the app.",
+    "error": "Couldn't load your reminders. Reload the page to try again."
+  },
   "AccountMenu": {
     "label": "Your account",
     "profile": "Your profile",

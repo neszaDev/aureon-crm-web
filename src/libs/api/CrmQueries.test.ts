@@ -1,7 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { parseListQuery } from '@/libs/crm/ListQuery';
 import { authedBackend } from './Backend';
-import { COMPANY_LIST, getCompanies, getLeads, LEAD_LIST, taskViewQuery } from './CrmQueries';
+import {
+  COMPANY_LIST,
+  getCompanies,
+  getLeads,
+  getReminders,
+  LEAD_LIST,
+  taskViewQuery,
+} from './CrmQueries';
 
 vi.mock(import('server-only'), () => ({}));
 vi.mock(import('./Backend'), () => ({ authedBackend: vi.fn<typeof authedBackend>() }));
@@ -98,5 +105,43 @@ describe(taskViewQuery, () => {
 
   it('adds nothing on "all"', () => {
     expect(taskViewQuery('all', NOW)).toStrictEqual({});
+  });
+});
+
+describe(getReminders, () => {
+  it("reads the caller's reminders of the workspace, and flags a lost session", async () => {
+    const reminders = { overdueTasks: [], dueSoonTasks: [], followUpLeads: [] };
+    const GET = vi
+      .fn<() => Promise<unknown>>()
+      .mockResolvedValueOnce({ data: reminders, response: new Response(null, { status: 200 }) })
+      .mockResolvedValueOnce({ response: new Response(null, { status: 401 }) });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await expect(getReminders('7')).resolves.toStrictEqual({
+      reminders,
+      unauthorized: false,
+      forbidden: false,
+      notFound: false,
+      invalid: false,
+    });
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/reminders', {
+      params: { path: { workspaceId: 7 } },
+    });
+    // A second workspace: the request-scoped cache is per argument, and a 401 has no data.
+    await expect(getReminders('8')).resolves.toMatchObject({
+      reminders: undefined,
+      unauthorized: true,
+    });
+  });
+
+  it('finds none for a malformed workspace id, without asking the backend', async () => {
+    vi.mocked(authedBackend).mockClear();
+
+    await expect(getReminders('seven')).resolves.toMatchObject({
+      reminders: undefined,
+      notFound: true,
+    });
+    expect(authedBackend).not.toHaveBeenCalled();
   });
 });

@@ -1,65 +1,9 @@
 'use server';
 
-import { authedBackend } from '@/libs/api/Backend';
-import { redirectIfUnauthorized } from '@/libs/api/Session';
+import type { RecordKind, RecordOption } from '@/libs/api/RecordSearch';
+import { findRecords } from '@/libs/api/RecordSearch';
 
-/** A record a picker offers: its name, and a detail that tells look-alikes apart. */
-export type RecordOption = { id: number; label: string; detail?: string };
-
-type Api = Awaited<ReturnType<typeof authedBackend>>;
-
-// How each kind is searched: its list endpoint, active records only (the default), the first 10
-// matching `q`. The options are undefined when the backend refused. A kind lands here with the
-// first picker that needs it.
-const SEARCHES = {
-  company: async (api: Api, workspaceId: number, q?: string) => {
-    const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/companies', {
-      params: { path: { workspaceId }, query: { q, size: 10 } },
-    });
-    const options: RecordOption[] | undefined = data?.content.map((company) => ({
-      id: company.id,
-      label: company.name,
-      detail: company.website,
-    }));
-    return { status: response.status, options };
-  },
-  contact: async (api: Api, workspaceId: number, q?: string) => {
-    const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/contacts', {
-      params: { path: { workspaceId }, query: { q, size: 10 } },
-    });
-    const options: RecordOption[] | undefined = data?.content.map((contact) => ({
-      id: contact.id,
-      label: contact.fullName,
-      detail: contact.company?.name ?? contact.email,
-    }));
-    return { status: response.status, options };
-  },
-  lead: async (api: Api, workspaceId: number, q?: string) => {
-    const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/leads', {
-      params: { path: { workspaceId }, query: { q, size: 10 } },
-    });
-    const options: RecordOption[] | undefined = data?.content.map((lead) => ({
-      id: lead.id,
-      label: [lead.firstName, lead.lastName].filter(Boolean).join(' '),
-      detail: lead.companyName,
-    }));
-    return { status: response.status, options };
-  },
-  deal: async (api: Api, workspaceId: number, q?: string) => {
-    const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/deals', {
-      params: { path: { workspaceId }, query: { q, size: 10 } },
-    });
-    const options: RecordOption[] | undefined = data?.content.map((deal) => ({
-      id: deal.id,
-      label: deal.name,
-      detail: deal.company?.name,
-    }));
-    return { status: response.status, options };
-  },
-};
-
-/** The kinds of record a picker can link. */
-export type RecordKind = keyof typeof SEARCHES;
+export type { RecordKind, RecordOption } from '@/libs/api/RecordSearch';
 
 /**
  * Finds active records of a kind whose list search (`q`) matches the text, for `RecordPicker`.
@@ -76,21 +20,5 @@ export async function searchRecords(
   kind: RecordKind,
   q: string,
 ): Promise<RecordOption[]> {
-  // A server action takes whatever a caller sends.
-  if (!Object.hasOwn(SEARCHES, kind)) {
-    return [];
-  }
-  // As the list parser: no NUL (a 400), and at most the 200 characters `q` takes.
-  const text = q.replaceAll('\u0000', '').trim().slice(0, 200);
-  const { status, options } = await SEARCHES[kind](
-    await authedBackend(),
-    workspaceId,
-    text || undefined,
-  );
-  await redirectIfUnauthorized(status);
-  if (!options) {
-    throw new Error(`The ${kind} search failed (${status})`);
-  }
-
-  return options;
+  return await findRecords(workspaceId, kind, q, 10);
 }

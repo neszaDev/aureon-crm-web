@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { CrmShell } from '@/components/crm/shell/CrmShell';
 import { PickerFrame } from '@/components/crm/shell/PickerFrame';
-import { getMyWorkspaces, getWorkspace } from '@/libs/api/CrmQueries';
+import { getMyWorkspaces, getReminders, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
 
@@ -14,12 +14,15 @@ export default async function WorkspaceLayout(props: {
   const { locale, workspaceId } = await props.params;
   setRequestLocale(locale);
 
-  const [{ user }, current, mine] = await Promise.all([
+  // The reminders are read with the rest, each time the layout renders: on a full load, and after
+  // every action that refreshes the page, so the bell's count follows what changed.
+  const [{ user }, current, mine, reminders] = await Promise.all([
     getCurrentUser(),
     getWorkspace(workspaceId),
     getMyWorkspaces(),
+    getReminders(workspaceId),
   ]);
-  if (current.unauthorized || mine.unauthorized) {
+  if (current.unauthorized || mine.unauthorized || reminders.unauthorized) {
     return endRejectedSession(locale);
   }
   if (current.notFound) {
@@ -40,9 +43,11 @@ export default async function WorkspaceLayout(props: {
 
   return (
     <CrmShell
-      workspace={{ id: workspace.id, name: workspace.name }}
+      workspace={{ id: workspace.id, name: workspace.name, timeZone: workspace.timezone }}
       workspaces={mine.workspaces}
       user={{ email: user.email, displayName: user.displayName }}
+      // Any other answer (a 5xx) leaves the bell saying so, and the page usable.
+      reminders={reminders.reminders}
     >
       {props.children}
     </CrmShell>

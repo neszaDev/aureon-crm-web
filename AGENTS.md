@@ -30,17 +30,20 @@ src/actions/crm/*               CRM writes: workspaces, members, invitations (cr
                                 companies, contacts, leads (status, convert), deals (move), tasks, activities
 src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for pages), ApiError.ts,
                                 ActionFailure.ts, Session.ts, schema.d.ts (GENERATED, see below)
-src/libs/api/CrmQueries.ts      CRM reads for pages (workspaces, members, invitations, stages, sources, records, lists)
+src/libs/api/CrmQueries.ts      CRM reads for pages (workspaces, members, invitations, stages, sources, records, lists, the
+                                caller's reminders, which the workspace layout reads on every render)
+src/libs/api/RecordSearch.ts    the list searches behind the pickers (`searchRecords`) and the ⌘K record search (`searchAll`)
 src/libs/crm/*                  CRM logic: Permissions (`can`), RecordAccess (who may edit a record), WorkspaceId,
                                 Stages, PageMetadata, OpenWorkspace (`getOpenWorkspace`: a page's workspace, 401
                                 and 404 handled), Format (money, dates, record numbers), ZonedTime (workspace-zone
-                                inputs), ListQuery (a list's state from its URL), DealHistory (stamp row signers)
+                                inputs), ListQuery (a list's state from its URL), DealHistory (stamp row signers),
+                                Reminders (the bell's count and its "20+")
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
 src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens
 src/validations/                zod schemas mirroring the backend's request rules (CRM: crm/*)
 src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx shadcn add`)
 src/components/report/          Marksheet domain UI: marks, totals, results table (demos only)
-src/components/crm/**           the CRM: shell/ (rail, switcher, account menu), settings/, seals, and per record:
+src/components/crm/**           the CRM: shell/ (rail, switcher, account menu, record search, reminders bell), settings/, seals, and per record:
                                 company/ contact/ lead/ deal/ task/ activity/, with the shared list/ (list kit),
                                 record/ (header, facts, archive) and fields/ (pickers, owner, date and time)
 src/components/ src/templates/  UI (MarketingTemplate, AppShell); src/locales/*.json  all user-visible text
