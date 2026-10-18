@@ -32,7 +32,7 @@ const TASK: Task = {
   version: 3,
 };
 
-const renderRow = async (task: Task) => {
+const renderRow = async (task: Task, compact?: boolean) => {
   await render(
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
       <Table>
@@ -43,6 +43,7 @@ const renderRow = async (task: Task) => {
             canEdit
             timeZone="Asia/Bangkok"
             headingId="tasks-heading"
+            compact={compact}
           />
         </TableBody>
       </Table>
@@ -134,5 +135,17 @@ describe(TaskRow, () => {
     await renderRow({ ...TASK, overdue: true, dueAt: '2026-10-10T02:00:00Z' });
 
     await expect.element(page.getByText('Overdue', { exact: false })).toBeVisible();
+  });
+
+  it('keeps a compact row to its title, due time and menu, with the linked records under the title', async () => {
+    await renderRow(TASK, true);
+
+    // The priority and the assignee are columns of the full row; the company moves under the title.
+    expect(page.getByRole('cell').elements()).toHaveLength(4);
+    expect(page.getByText('High').elements()).toHaveLength(0);
+    expect(page.getByText('Mia Manager').elements()).toHaveLength(0);
+    await expect.element(page.getByRole('link', { name: 'Acme' })).toBeVisible();
+    await expect.element(checkbox()).toBeVisible();
+    await expect.element(menu()).toBeVisible();
   });
 });

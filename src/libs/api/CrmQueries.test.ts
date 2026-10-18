@@ -4,6 +4,7 @@ import { authedBackend } from './Backend';
 import {
   COMPANY_LIST,
   getCompanies,
+  getDashboard,
   getLeads,
   getReminders,
   LEAD_LIST,
@@ -140,6 +141,52 @@ describe(getReminders, () => {
 
     await expect(getReminders('seven')).resolves.toMatchObject({
       reminders: undefined,
+      notFound: true,
+    });
+    expect(authedBackend).not.toHaveBeenCalled();
+  });
+});
+
+describe(getDashboard, () => {
+  it('asks for the period as it is, leaves out what is not given, and flags a refusal as invalid', async () => {
+    const GET = vi
+      .fn<() => Promise<unknown>>()
+      .mockResolvedValueOnce({
+        data: { counts: {} },
+        response: new Response(null, { status: 200 }),
+      })
+      .mockResolvedValueOnce({ response: new Response(null, { status: 200 }), data: {} })
+      .mockResolvedValueOnce({
+        error: { status: 400, code: 'VALIDATION_FAILED', message: 'Validation failed' },
+        response: new Response(null, { status: 400 }),
+      });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await expect(
+      getDashboard('7', { from: '2026-09-01', to: '2026-09-30' }),
+    ).resolves.toMatchObject({ dashboard: { counts: {} }, invalid: false });
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/dashboard', {
+      params: { path: { workspaceId: 7 }, query: { from: '2026-09-01', to: '2026-09-30' } },
+    });
+    await getDashboard('7', {});
+    expect(GET).toHaveBeenLastCalledWith('/api/v1/workspaces/{workspaceId}/dashboard', {
+      params: { path: { workspaceId: 7 }, query: {} },
+    });
+    await expect(getDashboard('7', { from: '2026-09-01' })).resolves.toStrictEqual({
+      dashboard: undefined,
+      unauthorized: false,
+      forbidden: false,
+      notFound: false,
+      invalid: true,
+    });
+  });
+
+  it('finds none for a malformed workspace id, without asking the backend', async () => {
+    vi.mocked(authedBackend).mockClear();
+
+    await expect(getDashboard('seven', {})).resolves.toMatchObject({
+      dashboard: undefined,
       notFound: true,
     });
     expect(authedBackend).not.toHaveBeenCalled();

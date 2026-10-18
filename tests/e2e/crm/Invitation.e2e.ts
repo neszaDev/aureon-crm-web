@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signOut, signUp, uniqueEmail } from '../helpers';
-import { BACKEND_URL, expectNoA11yViolations, invite } from './helpers';
+import { BACKEND_URL, expectDashboard, expectNoA11yViolations, invite } from './helpers';
 
 // The backend's database, for the one state the API can't produce: an expired link. Defaults to
 // the API repository's local Compose project.
@@ -28,12 +28,14 @@ const expireInvitation = (id: number) => {
 };
 
 /**
- * Checks the role shown on the workspace dashboard.
- * @param page Playwright page, on the dashboard.
+ * Checks the role the workspace switcher lists the open workspace with.
+ * @param page Playwright page, in the workspace.
  * @param role The role's name.
  */
 const expectRole = async (page: Page, role: string) => {
-  await expect(page.locator('dt:has-text("Your role") + dd')).toHaveText(role);
+  await page.getByRole('button', { name: /^Switch workspace/u }).click();
+  await expect(page.getByRole('menuitem', { name: /Acme/u })).toContainText(role);
+  await page.keyboard.press('Escape');
 };
 
 /**
@@ -70,7 +72,7 @@ test.describe('Invitation links', () => {
     await page.getByRole('button', { name: 'Create account and join' }).click();
 
     await expect(page).toHaveURL(`${baseURL}/app/${workspaceId}`);
-    await expect(page.getByRole('heading', { level: 1, name: 'Welcome to Acme' })).toBeVisible();
+    await expectDashboard(page, 'Acme');
     await expectRole(page, 'Manager');
     const cookies = await context.cookies();
     expect(cookies.find((cookie) => cookie.name === 'access_token')?.httpOnly).toBe(true);

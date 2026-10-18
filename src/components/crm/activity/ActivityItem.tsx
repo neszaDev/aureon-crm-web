@@ -1,5 +1,6 @@
 'use client';
 
+import { cn } from 'cn';
 import { PencilIcon, Trash2Icon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -26,25 +27,28 @@ type Activity = components['schemas']['ActivityResponse'];
  * @param props Component props.
  * @param props.activity The activity.
  * @param props.workspaceId The workspace.
- * @param props.link The record being viewed.
+ * @param props.link The record being viewed; none on the dashboard, where every link shows.
  * @param props.canEdit Whether the caller may edit and delete it.
  * @param props.timeZone The workspace's time zone.
  * @param props.headingId The timeline's heading, which takes the focus once it is deleted.
  * @param props.focused Whether its subject takes the focus as it appears ("Show older" added it).
  * @param props.onSaved Called with the saved activity.
  * @param props.onDeleted Called once it is deleted.
+ * @param props.compact A dashboard's read-only entry: tighter, with the details cut to two lines.
+ *   Without `canEdit` it needs no heading or callbacks.
  * @returns The list item.
  */
 export const ActivityItem = (props: {
   activity: Activity;
   workspaceId: number;
-  link: ActivityLink;
+  link?: ActivityLink;
   canEdit: boolean;
   timeZone: string;
-  headingId: string;
-  focused: boolean;
-  onSaved: (activity: Activity) => void;
-  onDeleted: (id: number) => void;
+  headingId?: string;
+  focused?: boolean;
+  onSaved?: (activity: Activity) => void;
+  onDeleted?: (id: number) => void;
+  compact?: boolean;
 }) => {
   const t = useTranslations('ActivityItem');
   const tType = useTranslations('ActivityComposer');
@@ -83,7 +87,7 @@ export const ActivityItem = (props: {
               },
             );
             if (result.activity) {
-              props.onSaved(result.activity);
+              props.onSaved?.(result.activity);
             }
             return result;
           }}
@@ -103,7 +107,12 @@ export const ActivityItem = (props: {
   }
 
   return (
-    <li className="flex flex-col gap-1.5 border-t border-rule px-5 py-4">
+    <li
+      className={cn(
+        'flex flex-col gap-1.5 border-t border-rule',
+        props.compact ? 'px-4 py-3 sm:px-5' : 'px-5 py-4',
+      )}
+    >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className="flex items-center gap-1.5 text-[0.8125rem] font-medium text-muted-foreground [&_svg]:size-4">
           <ActivityTypeIcon type={props.activity.type} />
@@ -147,12 +156,14 @@ export const ActivityItem = (props: {
               confirmLabel={t('delete_confirm')}
               cancelLabel={t('cancel')}
               fallbackFocus={() =>
-                document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
+                props.headingId
+                  ? document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
+                  : null
               }
               action={async () => {
                 const result = await deleteActivity(props.workspaceId, props.activity.id);
                 if (result.ok) {
-                  props.onDeleted(props.activity.id);
+                  props.onDeleted?.(props.activity.id);
                   toast.success(t('deleted'));
                 }
                 return result;
@@ -170,7 +181,12 @@ export const ActivityItem = (props: {
         {props.activity.subject}
       </h3>
       {props.activity.body && (
-        <p className="max-w-[65ch] text-sm break-words whitespace-pre-line">
+        <p
+          className={cn(
+            'max-w-[65ch] text-sm break-words whitespace-pre-line',
+            props.compact && 'line-clamp-2',
+          )}
+        >
           {props.activity.body}
         </p>
       )}

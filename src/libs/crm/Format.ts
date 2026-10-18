@@ -31,6 +31,20 @@ export const formatMoney = (
 };
 
 /**
+ * Shows an amount whose currency is not known, such as a change in the history: grouped, with the
+ * cents. The amount stays a decimal string: no float rounding.
+ * @param amount The amount as the backend sends it (`1250.50`).
+ * @param locale The page's locale.
+ * @returns The amount, e.g. `1,250.50`.
+ */
+export const formatAmount = (amount: string, locale: string) =>
+  new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(
+    // Intl reads a decimal string exactly, every digit kept; its type only names `${number}`.
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- see above
+    amount as `${number}`,
+  );
+
+/**
  * Shows an instant (a date and time) in the workspace's time zone.
  * @param instant An ISO 8601 instant.
  * @param opts Options.
@@ -57,6 +71,27 @@ export const formatInstant = (
  */
 export const formatDate = (date: string, locale: string) =>
   formatInstant(`${date}T00:00:00Z`, { locale, timeZone: 'UTC' });
+
+/**
+ * Shows a period the API answered with, as "Sep 19 – Oct 18, 2026": the year once when both days
+ * are in it.
+ * @param period The response's `period`: its first and last day, `YYYY-MM-DD`, both included.
+ * @param locale The page's locale.
+ * @returns The two days.
+ */
+export const formatPeriod = (period: { from: string; to: string }, locale: string) => {
+  const shortDay = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
+  const start =
+    period.from.slice(0, 4) === period.to.slice(0, 4)
+      ? shortDay.format(new Date(`${period.from}T00:00:00Z`))
+      : formatDate(period.from, locale);
+
+  return `${start} – ${formatDate(period.to, locale)}`;
+};
 
 /**
  * Counts the whole days since an instant, e.g. how long a deal has been in its stage.

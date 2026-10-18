@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   daysSince,
+  formatAmount,
   formatDate,
   formatInstant,
   formatMoney,
+  formatPeriod,
   fullName,
   recordNumber,
 } from './Format';
@@ -31,10 +33,38 @@ describe(formatMoney, () => {
   });
 });
 
+describe(formatAmount, () => {
+  it('groups the digits and keeps the cents, without a currency it does not know', () => {
+    expect(formatAmount('1250.5', 'en')).toBe('1,250.50');
+    expect(formatAmount('47000', 'fr')).toMatch(/^47\s000,00$/u);
+  });
+
+  it('keeps every digit of the largest amount', () => {
+    expect(formatAmount('9999999999999.99', 'en')).toBe('9,999,999,999,999.99');
+  });
+});
+
 describe(formatDate, () => {
   it('shows a date-only value as that day, whatever the time zone of the process', () => {
     // Also run with TZ=America/Los_Angeles: midnight UTC is the day before there.
     expect(formatDate('2026-10-01', 'en')).toBe('Oct 1, 2026');
+  });
+});
+
+describe(formatPeriod, () => {
+  it('writes the year once when both days are in it', () => {
+    expect(formatPeriod({ from: '2026-09-19', to: '2026-10-18' }, 'en')).toBe(
+      'Sep 19 – Oct 18, 2026',
+    );
+    expect(formatPeriod({ from: '2026-10-01', to: '2026-10-01' }, 'fr')).toBe(
+      '1 oct. – 1 oct. 2026',
+    );
+  });
+
+  it('writes both years across a new year', () => {
+    expect(formatPeriod({ from: '2025-12-20', to: '2026-01-18' }, 'en')).toBe(
+      'Dec 20, 2025 – Jan 18, 2026',
+    );
   });
 });
 

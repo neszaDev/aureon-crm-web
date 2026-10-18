@@ -18,6 +18,7 @@ import type { ActivityLink } from '@/validations/crm/ActivityValidation';
  * @param props.timeZone The workspace's time zone.
  * @param props.viewed The record whose page this is, left out of the linked records.
  * @param props.headingId The heading of the list, which takes the focus when a row leaves.
+ * @param props.compact A narrow list (the dashboard's): without the priority and assignee columns.
  * @returns The table.
  */
 export const TaskTable = (props: {
@@ -28,6 +29,7 @@ export const TaskTable = (props: {
   timeZone: string;
   viewed?: ActivityLink;
   headingId: string;
+  compact?: boolean;
 }) => {
   const t = useTranslations('TaskTable');
 
@@ -40,9 +42,13 @@ export const TaskTable = (props: {
           </TableHead>
           <TableHead>{t('title')}</TableHead>
           <TableHead>{t('due')}</TableHead>
-          <TableHead className="max-md:hidden">{t('priority')}</TableHead>
-          <TableHead className="max-sm:hidden">{t('assignee')}</TableHead>
-          <TableHead className="max-lg:hidden">{t('linked')}</TableHead>
+          {!props.compact && (
+            <>
+              <TableHead className="max-md:hidden">{t('priority')}</TableHead>
+              <TableHead className="max-sm:hidden">{t('assignee')}</TableHead>
+              <TableHead className="max-lg:hidden">{t('linked')}</TableHead>
+            </>
+          )}
           <TableHead className="w-10 pl-0">
             <span className="sr-only">{t('actions')}</span>
           </TableHead>
@@ -63,6 +69,7 @@ export const TaskTable = (props: {
             timeZone={props.timeZone}
             viewed={props.viewed}
             headingId={props.headingId}
+            compact={props.compact}
           />
         ))}
       </TableBody>

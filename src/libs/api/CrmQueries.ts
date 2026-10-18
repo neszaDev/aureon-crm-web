@@ -2,6 +2,7 @@ import 'server-only';
 import { cache } from 'react';
 import type { ListQuery, ListSpec } from '@/libs/crm/ListQuery';
 import { PAGE_SIZES, parseListQuery } from '@/libs/crm/ListQuery';
+import type { PeriodQuery } from '@/libs/crm/PeriodQuery';
 import { toRecordId, toWorkspaceId } from '@/libs/crm/WorkspaceId';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
 import { DEAL_STATUSES, DEAL_VIEWS } from '@/validations/crm/DealValidation';
@@ -639,6 +640,29 @@ export const getReminders = cache(async (segment: string) => {
 
   return { reminders: data, ...flags(response.status) };
 });
+
+/**
+ * Loads the dashboard (`GET /workspaces/{id}/dashboard`): the workspace's counts, open pipeline
+ * and stages as of now, the won and lost deals of a period, and the caller's tasks and the latest
+ * activity and changes. The response names the `period` it used.
+ * @param segment The `[workspaceId]` route segment.
+ * @param period The period from the URL, read with `parsePeriod`; a day left out is the API's
+ *   default (to: today, from: 29 days before).
+ * @returns The dashboard and the outcome flags (`invalid`: the backend refused the period).
+ */
+export const getDashboard = async (segment: string, period: PeriodQuery) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { dashboard: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/dashboard', {
+    params: { path: { workspaceId }, query: period },
+  });
+
+  return { dashboard: data, ...flags(response.status) };
+};
 
 /**
  * Loads one task (`GET /workspaces/{id}/tasks/{id}`). Cached for the request, so the page and

@@ -65,7 +65,7 @@ const withoutNul = (value: string) => value.replaceAll('\u0000', '');
  * @param value The URL value.
  * @returns Whether it is one.
  */
-const isDate = (value: string) => {
+export const isDate = (value: string) => {
   const time = Date.parse(`${value}T00:00:00Z`);
   return (
     /^\d{4}-\d{2}-\d{2}$/u.test(value) &&

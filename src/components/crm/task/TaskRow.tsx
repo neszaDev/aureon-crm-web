@@ -77,6 +77,8 @@ export const TaskDue = (props: { dueAt?: string; overdue: boolean; timeZone: str
  * @param props.timeZone The workspace's time zone.
  * @param props.viewed The record whose page this is, left out of the linked records.
  * @param props.headingId The list's heading, which takes the focus when the row leaves.
+ * @param props.compact A narrow list (the dashboard's): the title, due time and menu only, the
+ *   linked records under the title; priority and assignee are left out.
  * @returns The table row.
  */
 export const TaskRow = (props: {
@@ -86,6 +88,7 @@ export const TaskRow = (props: {
   timeZone: string;
   viewed?: ActivityLink;
   headingId: string;
+  compact?: boolean;
 }) => {
   const t = useTranslations('TaskRow');
   const tError = useTranslations('ActionError');
@@ -153,17 +156,32 @@ export const TaskRow = (props: {
           <span className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] text-muted-foreground">
             <span className="font-mono tabular-nums">{recordNumber('task', props.task.id)}</span>
             {!isOpen && <span>{t(`status_${props.task.status}`)}</span>}
+            {props.compact && (
+              <LinkedRecords
+                record={props.task}
+                workspaceId={props.workspaceId}
+                viewed={props.viewed}
+              />
+            )}
           </span>
         </span>
       </TableCell>
       <TableCell className="whitespace-normal">
         <TaskDue dueAt={props.task.dueAt} overdue={props.task.overdue} timeZone={props.timeZone} />
       </TableCell>
-      <TableCell className="max-md:hidden">{t(`priority_${props.task.priority}`)}</TableCell>
-      <OwnerCell owner={props.task.assignee} className="max-sm:hidden" />
-      <TableCell className="whitespace-normal max-lg:hidden">
-        <LinkedRecords record={props.task} workspaceId={props.workspaceId} viewed={props.viewed} />
-      </TableCell>
+      {!props.compact && (
+        <>
+          <TableCell className="max-md:hidden">{t(`priority_${props.task.priority}`)}</TableCell>
+          <OwnerCell owner={props.task.assignee} className="max-sm:hidden" />
+          <TableCell className="whitespace-normal max-lg:hidden">
+            <LinkedRecords
+              record={props.task}
+              workspaceId={props.workspaceId}
+              viewed={props.viewed}
+            />
+          </TableCell>
+        </>
+      )}
       <TableCell className="w-10 pl-0 text-right">
         {props.canEdit && (
           <>

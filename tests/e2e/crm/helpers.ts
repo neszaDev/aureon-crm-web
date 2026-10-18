@@ -38,6 +38,16 @@ export const expectNoA11yViolations = async (page: Page) => {
 };
 
 /**
+ * Checks the dashboard of a workspace is open: its heading, and the workspace named under it.
+ * @param page Playwright page.
+ * @param name The workspace's name.
+ */
+export const expectDashboard = async (page: Page, name: string) => {
+  await expect(page.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible();
+  await expect(page.getByText(`what changed in ${name}.`)).toBeVisible();
+};
+
+/**
  * Fills and sends the workspace form (EUR, Europe/Paris) and waits for the new workspace.
  * @param page Playwright page.
  * @param name Workspace name.

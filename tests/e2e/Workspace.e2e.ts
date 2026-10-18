@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { createWorkspace, expectNoA11yViolations, invite } from './crm/helpers';
+import { createWorkspace, expectDashboard, expectNoA11yViolations, invite } from './crm/helpers';
 import { PASSWORD, signUp, uniqueEmail } from './helpers';
 
 /**
@@ -27,13 +27,16 @@ test.describe('Workspaces', () => {
 
     await createWorkspace(page, 'Acme');
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Welcome to Acme' })).toBeVisible();
+    // The home is the dashboard; a workspace with nothing in it starts with its first records.
+    await expectDashboard(page, 'Acme');
+    await expect(
+      page.getByRole('heading', { name: 'Start with your first records' }),
+    ).toBeVisible();
     const nav = page.getByRole('navigation', { name: 'Workspace navigation' });
     await expect(nav.getByRole('link', { name: 'Dashboard' })).toHaveAttribute(
       'aria-current',
       'page',
     );
-    await expect(page.getByText('Europe/Paris')).toBeVisible();
     await expect(page).toHaveTitle('Dashboard');
     await expectNoA11yViolations(page);
 
@@ -71,11 +74,11 @@ test.describe('Workspaces', () => {
     await page.getByRole('menuitem', { name: 'Create workspace' }).click();
     await expect(page.getByRole('heading', { name: 'Create a workspace' })).toBeVisible();
     await createWorkspace(page, 'Beta');
-    await expect(page.getByRole('heading', { level: 1, name: 'Welcome to Beta' })).toBeVisible();
+    await expectDashboard(page, 'Beta');
 
     await page.getByRole('button', { name: 'Switch workspace. Current: Beta' }).click();
     await page.getByRole('menuitem', { name: /Acme/u }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Welcome to Acme' })).toBeVisible();
+    await expectDashboard(page, 'Acme');
 
     await page.goto('/app');
     await expect(page.getByRole('heading', { name: 'Your workspaces' })).toBeVisible();
