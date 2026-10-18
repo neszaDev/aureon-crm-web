@@ -12,7 +12,6 @@ import {
 import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import { ActionAlert } from '@/components/crm/ActionAlert';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
 import { describedBy, FormField } from '@/components/FormField';
@@ -20,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { ActionResult } from '@/libs/api/ApiError';
+import { toastActionFailure } from '@/utils/ActionToast';
 import { focusOnMount } from '@/utils/Focus';
 import type {
   LeadSourceUpdateValues,
@@ -219,16 +219,7 @@ const SourceItem = (props: {
                     );
                     if (!result.ok) {
                       // Someone else changed the source first: reloading shows their version.
-                      toast.error(result.message ?? t('error_generic'), {
-                        action: result.conflict
-                          ? {
-                              label: tError('reload'),
-                              onClick: () => {
-                                window.location.reload();
-                              },
-                            }
-                          : undefined,
-                      });
+                      toastActionFailure(result, t('error_generic'), tError('reload'));
                     }
                   });
                 }}

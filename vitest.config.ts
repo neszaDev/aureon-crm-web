@@ -17,9 +17,10 @@ export default defineConfig({
     alias: { 'next/image': 'next/dist/esm/shared/lib/image-external.js' },
   },
   // Pre-bundle dnd-kit: on a cold cache, Vite otherwise re-optimises mid-run and the first
-  // drag-and-drop test loads a second React copy ("Invalid hook call").
+  // drag-and-drop test loads a second React copy ("Invalid hook call"). The calendar's locales
+  // are one more such late import.
   optimizeDeps: {
-    include: ['@dnd-kit/core', '@dnd-kit/sortable'],
+    include: ['@dnd-kit/core', '@dnd-kit/sortable', 'react-day-picker/locale'],
   },
   test: {
     coverage: {

@@ -1,10 +1,10 @@
 'use client';
 
 import { cn } from 'cn';
-import { enUS, fr, th } from 'date-fns/locale';
 import { CalendarIcon, XIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { enUS, fr, th } from 'react-day-picker/locale';
 import type { FieldError as HookFormFieldError } from 'react-hook-form';
 import { FieldError } from '@/components/FieldError';
 import { describedBy } from '@/components/FormField';
@@ -76,6 +76,9 @@ export const DateTimeField = (props: {
   const labelId = `${props.id}-label`;
   const timeLabelId = `${props.id}-time-label`;
   const descriptionId = describedBy(props.id);
+  const zoneId = `${props.id}-zone`;
+  // The error first, when there is one; the zone stays named under it.
+  const describedById = props.error ? `${descriptionId} ${zoneId}` : zoneId;
   const invalid = props.error ? true : undefined;
 
   return (
@@ -90,7 +93,7 @@ export const DateTimeField = (props: {
               id={props.id}
               type="button"
               aria-labelledby={`${labelId} ${props.id}`}
-              aria-describedby={descriptionId}
+              aria-describedby={describedById}
               className={cn(
                 fieldSurface,
                 fieldStates,
@@ -132,7 +135,7 @@ export const DateTimeField = (props: {
           type="time"
           value={time}
           aria-labelledby={`${labelId} ${timeLabelId}`}
-          aria-describedby={descriptionId}
+          aria-describedby={describedById}
           aria-invalid={invalid}
           className="w-36"
           onChange={(event) => {
@@ -158,13 +161,10 @@ export const DateTimeField = (props: {
           </Button>
         )}
       </div>
-      {props.error ? (
-        <FieldError error={props.error} id={descriptionId} />
-      ) : (
-        <p id={descriptionId} className="text-[0.8125rem] text-muted-foreground">
-          {t('zone', { zone: props.timeZone.replaceAll('_', ' ') })}
-        </p>
-      )}
+      <FieldError error={props.error} id={descriptionId} />
+      <p id={zoneId} className="text-[0.8125rem] text-muted-foreground">
+        {t('zone', { zone: props.timeZone.replaceAll('_', ' ') })}
+      </p>
     </div>
   );
 };

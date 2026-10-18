@@ -5,10 +5,12 @@ import { PAGE_SIZES } from '@/libs/crm/ListQuery';
 import { toRecordId, toWorkspaceId } from '@/libs/crm/WorkspaceId';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
 import { authedBackend, backend } from './Backend';
-import type { operations } from './schema';
+import type { paths } from './schema';
 
 /** What the task list takes (api.md, Tasks and reminders): the backend's own query params. */
-export type TaskQuery = NonNullable<operations['list']['parameters']['query']>;
+export type TaskQuery = NonNullable<
+  paths['/api/v1/workspaces/{workspaceId}/tasks']['get']['parameters']['query']
+>;
 
 // Read-side CRM calls for server components, like `Queries.ts`. Each returns the data plus
 // `unauthorized` (401: the session is gone), `forbidden` (403), `notFound` (404: unknown,
@@ -66,6 +68,32 @@ export const CONTACT_LIST = {
 
 /** The Tasks page's views, its tabs: each a set of the task list's filters and a sort. */
 export const TASK_VIEWS = ['mine', 'overdue', 'upcoming', 'completed', 'all'] as const;
+
+export type TaskView = (typeof TASK_VIEWS)[number];
+
+const WEEK = 7 * 24 * 60 * 60 * 1000;
+
+// What each view asks the task list for. Due times run from `dueFrom` (inclusive) to `dueTo`
+// (exclusive).
+const VIEWS: Record<TaskView, (now: number) => TaskQuery> = {
+  mine: () => ({ mine: true, status: ['OPEN'] }),
+  overdue: () => ({ overdue: true }),
+  upcoming: (now) => ({
+    status: ['OPEN'],
+    dueFrom: new Date(now).toISOString(),
+    dueTo: new Date(now + WEEK).toISOString(),
+  }),
+  completed: () => ({ status: ['COMPLETED'], sort: 'UPDATED_AT', direction: 'DESC' }),
+  all: () => ({}),
+};
+
+/**
+ * What a Tasks page view asks the task list for, besides the search, the assignee and the paging.
+ * @param view The view.
+ * @param now The current time, in milliseconds.
+ * @returns The backend's filters and sort for it.
+ */
+export const taskViewQuery = (view: TaskView, now: number) => VIEWS[view](now);
 
 /**
  * The Tasks page's URL state: its view, the assignee filter (`unassigned` too) and the paging.

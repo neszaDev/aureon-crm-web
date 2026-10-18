@@ -30,6 +30,7 @@ type Activity = components['schemas']['ActivityResponse'];
  * @param props.canEdit Whether the caller may edit and delete it.
  * @param props.timeZone The workspace's time zone.
  * @param props.headingId The timeline's heading, which takes the focus once it is deleted.
+ * @param props.focused Whether its subject takes the focus as it appears ("Show older" added it).
  * @param props.onSaved Called with the saved activity.
  * @param props.onDeleted Called once it is deleted.
  * @returns The list item.
@@ -41,6 +42,7 @@ export const ActivityItem = (props: {
   canEdit: boolean;
   timeZone: string;
   headingId: string;
+  focused: boolean;
   onSaved: (activity: Activity) => void;
   onDeleted: (id: number) => void;
 }) => {
@@ -50,32 +52,36 @@ export const ActivityItem = (props: {
   const [editing, setEditing] = useState(false);
   // Back from editing: the Edit button that replaced the form takes the focus.
   const [edited, setEdited] = useState(false);
-  const { activity } = props;
 
   if (editing) {
     return (
       <li className="border-t border-rule px-5 py-4">
         <ActivityComposer
           defaults={{
-            type: activity.type,
-            subject: activity.subject,
-            body: activity.body ?? '',
-            occurredAt: toLocalInput(activity.occurredAt, props.timeZone),
+            type: props.activity.type,
+            subject: props.activity.subject,
+            body: props.activity.body ?? '',
+            occurredAt: toLocalInput(props.activity.occurredAt, props.timeZone),
           }}
           timeZone={props.timeZone}
           // Every field goes back, the links as they are; "When" only once changed, so an
           // edit elsewhere keeps its exact time.
           save={async (values, whenChanged) => {
-            const result = await updateActivity(props.workspaceId, activity.id, activity.version, {
-              ...values,
-              occurredAt: whenChanged
-                ? (toInstant(values.occurredAt, props.timeZone) ?? null)
-                : null,
-              companyId: activity.company?.id ?? null,
-              contactId: activity.contact?.id ?? null,
-              leadId: activity.lead?.id ?? null,
-              dealId: activity.deal?.id ?? null,
-            });
+            const result = await updateActivity(
+              props.workspaceId,
+              props.activity.id,
+              props.activity.version,
+              {
+                ...values,
+                occurredAt: whenChanged
+                  ? (toInstant(values.occurredAt, props.timeZone) ?? null)
+                  : null,
+                companyId: props.activity.company?.id ?? null,
+                contactId: props.activity.contact?.id ?? null,
+                leadId: props.activity.lead?.id ?? null,
+                dealId: props.activity.deal?.id ?? null,
+              },
+            );
             if (result.activity) {
               props.onSaved(result.activity);
             }
@@ -100,14 +106,18 @@ export const ActivityItem = (props: {
     <li className="flex flex-col gap-1.5 border-t border-rule px-5 py-4">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className="flex items-center gap-1.5 text-[0.8125rem] font-medium text-muted-foreground [&_svg]:size-4">
-          <ActivityTypeIcon type={activity.type} />
-          {tType(`type_${activity.type}`)}
+          <ActivityTypeIcon type={props.activity.type} />
+          {tType(`type_${props.activity.type}`)}
         </span>
         <time
-          dateTime={activity.occurredAt}
+          dateTime={props.activity.occurredAt}
           className="text-[0.8125rem] text-muted-foreground tabular-nums"
         >
-          {formatInstant(activity.occurredAt, { locale, timeZone: props.timeZone, withTime: true })}
+          {formatInstant(props.activity.occurredAt, {
+            locale,
+            timeZone: props.timeZone,
+            withTime: true,
+          })}
         </time>
         {props.canEdit && (
           <span className="ml-auto flex items-center gap-0.5">
@@ -115,7 +125,7 @@ export const ActivityItem = (props: {
               ref={edited ? focusOnMount : undefined}
               variant="ghost"
               size="icon-sm"
-              aria-label={t('edit', { subject: activity.subject })}
+              aria-label={t('edit', { subject: props.activity.subject })}
               onClick={() => {
                 setEditing(true);
               }}
@@ -127,12 +137,12 @@ export const ActivityItem = (props: {
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  aria-label={t('delete', { subject: activity.subject })}
+                  aria-label={t('delete', { subject: props.activity.subject })}
                 >
                   <Trash2Icon />
                 </Button>
               }
-              title={t('delete_title', { subject: activity.subject })}
+              title={t('delete_title', { subject: props.activity.subject })}
               description={t('delete_text')}
               confirmLabel={t('delete_confirm')}
               cancelLabel={t('cancel')}
@@ -140,9 +150,9 @@ export const ActivityItem = (props: {
                 document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
               }
               action={async () => {
-                const result = await deleteActivity(props.workspaceId, activity.id);
+                const result = await deleteActivity(props.workspaceId, props.activity.id);
                 if (result.ok) {
-                  props.onDeleted(activity.id);
+                  props.onDeleted(props.activity.id);
                   toast.success(t('deleted'));
                 }
                 return result;
@@ -153,26 +163,32 @@ export const ActivityItem = (props: {
       </div>
       {/* Focusable: "Show older" moves the focus to the first activity it added. */}
       <h3
-        id={`activity-${activity.id}`}
+        ref={props.focused && !edited ? focusOnMount : undefined}
         tabIndex={-1}
         className="rounded-sm font-medium break-words"
       >
-        {activity.subject}
+        {props.activity.subject}
       </h3>
-      {activity.body && (
-        <p className="max-w-[65ch] text-sm break-words whitespace-pre-line">{activity.body}</p>
+      {props.activity.body && (
+        <p className="max-w-[65ch] text-sm break-words whitespace-pre-line">
+          {props.activity.body}
+        </p>
       )}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
         <span className="flex items-center gap-2">
-          {activity.author && (
-            <Seal name={activity.author.displayName} email={activity.author.email} size="sm" />
+          {props.activity.author && (
+            <Seal
+              name={props.activity.author.displayName}
+              email={props.activity.author.email}
+              size="sm"
+            />
           )}
-          {activity.author
-            ? t('by', { name: activity.author.displayName ?? activity.author.email })
+          {props.activity.author
+            ? t('by', { name: props.activity.author.displayName ?? props.activity.author.email })
             : t('by_former')}
         </span>
         <LinkedRecords
-          record={activity}
+          record={props.activity}
           workspaceId={props.workspaceId}
           viewed={props.link}
           label={t('on')}

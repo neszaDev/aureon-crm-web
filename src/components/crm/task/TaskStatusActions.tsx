@@ -6,9 +6,9 @@ import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { cancelTask, completeTask, reopenTask } from '@/actions/crm/TaskActions';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
-import { toastTaskFailure } from '@/components/crm/task/TaskRow';
 import { Button } from '@/components/ui/button';
 import type { components } from '@/libs/api/schema';
+import { toastActionFailure } from '@/utils/ActionToast';
 import { focusOnMount } from '@/utils/Focus';
 
 const REOPEN_ID = 'task-reopen';
@@ -30,18 +30,17 @@ export const TaskStatusActions = (props: {
   const tError = useTranslations('ActionError');
   const [isPending, startTransition] = useTransition();
   const [moved, setMoved] = useState(false);
-  const { task } = props;
   const run = (action: typeof completeTask, done: string) => {
     if (isPending) {
       return;
     }
     startTransition(async () => {
-      const result = await action(props.workspaceId, task.id, task.version);
+      const result = await action(props.workspaceId, props.task.id, props.task.version);
       if (result.ok) {
         setMoved(true);
         toast.success(done);
       } else {
-        toastTaskFailure(result, t('error_generic'), tError('reload'));
+        toastActionFailure(result, t('error_generic'), tError('reload'));
       }
     });
   };
@@ -52,7 +51,7 @@ export const TaskStatusActions = (props: {
       <Icon data-icon="inline-start" />
     );
 
-  if (task.status !== 'OPEN') {
+  if (props.task.status !== 'OPEN') {
     return (
       <Button
         id={REOPEN_ID}
@@ -61,7 +60,7 @@ export const TaskStatusActions = (props: {
         // aria-disabled, not disabled: a disabled button drops the focus to the page.
         aria-disabled={isPending || undefined}
         onClick={() => {
-          run(reopenTask, t('reopened', { title: task.title }));
+          run(reopenTask, t('reopened', { title: props.task.title }));
         }}
       >
         {icon(RotateCcwIcon)}
@@ -76,7 +75,7 @@ export const TaskStatusActions = (props: {
         ref={moved ? focusOnMount : undefined}
         aria-disabled={isPending || undefined}
         onClick={() => {
-          run(completeTask, t('completed', { title: task.title }));
+          run(completeTask, t('completed', { title: props.task.title }));
         }}
       >
         {icon(CheckIcon)}
@@ -89,16 +88,16 @@ export const TaskStatusActions = (props: {
             {t('cancel_task')}
           </Button>
         }
-        title={t('cancel_title', { title: task.title })}
+        title={t('cancel_title', { title: props.task.title })}
         description={t('cancel_text')}
         confirmLabel={t('cancel_task')}
         cancelLabel={t('keep')}
         // Cancelled, the task shows Reopen in place of these buttons.
         fallbackFocus={() => document.querySelector<HTMLElement>(`#${REOPEN_ID}`)}
         action={async () => {
-          const result = await cancelTask(props.workspaceId, task.id, task.version);
+          const result = await cancelTask(props.workspaceId, props.task.id, props.task.version);
           if (result.ok) {
-            toast.success(t('cancelled', { title: task.title }));
+            toast.success(t('cancelled', { title: props.task.title }));
           }
           return result;
         }}

@@ -68,23 +68,29 @@ const pick = (ref?: { id: number; name?: string; fullName?: string }) =>
 
 /**
  * What the actions take from the form's values: the due time as an instant (an untouched one
- * exactly as saved, seconds and all), the links by id.
+ * exactly as saved, seconds and all), the links by id. A Company left as it was, under a contact
+ * or deal, is the one derived from it: sent back it would stay when the contact changes, so none
+ * is sent and the backend derives it again.
  * @param values The form's values.
  * @param timeZone The workspace's time zone, which the due time was entered in.
- * @param savedDueAt The saved due time, when the field wasn't touched.
+ * @param untouched What the form left as it was: `dueAt` is the saved due time (when so), and
+ *   `company` tells whether Company was not touched.
+ * @param untouched.dueAt The saved due time, when the field wasn't touched.
+ * @param untouched.company Whether the Company picker wasn't touched.
  * @returns The values to send.
  */
 const toTaskValues = (
   values: TaskFormValues,
   timeZone: string,
-  savedDueAt: string | undefined,
+  untouched: { dueAt?: string; company: boolean },
 ): TaskValues => ({
   title: values.title,
   description: values.description,
   priority: values.priority,
   assigneeId: values.assigneeId,
-  dueAt: savedDueAt ?? toInstant(values.dueAt, timeZone) ?? null,
-  companyId: values.company?.id ?? null,
+  dueAt: untouched.dueAt ?? toInstant(values.dueAt, timeZone) ?? null,
+  companyId:
+    untouched.company && (values.contact || values.deal) ? null : (values.company?.id ?? null),
   contactId: values.contact?.id ?? null,
   leadId: values.lead?.id ?? null,
   dealId: values.deal?.id ?? null,
@@ -97,7 +103,6 @@ const toTaskValues = (
  * @returns The values.
  */
 const startingValues = (props: TaskDialogProps): TaskFormValues => {
-  const { task } = props;
   const linked: Partial<Record<string, number>> = props.link ?? {};
   const fromLink = (id: string) => {
     const value = linked[id];
@@ -105,15 +110,15 @@ const startingValues = (props: TaskDialogProps): TaskFormValues => {
   };
 
   return {
-    title: task?.title ?? '',
-    description: task?.description ?? '',
-    dueAt: task?.dueAt ? toLocalInput(task.dueAt, props.timeZone) : '',
-    priority: task?.priority ?? 'MEDIUM',
-    assigneeId: task ? (task.assignee?.userId ?? null) : props.me,
-    company: task ? pick(task.company) : fromLink('companyId'),
-    contact: task ? pick(task.contact) : fromLink('contactId'),
-    lead: task ? pick(task.lead) : fromLink('leadId'),
-    deal: task ? pick(task.deal) : fromLink('dealId'),
+    title: props.task?.title ?? '',
+    description: props.task?.description ?? '',
+    dueAt: props.task?.dueAt ? toLocalInput(props.task.dueAt, props.timeZone) : '',
+    priority: props.task?.priority ?? 'MEDIUM',
+    assigneeId: props.task ? (props.task.assignee?.userId ?? null) : props.me,
+    company: props.task ? pick(props.task.company) : fromLink('companyId'),
+    contact: props.task ? pick(props.task.contact) : fromLink('contactId'),
+    lead: props.task ? pick(props.task.lead) : fromLink('leadId'),
+    deal: props.task ? pick(props.task.deal) : fromLink('dealId'),
   };
 };
 
@@ -132,20 +137,18 @@ const TaskForm = (props: TaskDialogProps & { onDone: () => void }) => {
     defaultValues: startingValues(props),
   });
   const { errors, isSubmitting } = form.formState;
-  const { task } = props;
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
-    const body = toTaskValues(
-      values,
-      props.timeZone,
-      form.getFieldState('dueAt').isDirty ? undefined : task?.dueAt,
-    );
-    const result = task
-      ? await updateTask(props.workspaceId, task.id, task.version, body)
+    const body = toTaskValues(values, props.timeZone, {
+      dueAt: form.getFieldState('dueAt').isDirty ? undefined : props.task?.dueAt,
+      company: !form.getFieldState('company').isDirty,
+    });
+    const result = props.task
+      ? await updateTask(props.workspaceId, props.task.id, props.task.version, body)
       : await createTask(props.workspaceId, body);
     if (result.ok) {
-      toast.success(task ? t('saved') : t('created'));
+      toast.success(props.task ? t('saved') : t('created'));
       props.onDone();
       return;
     }
@@ -163,7 +166,7 @@ const TaskForm = (props: TaskDialogProps & { onDone: () => void }) => {
   return (
     <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <DialogHeader>
-        <DialogTitle>{task ? t('edit_title') : t('new_title')}</DialogTitle>
+        <DialogTitle>{props.task ? t('edit_title') : t('new_title')}</DialogTitle>
         <DialogDescription>
           {props.link && props.linkLabel
             ? t('linked_to', { name: props.linkLabel })
@@ -238,7 +241,7 @@ const TaskForm = (props: TaskDialogProps & { onDone: () => void }) => {
               members={props.members}
               me={props.me}
               canAssign={props.canAssign}
-              allowUnassigned={task !== undefined}
+              allowUnassigned={props.task !== undefined}
               error={errors.assigneeId}
             />
           )}
@@ -275,7 +278,7 @@ const TaskForm = (props: TaskDialogProps & { onDone: () => void }) => {
       <DialogFooter>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
-          {task ? t('save') : t('create')}
+          {props.task ? t('save') : t('create')}
         </Button>
       </DialogFooter>
     </form>

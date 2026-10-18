@@ -35,7 +35,7 @@ export type ActionResult = {
   ok: boolean;
   message?: string;
   fieldErrors?: Record<string, string>;
-  /** Someone else saved the record first (stale `version`): the form offers a reload. */
+  /** Someone else changed the record first (stale `version`, a task's status): offers a reload. */
   conflict?: boolean;
 };
 

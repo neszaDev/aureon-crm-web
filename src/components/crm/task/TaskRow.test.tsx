@@ -81,6 +81,19 @@ describe(TaskRow, () => {
     await expect.element(checkbox()).not.toBeChecked();
   });
 
+  it('offers a reload when the task changed meanwhile', async () => {
+    vi.mocked(TaskActions.completeTask).mockResolvedValue({
+      ok: false,
+      message: "This task's status changed meanwhile. Reload to see it.",
+      conflict: true,
+    });
+    await renderRow(TASK);
+
+    await checkbox().click();
+
+    await expect.element(page.getByRole('button', { name: 'Reload' })).toBeVisible();
+  });
+
   it('offers Reopen only on a completed or cancelled task, and Cancel only on an open one', async () => {
     await renderRow(TASK);
 

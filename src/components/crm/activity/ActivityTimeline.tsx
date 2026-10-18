@@ -2,7 +2,7 @@
 
 import { ChevronDownIcon, InboxIcon, LoaderCircleIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useLayoutEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { loadActivities, logActivity } from '@/actions/crm/ActivityActions';
 import { ActivityComposer } from '@/components/crm/activity/ActivityComposer';
@@ -86,11 +86,11 @@ export const ActivityTimeline = (props: {
   const [isLoading, startLoading] = useTransition();
   const [firstShown, setFirstShown] = useState(props.first);
   // A refreshed first page (an activity logged) pushes its last ones onto the next page: once
-  // older ones show, they stay, so the list has no gap.
+  // older ones show, they stay, so the list has no gap (each once, as the pages overlap).
   if (props.first !== firstShown) {
     setFirstShown(props.first);
     if (older.length > 0) {
-      setOlder([...firstShown, ...older]);
+      setOlder(timelineOf([...firstShown, ...older], [], []));
     }
   }
   const headingId = `activity-heading-${Object.keys(props.link)[0]}`;
@@ -102,8 +102,12 @@ export const ActivityTimeline = (props: {
     }
     startLoading(async () => {
       // The page holding the first activity not shown yet: those before it come again if the
-      // pages moved since, and are dropped.
-      const page = Math.floor(items.length / PAGE_SIZES[0]);
+      // pages moved since, and are dropped. An activity edited here to a time past the last one
+      // a page gave us is no longer among the server's first ones (its copy may stand for a
+      // page not loaded yet), so it doesn't count: counted, it would skip one.
+      const last = [...older, ...props.first].toSorted(newestFirst).at(-1);
+      const loaded = last ? items.filter((item) => newestFirst(item, last) <= 0).length : 0;
+      const page = Math.floor(loaded / PAGE_SIZES[0]);
       let next: Activity[];
       try {
         next = await loadActivities(props.workspaceId, props.link, page);
@@ -116,12 +120,6 @@ export const ActivityTimeline = (props: {
       setFirstAdded(added[0]?.id);
     });
   };
-
-  useLayoutEffect(() => {
-    if (firstAdded !== undefined) {
-      document.querySelector<HTMLElement>(`#activity-${firstAdded}`)?.focus();
-    }
-  }, [firstAdded]);
 
   return (
     <section aria-labelledby={headingId} className="rounded-lg border border-rule bg-card">
@@ -178,6 +176,7 @@ export const ActivityTimeline = (props: {
               )}
               timeZone={props.timeZone}
               headingId={headingId}
+              focused={activity.id === firstAdded}
               onSaved={(copy) => {
                 setSaved((current) => [...current, copy]);
               }}

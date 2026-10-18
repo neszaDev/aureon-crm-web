@@ -23,8 +23,9 @@ export const TaskFacts = (props: {
   const t = useTranslations('TaskPage');
   const tRow = useTranslations('TaskRow');
   const locale = useLocale();
-  const { task } = props;
-  const linked = [task.company, task.contact, task.lead, task.deal].some(Boolean);
+  const linked = [props.task.company, props.task.contact, props.task.lead, props.task.deal].some(
+    Boolean,
+  );
 
   return (
     <RecordFacts
@@ -32,23 +33,33 @@ export const TaskFacts = (props: {
       facts={[
         {
           label: t('due'),
-          value: <TaskDue dueAt={task.dueAt} overdue={task.overdue} timeZone={props.timeZone} />,
+          value: (
+            <TaskDue
+              dueAt={props.task.dueAt}
+              overdue={props.task.overdue}
+              timeZone={props.timeZone}
+            />
+          ),
         },
-        { label: t('priority'), value: tRow(`priority_${task.priority}`) },
+        { label: t('priority'), value: tRow(`priority_${props.task.priority}`) },
         {
           label: t('linked'),
           // Undefined without one, so the row reads "Not set".
           value: linked ? (
-            <LinkedRecords record={task} workspaceId={props.workspaceId} />
+            <LinkedRecords record={props.task} workspaceId={props.workspaceId} />
           ) : undefined,
         },
         {
           label: t('created_by'),
           // Missing once that member left the workspace.
-          value: task.createdBy ? (
+          value: props.task.createdBy ? (
             <span className="flex items-center gap-2">
-              <Seal name={task.createdBy.displayName} email={task.createdBy.email} size="sm" />
-              {task.createdBy.displayName ?? task.createdBy.email}
+              <Seal
+                name={props.task.createdBy.displayName}
+                email={props.task.createdBy.email}
+                size="sm"
+              />
+              {props.task.createdBy.displayName ?? props.task.createdBy.email}
             </span>
           ) : (
             t('created_by_former')
@@ -56,9 +67,9 @@ export const TaskFacts = (props: {
         },
         {
           label: t('completed_at'),
-          value: task.completedAt && (
+          value: props.task.completedAt && (
             <span className="tabular-nums">
-              {formatInstant(task.completedAt, {
+              {formatInstant(props.task.completedAt, {
                 locale,
                 timeZone: props.timeZone,
                 withTime: true,
@@ -68,8 +79,8 @@ export const TaskFacts = (props: {
         },
         {
           label: t('description'),
-          value: task.description && (
-            <span className="whitespace-pre-line">{task.description}</span>
+          value: props.task.description && (
+            <span className="whitespace-pre-line">{props.task.description}</span>
           ),
         },
       ]}

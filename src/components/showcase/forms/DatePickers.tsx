@@ -1,11 +1,11 @@
 'use client';
 
 import { format } from 'date-fns';
-import { enUS, fr, th } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
+import { enUS, fr, th } from 'react-day-picker/locale';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';

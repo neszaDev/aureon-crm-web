@@ -22,29 +22,11 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import { formatInstant, recordNumber } from '@/libs/crm/Format';
 import { Link } from '@/libs/I18nNavigation';
+import { toastActionFailure } from '@/utils/ActionToast';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
 
 type Task = components['schemas']['TaskResponse'];
 type StatusAction = (workspaceId: number, taskId: number, version: number) => Promise<ActionResult>;
-
-/**
- * Shows a refused task action in a toast, with a reload when someone changed the task first.
- * @param result The refusal.
- * @param fallback The message without one from the backend.
- * @param reload The reload button's label.
- */
-export const toastTaskFailure = (result: ActionResult, fallback: string, reload: string) => {
-  toast.error(result.message ?? fallback, {
-    action: result.conflict
-      ? {
-          label: reload,
-          onClick: () => {
-            window.location.reload();
-          },
-        }
-      : undefined,
-  });
-};
 
 /**
  * When a task is due, in the workspace's time zone; an overdue one in crimson with an icon and
@@ -106,9 +88,8 @@ export const TaskRow = (props: {
 }) => {
   const t = useTranslations('TaskRow');
   const tError = useTranslations('ActionError');
-  const { task } = props;
-  const isOpen = task.status === 'OPEN';
-  const [ticked, setTicked] = useOptimistic(task.status === 'COMPLETED');
+  const isOpen = props.task.status === 'OPEN';
+  const [ticked, setTicked] = useOptimistic(props.task.status === 'COMPLETED');
   const [isPending, startTransition] = useTransition();
   const [cancelling, setCancelling] = useState(false);
   const row = useRef<HTMLTableRowElement>(null);
@@ -133,9 +114,9 @@ export const TaskRow = (props: {
       if (tick) {
         setTicked(true);
       }
-      const result = await action(props.workspaceId, task.id, task.version);
+      const result = await action(props.workspaceId, props.task.id, props.task.version);
       if (!result.ok) {
-        toastTaskFailure(result, t('error_generic'), tError('reload'));
+        toastActionFailure(result, t('error_generic'), tError('reload'));
       }
     });
   };
@@ -145,7 +126,7 @@ export const TaskRow = (props: {
       <TableCell className="w-10 pr-0">
         <Checkbox
           checked={ticked}
-          aria-label={t('complete', { title: task.title })}
+          aria-label={t('complete', { title: props.task.title })}
           // aria-disabled, not disabled: a disabled box drops the focus to the page.
           aria-disabled={!isOpen || !props.canEdit || isPending || undefined}
           className={cn(!props.canEdit && 'cursor-not-allowed opacity-50')}
@@ -159,27 +140,27 @@ export const TaskRow = (props: {
       <TableCell className="py-2 whitespace-normal">
         <span className="flex min-w-0 flex-col">
           <Link
-            href={`/app/${props.workspaceId}/tasks/${task.id}`}
+            href={`/app/${props.workspaceId}/tasks/${props.task.id}`}
             className={cn(
               'text-[0.9375rem] font-medium break-words text-foreground',
               !isOpen && 'text-muted-foreground line-through',
             )}
           >
-            {task.title}
+            {props.task.title}
           </Link>
           <span className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] text-muted-foreground">
-            <span className="font-mono tabular-nums">{recordNumber('task', task.id)}</span>
-            {!isOpen && <span>{t(`status_${task.status}`)}</span>}
+            <span className="font-mono tabular-nums">{recordNumber('task', props.task.id)}</span>
+            {!isOpen && <span>{t(`status_${props.task.status}`)}</span>}
           </span>
         </span>
       </TableCell>
       <TableCell className="whitespace-normal">
-        <TaskDue dueAt={task.dueAt} overdue={task.overdue} timeZone={props.timeZone} />
+        <TaskDue dueAt={props.task.dueAt} overdue={props.task.overdue} timeZone={props.timeZone} />
       </TableCell>
-      <TableCell className="max-md:hidden">{t(`priority_${task.priority}`)}</TableCell>
-      <OwnerCell owner={task.assignee} className="max-sm:hidden" />
+      <TableCell className="max-md:hidden">{t(`priority_${props.task.priority}`)}</TableCell>
+      <OwnerCell owner={props.task.assignee} className="max-sm:hidden" />
       <TableCell className="whitespace-normal max-lg:hidden">
-        <LinkedRecords record={task} workspaceId={props.workspaceId} viewed={props.viewed} />
+        <LinkedRecords record={props.task} workspaceId={props.workspaceId} viewed={props.viewed} />
       </TableCell>
       <TableCell className="w-10 pl-0 text-right">
         {props.canEdit && (
@@ -190,7 +171,7 @@ export const TaskRow = (props: {
                   ref={menuButton}
                   variant="ghost"
                   size="icon-sm"
-                  aria-label={t('menu', { title: task.title })}
+                  aria-label={t('menu', { title: props.task.title })}
                 >
                   <EllipsisIcon />
                 </Button>
@@ -223,14 +204,18 @@ export const TaskRow = (props: {
               onOpenChange={setCancelling}
               // The menu's button, or the list's heading once the cancelled task left the list.
               returnFocus={() => menuButton.current ?? heading()}
-              title={t('cancel_title', { title: task.title })}
+              title={t('cancel_title', { title: props.task.title })}
               description={t('cancel_text')}
               confirmLabel={t('cancel_task')}
               cancelLabel={t('keep')}
               action={async () => {
-                const result = await cancelTask(props.workspaceId, task.id, task.version);
+                const result = await cancelTask(
+                  props.workspaceId,
+                  props.task.id,
+                  props.task.version,
+                );
                 if (result.ok) {
-                  toast.success(t('cancelled', { title: task.title }));
+                  toast.success(t('cancelled', { title: props.task.title }));
                 }
                 return result;
               }}

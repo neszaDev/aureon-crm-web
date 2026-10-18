@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { parseListQuery } from '@/libs/crm/ListQuery';
 import { authedBackend } from './Backend';
-import { COMPANY_LIST, getCompanies } from './CrmQueries';
+import { COMPANY_LIST, getCompanies, taskViewQuery } from './CrmQueries';
 
 vi.mock(import('server-only'), () => ({}));
 vi.mock(import('./Backend'), () => ({ authedBackend: vi.fn<typeof authedBackend>() }));
@@ -30,5 +30,38 @@ describe(getCompanies, () => {
         query: expect.objectContaining({ q: 'a'.repeat(201), page: 0, size: 20, sort: 'NAME' }),
       },
     });
+  });
+});
+
+describe(taskViewQuery, () => {
+  // Sunday 18 October 2026, 03:00 UTC.
+  const NOW = Date.UTC(2026, 9, 18, 3);
+
+  it('asks for the caller\'s open tasks on "mine"', () => {
+    expect(taskViewQuery('mine', NOW)).toStrictEqual({ mine: true, status: ['OPEN'] });
+  });
+
+  it('asks for overdue tasks on "overdue"', () => {
+    expect(taskViewQuery('overdue', NOW)).toStrictEqual({ overdue: true });
+  });
+
+  it('asks for the open tasks due from now to a week on, now included and the week out', () => {
+    expect(taskViewQuery('upcoming', NOW)).toStrictEqual({
+      status: ['OPEN'],
+      dueFrom: '2026-10-18T03:00:00.000Z',
+      dueTo: '2026-10-25T03:00:00.000Z',
+    });
+  });
+
+  it('lists completed tasks by when they were last updated, latest first', () => {
+    expect(taskViewQuery('completed', NOW)).toStrictEqual({
+      status: ['COMPLETED'],
+      sort: 'UPDATED_AT',
+      direction: 'DESC',
+    });
+  });
+
+  it('adds nothing on "all"', () => {
+    expect(taskViewQuery('all', NOW)).toStrictEqual({});
   });
 });

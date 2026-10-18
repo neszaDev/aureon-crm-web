@@ -13,8 +13,8 @@ import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { TaskDialog } from '@/components/crm/task/TaskDialog';
 import { TaskTable } from '@/components/crm/task/TaskTable';
 import { Button } from '@/components/ui/button';
-import type { TaskQuery } from '@/libs/api/CrmQueries';
-import { getMembers, getTasks, TASK_LIST, TASK_VIEWS } from '@/libs/api/CrmQueries';
+import type { TaskQuery, TaskView } from '@/libs/api/CrmQueries';
+import { getMembers, getTasks, TASK_LIST, TASK_VIEWS, taskViewQuery } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
 import type { ListQuery } from '@/libs/crm/ListQuery';
@@ -29,24 +29,6 @@ type TasksPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-type View = (typeof TASK_VIEWS)[number];
-
-const WEEK = 7 * 24 * 60 * 60 * 1000;
-
-// What each view asks the task list for, besides the search, the assignee and the paging. Due
-// times run from `dueFrom` (inclusive) to `dueTo` (exclusive).
-const VIEWS: Record<View, (now: number) => TaskQuery> = {
-  mine: () => ({ mine: true, status: ['OPEN'] }),
-  overdue: () => ({ overdue: true }),
-  upcoming: (now) => ({
-    status: ['OPEN'],
-    dueFrom: new Date(now).toISOString(),
-    dueTo: new Date(now + WEEK).toISOString(),
-  }),
-  completed: () => ({ status: ['COMPLETED'], sort: 'UPDATED_AT', direction: 'DESC' }),
-  all: () => ({}),
-};
-
 /**
  * The task list's query for a view: "Mine" is the caller's open tasks, without the search and
  * the assignee filter, which the other views take.
@@ -54,9 +36,9 @@ const VIEWS: Record<View, (now: number) => TaskQuery> = {
  * @param query The page's list query.
  * @returns The backend's query.
  */
-const viewQuery = (view: View, query: ListQuery<typeof TASK_LIST>): TaskQuery => ({
+const viewQuery = (view: TaskView, query: ListQuery<typeof TASK_LIST>): TaskQuery => ({
   sort: 'DUE_AT',
-  ...VIEWS[view](Date.now()),
+  ...taskViewQuery(view, Date.now()),
   ...(view !== 'mine' && {
     q: query.q,
     assigneeId: query.filters.assigneeId,
@@ -73,7 +55,7 @@ const viewQuery = (view: View, query: ListQuery<typeof TASK_LIST>): TaskQuery =>
  * @param query The page's list query.
  * @returns Whether it is narrowed.
  */
-const isNarrowed = (view: View, query: ListQuery<typeof TASK_LIST>) =>
+const isNarrowed = (view: TaskView, query: ListQuery<typeof TASK_LIST>) =>
   view !== 'mine' &&
   [query.q, query.unassigned, query.filters.assigneeId].some((value) => value !== undefined);
 

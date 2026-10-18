@@ -7,6 +7,7 @@
 /build
 /coverage
 /vitest-test-results
+.vitest-attachments/
 /test-results/
 /playwright-report/
 /blob-report/

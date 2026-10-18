@@ -91,7 +91,10 @@ export const ActivityComposer = (props: {
         form.setError(name, { type: 'server', message });
       }
     }
-    setFailure(result);
+    // `links` is no field of the form: its error is the alert, not "check the highlighted fields".
+    setFailure(
+      result.fieldErrors?.links ? { ...result, message: result.fieldErrors.links } : result,
+    );
   });
 
   return (

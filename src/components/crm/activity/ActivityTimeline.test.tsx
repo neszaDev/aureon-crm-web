@@ -160,4 +160,40 @@ describe(ActivityTimeline, () => {
       'A5 moved',
     ]);
   });
+
+  it('asks for the page after the last one it holds when an activity was moved past the pages shown', async () => {
+    // 45 activities, A1 to A45. A5 is edited to the oldest time of all: the server then has
+    // A1-A4 and A6-A45, then A5 (page 1 starts at A22, page 2 at A42).
+    const all = Array.from({ length: 45 }, (_, index) => activity(index + 1, `A${index + 1}`));
+    const moved = { ...activity(60, 'A5 moved'), id: 5, version: 1 };
+    const after = [...all.filter((each) => each.id !== 5), moved];
+    let server = all;
+    vi.mocked(ActivityActions.loadActivities)
+      .mockReset()
+      .mockImplementation(
+        async (_workspaceId, _link, pageNumber) =>
+          await Promise.resolve(server.slice(pageNumber * 20, pageNumber * 20 + 20)),
+      );
+    vi.mocked(ActivityActions.updateActivity).mockResolvedValue({ ok: true, activity: moved });
+    const screen = await renderTimeline(all.slice(0, 20), 45);
+    await page.getByRole('button', { name: 'Show older' }).click();
+    await expect.element(item('A40')).toBeVisible();
+
+    server = after;
+    await page.getByRole('button', { name: 'Edit A5' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    // The refresh after the save: the server's first page no longer holds A5.
+    await screen.rerender(timeline(after.slice(0, 20), 45));
+    await page.getByRole('button', { name: 'Show older' }).click();
+    await expect.element(item('A41')).toBeVisible();
+    await page.getByRole('button', { name: 'Show older' }).click();
+
+    await expect.element(item('A45')).toBeVisible();
+    // Each once, the moved one last; A41 was not skipped, and no page was asked for twice.
+    expect(subjects()).toStrictEqual(after.map((each) => each.subject));
+    expect(
+      vi.mocked(ActivityActions.loadActivities).mock.calls.map((call) => call[2]),
+    ).toStrictEqual([1, 1, 2]);
+    await expect.element(page.getByRole('button', { name: 'Show older' })).not.toBeInTheDocument();
+  });
 });
