@@ -15,10 +15,11 @@ const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
  * @param page Playwright page.
  */
 export const expectNoA11yViolations = async (page: Page) => {
-  await expect(page).not.toHaveTitle('');
   await page.waitForFunction(() =>
     document.getAnimations().every((animation) => animation.playState !== 'running'),
   );
+  // Last, so no gap is left between the check and axe's reading of the page.
+  await expect(page).not.toHaveTitle('');
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
 
   expect(

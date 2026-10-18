@@ -24,7 +24,7 @@ const changeStatus = async (page: Page, status: string) => {
   await page.getByRole('button', { name: 'Change status' }).click();
   await page.getByRole('menuitem', { name: status, exact: true }).click();
   await expect(page.getByText(`Status changed to ${status}`)).toBeVisible();
-  await expect(page.getByText(`${status}: current`, { exact: true })).toBeAttached();
+  await expect(page.getByText(`${status}: current`, { exact: true })).toBeVisible();
 };
 
 test.describe('Records', () => {
@@ -62,17 +62,30 @@ test.describe('Records', () => {
     // A call logged on Ada.
     await page.goto(`${owner.path}/contacts/${ada}`);
     await waitForHydration(page.locator('form'));
+    const type = page.getByRole('radio', { name: 'Call' });
+    await type.click();
+    await expect(type).toBeChecked();
     await page.getByLabel('Subject').fill('Intro call');
     await page.getByRole('textbox', { name: 'Details' }).fill('Wants a quote for 40 seats.');
     await page.getByRole('button', { name: 'Log activity' }).click();
     await expect(page.getByText('Activity logged')).toBeVisible();
-    await expect(page.getByText('Intro call')).toBeVisible();
+    const call = page.getByRole('listitem').filter({ hasText: 'Intro call' });
+    await expect(call).toContainText('Call');
+    await expect(page.getByLabel('Subject')).toHaveValue('');
+    await expect(page.getByRole('textbox', { name: 'Details' })).toHaveValue('');
+
+    // And again: the composer is ready for the next one every time, not only the first.
+    await page.getByLabel('Subject').fill('Follow-up call');
+    await page.getByRole('button', { name: 'Log activity' }).click();
+    await expect(page.getByRole('listitem').filter({ hasText: 'Follow-up call' })).toBeVisible();
     await expect(page.getByLabel('Subject')).toHaveValue('');
 
     // The company's timeline holds its contacts' activities.
     await page.goto(`${owner.path}/companies/${acme}`);
     await expect(page.getByText('Intro call')).toBeVisible();
-    await expect(page.getByText('Logged by Olivia Owner')).toBeVisible();
+    await expect(page.getByRole('listitem').filter({ hasText: 'Intro call' })).toContainText(
+      'Logged by Olivia Owner',
+    );
     await expectNoA11yViolations(page);
   });
 
@@ -114,7 +127,7 @@ test.describe('Records', () => {
     await dialog.getByRole('button', { name: 'Done' }).click();
 
     // The lead now reads as converted and links what it became.
-    await expect(page.getByText('Converted: reached', { exact: true })).toBeAttached();
+    await expect(page.getByText('Converted: reached', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Convert lead' })).toHaveCount(0);
     await expect(page.getByRole('heading', { level: 1, name: 'Grace Hopper' })).toBeFocused();
 
@@ -232,6 +245,12 @@ test.describe('Records', () => {
     await expect(page.getByRole('heading', { name: '1 company' })).toBeVisible();
     await expect(rows).toHaveCount(2);
     await expect(page).toHaveURL(/q=zeta/u);
+    // NAME is the default sort, so the URL keeps only the direction.
+    await expect(page).toHaveURL(/direction=DESC/u);
+    await expect(page.getByRole('columnheader', { name: 'Name' })).toHaveAttribute(
+      'aria-sort',
+      'descending',
+    );
     await page.getByRole('searchbox', { name: 'Search' }).fill('nothing like this');
     await expect(page.getByText('Nothing matches', { exact: true })).toBeVisible();
     await page.getByRole('link', { name: 'Clear filters' }).click();
@@ -374,11 +393,18 @@ test.describe('Records', () => {
       const expectReachable = async (open: () => Promise<void>, button: Locator) => {
         await open();
         const dialog = page.getByRole('dialog');
-        const box = await dialog.boundingBox();
-        expect(box && box.y >= 0 && box.y + box.height <= (page.viewportSize()?.height ?? 0)).toBe(
-          true,
-        );
-        expect(await dialog.evaluate((node) => node.scrollHeight > node.clientHeight)).toBe(true);
+        const height = page.viewportSize()?.height ?? 0;
+        // Polled: the dialog is still opening (zooming in) when it first appears.
+        await expect
+          .poll(async () => {
+            const box = await dialog.boundingBox();
+
+            return Boolean(box && box.y >= 0 && box.y + box.height <= height);
+          })
+          .toBe(true);
+        await expect
+          .poll(async () => await dialog.evaluate((node) => node.scrollHeight > node.clientHeight))
+          .toBe(true);
         await button.scrollIntoViewIfNeeded();
         await expect(button).toBeInViewport({ ratio: 1 });
       };

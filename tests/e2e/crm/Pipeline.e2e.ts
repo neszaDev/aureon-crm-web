@@ -197,12 +197,15 @@ test.describe('Pipeline', () => {
     await expect(history.getByRole('listitem').nth(0)).toContainText('Needs analysis');
     await expect(history.getByRole('listitem').nth(0)).toContainText('Proposal');
     await expect(history.getByRole('listitem').nth(0)).toContainText('Olivia Owner');
+    await expect(history.getByRole('listitem').nth(1)).toContainText('Qualification');
+    await expect(history.getByRole('listitem').nth(1)).toContainText('Needs analysis');
+    await expect(history.getByRole('listitem').nth(1)).toContainText('Olivia Owner');
     await expect(history.getByRole('listitem').nth(2)).toContainText('Created in Qualification');
     await expect(history.getByRole('listitem').nth(2)).toContainText('Mia Manager');
     const row = page.getByRole('list', { name: 'Deal progress' });
-    await expect(row.getByText('Qualification: reached, signed by Mia Manager')).toBeAttached();
-    await expect(row.getByText('Needs analysis: reached, signed by Olivia Owner')).toBeAttached();
-    await expect(row.getByText('Proposal: current, 0 days')).toBeAttached();
+    await expect(row.getByText('Qualification: reached, signed by Mia Manager')).toBeVisible();
+    await expect(row.getByText('Needs analysis: reached, signed by Olivia Owner')).toBeVisible();
+    await expect(row.getByText('Proposal: current, 0 days')).toBeVisible();
     await expectNoA11yViolations(page);
   });
 
@@ -217,10 +220,12 @@ test.describe('Pipeline', () => {
     await handle.focus();
     await page.keyboard.press('Space');
     await expect(announced).toHaveText('Acme seats is over Qualification.');
-    // dnd-kit starts listening for the arrow keys on the next tick after it announces the pick-up.
-    await page.waitForTimeout(100);
-    await page.keyboard.press('ArrowRight');
-    await expect(announced).toHaveText('Acme seats is over Needs analysis.');
+    // dnd-kit starts listening for the arrow keys a moment after it announces the pick-up, and an
+    // arrow pressed before moves nothing: press again until the card is over the next stage.
+    await expect(async () => {
+      await page.keyboard.press('ArrowRight');
+      await expect(announced).toHaveText('Acme seats is over Needs analysis.', { timeout: 1000 });
+    }).toPass({ timeout: 10_000 });
     await page.keyboard.press('Space');
     await expect(announced).toHaveText('Acme seats dropped on Needs analysis.');
     await expect(
@@ -272,7 +277,7 @@ test.describe('Pipeline', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Acme seats' })).toBeVisible();
     await expect(page.getByText('Why it was lost')).toBeVisible();
     await expect(page.getByText('Went with a competitor')).toBeVisible();
-    await expect(page.getByText('Lost: closed as lost')).toBeAttached();
+    await expect(page.getByText('Lost: closed as lost')).toBeVisible();
 
     // The Move dialog on a deal's page asks the same.
     await page.goto(`${owner.path}/deals/${second.id}`);
