@@ -235,9 +235,42 @@
     "text": "Your role in this workspace doesn't allow it. Ask an owner or admin if you need it."
   },
   "ActionError": {
-    "conflict": "Someone else changed this. Reload to see their version.",
-    "generic": "That didn't work. Try again.",
     "reload": "Reload"
+  },
+  "ApiError": {
+    "generic": "That didn't work. Try again.",
+    "status_400": "Something in the request isn't valid. Check it and try again.",
+    "status_403": "Your role doesn't allow this.",
+    "status_404": "This can't be found. It may have been deleted.",
+    "status_409": "This clashes with a change saved meanwhile. Reload and try again.",
+    "status_413": "This is too large to send.",
+    "status_429": "Too many attempts. Wait a moment and try again.",
+    "code_VALIDATION_FAILED": "Check the highlighted fields and try again.",
+    "code_TEXT_INVALID": "A value can't be saved. It may be too long or hold a character that isn't allowed.",
+    "code_PIPELINE_CHANGED": "The pipeline changed. Reload to see the current stages.",
+    "code_EXPORT_TOO_LARGE": "Too many rows to export. Narrow the filters and try again.",
+    "code_FORBIDDEN": "Your role doesn't allow this.",
+    "code_REGISTRATION_DISABLED": "Sign-up is by invitation only. Ask a workspace owner for an invitation link.",
+    "code_OWNER_ONLY": "Only owners can manage owners.",
+    "code_INVITATION_EMAIL_MISMATCH": "This invitation is for another email address. Sign in with that one to join.",
+    "code_NOT_FOUND": "This can't be found. It may have been deleted.",
+    "code_VERSION_CONFLICT": "Someone else changed this. Reload to see their version.",
+    "code_EMAIL_TAKEN": "An account with this email already exists.",
+    "code_OWN_ACCOUNT": "You can't change or delete your own account here.",
+    "code_ACCOUNT_OWNS_WORKSPACE": "This account is the only owner of a workspace. Add another owner there first.",
+    "code_LAST_OWNER": "A workspace needs an owner. Make someone else an owner first.",
+    "code_ALREADY_MEMBER": "This person is already a member.",
+    "code_ALREADY_INVITED": "This email already has a pending invitation.",
+    "code_INVITATION_NOT_PENDING": "This invitation can't be used anymore: it was accepted, revoked or has expired.",
+    "code_DUPLICATE_NAME": "That name is already taken.",
+    "code_STAGE_PROTECTED": "The Won and Lost stages, and the last open stage, can't be deleted.",
+    "code_STAGE_IN_USE": "Deals use this stage, archived ones included. Move them to another stage first.",
+    "code_SOURCE_IN_USE": "Records use this source. Archive it instead.",
+    "code_LEAD_CONVERTED": "This lead was converted, so it can't be changed.",
+    "code_LEAD_NOT_QUALIFIED": "Only a qualified lead can be converted.",
+    "code_TASK_STATUS_CONFLICT": "This task's status changed meanwhile. Reload to see it.",
+    "code_CONFLICT": "This clashes with data saved meanwhile. Reload and try again.",
+    "code_RATE_LIMITED": "Too many attempts. Wait a moment and try again."
   },
   "SettingsNav": {
     "label": "Settings",
@@ -413,8 +446,7 @@
     "delete": "Delete {name}",
     "delete_title": "Delete the stage {name}?",
     "delete_text": "This can't be undone. A stage that has deals in it can't be deleted.",
-    "delete_confirm": "Delete stage",
-    "error_order_stale": "The pipeline changed. Reload to see the current stages."
+    "delete_confirm": "Delete stage"
   },
   "SourcesPage": {
     "title": "Lead sources",
@@ -523,7 +555,6 @@
     "error_empty": "Choose a file that isn't empty",
     "error_too_large": "The file is larger than 10 MB",
     "error_type": "This kind of file isn't allowed, or its content doesn't match its type",
-    "error_generic": "Something went wrong",
     "column_name": "Name",
     "column_size": "Size",
     "column_uploaded": "Uploaded",
@@ -549,8 +580,7 @@
     "status_PENDING": "Pending",
     "status_PASSED": "Passed",
     "status_FAILED": "Failed",
-    "error_invalid_input": "Check the highlighted fields",
-    "error_generic": "Something went wrong"
+    "error_invalid_input": "Check the highlighted fields"
   },
   "AccountPage": {
     "title": "Account",
@@ -2032,7 +2062,6 @@
     "saved": "Saved",
     "error_invalid_input": "Check the highlighted fields",
     "error_email_taken": "This email is already registered",
-    "error_generic": "Something went wrong",
     "delete_button": "Delete account",
     "confirm_title": "Delete {email}?",
     "confirm_text": "The account, its test results and its files are removed for good.",

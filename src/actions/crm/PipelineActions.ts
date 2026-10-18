@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { refresh } from 'next/cache';
 import { actionFailure } from '@/libs/api/ActionFailure';
 import type { ActionResult } from '@/libs/api/ApiError';
-import { isApiError, isStaleVersion } from '@/libs/api/ApiError';
+import { errorCode } from '@/libs/api/ApiError';
 import { authedBackend } from '@/libs/api/Backend';
 import type { Stage } from '@/libs/crm/Stages';
 import { toStages } from '@/libs/crm/Stages';
@@ -12,13 +12,13 @@ import type { StageValues } from '@/validations/crm/PipelineValidation';
 import { StageValidation } from '@/validations/crm/PipelineValidation';
 
 /**
- * The result of a stage write that is not a version conflict but a 409: a duplicate name.
+ * The result of a failed stage write: a duplicate name is the name field's error.
  * @param response The backend response.
  * @param error Its parsed error body.
  * @returns The name field error, or the general failure.
  */
 const stageFailure = async (response: Response, error: unknown) => {
-  if (response.status === 409 && !isStaleVersion(error)) {
+  if (errorCode(error) === 'DUPLICATE_NAME') {
     const t = await getTranslations('StageList');
     return { ok: false, fieldErrors: { name: t('error_name_taken') } } satisfies ActionResult;
   }
@@ -91,7 +91,7 @@ export async function updateStage(
  * @param workspaceId The workspace.
  * @param stageIds Every open stage id, once, in the new order.
  * @returns The whole pipeline in the server's order, a reload conflict when the pipeline changed
- *   meanwhile, or the backend's message.
+ *   meanwhile, or the translated refusal.
  */
 export async function reorderStages(
   workspaceId: number,
@@ -103,14 +103,9 @@ export async function reorderStages(
     { params: { path: { workspaceId } }, body: { stageIds } },
   );
   if (!response.ok || !data) {
-    // The ids no longer match the open stages: another tab added or deleted one meanwhile.
-    // (The spec declares no error body, so it is checked as unknown.)
-    const body: unknown = error;
-    if (response.status === 400 && isApiError(body) && body.fieldErrors?.stageIds) {
-      const t = await getTranslations('StageList');
-      return { ok: false, conflict: true, message: t('error_order_stale') };
-    }
-    return await actionFailure(response, error);
+    const result = await actionFailure(response, error);
+    // The ids no longer match the open stages (another tab added or deleted one): reload.
+    return errorCode(error) === 'PIPELINE_CHANGED' ? { ...result, conflict: true } : result;
   }
 
   refresh();
@@ -121,7 +116,7 @@ export async function reorderStages(
  * Deletes an open stage (`DELETE /workspaces/{id}/pipeline-stages/{id}`).
  * @param workspaceId The workspace.
  * @param stageId The stage.
- * @returns Success, or the backend's message (409: Won or Lost, the last open stage, or in use).
+ * @returns Success, or the translated refusal (409: Won or Lost, the last open stage, or in use).
  */
 export async function deleteStage(workspaceId: number, stageId: number): Promise<ActionResult> {
   const api = await authedBackend();

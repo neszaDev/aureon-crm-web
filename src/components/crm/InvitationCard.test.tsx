@@ -14,6 +14,7 @@ const INVITATION = {
   email: 'ana@example.com',
   role: 'MANAGER',
   status: 'PENDING',
+  expiresAt: '2026-10-25T03:00:00Z',
 } as const;
 
 type Register = (token: string, values: InvitationRegisterValues) => Promise<ActionResult>;

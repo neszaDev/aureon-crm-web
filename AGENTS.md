@@ -77,9 +77,11 @@ Use `pnpm` (version pinned in `package.json` → `packageManager`), never npm or
   by hand; use the typed client from `Backend.ts`.
 - `schema.d.ts` is **generated**: after a backend API change run `make api-types` and commit it.
   Type errors that follow are the point: fix the callers.
-- The backend's error body is `ApiError` (hand-written in `ApiError.ts`; not in its spec). Map
-  failures with `toActionError` (CRM actions: `actionFailure`); a 401 ends the session through
-  `/api/session/expired`, as the CRM rules below say.
+- The backend's error body is `ApiError` (`components.schemas.ApiError`, re-exported by
+  `ApiError.ts`). Decide by its `code` (`errorCode`), never by its message text. Map
+  failures with `toActionError` (CRM actions: `actionFailure`): the message is the `ApiError`
+  translation of the code, or of the status for an error without one; a 401 ends the session, as
+  the CRM rules below say.
 - Keep zod rules in `src/validations/` in sync with the backend's request constraints.
 
 ## CRM rules
@@ -94,8 +96,8 @@ Use `pnpm` (version pinned in `package.json` → `packageManager`), never npm or
   straight to `/sign-in` (the proxy still sees the cookie: a loop). A 5xx throws to the error
   boundary; a 404 on the workspace is `notFound()`.
 - **Record forms always send the `version` they read and the current owner** (`ownerId` /
-  `assigneeId`; `null` unassigns). A stale version is a 409: `actionFailure` turns it into
-  "Someone else changed this" with `conflict: true`, and the UI offers a reload.
+  `assigneeId`; `null` unassigns). A stale version is `VERSION_CONFLICT`: `actionFailure` turns
+  it into "Someone else changed this" with `conflict: true`, and the UI offers a reload.
 - **Permissions come from `GET /workspaces/{id}` → `permissions`**: hide what `can()` denies,
   and still handle the backend's 403 (`ForbiddenNotice`, or the refusal in a toast or form).
 

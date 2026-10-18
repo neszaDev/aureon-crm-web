@@ -4,7 +4,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { refresh } from 'next/cache';
 import { actionFailure } from '@/libs/api/ActionFailure';
 import type { ActionResult } from '@/libs/api/ApiError';
-import { toActionError } from '@/libs/api/ApiError';
+import { errorCode, toActionError } from '@/libs/api/ApiError';
 import { authedBackend, backend } from '@/libs/api/Backend';
 import { rateLimited } from '@/libs/api/RateLimit';
 import { forwardedFor, redirectIfUnauthorized, startSession } from '@/libs/api/Session';
@@ -26,7 +26,7 @@ import {
  */
 export async function acceptInvitation(token: string): Promise<ActionResult> {
   if (!InvitationTokenValidation.safeParse(token).success) {
-    const t = await getTranslations('ActionError');
+    const t = await getTranslations('ApiError');
     return { ok: false, message: t('generic') };
   }
 
@@ -34,7 +34,7 @@ export async function acceptInvitation(token: string): Promise<ActionResult> {
   const { data, error, response } = await api.POST('/api/v1/invitations/{token}/accept', {
     params: { path: { token } },
   });
-  if (data?.workspaceId === undefined) {
+  if (!data) {
     // A 401 signs in again and comes back to this link.
     await redirectIfUnauthorized(response.status, `/invite/${token}`);
     refresh();
@@ -70,14 +70,16 @@ export async function registerThroughInvitation(
     if (response.status === 429) {
       return await rateLimited(response);
     }
-    if (response.status === 409) {
-      // The email has an account, or the invitation was used or revoked meanwhile: the refreshed
-      // page shows the latter instead of this form.
-      refresh();
+    const code = errorCode(error);
+    if (code === 'EMAIL_TAKEN') {
       const tInvite = await getTranslations('InvitationCard');
       return { ok: false, message: tInvite('error_email_taken') };
     }
-    return toActionError(error, t('error_generic'));
+    if (code === 'INVITATION_NOT_PENDING') {
+      // Used or revoked meanwhile: the refreshed page shows that instead of this form.
+      refresh();
+    }
+    return toActionError(error, await getTranslations('ApiError'));
   }
 
   const preview = await backend.GET('/api/v1/invitations/{token}', {

@@ -26,7 +26,7 @@ export async function createWorkspace(values: WorkspaceValues): Promise<ActionRe
   if (!response.ok) {
     return await actionFailure(response, error);
   }
-  if (data?.id === undefined) {
+  if (!data) {
     return { ok: false, message: t('error_generic') };
   }
 

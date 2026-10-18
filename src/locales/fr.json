@@ -235,9 +235,42 @@
     "text": "Votre rôle dans cet espace de travail ne le permet pas. Demandez à un propriétaire ou à un administrateur si vous en avez besoin."
   },
   "ActionError": {
-    "conflict": "Quelqu'un d'autre a modifié cet élément. Rechargez pour voir sa version.",
-    "generic": "Cela n'a pas fonctionné. Réessayez.",
     "reload": "Recharger"
+  },
+  "ApiError": {
+    "generic": "Cela n'a pas fonctionné. Réessayez.",
+    "status_400": "Un élément de la demande n'est pas valide. Vérifiez-le et réessayez.",
+    "status_403": "Votre rôle ne le permet pas.",
+    "status_404": "Introuvable. Cet élément a peut-être été supprimé.",
+    "status_409": "Cela entre en conflit avec une modification enregistrée entre-temps. Rechargez et réessayez.",
+    "status_413": "C'est trop volumineux pour être envoyé.",
+    "status_429": "Trop de tentatives. Patientez un moment et réessayez.",
+    "code_VALIDATION_FAILED": "Vérifiez les champs signalés et réessayez.",
+    "code_TEXT_INVALID": "Une valeur ne peut pas être enregistrée. Elle est peut-être trop longue ou contient un caractère non autorisé.",
+    "code_PIPELINE_CHANGED": "Le pipeline a changé. Rechargez pour voir les étapes actuelles.",
+    "code_EXPORT_TOO_LARGE": "Trop de lignes à exporter. Affinez les filtres et réessayez.",
+    "code_FORBIDDEN": "Votre rôle ne le permet pas.",
+    "code_REGISTRATION_DISABLED": "L'inscription se fait uniquement sur invitation. Demandez un lien d'invitation au propriétaire d'un espace de travail.",
+    "code_OWNER_ONLY": "Seuls les propriétaires peuvent gérer les propriétaires.",
+    "code_INVITATION_EMAIL_MISMATCH": "Cette invitation est destinée à une autre adresse e-mail. Connectez-vous avec celle-ci pour rejoindre l'espace.",
+    "code_NOT_FOUND": "Introuvable. Cet élément a peut-être été supprimé.",
+    "code_VERSION_CONFLICT": "Quelqu'un d'autre a modifié cet élément. Rechargez pour voir sa version.",
+    "code_EMAIL_TAKEN": "Un compte existe déjà avec cette adresse e-mail.",
+    "code_OWN_ACCOUNT": "Vous ne pouvez pas modifier ni supprimer votre propre compte ici.",
+    "code_ACCOUNT_OWNS_WORKSPACE": "Ce compte est le seul propriétaire d'un espace de travail. Ajoutez-y d'abord un autre propriétaire.",
+    "code_LAST_OWNER": "Un espace de travail a besoin d'un propriétaire. Nommez d'abord quelqu'un d'autre propriétaire.",
+    "code_ALREADY_MEMBER": "Cette personne est déjà membre.",
+    "code_ALREADY_INVITED": "Cette adresse e-mail a déjà une invitation en attente.",
+    "code_INVITATION_NOT_PENDING": "Cette invitation n'est plus utilisable : elle a été acceptée, révoquée ou a expiré.",
+    "code_DUPLICATE_NAME": "Ce nom est déjà pris.",
+    "code_STAGE_PROTECTED": "Les étapes de clôture (gagnée, perdue) et la dernière étape ouverte ne peuvent pas être supprimées.",
+    "code_STAGE_IN_USE": "Des affaires utilisent cette étape, archivées comprises. Déplacez-les d'abord vers une autre étape.",
+    "code_SOURCE_IN_USE": "Des fiches utilisent cette source. Archivez-la plutôt.",
+    "code_LEAD_CONVERTED": "Ce prospect a été converti : il ne peut plus être modifié.",
+    "code_LEAD_NOT_QUALIFIED": "Seul un prospect qualifié peut être converti.",
+    "code_TASK_STATUS_CONFLICT": "Le statut de cette tâche a changé entre-temps. Rechargez pour le voir.",
+    "code_CONFLICT": "Cela entre en conflit avec des données enregistrées entre-temps. Rechargez et réessayez.",
+    "code_RATE_LIMITED": "Trop de tentatives. Patientez un moment et réessayez."
   },
   "SettingsNav": {
     "label": "Paramètres",
@@ -413,8 +446,7 @@
     "delete": "Supprimer {name}",
     "delete_title": "Supprimer l'étape {name} ?",
     "delete_text": "C'est définitif. Une étape qui contient des affaires ne peut pas être supprimée.",
-    "delete_confirm": "Supprimer l'étape",
-    "error_order_stale": "Le pipeline a changé. Rechargez pour voir les étapes actuelles."
+    "delete_confirm": "Supprimer l'étape"
   },
   "SourcesPage": {
     "title": "Sources de prospects",
@@ -523,7 +555,6 @@
     "error_empty": "Choisissez un fichier non vide",
     "error_too_large": "Le fichier dépasse 10 Mo",
     "error_type": "Ce type de fichier n’est pas autorisé, ou son contenu ne correspond pas à son type",
-    "error_generic": "Une erreur s’est produite",
     "column_name": "Nom",
     "column_size": "Taille",
     "column_uploaded": "Envoyé le",
@@ -549,8 +580,7 @@
     "status_PENDING": "En attente",
     "status_PASSED": "Réussi",
     "status_FAILED": "Échoué",
-    "error_invalid_input": "Vérifiez les champs signalés",
-    "error_generic": "Une erreur est survenue"
+    "error_invalid_input": "Vérifiez les champs signalés"
   },
   "AccountPage": {
     "title": "Compte",
@@ -2032,7 +2062,6 @@
     "saved": "Enregistré",
     "error_invalid_input": "Vérifiez les champs signalés",
     "error_email_taken": "Cet e-mail est déjà enregistré",
-    "error_generic": "Une erreur s’est produite",
     "delete_button": "Supprimer le compte",
     "confirm_title": "Supprimer {email} ?",
     "confirm_text": "Le compte, ses résultats de tests et ses fichiers sont supprimés définitivement.",

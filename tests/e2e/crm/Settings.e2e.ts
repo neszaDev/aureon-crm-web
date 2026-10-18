@@ -89,7 +89,8 @@ test.describe('Settings', () => {
     await expect(page).toHaveTitle('Members');
     await expect(page.getByRole('heading', { name: '1 member' })).toBeVisible();
     await expectNoA11yViolations(page);
-    const message = 'A workspace needs an owner; make someone else an owner first';
+    // The translation of the backend's LAST_OWNER code.
+    const message = 'A workspace needs an owner. Make someone else an owner first.';
 
     // Your own role asks first, then shows the backend's refusal.
     const role = page.getByLabel(`Role of ${email}`);

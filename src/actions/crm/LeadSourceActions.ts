@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { refresh } from 'next/cache';
 import { actionFailure } from '@/libs/api/ActionFailure';
 import type { ActionResult } from '@/libs/api/ApiError';
-import { isStaleVersion } from '@/libs/api/ApiError';
+import { errorCode } from '@/libs/api/ApiError';
 import { authedBackend } from '@/libs/api/Backend';
 import type {
   LeadSourceUpdateValues,
@@ -16,13 +16,13 @@ import {
 } from '@/validations/crm/LeadSourceValidation';
 
 /**
- * The result of a source write that is not a version conflict but a 409: a duplicate name.
+ * The result of a failed source write: a duplicate name is the name field's error.
  * @param response The backend response.
  * @param error Its parsed error body.
  * @returns The name field error, or the general failure.
  */
 const sourceFailure = async (response: Response, error: unknown) => {
-  if (response.status === 409 && !isStaleVersion(error)) {
+  if (errorCode(error) === 'DUPLICATE_NAME') {
     const t = await getTranslations('SourceList');
     return { ok: false, fieldErrors: { name: t('error_name_taken') } } satisfies ActionResult;
   }
@@ -97,7 +97,7 @@ export async function updateLeadSource(
  * Deletes a lead source (`DELETE /workspaces/{id}/lead-sources/{id}`).
  * @param workspaceId The workspace.
  * @param sourceId The source.
- * @returns Success, or the backend's message (409 while records use it: archive it instead).
+ * @returns Success, or the translated refusal (409 while records use it: archive it instead).
  */
 export async function deleteLeadSource(
   workspaceId: number,

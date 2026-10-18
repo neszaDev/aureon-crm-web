@@ -16,7 +16,7 @@ import { MemberRoleValidation } from '@/validations/crm/MemberValidation';
  * @param workspaceId The workspace.
  * @param userId The member.
  * @param role The new role.
- * @returns Success, or the backend's message.
+ * @returns Success, or the translated refusal.
  */
 export async function changeMemberRole(
   workspaceId: number,
@@ -47,7 +47,7 @@ export async function changeMemberRole(
  * list, since this workspace is gone for them (`DELETE /workspaces/{id}/members/{userId}`).
  * @param workspaceId The workspace.
  * @param userId The member.
- * @returns Success, or the backend's message (the last owner can't go: 409).
+ * @returns Success, or the translated refusal (the last owner can't go: 409).
  */
 export async function removeMember(workspaceId: number, userId: number): Promise<ActionResult> {
   const api = await authedBackend();

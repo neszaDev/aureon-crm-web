@@ -3,7 +3,7 @@ import type { components } from '@/libs/api/schema';
 type Workspace = components['schemas']['WorkspaceResponse'];
 
 /** A workspace permission, as the backend names it (`MEMBERS_MANAGE`, `EXPORT`, ...). */
-export type Permission = NonNullable<Workspace['permissions']>[number];
+export type Permission = Workspace['permissions'][number];
 
 /**
  * Tells whether the signed-in member may take an action in a workspace. The list comes from
@@ -13,4 +13,4 @@ export type Permission = NonNullable<Workspace['permissions']>[number];
  * @returns Whether the caller has it.
  */
 export const can = (workspace: Pick<Workspace, 'permissions'>, permission: Permission) =>
-  workspace.permissions?.includes(permission) ?? false;
+  workspace.permissions.includes(permission);

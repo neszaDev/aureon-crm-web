@@ -56,8 +56,8 @@ describe('Auth', () => {
       expect(toSessionTokens({ ...tokens, tokenType: 'Bearer' })).toStrictEqual(tokens);
     });
 
-    it('returns undefined when a field is missing', () => {
-      expect(toSessionTokens({ ...tokens, refreshToken: undefined })).toBeUndefined();
+    it('returns undefined when a token is empty or the body is missing', () => {
+      expect(toSessionTokens({ ...tokens, tokenType: 'Bearer', refreshToken: '' })).toBeUndefined();
       expect(toSessionTokens()).toBeUndefined();
     });
   });

@@ -10,8 +10,4 @@ describe(can, () => {
     expect(can({ permissions: ['EXPORT'] }, 'WORKSPACE_MANAGE')).toBeFalsy();
     expect(can({ permissions: [] }, 'EXPORT')).toBeFalsy();
   });
-
-  it('denies everything when the workspace has no permission list', () => {
-    expect(can({}, 'RECORDS_EDIT_ANY')).toBeFalsy();
-  });
 });

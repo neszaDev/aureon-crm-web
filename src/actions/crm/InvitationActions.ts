@@ -45,7 +45,7 @@ export async function createInvitation(
   if (!response.ok) {
     return await actionFailure(response, error);
   }
-  if (!data?.token || !data.expiresAt) {
+  if (!data) {
     return { ok: false, message: t('error_generic') };
   }
 
@@ -54,8 +54,8 @@ export async function createInvitation(
   return {
     ok: true,
     invitation: {
-      email: data.email ?? parsed.data.email,
-      role: data.role ?? parsed.data.role,
+      email: data.email,
+      role: data.role,
       expiresAt: data.expiresAt,
       link: new URL(path, Env.APP_URL).href,
     },
@@ -66,7 +66,7 @@ export async function createInvitation(
  * Revokes a pending (or expired) invitation (`DELETE /workspaces/{id}/invitations/{id}`).
  * @param workspaceId The workspace.
  * @param invitationId The invitation.
- * @returns Success, or the backend's message (409 once accepted or revoked).
+ * @returns Success, or the translated refusal (409 once accepted or revoked).
  */
 export async function revokeInvitation(
   workspaceId: number,

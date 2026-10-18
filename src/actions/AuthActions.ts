@@ -36,7 +36,7 @@ export async function signIn(values: AuthValues, next?: unknown): Promise<Action
     }
     return response.status === 401
       ? { ok: false, message: t('error_invalid_credentials') }
-      : toActionError(error, t('error_generic'));
+      : toActionError(error, await getTranslations('ApiError'));
   }
 
   return await startSession(data, next);
@@ -65,7 +65,7 @@ export async function signUp(values: AuthValues, next?: unknown): Promise<Action
     }
     return response.status === 409
       ? { ok: false, fieldErrors: { email: t('error_email_taken') } }
-      : toActionError(error, t('error_generic'));
+      : toActionError(error, await getTranslations('ApiError'));
   }
 
   return await startSession(data, next);
