@@ -66,7 +66,7 @@ export const OwnerField = (props: {
           {owner ? (
             <>
               <Seal name={owner.displayName} email={owner.email} size="sm" />
-              {nameOf(owner)}
+              <span className="min-w-0 [overflow-wrap:anywhere]">{nameOf(owner)}</span>
             </>
           ) : (
             <span className="text-muted-foreground">{t('unassigned')}</span>

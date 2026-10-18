@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircleIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import type { RegisterOptions } from 'react-hook-form';
 import { Controller, useForm } from 'react-hook-form';
 import { ActionAlert } from '@/components/crm/ActionAlert';
 import { DateTimeField } from '@/components/crm/fields/DateTimeField';
@@ -76,11 +77,15 @@ export const LeadForm = (props: {
     defaultValues: props.defaults,
   });
   const { errors, isSubmitting } = form.formState;
-  const field = (name: TextField, id: string) => ({
+  const field = (
+    name: TextField,
+    id: string,
+    options?: RegisterOptions<LeadValues, TextField>,
+  ) => ({
     id,
     'aria-invalid': errors[name] ? true : undefined,
     'aria-describedby': describedBy(id),
-    ...form.register(name),
+    ...form.register(name, options),
   });
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -226,7 +231,14 @@ export const LeadForm = (props: {
           <Input
             inputMode="decimal"
             autoComplete="off"
-            {...field('estimatedValue', 'lead-value')}
+            {...field('estimatedValue', 'lead-value', {
+              // The API always returns a currency with a value: without the value it means nothing.
+              onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+                if (event.target.value.trim() === '') {
+                  form.setValue('currency', '');
+                }
+              },
+            })}
           />
         </FormField>
         <FormField htmlFor="lead-currency" label={t('currency_label')} error={errors.currency}>

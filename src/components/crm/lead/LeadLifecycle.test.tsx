@@ -35,6 +35,14 @@ describe(LeadLifecycle, () => {
     ]);
   });
 
+  it('ticks a reached stage in the text colour, never in the seal ink', async () => {
+    await renderRow({ status: 'CONTACTED' });
+
+    const tick = page.getByRole('listitem').first().element().querySelector('svg');
+
+    expect(tick).toHaveClass('text-foreground');
+  });
+
   it('shows every stage reached once converted', async () => {
     await renderRow({ status: 'CONVERTED' });
 
@@ -45,9 +53,9 @@ describe(LeadLifecycle, () => {
     await renderRow({ status: 'UNQUALIFIED', reason: 'Budget too small' });
 
     expect(states()).toStrictEqual([
-      expect.stringContaining('New: not reached'),
-      expect.stringContaining('Contacted: not reached'),
-      expect.stringContaining('Qualified: not reached'),
+      expect.stringContaining('New: not shown'),
+      expect.stringContaining('Contacted: not shown'),
+      expect.stringContaining('Qualified: not shown'),
       expect.stringContaining('Unqualified: current'),
     ]);
     await expect.element(page.getByText('Budget too small')).toBeVisible();

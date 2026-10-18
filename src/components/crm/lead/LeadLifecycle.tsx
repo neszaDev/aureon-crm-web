@@ -29,19 +29,23 @@ export const LeadLifecycle = (props: { status: Status; reason?: string }) => {
     <section className="flex flex-col gap-4 rounded-lg border border-rule bg-card px-5 py-4">
       <ol aria-label={t('label')} className="flex gap-1">
         {steps.map((step, index) => {
-          let state: 'reached' | 'current' | 'blank' = 'blank';
-          // An unqualified lead's history before it is unknown: only the closing box is marked.
+          let state: 'reached' | 'current' | 'unknown' | 'blank' = 'blank';
           if (props.status === 'CONVERTED' || (!unqualified && index < current)) {
             state = 'reached';
           } else if (index === current) {
             state = 'current';
+          } else if (unqualified) {
+            // Its history before is unknown: only the closing box is marked, the rest says nothing.
+            state = 'unknown';
           }
           const name = tStatus(`status_${step}`);
 
           return (
             <li key={step} className="flex w-[4.75rem] flex-col items-center gap-1.5 sm:w-24">
               <StampBox open={state === 'current'}>
-                {state === 'reached' && <CheckIcon aria-hidden="true" className="size-4" />}
+                {state === 'reached' && (
+                  <CheckIcon aria-hidden="true" className="size-4 text-foreground" />
+                )}
                 {state === 'current' && unqualified && (
                   <XIcon aria-hidden="true" className="size-4 text-foreground" />
                 )}

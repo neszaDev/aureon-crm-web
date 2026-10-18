@@ -276,8 +276,8 @@
     "code_STAGE_PROTECTED": "The Won and Lost stages, and the last open stage, can't be deleted.",
     "code_STAGE_IN_USE": "Deals use this stage, archived ones included. Move them to another stage first.",
     "code_SOURCE_IN_USE": "Records use this source. Archive it instead.",
-    "code_LEAD_CONVERTED": "This lead was converted, so it can't be changed.",
-    "code_LEAD_NOT_QUALIFIED": "Only a qualified lead can be converted.",
+    "code_LEAD_CONVERTED": "This lead was converted, so it can't be changed. Reload to see it.",
+    "code_LEAD_NOT_QUALIFIED": "Only a qualified lead can be converted. Reload to see it.",
     "code_TASK_STATUS_CONFLICT": "This task's status changed meanwhile. Reload to see it.",
     "code_CONFLICT": "This clashes with data saved meanwhile. Reload and try again.",
     "code_RATE_LIMITED": "Too many attempts. Wait a moment and try again."
@@ -2885,7 +2885,7 @@
     "source_unknown": "Unknown source",
     "priority_label": "Priority",
     "priority_any": "Any priority",
-    "follow_up_label": "Follow-up before",
+    "follow_up_label": "Follow-up on or before",
     "list_heading": "{count, plural, =0 {No leads} one {# lead} other {# leads}}",
     "archived_heading": "{count, plural, =0 {No archived leads} one {# archived lead} other {# archived leads}}",
     "empty_title": "No leads yet",
@@ -3022,6 +3022,7 @@
     "state_reached": "{name}: reached",
     "state_current": "{name}: current",
     "state_blank": "{name}: not reached",
+    "state_unknown": "{name}: not shown",
     "reason_label": "Reason:",
     "hint": "A lead moves from New to Contacted to Qualified, or is marked Unqualified with a reason. Convert a qualified lead to make it a contact, with a company and a deal if you want them."
   }

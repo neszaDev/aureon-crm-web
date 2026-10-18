@@ -19,12 +19,13 @@ const refusal = (code: string, status = 409) => ({
 });
 
 describe(actionFailure, () => {
-  it.each(['VERSION_CONFLICT', 'TASK_STATUS_CONFLICT'])(
+  it.each(['VERSION_CONFLICT', 'TASK_STATUS_CONFLICT', 'LEAD_CONVERTED', 'LEAD_NOT_QUALIFIED'])(
     'offers a reload when %s says the record changed meanwhile',
     async (code) => {
       const result = await actionFailure(new Response(null, { status: 409 }), refusal(code));
 
       expect(result).toMatchObject({ ok: false, conflict: true });
+      expect(result.message).toMatch(/Reload to see/u);
     },
   );
 

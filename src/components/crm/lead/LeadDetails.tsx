@@ -22,7 +22,6 @@ export const LeadDetails = (props: {
   const t = useTranslations('LeadPage');
   const tStatus = useTranslations('LeadStatus');
   const locale = useLocale();
-  const { lead } = props;
 
   return (
     <RecordFacts
@@ -31,56 +30,58 @@ export const LeadDetails = (props: {
         {
           label: t('email'),
           // Encoded: a stored address can hold `?subject=…`, which must not fill in a message.
-          value: lead.email && (
+          value: props.lead.email && (
             <a
-              href={`mailto:${encodeURIComponent(lead.email)}`}
+              href={`mailto:${encodeURIComponent(props.lead.email)}`}
               className="break-all text-seal-ink"
             >
-              {lead.email}
+              {props.lead.email}
             </a>
           ),
         },
         {
           label: t('phone'),
-          value: lead.phone && (
+          value: props.lead.phone && (
             <a
-              href={`tel:${lead.phone.replaceAll(/\s/gu, '')}`}
+              href={`tel:${props.lead.phone.replaceAll(/\s/gu, '')}`}
               className="text-seal-ink tabular-nums"
             >
-              {lead.phone}
+              {props.lead.phone}
             </a>
           ),
         },
-        { label: t('job_title'), value: lead.jobTitle },
-        { label: t('company'), value: lead.companyName },
-        { label: t('source'), value: lead.source?.name },
-        { label: t('priority'), value: tStatus(`priority_${lead.priority}`) },
+        { label: t('job_title'), value: props.lead.jobTitle },
+        { label: t('company'), value: props.lead.companyName },
+        { label: t('source'), value: props.lead.source?.name },
+        { label: t('priority'), value: tStatus(`priority_${props.lead.priority}`) },
         {
           label: t('follow_up'),
-          value: lead.followUpDate && (
+          value: props.lead.followUpDate && (
             <LeadFollowUp
-              date={lead.followUpDate}
-              overdue={isFollowUpOverdue(lead, todayIn(props.timeZone))}
+              date={props.lead.followUpDate}
+              overdue={isFollowUpOverdue(props.lead, todayIn(props.timeZone))}
             />
           ),
         },
         {
           label: t('estimated_value'),
-          value: lead.estimatedValue && lead.currency && (
+          value: props.lead.estimatedValue && props.lead.currency && (
             <span className="tabular-nums">
-              {formatMoney(lead.estimatedValue, lead.currency, locale)}
+              {formatMoney(props.lead.estimatedValue, props.lead.currency, locale)}
             </span>
           ),
         },
         {
           label: t('notes'),
-          value: lead.notes && <span className="whitespace-pre-line">{lead.notes}</span>,
+          value: props.lead.notes && (
+            <span className="whitespace-pre-line">{props.lead.notes}</span>
+          ),
         },
-        ...(lead.convertedAt
+        ...(props.lead.convertedAt
           ? [
               {
                 label: t('converted_on'),
-                value: formatInstant(lead.convertedAt, {
+                value: formatInstant(props.lead.convertedAt, {
                   locale,
                   timeZone: props.timeZone,
                   withTime: true,

@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { ConvertResult } from '@/actions/crm/LeadActions';
 import { convertLead } from '@/actions/crm/LeadActions';
 import { searchRecords } from '@/actions/crm/RecordSearchActions';
@@ -240,6 +240,31 @@ describe(ConvertDialog, () => {
     resolve({ ok: true, conversion: CONVERSION });
     await expect.element(summaryLink('Acme')).toBeVisible();
     expect(convertLead).toHaveBeenCalledOnce();
+  });
+
+  it('stays open while a conversion is pending, and shows its answer when it lands', async () => {
+    const { promise, resolve } = Promise.withResolvers<ConvertResult>();
+    vi.mocked(convertLead).mockReset().mockReturnValue(promise);
+    router.refresh.mockClear();
+    await openDialog();
+    await submit().click();
+    await expect.element(submit()).toBeDisabled();
+    const dialog = page.getByRole('dialog');
+
+    await userEvent.keyboard('{Escape}');
+    await expect.element(dialog).toBeVisible();
+    await page.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect.element(dialog).toBeVisible();
+    // A click outside the dialog (forced: the overlay has no size without a stylesheet).
+    await page.elementLocator(document.body).click({ position: { x: 1, y: 1 }, force: true });
+    await expect.element(dialog).toBeVisible();
+
+    resolve({ ok: true, conversion: CONVERSION });
+    await expect.element(summaryLink('Acme')).toBeVisible();
+    expect(convertLead).toHaveBeenCalledOnce();
+    await page.getByRole('button', { name: 'Done' }).click();
+    await expect.element(dialog).not.toBeInTheDocument();
+    expect(router.refresh).toHaveBeenCalledOnce();
   });
 
   it.each([false, true])(

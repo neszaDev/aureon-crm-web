@@ -276,8 +276,8 @@
     "code_STAGE_PROTECTED": "Les étapes de clôture (gagnée, perdue) et la dernière étape ouverte ne peuvent pas être supprimées.",
     "code_STAGE_IN_USE": "Des affaires utilisent cette étape, archivées comprises. Déplacez-les d'abord vers une autre étape.",
     "code_SOURCE_IN_USE": "Des fiches utilisent cette source. Archivez-la plutôt.",
-    "code_LEAD_CONVERTED": "Ce prospect a été converti : il ne peut plus être modifié.",
-    "code_LEAD_NOT_QUALIFIED": "Seul un prospect qualifié peut être converti.",
+    "code_LEAD_CONVERTED": "Ce prospect a été converti : il ne peut plus être modifié. Rechargez pour le voir.",
+    "code_LEAD_NOT_QUALIFIED": "Seul un prospect qualifié peut être converti. Rechargez pour le voir.",
     "code_TASK_STATUS_CONFLICT": "Le statut de cette tâche a changé entre-temps. Rechargez pour le voir.",
     "code_CONFLICT": "Cela entre en conflit avec des données enregistrées entre-temps. Rechargez et réessayez.",
     "code_RATE_LIMITED": "Trop de tentatives. Patientez un moment et réessayez."
@@ -2885,7 +2885,7 @@
     "source_unknown": "Source inconnue",
     "priority_label": "Priorité",
     "priority_any": "Toutes les priorités",
-    "follow_up_label": "Relance avant le",
+    "follow_up_label": "Relance au plus tard le",
     "list_heading": "{count, plural, =0 {Aucun prospect} one {# prospect} other {# prospects}}",
     "archived_heading": "{count, plural, =0 {Aucun prospect archivé} one {# prospect archivé} other {# prospects archivés}}",
     "empty_title": "Aucun prospect pour l'instant",
@@ -3022,6 +3022,7 @@
     "state_reached": "{name} : atteint",
     "state_current": "{name} : en cours",
     "state_blank": "{name} : pas atteint",
+    "state_unknown": "{name} : non affiché",
     "reason_label": "Motif :",
     "hint": "Un prospect passe de Nouveau à Contacté puis à Qualifié, ou est marqué Non qualifié avec un motif. Convertissez un prospect qualifié pour en faire un contact, avec une entreprise et une affaire si vous le souhaitez."
   }

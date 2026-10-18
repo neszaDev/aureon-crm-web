@@ -21,9 +21,9 @@ export default defineConfig({
   },
   // Pre-bundle dnd-kit: on a cold cache, Vite otherwise re-optimises mid-run and the first
   // drag-and-drop test loads a second React copy ("Invalid hook call"). The calendar's locales
-  // are one more such late import.
+  // and the server renderer (the server-rendered HTML tests) are two more such late imports.
   optimizeDeps: {
-    include: ['@dnd-kit/core', '@dnd-kit/sortable', 'react-day-picker/locale'],
+    include: ['@dnd-kit/core', '@dnd-kit/sortable', 'react-day-picker/locale', 'react-dom/server'],
   },
   test: {
     coverage: {

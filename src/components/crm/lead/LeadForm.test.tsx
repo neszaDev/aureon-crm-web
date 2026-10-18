@@ -1,4 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
@@ -49,6 +50,20 @@ const form = (props: { action: Action; defaults?: LeadValues }) => (
 );
 
 describe(LeadForm, () => {
+  it('sends neither value nor currency when the estimated value is cleared', async () => {
+    const action = vi.fn<Action>().mockResolvedValue({ ok: true });
+    await render(form({ action }));
+
+    await page.getByLabelText('Estimated value').fill('');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+
+    await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
+    expect(action).toHaveBeenCalledWith(
+      expect.objectContaining({ estimatedValue: '', currency: '' }),
+    );
+    await expect.element(page.getByLabelText('Currency')).toHaveValue('');
+  });
+
   it("marks the field invalid and shows the backend's error under it", async () => {
     const action = vi.fn<Action>().mockResolvedValue({
       ok: false,
@@ -63,5 +78,19 @@ describe(LeadForm, () => {
       .element(page.getByLabelText('First name'))
       .toHaveAccessibleDescription('must not be blank');
     await expect.element(page.getByLabelText('First name')).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('server-renders the saved priority and currency as the selected options', () => {
+    const html = renderToString(
+      form({ action: vi.fn<Action>(), defaults: { ...SAVED, currency: 'USD' } }),
+    );
+    const selected = (id: string) =>
+      new DOMParser()
+        .parseFromString(html, 'text/html')
+        .querySelector(`#${id} option[selected]`)
+        ?.getAttribute('value');
+
+    expect(selected('lead-priority')).toBe('HIGH');
+    expect(selected('lead-currency')).toBe('USD');
   });
 });

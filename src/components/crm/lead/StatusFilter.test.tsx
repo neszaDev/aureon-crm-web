@@ -1,4 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
+import { Suspense, use } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
@@ -20,7 +21,7 @@ const SPEC = {
 const PATH = '/app/1/leads';
 
 const renderFilter = async (query: Record<string, string | string[]>) => {
-  router.push.mockClear();
+  router.push.mockReset();
   await render(
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
       <StatusFilter path={PATH} query={parseListQuery(SPEC, query)} />
@@ -29,6 +30,16 @@ const renderFilter = async (query: Record<string, string | string[]>) => {
 };
 
 const toggle = (name: string) => page.getByRole('button', { name, exact: true });
+
+// A page whose next list never arrives: the navigation's transition stays pending, as it does
+// while the server renders the filtered list.
+const { promise: NEVER } = Promise.withResolvers<never>();
+const Page = (props: { href: string; children: React.ReactElement }) => {
+  if (props.href !== PATH) {
+    use(NEVER);
+  }
+  return props.children;
+};
 
 describe(StatusFilter, () => {
   it('shows the statuses in the URL as pressed', async () => {
@@ -58,5 +69,30 @@ describe(StatusFilter, () => {
     await toggle('New').click();
 
     expect(router.push).toHaveBeenCalledExactlyOnceWith(PATH, { scroll: false });
+  });
+
+  it('keeps the first toggle while its navigation is pending, so a second one carries both', async () => {
+    router.push.mockReset();
+    const view = (href: string) => (
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <Suspense>
+          <Page href={href}>
+            <StatusFilter path={PATH} query={parseListQuery(SPEC, {})} />
+          </Page>
+        </Suspense>
+      </NextIntlClientProvider>
+    );
+    const screen = await render(view(PATH));
+    // The router's push renders the next page inside the transition that called it.
+    router.push.mockImplementation((href) => {
+      void screen.rerender(view(href));
+    });
+
+    await toggle('New').click();
+    await toggle('Qualified').click();
+
+    expect(router.push).toHaveBeenLastCalledWith(`${PATH}?status=NEW&status=QUALIFIED`, {
+      scroll: false,
+    });
   });
 });

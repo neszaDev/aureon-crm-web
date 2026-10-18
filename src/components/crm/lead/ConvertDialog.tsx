@@ -131,15 +131,20 @@ const Choice = (props: { id: string; value: string; label: string }) => (
 /**
  * The conversion's choices, mounted each time the dialog opens, so it starts from the lead.
  * Submitting twice before the first answer is one conversion: the button is disabled while it
- * is on its way, and a second submit that gets past that is dropped.
+ * is on its way, and the dialog drops a second submit that gets past that.
  * @param props The dialog's props.
  * @param props.onDone Called with the result, which the dialog then shows.
+ * @param props.convertOnce Runs a conversion unless one is already on its way.
  * @returns The form.
  */
-const ConvertForm = (props: ConvertProps & { onDone: (conversion: Conversion) => void }) => {
+const ConvertForm = (
+  props: ConvertProps & {
+    onDone: (conversion: Conversion) => void;
+    convertOnce: (convert: () => Promise<void>) => Promise<void>;
+  },
+) => {
   const t = useTranslations('ConvertDialog');
   const [failure, setFailure] = useState<ActionResult>();
-  const inFlight = useRef(false);
   const form = useForm<ConvertFormValues>({
     resolver: zodResolver(ConvertFormValidation),
     defaultValues: startingValues(props, (name) => t('deal_name_default', { name })),
@@ -148,12 +153,11 @@ const ConvertForm = (props: ConvertProps & { onDone: (conversion: Conversion) =>
   const company = useWatch({ control: form.control, name: 'company' });
   const contact = useWatch({ control: form.control, name: 'contact' });
   const withDeal = useWatch({ control: form.control, name: 'deal' });
-  const { lead } = props;
 
   const convert = form.handleSubmit(async (values) => {
     setFailure(undefined);
     try {
-      const result = await convertLead(props.workspaceId, lead.id, toConversion(values));
+      const result = await convertLead(props.workspaceId, props.lead.id, toConversion(values));
       if (result.conversion) {
         props.onDone(result.conversion);
         return;
@@ -169,24 +173,18 @@ const ConvertForm = (props: ConvertProps & { onDone: (conversion: Conversion) =>
   return (
     <form
       method="post"
-      onSubmit={async (event) => {
-        // A second submit before the first has answered is the same conversion: dropped.
-        if (inFlight.current) {
-          event.preventDefault();
-          return;
-        }
-        inFlight.current = true;
-        try {
+      onSubmit={(event) => {
+        // Not a native POST, whether or not the dialog takes this submit.
+        event.preventDefault();
+        void props.convertOnce(async () => {
           await convert(event);
-        } finally {
-          inFlight.current = false;
-        }
+        });
       }}
       className="flex flex-col gap-5"
       noValidate
     >
       <DialogHeader>
-        <DialogTitle>{t('title', { name: fullName(lead) })}</DialogTitle>
+        <DialogTitle>{t('title', { name: fullName(props.lead) })}</DialogTitle>
         <DialogDescription>{t('description')}</DialogDescription>
       </DialogHeader>
       <ActionAlert result={failure} />
@@ -207,11 +205,11 @@ const ConvertForm = (props: ConvertProps & { onDone: (conversion: Conversion) =>
               }}
               className="gap-0"
             >
-              {lead.companyName && (
+              {props.lead.companyName && (
                 <Choice
                   id="convert-company-create"
                   value="create"
-                  label={t('company_create', { name: lead.companyName })}
+                  label={t('company_create', { name: props.lead.companyName })}
                 />
               )}
               <Choice id="convert-company-link" value="link" label={t('company_link')} />
@@ -235,7 +233,7 @@ const ConvertForm = (props: ConvertProps & { onDone: (conversion: Conversion) =>
                   workspaceId={props.workspaceId}
                   kind="company"
                   value={controller.field.value}
-                  initialQuery={lead.companyName}
+                  initialQuery={props.lead.companyName}
                   invalid={Boolean(errors.companyLink)}
                   describedBy={errors.companyLink ? describedBy('convert-company') : undefined}
                   onChange={(next) => {
@@ -285,7 +283,7 @@ const ConvertForm = (props: ConvertProps & { onDone: (conversion: Conversion) =>
                   workspaceId={props.workspaceId}
                   kind="contact"
                   value={controller.field.value}
-                  initialQuery={lead.email}
+                  initialQuery={props.lead.email}
                   invalid={Boolean(errors.contactLink)}
                   describedBy={errors.contactLink ? describedBy('convert-contact') : undefined}
                   onChange={(next) => {
@@ -444,11 +442,30 @@ export const ConvertDialog = (props: ConvertProps & { headingId: string }) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [conversion, setConversion] = useState<Conversion>();
+  const inFlight = useRef(false);
+
+  // One conversion at a time: a second submit before the first has answered is the same
+  // conversion, dropped. A ref, as state only catches up on the next render.
+  const convertOnce = async (convert: () => Promise<void>) => {
+    if (inFlight.current) {
+      return;
+    }
+    inFlight.current = true;
+    try {
+      await convert();
+    } finally {
+      inFlight.current = false;
+    }
+  };
 
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
+        // Closing would lose the answer: the dialog stays until the conversion has one.
+        if (!next && inFlight.current) {
+          return;
+        }
         setOpen(next);
         if (!next && conversion) {
           router.refresh();
@@ -496,7 +513,7 @@ export const ConvertDialog = (props: ConvertProps & { headingId: string }) => {
             </DialogFooter>
           </>
         ) : (
-          <ConvertForm {...props} onDone={setConversion} />
+          <ConvertForm {...props} onDone={setConversion} convertOnce={convertOnce} />
         )}
       </DialogContent>
     </Dialog>
