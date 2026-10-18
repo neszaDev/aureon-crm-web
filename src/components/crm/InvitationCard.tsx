@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { Link } from '@/libs/I18nNavigation';
 import type { InvitationRegisterValues } from '@/validations/crm/InvitationValidation';
 import { InvitationRegisterValidation } from '@/validations/crm/InvitationValidation';
@@ -153,11 +154,9 @@ const RegisterForm = (props: {
     setFailure(undefined);
     // On success the action redirects, so a result means something went wrong.
     const result = await props.register(props.token, values);
-    for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (field === 'displayName' || field === 'password') {
-        form.setError(field, { type: 'server', message });
-      }
-    }
+    applyFieldErrors(form, result.fieldErrors, (field) =>
+      field === 'displayName' || field === 'password' ? field : undefined,
+    );
     setFailure(result);
   });
 

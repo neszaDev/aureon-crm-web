@@ -144,6 +144,10 @@ and the tokens in `src/styles/global.css`; see `DESIGN.md`. Responsive. No unnec
 - Use `React.ReactNode`, not `ReactNode`. Inline short event handlers.
 - Server components can't call capitalised functions (React compiler): put backend reads in
   `Queries.ts` instead of calling `api.GET(...)` in a page.
+- Show a server action's `fieldErrors` with `applyFieldErrors` (`src/libs/form/`), never a bare
+  `setError` loop: `setError` edits `errors` in place, which the compiled (production) form does
+  not see. Vitest compiles with the React Compiler too, so a test that asserts the error text and
+  `aria-invalid` catches it; the e2e suite should also pass against `pnpm build` + `next start`.
 
 ### Pages
 - Default export name ends with `Page`. Props alias (if reused) ends with `PageProps`.

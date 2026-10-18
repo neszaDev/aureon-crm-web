@@ -30,6 +30,7 @@ import { Switch } from '@/components/ui/switch';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import { fullName } from '@/libs/crm/Format';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { useRouter } from '@/libs/I18nNavigation';
 import type { ConversionValues, ConvertFormValues } from '@/validations/crm/LeadValidation';
 import { ConvertFormValidation } from '@/validations/crm/LeadValidation';
@@ -157,12 +158,7 @@ const ConvertForm = (props: ConvertProps & { onDone: (conversion: Conversion) =>
         props.onDone(result.conversion);
         return;
       }
-      for (const [name, message] of Object.entries(result.fieldErrors ?? {})) {
-        const field = FIELDS[name];
-        if (field) {
-          form.setError(field, { type: 'server', message });
-        }
-      }
+      applyFieldErrors(form, result.fieldErrors, (name) => FIELDS[name]);
       setFailure(result);
     } catch {
       // Nothing came back (the network): converting again is safe, a repeat gives the first result.

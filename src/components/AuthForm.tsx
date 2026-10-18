@@ -10,6 +10,7 @@ import { FormAlert } from '@/components/FormAlert';
 import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import type { AuthValues } from '@/validations/AuthValidation';
 import { SignInValidation, SignUpValidation } from '@/validations/AuthValidation';
 
@@ -30,11 +31,9 @@ export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
     // On success the action redirects, so a result means something went wrong.
     const result = await (isSignUp ? signUp(values, next) : signIn(values, next));
 
-    for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (field === 'email' || field === 'password') {
-        form.setError(field, { type: 'server', message });
-      }
-    }
+    applyFieldErrors(form, result.fieldErrors, (name) =>
+      name === 'email' || name === 'password' ? name : undefined,
+    );
     setFormError(result.message);
   });
 

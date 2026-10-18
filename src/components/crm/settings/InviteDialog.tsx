@@ -31,6 +31,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import type { ActionResult } from '@/libs/api/ApiError';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { focusOnMount } from '@/utils/Focus';
 import type { InvitationValues } from '@/validations/crm/InvitationValidation';
 import { InvitationValidation } from '@/validations/crm/InvitationValidation';
@@ -74,11 +75,7 @@ const InviteForm = (props: {
       return;
     }
 
-    for (const [name, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (isFormField(name)) {
-        form.setError(name, { type: 'server', message });
-      }
-    }
+    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
     setFailure(result);
   });
 

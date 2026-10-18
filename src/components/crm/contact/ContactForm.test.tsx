@@ -74,6 +74,23 @@ describe(ContactForm, () => {
     );
   });
 
+  it("marks the field invalid and shows the backend's error under it", async () => {
+    await renderForm({
+      action: vi.fn<Action>().mockResolvedValue({
+        ok: false,
+        message: 'Check the highlighted fields and try again.',
+        fieldErrors: { lastName: 'must not be blank' },
+      }),
+    });
+
+    await page.getByRole('button', { name: 'Save changes' }).click();
+
+    await expect
+      .element(page.getByLabelText('Last name'))
+      .toHaveAccessibleDescription('must not be blank');
+    await expect.element(page.getByLabelText('Last name')).toHaveAttribute('aria-invalid', 'true');
+  });
+
   it('lists possible duplicates, other than this contact, after the email loses focus', async () => {
     const findDuplicates = vi
       .fn<FindDuplicates>()

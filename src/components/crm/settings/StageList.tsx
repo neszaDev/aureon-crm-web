@@ -39,6 +39,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { Stage } from '@/libs/crm/Stages';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { focusOnMount } from '@/utils/Focus';
 import type { StageValues } from '@/validations/crm/PipelineValidation';
 import { StageValidation } from '@/validations/crm/PipelineValidation';
@@ -92,11 +93,7 @@ const StageForm = (props: {
       return;
     }
 
-    for (const [name, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (isFormField(name)) {
-        form.setError(name, { type: 'server', message });
-      }
-    }
+    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
     setFailure(result);
   });
 

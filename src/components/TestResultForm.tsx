@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import type { TestResultFormValues } from '@/validations/TestResultValidation';
 import { TEST_STATUSES, TestResultFormValidation } from '@/validations/TestResultValidation';
 
@@ -48,11 +49,7 @@ export const TestResultForm = () => {
       setCreated(true);
       return;
     }
-    for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (isFormField(field)) {
-        form.setError(field, { type: 'server', message });
-      }
-    }
+    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
     setFormError(result.message);
   });
 

@@ -94,6 +94,9 @@ describe(CompanyForm, () => {
     await expect
       .element(page.getByLabelText('Company name'))
       .toHaveAccessibleDescription('must not be blank');
+    await expect
+      .element(page.getByLabelText('Company name'))
+      .toHaveAttribute('aria-invalid', 'true');
   });
 
   it("shows the backend's refusal of the owner under the owner field", async () => {

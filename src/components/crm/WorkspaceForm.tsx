@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import type { ActionResult } from '@/libs/api/ApiError';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import type { WorkspaceValues } from '@/validations/crm/WorkspaceValidation';
 import { WorkspaceValidation } from '@/validations/crm/WorkspaceValidation';
 
@@ -83,11 +84,7 @@ export const WorkspaceForm = (props: {
       return;
     }
 
-    for (const [name, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (isFormField(name)) {
-        form.setError(name, { type: 'server', message });
-      }
-    }
+    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
     setFailure(result);
   });
 

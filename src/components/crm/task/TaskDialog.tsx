@@ -29,6 +29,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import { toInstant, toLocalInput } from '@/libs/crm/ZonedTime';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
 import type { TaskFormValues, TaskValues } from '@/validations/crm/TaskValidation';
 import { TASK_PRIORITIES, TaskFormValidation } from '@/validations/crm/TaskValidation';
@@ -153,13 +154,10 @@ const TaskForm = (props: TaskDialogProps & { onDone: () => void }) => {
       return;
     }
 
-    for (const [name, message] of Object.entries(result.fieldErrors ?? {})) {
-      const link = LINKS.find((item) => item.id === name);
-      const field = link?.field ?? name;
-      if (isFormField(field)) {
-        form.setError(field, { type: 'server', message });
-      }
-    }
+    applyFieldErrors(form, result.fieldErrors, (name) => {
+      const field = LINKS.find((item) => item.id === name)?.field ?? name;
+      return isFormField(field) ? field : undefined;
+    });
     setFailure(result);
   });
 

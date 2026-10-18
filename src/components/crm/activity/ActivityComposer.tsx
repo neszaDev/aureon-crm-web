@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { toLocalInput } from '@/libs/crm/ZonedTime';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import type { ActivityFormValues } from '@/validations/crm/ActivityValidation';
 import { ACTIVITY_TYPES, ActivityFormValidation } from '@/validations/crm/ActivityValidation';
 
@@ -86,11 +87,7 @@ export const ActivityComposer = (props: {
       return;
     }
 
-    for (const [name, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (isFormField(name)) {
-        form.setError(name, { type: 'server', message });
-      }
-    }
+    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
     // `links` is no field of the form: its error is the alert, not "check the highlighted fields".
     setFailure(
       result.fieldErrors?.links ? { ...result, message: result.fieldErrors.links } : result,

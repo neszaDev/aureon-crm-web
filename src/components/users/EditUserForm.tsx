@@ -11,6 +11,7 @@ import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import type { UpdateUserValues } from '@/validations/UserValidation';
 import { UpdateUserValidation, USER_ROLES } from '@/validations/UserValidation';
 
@@ -50,11 +51,7 @@ export const EditUserForm = (props: { id: number; defaults: UpdateUserValues }) 
       setSaved(true);
       return;
     }
-    for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (isFormField(field)) {
-        form.setError(field, { type: 'server', message });
-      }
-    }
+    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
     setFormError(result.message);
   });
 

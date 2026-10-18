@@ -335,6 +335,7 @@ test.describe('Settings', () => {
     await page.getByLabel('Confirm the new password').fill(NEW_PASSWORD);
     await page.getByRole('button', { name: 'Change password' }).click();
     await expect(page.getByText("This isn't your current password")).toBeVisible();
+    await expect(current).toHaveAttribute('aria-invalid', 'true');
 
     await current.fill(PASSWORD);
     await page.getByLabel('New password', { exact: true }).fill(NEW_PASSWORD);

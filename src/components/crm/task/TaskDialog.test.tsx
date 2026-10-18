@@ -95,4 +95,20 @@ describe(TaskDialog, () => {
 
     expect(sentBody()).toMatchObject({ companyId: 8, contactId: 9 });
   });
+
+  it('marks a picker invalid when the backend refuses the record it holds', async () => {
+    vi.mocked(TaskActions.updateTask).mockClear();
+    await openDialog(TASK);
+    vi.mocked(TaskActions.updateTask).mockResolvedValue({
+      ok: false,
+      message: 'Check the highlighted fields and try again.',
+      fieldErrors: { contactId: 'is not in this workspace' },
+    });
+
+    await save();
+
+    await expect
+      .element(page.getByRole('combobox', { name: 'Contact' }))
+      .toHaveAttribute('aria-invalid', 'true');
+  });
 });

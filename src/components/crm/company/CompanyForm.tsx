@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { Link } from '@/libs/I18nNavigation';
 import type { CompanyDuplicateValues, CompanyValues } from '@/validations/crm/CompanyValidation';
 import { CompanyValidation } from '@/validations/crm/CompanyValidation';
@@ -92,11 +93,7 @@ export const CompanyForm = (props: {
       return;
     }
 
-    for (const [name, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (isFormField(name)) {
-        form.setError(name, { type: 'server', message });
-      }
-    }
+    applyFieldErrors(form, result.fieldErrors, (name) => (isFormField(name) ? name : undefined));
     setFailure(result);
   });
 
