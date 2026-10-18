@@ -45,7 +45,13 @@ export const TestResultForm = () => {
     });
 
     if (result.ok) {
-      form.reset();
+      // Field by field: `reset` finds the fields through registrations that the compiled form
+      // makes only once, so it clears the inputs the first time and never again.
+      form.resetField('testName');
+      form.resetField('status');
+      form.resetField('score');
+      form.resetField('testedAt');
+      form.resetField('notes');
       setCreated(true);
       return;
     }

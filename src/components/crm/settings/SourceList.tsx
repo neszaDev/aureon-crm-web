@@ -73,9 +73,9 @@ const SourceForm = (props: {
     setFailure(undefined);
     const result = await props.onSubmit(values);
     if (result.ok) {
-      // Keeping the fields' registrations: dropped, the compiled form never registers them again
-      // and the inputs would keep what was typed.
-      form.reset(props.defaults, { keepFieldsRef: true });
+      // Field by field: `reset` finds the fields through registrations that the compiled form
+      // makes only once, so it clears the inputs the first time and never again.
+      form.resetField('name', { defaultValue: props.defaults.name });
       props.onSaved?.();
       return;
     }

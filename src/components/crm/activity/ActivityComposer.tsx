@@ -76,18 +76,14 @@ export const ActivityComposer = (props: {
       if (props.onSaved) {
         props.onSaved();
       } else {
-        // Ready for the next one, of the same type, happening now. The fields keep their
-        // registrations: dropped, the compiled form never registers them again and the inputs
-        // would keep what was typed.
-        form.reset(
-          {
-            type: values.type,
-            subject: '',
-            body: '',
-            occurredAt: toLocalInput(new Date().toISOString(), props.timeZone),
-          },
-          { keepFieldsRef: true },
-        );
+        // Ready for the next one, of the same type, happening now. Field by field: `reset` finds
+        // the fields through registrations that the compiled form makes only once, so it clears
+        // the inputs the first time and never again.
+        form.resetField('subject');
+        form.resetField('body');
+        form.resetField('occurredAt', {
+          defaultValue: toLocalInput(new Date().toISOString(), props.timeZone),
+        });
       }
       return;
     }

@@ -93,4 +93,20 @@ describe(LeadForm, () => {
     expect(selected('lead-priority')).toBe('HIGH');
     expect(selected('lead-currency')).toBe('USD');
   });
+
+  it('sends what was typed since the last save, not the values saved before', async () => {
+    const action = vi.fn<Action>().mockResolvedValue({ ok: true });
+    await render(form({ action }));
+
+    await page.getByLabelText('First name').fill('Mina');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
+    await page.getByLabelText('First name').fill('Mira');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+
+    await vi.waitFor(() => {
+      expect(action).toHaveBeenCalledTimes(2);
+    });
+    expect(action).toHaveBeenLastCalledWith(expect.objectContaining({ firstName: 'Mira' }));
+  });
 });

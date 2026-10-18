@@ -47,7 +47,8 @@ export const EditUserForm = (props: { id: number; defaults: UpdateUserValues }) 
     const result = await updateUser(props.id, values);
 
     if (result.ok) {
-      form.reset(values);
+      // Keep the fields' registrations: dropped, the compiled form never registers them again.
+      form.reset(values, { keepFieldsRef: true });
       setSaved(true);
       return;
     }

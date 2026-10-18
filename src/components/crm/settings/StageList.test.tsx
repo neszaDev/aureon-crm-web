@@ -205,16 +205,25 @@ describe(StageList, () => {
     await expect.element(page.getByRole('heading', { name: 'Pipeline' })).toHaveFocus();
   });
 
-  it('clears the add form once the stage is saved, ready for the next one', async () => {
+  it('clears the add form each time a stage is saved, ready for the next one', async () => {
+    done.mockClear();
     await renderList(vi.fn<Reorder>());
-    await page.getByLabelText('Stage name').fill('Demo');
-    await page.getByLabelText('Win probability (%)').fill('40');
+    const name = page.getByLabelText('Stage name');
+    const probability = page.getByLabelText('Win probability (%)');
 
+    await name.fill('Demo');
+    await probability.fill('40');
     await page.getByRole('button', { name: 'Add stage' }).click();
 
-    expect(done).toHaveBeenCalledWith({ name: 'Demo', probability: 40 });
-    await expect.element(page.getByLabelText('Stage name')).toHaveValue('');
+    await expect.element(name).toHaveValue('');
     // Back to the add form's own starting probability.
-    await expect.element(page.getByLabelText('Win probability (%)')).toHaveValue(50);
+    await expect.element(probability).toHaveValue(50);
+    expect(done).toHaveBeenLastCalledWith({ name: 'Demo', probability: 40 });
+
+    await name.fill('Review');
+    await page.getByRole('button', { name: 'Add stage' }).click();
+
+    await expect.element(name).toHaveValue('');
+    expect(done).toHaveBeenLastCalledWith({ name: 'Review', probability: 50 });
   });
 });

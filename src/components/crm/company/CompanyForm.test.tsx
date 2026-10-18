@@ -159,4 +159,20 @@ describe(CompanyForm, () => {
     await expect.element(link).toHaveAttribute('target', '_blank');
     expect(findDuplicates).toHaveBeenCalledWith({ name: 'ACME', website: 'https://acme.test' }, 42);
   });
+
+  it('sends what was typed since the last save, not the values saved before', async () => {
+    const action = vi.fn<Action>().mockResolvedValue({ ok: true });
+    await renderForm({ action });
+
+    await page.getByLabelText('Company name').fill('Acme Ltd');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
+    await page.getByLabelText('Company name').fill('Acme GmbH');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+
+    await vi.waitFor(() => {
+      expect(action).toHaveBeenCalledTimes(2);
+    });
+    expect(action).toHaveBeenLastCalledWith(expect.objectContaining({ name: 'Acme GmbH' }));
+  });
 });

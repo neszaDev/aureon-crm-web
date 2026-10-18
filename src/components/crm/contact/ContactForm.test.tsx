@@ -132,4 +132,20 @@ describe(ContactForm, () => {
     await expect.element(page.getByText('Each tag takes 1 to 40 characters')).toBeVisible();
     expect(action).not.toHaveBeenCalled();
   });
+
+  it('sends what was typed since the last save, not the values saved before', async () => {
+    const action = vi.fn<Action>().mockResolvedValue({ ok: true });
+    await renderForm({ action });
+
+    await page.getByLabelText('First name').fill('Mina');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
+    await page.getByLabelText('First name').fill('Mira');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+
+    await vi.waitFor(() => {
+      expect(action).toHaveBeenCalledTimes(2);
+    });
+    expect(action).toHaveBeenLastCalledWith(expect.objectContaining({ firstName: 'Mira' }));
+  });
 });

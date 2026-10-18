@@ -55,7 +55,9 @@ const ReplyForm = (props: { message: Mail }) => {
             box: 'sent',
           }),
         );
-        form.reset();
+        // Not `reset`: it finds the field through a registration that the compiled form makes only
+        // once, so it clears the input the first time and never again.
+        form.resetField('reply');
         toast.success(t('reply_sent'));
       })}
     >

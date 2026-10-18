@@ -152,6 +152,13 @@ and the tokens in `src/styles/global.css`; see `DESIGN.md`. Responsive. No unnec
   `setError` loop: `setError` edits `errors` in place, which the compiled (production) form does
   not see. Vitest compiles with the React Compiler too, so a test that asserts the error text and
   `aria-invalid` catches it; the e2e suite should also pass against `pnpm build` + `next start`.
+- A form that stays mounted after a save clears or rebases its fields in a way the compiled form
+  keeps working, because react-hook-form finds a field's input through a registration the compiled
+  form makes only once. To clear fields, call `form.resetField(name, { defaultValue })` for each
+  (`form.reset(...)` clears them the first time and never again). To rebase on what was saved
+  (`reset(values)`), pass `{ keepFieldsRef: true }`, or the next edit isn't tracked. Test it:
+  save, retype, save again, and assert the second call carries the new values (and, for a clear,
+  that the fields are empty again).
 
 ### Pages
 - Default export name ends with `Page`. Props alias (if reused) ends with `PageProps`.

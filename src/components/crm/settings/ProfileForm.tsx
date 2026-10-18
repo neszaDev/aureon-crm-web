@@ -42,7 +42,8 @@ export const ProfileForm = (props: {
     setSaved(false);
     const result = await props.action(values);
     if (result.ok) {
-      form.reset(values);
+      // Keep the fields' registrations: dropped, the compiled form never registers them again.
+      form.reset(values, { keepFieldsRef: true });
       setSaved(true);
       return;
     }

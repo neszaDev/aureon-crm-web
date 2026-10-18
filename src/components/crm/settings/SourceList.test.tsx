@@ -9,7 +9,7 @@ import { SourceList } from './SourceList';
 const done = vi.fn<() => Promise<ActionResult>>().mockResolvedValue({ ok: true });
 
 describe(SourceList, () => {
-  it('clears the add form once the source is saved, ready for the next one', async () => {
+  it('clears the add form each time a source is saved, ready for the next one', async () => {
     await render(
       <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
         <SourceList
@@ -20,11 +20,18 @@ describe(SourceList, () => {
         />
       </NextIntlClientProvider>,
     );
-    await page.getByLabelText('Source name').fill('Trade fair');
+    const name = page.getByLabelText('Source name');
 
+    await name.fill('Trade fair');
     await page.getByRole('button', { name: 'Add source' }).click();
 
-    expect(done).toHaveBeenCalledWith({ name: 'Trade fair' });
-    await expect.element(page.getByLabelText('Source name')).toHaveValue('');
+    await expect.element(name).toHaveValue('');
+    expect(done).toHaveBeenLastCalledWith({ name: 'Trade fair' });
+
+    await name.fill('Referral');
+    await page.getByRole('button', { name: 'Add source' }).click();
+
+    await expect.element(name).toHaveValue('');
+    expect(done).toHaveBeenLastCalledWith({ name: 'Referral' });
   });
 });

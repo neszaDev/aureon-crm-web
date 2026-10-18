@@ -168,4 +168,20 @@ describe(DealForm, () => {
     expect(selected('deal-stage')).toBe('12');
     expect(selected('deal-currency')).toBe('USD');
   });
+
+  it('sends what was typed since the last save, not the values saved before', async () => {
+    const action = vi.fn<Action>().mockResolvedValue({ ok: true });
+    await render(form({ action }));
+
+    await page.getByLabelText('Amount').fill('100.00');
+    await page.getByRole('button', { name: 'Create deal' }).click();
+    await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
+    await page.getByLabelText('Amount').fill('200.00');
+    await page.getByRole('button', { name: 'Create deal' }).click();
+
+    await vi.waitFor(() => {
+      expect(action).toHaveBeenCalledTimes(2);
+    });
+    expect(action).toHaveBeenLastCalledWith(expect.objectContaining({ amount: '200.00' }));
+  });
 });

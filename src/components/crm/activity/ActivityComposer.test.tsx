@@ -50,9 +50,16 @@ describe(ActivityComposer, () => {
       .toHaveTextContent('You can only edit your own activities.');
   });
 
-  it('clears the subject and details once logged, ready for the next activity', async () => {
+  it('clears the subject and details each time it is logged, ready for the next activity', async () => {
     await renderForm({ ok: true });
     await page.getByLabelText('Details').fill('Wants a quote');
+    await page.getByRole('button', { name: 'Log' }).click();
+
+    await expect.element(page.getByLabelText('Subject')).toHaveValue('');
+    await expect.element(page.getByLabelText('Details')).toHaveValue('');
+
+    await page.getByLabelText('Subject').fill('Sent the quote');
+    await page.getByLabelText('Details').fill('Valid for 30 days');
     await page.getByRole('button', { name: 'Log' }).click();
 
     await expect.element(page.getByLabelText('Subject')).toHaveValue('');
