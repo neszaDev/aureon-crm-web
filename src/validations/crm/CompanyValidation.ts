@@ -2,13 +2,17 @@ import * as z from 'zod';
 
 const optionalText = (max: number) => z.string().trim().max(max, 'too_long');
 
+// A leading scheme, even mistyped (`http:/`, `https:x`, `http//`), which stays for the format
+// check to refuse; a colon before a digit is a port (`acme.com:8080`), not a scheme.
+const SCHEME_ATTEMPT = /^[a-z][a-z\d+.-]*(?::\/*(?!\d)|\/\/)/iu;
+
 /**
  * A website as typed, with `https://` in front when it has no scheme (`acme.com`). Idempotent.
  * @param value The trimmed website.
  * @returns The website to check and send.
  */
 const withScheme = (value: string) =>
-  value && !value.includes('://') ? `https://${value}` : value;
+  value && !SCHEME_ATTEMPT.test(value) ? `https://${value}` : value;
 
 // Mirrors the backend's CompanyInput (Create/UpdateCompanyRequest). Messages are `Validation`
 // translation keys. Fields hold what the inputs hold (text); an empty one is sent as absent.

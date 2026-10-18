@@ -1,0 +1,131 @@
+import type { Metadata } from 'next';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { findContactDuplicates, updateContact } from '@/actions/crm/ContactActions';
+import { ContactForm } from '@/components/crm/contact/ContactForm';
+import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
+import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
+import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import {
+  getContact,
+  getContactTags,
+  getLeadSources,
+  getMembers,
+  getWorkspace,
+} from '@/libs/api/CrmQueries';
+import { getCurrentUser } from '@/libs/api/Queries';
+import type { components } from '@/libs/api/schema';
+import { endRejectedSession } from '@/libs/api/Session';
+import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
+import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
+import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
+import type { ContactValues } from '@/validations/crm/ContactValidation';
+
+type EditContactPageProps = {
+  params: Promise<{ locale: string; workspaceId: string; id: string }>;
+};
+
+/**
+ * The form's values of a saved contact: what the inputs hold, an absent field empty.
+ * @param contact The contact.
+ * @returns The values.
+ */
+const formValues = (contact: components['schemas']['ContactResponse']): ContactValues => ({
+  firstName: contact.firstName,
+  lastName: contact.lastName ?? '',
+  email: contact.email ?? '',
+  phone: contact.phone ?? '',
+  jobTitle: contact.jobTitle ?? '',
+  companyId: contact.company?.id ?? null,
+  ownerId: contact.owner?.userId ?? null,
+  sourceId: contact.source?.id ?? null,
+  tags: contact.tags,
+  notes: contact.notes ?? '',
+});
+
+export async function generateMetadata(props: EditContactPageProps): Promise<Metadata> {
+  const { locale, workspaceId, id } = await props.params;
+  const t = await getTranslations({ locale, namespace: 'EditContactPage' });
+  const tNotFound = await getTranslations({ locale, namespace: 'RecordNotFound' });
+  // The same cached calls as the page, which shows ForbiddenNotice to a member who can't edit.
+  const [{ contact, forbidden }, { user }, { workspace }] = await Promise.all([
+    getContact(workspaceId, id),
+    getCurrentUser(),
+    getWorkspace(workspaceId),
+  ]);
+  const refused =
+    contact && user && workspace && !canEditRecord(workspace, user.id, contact.owner?.userId);
+
+  return await workspacePageMetadata({
+    locale,
+    workspaceId,
+    title: contact ? t('title', { name: contact.fullName }) : tNotFound('title'),
+    forbidden: forbidden || refused,
+  });
+}
+
+export default async function EditContactPage(props: EditContactPageProps) {
+  const { locale, workspaceId, id } = await props.params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'EditContactPage' });
+  const tContact = await getTranslations({ locale, namespace: 'ContactPage' });
+
+  // The workspace (a cached call); a lost one is "not found" even on a client navigation.
+  const [{ workspace }, { user }, result, members, sources, tags] = await Promise.all([
+    getOpenWorkspace(locale, workspaceId),
+    getCurrentUser(),
+    getContact(workspaceId, id),
+    getMembers(workspaceId),
+    getLeadSources(workspaceId),
+    getContactTags(workspaceId),
+  ]);
+  if ([result, members, sources, tags].some((item) => item.unauthorized)) {
+    return endRejectedSession(locale);
+  }
+  if (!workspace) {
+    throw new Error('Could not load the workspace');
+  }
+  const path = `/app/${workspace.id}/contacts`;
+  if (result.notFound) {
+    return <RecordNotFound href={path} backLabel={tContact('back')} />;
+  }
+  const { contact } = result;
+  if (
+    result.forbidden ||
+    (contact && user && !canEditRecord(workspace, user.id, contact.owner?.userId))
+  ) {
+    return <ForbiddenNotice page />;
+  }
+  if (!contact || !user || !members.members || !sources.sources || !tags.tags) {
+    throw new Error('Could not load the contact');
+  }
+
+  return (
+    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+      <SettingsHeader
+        title={t('title', { name: contact.fullName })}
+        description={t('description')}
+      />
+      <section
+        aria-label={contact.fullName}
+        className="max-w-3xl rounded-lg border border-rule bg-card p-5 sm:p-6"
+      >
+        <ContactForm
+          action={updateContact.bind(null, workspace.id, contact.id, contact.version)}
+          findDuplicates={findContactDuplicates.bind(null, workspace.id)}
+          defaults={formValues(contact)}
+          company={contact.company ? { id: contact.company.id, label: contact.company.name } : null}
+          recordId={contact.id}
+          workspaceId={workspace.id}
+          members={members.members}
+          me={user.id}
+          canAssign={canAssign(workspace)}
+          sources={sources.sources}
+          tags={tags.tags}
+          listPath={path}
+          cancelHref={`${path}/${contact.id}`}
+          submitLabel={t('submit')}
+        />
+      </section>
+    </div>
+  );
+}

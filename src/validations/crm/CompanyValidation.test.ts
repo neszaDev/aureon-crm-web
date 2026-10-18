@@ -75,6 +75,28 @@ describe('company validation', () => {
     expect(parse('')).toBe('');
   });
 
+  it('refuses a mistyped scheme instead of putting https:// in front of it', () => {
+    for (const value of [
+      'http//acme.com',
+      'HTTPS//acme.com',
+      'http:/acme.com',
+      'https:acme.com',
+      'mailto:mia@acme.com',
+      // oxlint-disable-next-line no-script-url -- test input, never executed
+      'javascript:alert(1)',
+    ]) {
+      expect(messageFor('website', value)).toBe('website_format');
+    }
+  });
+
+  it('adds https:// to a host with a port, and to a path that holds an address', () => {
+    const parse = (value: string) => CompanyValidation.parse({ ...VALID, website: value }).website;
+
+    expect(parse('acme.com:8080/shop')).toBe('https://acme.com:8080/shop');
+    expect(parse('localhost:3000')).toBe('https://localhost:3000');
+    expect(parse('acme.com/go?to=https://x.test')).toBe('https://acme.com/go?to=https://x.test');
+  });
+
   it('takes a website of at most 255 characters, the added scheme included', () => {
     expect(messageFor('website', website(255))).toBeUndefined();
     expect(messageFor('website', website(256))).toBe('too_long');

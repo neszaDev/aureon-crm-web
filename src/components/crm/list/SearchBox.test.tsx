@@ -46,6 +46,40 @@ describe(SearchBox, () => {
     await expect.element(input).toHaveValue('');
   });
 
+  it('asks nothing when typing comes back to the search the URL holds', async () => {
+    router.replace.mockClear();
+    // The URL changes without this box (Back): it holds "acme" from now on.
+    const screen = await render(box({}));
+    await screen.rerender(box({ q: 'acme' }));
+    const input = page.getByLabelText('Search');
+    await expect.element(input).toHaveValue('acme');
+
+    await userEvent.type(input, 'x{Backspace}');
+    // Past the typing pause, when a request would have gone.
+    const { promise, resolve } = Promise.withResolvers<undefined>();
+    setTimeout(resolve, 500);
+    await promise;
+
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it('asks again for a value typed back to while a later search is on its way', async () => {
+    router.replace.mockClear();
+    const screen = await render(box({}));
+    const input = page.getByLabelText('Search');
+
+    await input.fill('a');
+    await expect.poll(() => router.replace.mock.lastCall?.[0]).toBe(`${PATH}?q=a`);
+    await input.fill('ab');
+    await expect.poll(() => router.replace.mock.lastCall?.[0]).toBe(`${PATH}?q=ab`);
+    // "a" lands while "ab" is still on its way: the list would end on "ab".
+    await screen.rerender(box({ q: 'a' }));
+    await input.fill('a');
+
+    await expect.poll(() => router.replace.mock.calls.length).toBe(3);
+    expect(router.replace.mock.lastCall?.[0]).toBe(`${PATH}?q=a`);
+  });
+
   it('follows a change of the URL it did not ask for', async () => {
     const screen = await render(box({ q: 'acme' }));
 

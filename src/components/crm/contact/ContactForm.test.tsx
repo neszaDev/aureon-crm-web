@@ -1,0 +1,90 @@
+import { NextIntlClientProvider } from 'next-intl';
+import { describe, expect, it, vi } from 'vitest';
+import { render } from 'vitest-browser-react';
+import { page, userEvent } from 'vitest/browser';
+import { searchRecords } from '@/actions/crm/RecordSearchActions';
+import type { ActionResult } from '@/libs/api/ApiError';
+import type { components } from '@/libs/api/schema';
+import messages from '@/locales/en.json';
+import type { ContactDuplicateValues, ContactValues } from '@/validations/crm/ContactValidation';
+import { ContactForm } from './ContactForm';
+
+vi.mock(import('@/actions/crm/RecordSearchActions'), () => ({
+  searchRecords: vi.fn<typeof searchRecords>(),
+}));
+
+type Action = (values: ContactValues) => Promise<ActionResult>;
+type FindDuplicates = (
+  values: ContactDuplicateValues,
+  excludeId?: number,
+) => Promise<components['schemas']['ContactRef'][]>;
+
+const ME = 1;
+const SAVED: ContactValues = {
+  firstName: 'Mia',
+  lastName: 'Chan',
+  email: 'mia@acme.test',
+  phone: '',
+  jobTitle: '',
+  companyId: 7,
+  ownerId: ME,
+  sourceId: null,
+  tags: ['b2b'],
+  notes: '',
+};
+
+const renderForm = async (props: { action: Action; findDuplicates?: FindDuplicates }) => {
+  await render(
+    <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+      <ContactForm
+        action={props.action}
+        findDuplicates={props.findDuplicates ?? vi.fn<FindDuplicates>().mockResolvedValue([])}
+        defaults={SAVED}
+        company={{ id: 7, label: 'Acme' }}
+        recordId={42}
+        workspaceId={1}
+        members={[{ userId: ME, email: 'mia@acme.test', displayName: 'Mia Manager' }]}
+        me={ME}
+        canAssign
+        sources={[]}
+        tags={['vip']}
+        listPath="/app/1/contacts"
+        cancelHref="/app/1/contacts/42"
+        submitLabel="Save changes"
+      />
+    </NextIntlClientProvider>,
+  );
+};
+
+describe(ContactForm, () => {
+  it('sends the picked company and the tags, and Enter in the tags does not submit', async () => {
+    vi.mocked(searchRecords).mockResolvedValue([{ id: 9, label: 'Globex' }]);
+    const action = vi.fn<Action>().mockResolvedValue({ ok: true });
+    await renderForm({ action });
+
+    await page.getByRole('combobox', { name: 'Company' }).click();
+    await page.getByRole('option', { name: /Globex/u }).click();
+    await userEvent.type(page.getByLabelText('Tags'), 'VIP{Enter}');
+    expect(action).not.toHaveBeenCalled();
+    await page.getByRole('button', { name: 'Save changes' }).click();
+
+    await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
+    expect(action).toHaveBeenCalledWith(
+      expect.objectContaining({ companyId: 9, tags: ['b2b', 'vip'] }),
+    );
+  });
+
+  it('lists possible duplicates, other than this contact, after the email loses focus', async () => {
+    const findDuplicates = vi
+      .fn<FindDuplicates>()
+      .mockResolvedValue([{ id: 7, fullName: 'Mia C.', email: 'mia@acme.test' }]);
+    await renderForm({ action: vi.fn<Action>(), findDuplicates });
+
+    await page.getByLabelText('Email').fill('MIA@acme.test');
+    await page.getByLabelText('Phone').click();
+
+    const link = page.getByRole('link', { name: /Mia C\./u });
+    await expect.element(link).toHaveAttribute('href', '/app/1/contacts/7');
+    expect(findDuplicates).toHaveBeenCalledWith({ email: 'MIA@acme.test', phone: '' }, 42);
+  });
+});

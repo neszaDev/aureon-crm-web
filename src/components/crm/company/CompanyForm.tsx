@@ -86,6 +86,8 @@ export const CompanyForm = (props: {
     setSaved(false);
     const result = await props.action(values);
     if (result.ok) {
+      // The fields show what was saved: trimmed, the website with its scheme.
+      form.reset(values);
       setSaved(true);
       return;
     }

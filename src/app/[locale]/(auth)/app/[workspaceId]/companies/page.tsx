@@ -96,7 +96,11 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
     empty = <ListEmpty variant="filtered" clearHref={path} />;
   } else if (query.archived) {
     empty = (
-      <ListEmpty variant="none" title={t('archived_empty_title')} text={t('archived_empty_text')} />
+      <ListEmpty
+        variant="archived"
+        text={t('archived_empty_text')}
+        activeHref={listHref(path, query, { archived: undefined })}
+      />
     );
   }
 

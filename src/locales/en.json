@@ -142,7 +142,9 @@
     "probability_range": "Use a whole number from 0 to 100",
     "money_format": "Enter an amount like 1250.50: digits, an optional dot and up to 2 decimals",
     "website_format": "Enter a web address starting with http:// or https://",
-    "employee_count_range": "Use a whole number from 0 to 10,000,000"
+    "employee_count_range": "Use a whole number from 0 to 10,000,000",
+    "too_many_tags": "Use at most 20 tags",
+    "tag_length": "Each tag takes 1 to 40 characters"
   },
   "DashboardLayout": {
     "meta_title": "Dashboard",
@@ -186,6 +188,7 @@
     "nav_label": "Workspace navigation",
     "nav_dashboard": "Dashboard",
     "nav_companies": "Companies",
+    "nav_contacts": "Contacts",
     "nav_settings": "Settings",
     "open_menu": "Open menu",
     "close_menu": "Close menu",
@@ -521,7 +524,8 @@
     "clear_filters": "Clear filters",
     "invalid_title": "These filters can't be used together",
     "invalid_text": "The link holds a search or filters the list can't apply. Reset the list to start again.",
-    "invalid_reset": "Reset the list"
+    "invalid_reset": "Reset the list",
+    "view_active_link": "Back to the active list"
   },
   "OwnerField": {
     "you": "{name} (you)",
@@ -574,7 +578,6 @@
     "archived_heading": "{count, plural, =0 {No archived companies} one {# archived company} other {# archived companies}}",
     "empty_title": "No companies yet",
     "empty_text": "Add the organisations you sell to. Their contacts and deals hang off them.",
-    "archived_empty_title": "No archived companies",
     "archived_empty_text": "Companies you archive show here, ready to restore."
   },
   "CompanyTable": {
@@ -623,6 +626,107 @@
     "title": "Edit {name}",
     "description": "Changes show for everyone in the workspace once saved.",
     "submit": "Save changes"
+  },
+  "CompanyContacts": {
+    "title": "Contacts",
+    "count": "{count, number}",
+    "new": "New contact",
+    "empty": "No one at this company yet.",
+    "view_all": "{count, plural, one {View # contact in the list} other {View all # contacts}}"
+  },
+  "ContactsPage": {
+    "title": "Contacts",
+    "description": "The people you deal with, at their companies.",
+    "new": "New contact",
+    "toolbar_label": "Search contacts",
+    "search_label": "Search",
+    "search_placeholder": "Name, email, phone or company",
+    "company_label": "Company",
+    "company_any": "Any company",
+    "company_unknown": "Unknown company",
+    "owner_label": "Owner",
+    "owner_any": "Anyone",
+    "owner_me": "Me",
+    "owner_unassigned": "Unassigned",
+    "owner_former": "Former member",
+    "source_label": "Source",
+    "source_any": "Any source",
+    "source_unknown": "Unknown source",
+    "tag_label": "Tag",
+    "tag_any": "Any tag",
+    "list_heading": "{count, plural, =0 {No contacts} one {# contact} other {# contacts}}",
+    "archived_heading": "{count, plural, =0 {No archived contacts} one {# archived contact} other {# archived contacts}}",
+    "empty_title": "No contacts yet",
+    "empty_text": "Add the people you talk to. Link each one to their company to see them on its page.",
+    "archived_empty_text": "Contacts you archive show here, ready to restore."
+  },
+  "ContactTable": {
+    "name": "Name",
+    "company": "Company",
+    "email": "Email",
+    "phone": "Phone",
+    "owner": "Owner",
+    "tags": "Tags",
+    "updated": "Updated",
+    "unassigned": "Unassigned",
+    "tags_more": "+{count}",
+    "tags_more_label": "{count, plural, one {and # more tag} other {and # more tags}}"
+  },
+  "ContactForm": {
+    "first_name_label": "First name",
+    "last_name_label": "Last name",
+    "email_label": "Email",
+    "phone_label": "Phone",
+    "job_title_label": "Job title",
+    "company_label": "Company",
+    "owner_label": "Owner",
+    "source_label": "Source",
+    "tags_label": "Tags",
+    "notes_label": "Notes",
+    "cancel": "Cancel",
+    "saved": "Saved",
+    "error_invalid_input": "Check the highlighted fields",
+    "error_generic": "The contact wasn't created. Try again."
+  },
+  "NewContactPage": {
+    "title": "New contact",
+    "description": "Add someone you deal with. Link them to their company so they show on its page.",
+    "submit": "Create contact"
+  },
+  "ContactPage": {
+    "back": "Back to contacts",
+    "details": "Contact details",
+    "email": "Email",
+    "phone": "Phone",
+    "job_title": "Job title",
+    "company": "Company",
+    "source": "Source",
+    "tags": "Tags",
+    "notes": "Notes",
+    "edit": "Edit"
+  },
+  "EditContactPage": {
+    "title": "Edit {name}",
+    "description": "Changes show for everyone in the workspace once saved.",
+    "submit": "Save changes"
+  },
+  "RecordPicker": {
+    "none": "None",
+    "searching": "Searching…",
+    "empty": "Nothing found",
+    "search_company": "Search companies",
+    "clear_company": "Clear company"
+  },
+  "TagInput": {
+    "remove": "Remove {tag}",
+    "add": "Add {tag}",
+    "suggestions": "Tags in use",
+    "hint": "Press Enter or type a comma after each tag.",
+    "limit": "A contact takes at most {max} tags. Remove one to add another."
+  },
+  "SourceField": {
+    "none": "None",
+    "archived": "{name} (archived)"
   },
   "DashboardPage": {
     "title": "Overview",

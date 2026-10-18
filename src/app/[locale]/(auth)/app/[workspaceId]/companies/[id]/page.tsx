@@ -2,16 +2,18 @@ import { ExternalLinkIcon, PencilIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { archiveCompany, restoreCompany } from '@/actions/crm/CompanyActions';
+import { CompanyContacts } from '@/components/crm/company/CompanyContacts';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { ArchiveButton } from '@/components/crm/record/ArchiveButton';
 import { RecordFacts } from '@/components/crm/record/RecordFacts';
 import { RecordHeader } from '@/components/crm/record/RecordHeader';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { Button } from '@/components/ui/button';
-import { getCompany } from '@/libs/api/CrmQueries';
+import { CONTACT_LIST, getCompany, getContacts } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
 import { recordNumber } from '@/libs/crm/Format';
+import { parseListQuery } from '@/libs/crm/ListQuery';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canEditRecord } from '@/libs/crm/RecordAccess';
@@ -38,14 +40,19 @@ export default async function CompanyPage(props: CompanyPageProps) {
   const { locale, workspaceId, id } = await props.params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'CompanyPage' });
+  // Its first 10 active contacts, by name (a malformed id filters nothing: none are asked for).
+  const contactsQuery = { ...parseListQuery(CONTACT_LIST, { companyId: id }), size: 10 };
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
-  const [{ workspace }, { user }, result] = await Promise.all([
+  const [{ workspace }, { user }, result, contacts] = await Promise.all([
     getOpenWorkspace(locale, workspaceId),
     getCurrentUser(),
     getCompany(workspaceId, id),
+    contactsQuery.filters.companyId === undefined
+      ? undefined
+      : getContacts(workspaceId, contactsQuery),
   ]);
-  if (result.unauthorized) {
+  if (result.unauthorized || contacts?.unauthorized) {
     return endRejectedSession(locale);
   }
   if (!workspace) {
@@ -59,7 +66,7 @@ export default async function CompanyPage(props: CompanyPageProps) {
     return <ForbiddenNotice page />;
   }
   const { company } = result;
-  if (!company || !user) {
+  if (!company || !user || !contacts?.contacts) {
     throw new Error('Could not load the company');
   }
 
@@ -143,6 +150,12 @@ export default async function CompanyPage(props: CompanyPageProps) {
             value: company.notes && <span className="whitespace-pre-line">{company.notes}</span>,
           },
         ]}
+      />
+      <CompanyContacts
+        contacts={contacts.contacts.content}
+        total={contacts.contacts.totalElements}
+        contactsPath={`/app/${workspace.id}/contacts`}
+        companyId={company.id}
       />
     </div>
   );

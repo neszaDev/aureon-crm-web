@@ -70,14 +70,12 @@ export const CompanyTable = (props: {
             <TableCell className="whitespace-normal max-md:hidden">
               {company.industry ?? <span className="text-muted-foreground">—</span>}
             </TableCell>
-            <TableCell>
+            <TableCell className="whitespace-normal">
               {company.owner ? (
                 <span className="flex items-center gap-2">
                   <Seal name={company.owner.displayName} email={company.owner.email} size="sm" />
-                  <span
-                    title={company.owner.displayName ?? company.owner.email}
-                    className="block max-w-40 min-w-0 truncate"
-                  >
+                  {/* Wraps rather than truncating: touch and keyboard users can't hover a title. */}
+                  <span className="max-w-40 min-w-0 break-words">
                     {company.owner.displayName ?? company.owner.email}
                   </span>
                 </span>

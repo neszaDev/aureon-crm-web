@@ -69,6 +69,16 @@ describe(CompanyForm, () => {
     await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
   });
 
+  it('shows the website as it was saved, with its scheme', async () => {
+    await renderForm({ action: vi.fn<Action>().mockResolvedValue({ ok: true }) });
+
+    await page.getByLabelText('Website').fill(' acme.com ');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+
+    await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
+    await expect.element(page.getByLabelText('Website')).toHaveValue('https://acme.com');
+  });
+
   it("shows the backend's field error under its field", async () => {
     await renderForm({
       action: vi.fn<Action>().mockResolvedValue({

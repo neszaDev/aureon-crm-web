@@ -51,6 +51,13 @@ export const COMPANY_LIST = {
   filters: { ownerId: 'id', industry: 'text' },
 } as const satisfies ListSpec;
 
+/** The contact list's sorts and filters (api.md, Contacts). */
+export const CONTACT_LIST = {
+  sorts: ['NAME', 'COMPANY', 'CREATED_AT', 'UPDATED_AT'],
+  defaultSort: 'NAME',
+  filters: { companyId: 'id', ownerId: 'id', sourceId: 'id', tag: 'text' },
+} as const satisfies ListSpec;
+
 /**
  * Loads the signed-in user's workspaces (`GET /workspaces`), by name.
  * @returns The workspaces (id, name, role) and the outcome flags.
@@ -203,6 +210,68 @@ export const getCompany = cache(async (segment: string, id: string) => {
 
   return { company: data, ...flags(response.status) };
 });
+
+/**
+ * Loads a page of the workspace's contacts (`GET /workspaces/{id}/contacts`).
+ * @param segment The `[workspaceId]` route segment.
+ * @param query The list query, read with `CONTACT_LIST`.
+ * @returns The page and the outcome flags (`invalid`: the backend refused the query).
+ */
+export const getContacts = async (segment: string, query: ListQuery<typeof CONTACT_LIST>) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { contacts: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/contacts', {
+    params: { path: { workspaceId }, query: listParams(query) },
+  });
+
+  return { contacts: data, ...flags(response.status) };
+};
+
+/**
+ * Loads one contact (`GET /workspaces/{id}/contacts/{id}`). Cached for the request, so the page
+ * and its metadata share one call.
+ * @param segment The `[workspaceId]` route segment.
+ * @param id The `[id]` route segment.
+ * @returns The contact and the outcome flags (`notFound` for a malformed id too).
+ */
+export const getContact = cache(async (segment: string, id: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  const contactId = toRecordId(id);
+  if (workspaceId === undefined || contactId === undefined) {
+    return { contact: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/contacts/{id}', {
+    params: { path: { workspaceId, id: contactId } },
+  });
+
+  return { contact: data, ...flags(response.status) };
+});
+
+/**
+ * Loads the tags of the workspace's active contacts, each once, sorted
+ * (`GET /workspaces/{id}/contacts/tags`): the tag filter's options and the tag suggestions.
+ * @param segment The `[workspaceId]` route segment.
+ * @returns The tags and the outcome flags.
+ */
+export const getContactTags = async (segment: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { tags: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/contacts/tags', {
+    params: { path: { workspaceId } },
+  });
+
+  return { tags: data, ...flags(response.status) };
+};
 
 /**
  * Previews an invitation link (`GET /invitations/{token}`, public, so without the session: a
