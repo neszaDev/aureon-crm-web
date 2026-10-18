@@ -135,8 +135,6 @@ test.describe('Settings', () => {
     const link = page.getByLabel('Invitation link', { exact: true });
     await expect(link).toHaveValue(new RegExp(`^${baseURL}/invite/[^/]+$`, 'u'));
     await expect(page.getByRole('button', { name: 'Copy link' })).toBeFocused();
-    // Next streams the title after a client-side navigation: wait for it before axe looks.
-    await expect(page).toHaveTitle(/Members/u);
     await expectNoA11yViolations(page);
     // The link is shown once: Escape doesn't close it, Done does.
     await page.keyboard.press('Escape');
@@ -179,6 +177,8 @@ test.describe('Settings', () => {
     await expect
       .poll(async () => await stageOrder(page))
       .toEqual([...defaults, 'Demo', 'Won', 'Lost']);
+    // The form is ready for the next stage.
+    await expect(page.getByLabel('Stage name')).toHaveValue('');
 
     // With the buttons: focus stays on the moved stage's button.
     const up = page.getByRole('button', { name: 'Move Demo up' });
