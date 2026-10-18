@@ -1,8 +1,14 @@
 import 'server-only';
 import { cache } from 'react';
 import type { ListQuery, ListSpec } from '@/libs/crm/ListQuery';
+import { PAGE_SIZES } from '@/libs/crm/ListQuery';
 import { toRecordId, toWorkspaceId } from '@/libs/crm/WorkspaceId';
+import type { ActivityLink } from '@/validations/crm/ActivityValidation';
 import { authedBackend, backend } from './Backend';
+import type { operations } from './schema';
+
+/** What the task list takes (api.md, Tasks and reminders): the backend's own query params. */
+export type TaskQuery = NonNullable<operations['list']['parameters']['query']>;
 
 // Read-side CRM calls for server components, like `Queries.ts`. Each returns the data plus
 // `unauthorized` (401: the session is gone), `forbidden` (403), `notFound` (404: unknown,
@@ -56,6 +62,19 @@ export const CONTACT_LIST = {
   sorts: ['NAME', 'COMPANY', 'CREATED_AT', 'UPDATED_AT'],
   defaultSort: 'NAME',
   filters: { companyId: 'id', ownerId: 'id', sourceId: 'id', tag: 'text' },
+} as const satisfies ListSpec;
+
+/** The Tasks page's views, its tabs: each a set of the task list's filters and a sort. */
+export const TASK_VIEWS = ['mine', 'overdue', 'upcoming', 'completed', 'all'] as const;
+
+/**
+ * The Tasks page's URL state: its view, the assignee filter (`unassigned` too) and the paging.
+ * The view sets the backend's filters and sort (`getTasks` takes them as the backend names them).
+ */
+export const TASK_LIST = {
+  sorts: ['DUE_AT'],
+  defaultSort: 'DUE_AT',
+  filters: { view: { enum: TASK_VIEWS }, assigneeId: 'id' },
 } as const satisfies ListSpec;
 
 /**
@@ -271,6 +290,102 @@ export const getContactTags = async (segment: string) => {
   });
 
   return { tags: data, ...flags(response.status) };
+};
+
+/**
+ * Loads a page of the activities on one record, newest first (`GET /workspaces/{id}/activities`).
+ * A company's include those on its contacts and deals.
+ * @param segment The `[workspaceId]` route segment.
+ * @param link The record, such as `{ companyId: 7 }`.
+ * @param page The page, from 0; each holds the default page size.
+ * @returns The page and the outcome flags.
+ */
+export const getActivities = async (segment: string, link: ActivityLink, page: number) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { activities: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/activities', {
+    params: { path: { workspaceId }, query: { ...link, page, size: PAGE_SIZES[0] } },
+  });
+
+  return { activities: data, ...flags(response.status) };
+};
+
+/**
+ * Loads a page of tasks (`GET /workspaces/{id}/tasks`).
+ * @param segment The `[workspaceId]` route segment.
+ * @param query The filters, sort and paging, as the backend names them.
+ * @returns The page and the outcome flags (`invalid`: the backend refused the query).
+ */
+export const getTasks = async (segment: string, query: TaskQuery) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { tasks: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/tasks', {
+    params: { path: { workspaceId }, query },
+  });
+
+  return { tasks: data, ...flags(response.status) };
+};
+
+/**
+ * Loads one task (`GET /workspaces/{id}/tasks/{id}`). Cached for the request, so the page and
+ * its metadata share one call.
+ * @param segment The `[workspaceId]` route segment.
+ * @param id The `[id]` route segment.
+ * @returns The task and the outcome flags (`notFound` for a malformed id too).
+ */
+export const getTask = cache(async (segment: string, id: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  const taskId = toRecordId(id);
+  if (workspaceId === undefined || taskId === undefined) {
+    return { task: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/tasks/{id}', {
+    params: { path: { workspaceId, id: taskId } },
+  });
+
+  return { task: data, ...flags(response.status) };
+});
+
+/**
+ * Loads what a record page shows under its details: its open tasks by due time (the first 50),
+ * its completed and cancelled ones, latest first (the first 20), the first page of its activity,
+ * and the members (the task dialog's assignees).
+ * @param segment The `[workspaceId]` route segment.
+ * @param link The record, such as `{ companyId: 7 }`.
+ * @returns The pages, the members, when they were read, and `unauthorized` (any of them 401).
+ */
+export const getRecordWork = async (segment: string, link: ActivityLink) => {
+  const [open, closed, activities, members] = await Promise.all([
+    getTasks(segment, { ...link, status: ['OPEN'], sort: 'DUE_AT', size: 50 }),
+    getTasks(segment, {
+      ...link,
+      status: ['COMPLETED', 'CANCELLED'],
+      sort: 'UPDATED_AT',
+      direction: 'DESC',
+      size: PAGE_SIZES[0],
+    }),
+    getActivities(segment, link, 0),
+    getMembers(segment),
+  ]);
+
+  return {
+    open: open.tasks,
+    closed: closed.tasks,
+    activities: activities.activities,
+    members: members.members,
+    readAt: new Date().toISOString(),
+    unauthorized: [open, closed, activities, members].some((result) => result.unauthorized),
+  };
 };
 
 /**

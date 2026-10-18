@@ -144,7 +144,8 @@
     "website_format": "Enter a web address starting with http:// or https://",
     "employee_count_range": "Use a whole number from 0 to 10,000,000",
     "too_many_tags": "Use at most 20 tags",
-    "tag_length": "Each tag takes 1 to 40 characters"
+    "tag_length": "Each tag takes 1 to 40 characters",
+    "invalid_date_time": "Enter a date and a time"
   },
   "DashboardLayout": {
     "meta_title": "Dashboard",
@@ -197,7 +198,8 @@
     "current": "Current",
     "create_workspace": "Create workspace",
     "all_workspaces": "Your workspaces",
-    "skip_to_content": "Skip to content"
+    "skip_to_content": "Skip to content",
+    "nav_tasks": "Tasks"
   },
   "AccountMenu": {
     "label": "Your account",
@@ -533,7 +535,8 @@
     "any": "Anyone",
     "me": "Me",
     "unassigned": "Unassigned",
-    "former": "Former member"
+    "former": "Former member",
+    "label_assignee": "Assignee"
   },
   "OwnerField": {
     "you": "{name} (you)",
@@ -547,7 +550,8 @@
   "RecordHeader": {
     "archived": "Archived",
     "owner": "Owned by {name}",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "assignee": "Assigned to {name}"
   },
   "RecordFacts": {
     "not_set": "Not set"
@@ -714,7 +718,14 @@
     "clear_company": "Clear company",
     "results": "Results",
     "current": "(current)",
-    "error": "Couldn't search. Try again."
+    "error": "Couldn't search. Try again.",
+    "count": "{count, plural, one {# result} other {# results}}",
+    "search_contact": "Search contacts",
+    "clear_contact": "Clear contact",
+    "search_lead": "Search leads",
+    "clear_lead": "Clear lead",
+    "search_deal": "Search deals",
+    "clear_deal": "Clear deal"
   },
   "TagInput": {
     "remove": "Remove {tag}",
@@ -722,7 +733,7 @@
     "suggestions": "Tags in use",
     "hint": "Press Enter or type a comma after each tag.",
     "limit": "A contact takes at most {max} tags. Remove one to add another.",
-    "chosen": "Added",
+    "chosen": "Tags added",
     "added": "{tags} added.",
     "removed": "{tag} removed.",
     "dropped": "{tags} not added: a contact takes at most {max} tags.",
@@ -731,6 +742,147 @@
   "SourceField": {
     "none": "None",
     "archived": "{name} (archived)"
+  },
+  "DateTimeField": {
+    "pick_date": "Pick a date",
+    "time": "time",
+    "clear": "Clear {label}",
+    "zone": "Workspace time ({zone})"
+  },
+  "ActivityComposer": {
+    "type_label": "Type",
+    "type_CALL": "Call",
+    "type_EMAIL": "Email",
+    "type_MEETING": "Meeting",
+    "type_NOTE": "Note",
+    "subject_label": "Subject",
+    "body_label": "Details",
+    "when_label": "When",
+    "cancel": "Cancel",
+    "error_invalid_input": "Check the highlighted fields"
+  },
+  "ActivityItem": {
+    "edit": "Edit {subject}",
+    "delete": "Delete {subject}",
+    "delete_title": "Delete “{subject}”?",
+    "delete_text": "It leaves the timeline for good.",
+    "delete_confirm": "Delete",
+    "cancel": "Cancel",
+    "deleted": "Activity deleted",
+    "save": "Save",
+    "saved": "Activity saved",
+    "by": "Logged by {name}",
+    "by_former": "Logged by a former member",
+    "on": "On"
+  },
+  "ActivityTimeline": {
+    "title": "Activity",
+    "count": "{count, number}",
+    "log": "Log activity",
+    "logged": "Activity logged",
+    "empty": "Nothing logged yet. Calls, emails, meetings and notes show here, newest first.",
+    "show_older": "Show older",
+    "older_failed": "Older activities couldn't be loaded. Try again."
+  },
+  "TaskRow": {
+    "complete": "Complete {title}",
+    "complete_button": "Complete",
+    "completed": "“{title}” completed",
+    "status_OPEN": "Open",
+    "status_COMPLETED": "Completed",
+    "status_CANCELLED": "Cancelled",
+    "overdue": "Overdue",
+    "no_due": "No due date",
+    "priority_LOW": "Low",
+    "priority_MEDIUM": "Medium",
+    "priority_HIGH": "High",
+    "menu": "More actions for {title}",
+    "reopen": "Reopen",
+    "reopened": "“{title}” reopened",
+    "cancel_task": "Cancel task",
+    "cancel_title": "Cancel “{title}”?",
+    "cancel_text": "It moves to the cancelled tasks and can be reopened later. Tasks are never deleted.",
+    "keep": "Keep it",
+    "cancelled": "“{title}” cancelled",
+    "error_generic": "That didn't work. Try again."
+  },
+  "TaskTable": {
+    "done": "Done",
+    "title": "Task",
+    "due": "Due",
+    "priority": "Priority",
+    "assignee": "Assignee",
+    "linked": "Linked to",
+    "actions": "Actions"
+  },
+  "TaskPanel": {
+    "title": "Tasks",
+    "count": "{count, number}",
+    "show_closed": "Show completed and cancelled",
+    "add": "Add task",
+    "empty": "No open tasks.",
+    "more": "Showing {shown} of {total}.",
+    "closed_title": "Completed and cancelled ({count, number})",
+    "closed_empty": "None yet."
+  },
+  "TaskDialog": {
+    "close": "Close",
+    "new_title": "New task",
+    "edit_title": "Edit task",
+    "linked_to": "On {name}.",
+    "description": "Link it to the records it is about, if any.",
+    "title_label": "Title",
+    "description_label": "Description",
+    "due_label": "Due",
+    "priority_label": "Priority",
+    "assignee_label": "Assignee",
+    "company_label": "Company",
+    "contact_label": "Contact",
+    "lead_label": "Lead",
+    "deal_label": "Deal",
+    "links_hint": "On a contact or deal, the task shows on its company too.",
+    "create": "Add task",
+    "save": "Save changes",
+    "created": "Task added",
+    "saved": "Task saved",
+    "error_invalid_input": "Check the highlighted fields"
+  },
+  "TasksPage": {
+    "title": "Tasks",
+    "description": "What needs doing, by whom and when.",
+    "new": "New task",
+    "views_label": "Task views",
+    "view_mine": "My tasks",
+    "view_overdue": "Overdue",
+    "view_upcoming": "Next 7 days",
+    "view_completed": "Completed",
+    "view_all": "All",
+    "toolbar_label": "Search tasks",
+    "search_label": "Search",
+    "search_placeholder": "Title",
+    "list_heading": "{count, plural, =0 {No tasks} one {# task} other {# tasks}}",
+    "empty_title_mine": "Nothing on your list",
+    "empty_text_mine": "Open tasks assigned to you show here, the soonest due first.",
+    "empty_title_overdue": "Nothing overdue",
+    "empty_text_overdue": "Open tasks past their due time show here.",
+    "empty_title_upcoming": "Nothing due in the next 7 days",
+    "empty_text_upcoming": "Open tasks due from now to a week ahead show here.",
+    "empty_title_completed": "No completed tasks yet",
+    "empty_text_completed": "Tasks show here once done, the latest first.",
+    "empty_title_all": "No tasks yet",
+    "empty_text_all": "Add a task here or from a company or contact, with a due time and someone to do it."
+  },
+  "TaskPage": {
+    "back": "Back to tasks",
+    "details": "Task details",
+    "due": "Due",
+    "priority": "Priority",
+    "linked": "Linked to",
+    "created_by": "Created by",
+    "created_by_former": "A former member",
+    "completed_at": "Completed",
+    "description": "Description",
+    "edit": "Edit"
   },
   "DashboardPage": {
     "title": "Overview",

@@ -144,7 +144,8 @@
     "website_format": "Saisissez une adresse web commençant par http:// ou https://",
     "employee_count_range": "Utilisez un nombre entier de 0 à 10 000 000",
     "too_many_tags": "Utilisez au plus 20 étiquettes",
-    "tag_length": "Chaque étiquette compte de 1 à 40 caractères"
+    "tag_length": "Chaque étiquette compte de 1 à 40 caractères",
+    "invalid_date_time": "Indiquez une date et une heure"
   },
   "DashboardLayout": {
     "meta_title": "Tableau de bord",
@@ -197,7 +198,8 @@
     "current": "Actuel",
     "create_workspace": "Créer un espace de travail",
     "all_workspaces": "Vos espaces de travail",
-    "skip_to_content": "Aller au contenu"
+    "skip_to_content": "Aller au contenu",
+    "nav_tasks": "Tâches"
   },
   "AccountMenu": {
     "label": "Votre compte",
@@ -533,7 +535,8 @@
     "any": "Tout le monde",
     "me": "Moi",
     "unassigned": "Sans propriétaire",
-    "former": "Ancien membre"
+    "former": "Ancien membre",
+    "label_assignee": "Responsable"
   },
   "OwnerField": {
     "you": "{name} (vous)",
@@ -547,7 +550,8 @@
   "RecordHeader": {
     "archived": "Archivée",
     "owner": "Propriétaire : {name}",
-    "unassigned": "Sans propriétaire"
+    "unassigned": "Sans propriétaire",
+    "assignee": "Responsable : {name}"
   },
   "RecordFacts": {
     "not_set": "Non renseigné"
@@ -714,7 +718,14 @@
     "clear_company": "Effacer l'entreprise",
     "results": "Résultats",
     "current": "(choix actuel)",
-    "error": "La recherche a échoué. Réessayez."
+    "error": "La recherche a échoué. Réessayez.",
+    "count": "{count, plural, one {# résultat} other {# résultats}}",
+    "search_contact": "Rechercher un contact",
+    "clear_contact": "Effacer le contact",
+    "search_lead": "Rechercher un prospect",
+    "clear_lead": "Effacer le prospect",
+    "search_deal": "Rechercher une affaire",
+    "clear_deal": "Effacer l'affaire"
   },
   "TagInput": {
     "remove": "Retirer {tag}",
@@ -722,7 +733,7 @@
     "suggestions": "Étiquettes déjà utilisées",
     "hint": "Appuyez sur Entrée ou tapez une virgule après chaque étiquette.",
     "limit": "Un contact a au plus {max} étiquettes. Retirez-en une pour en ajouter une autre.",
-    "chosen": "Ajoutées",
+    "chosen": "Étiquettes ajoutées",
     "added": "Ajouté : {tags}.",
     "removed": "Retiré : {tag}.",
     "dropped": "Non ajouté : {tags}. Un contact a au plus {max} étiquettes.",
@@ -731,6 +742,147 @@
   "SourceField": {
     "none": "Aucune",
     "archived": "{name} (archivée)"
+  },
+  "DateTimeField": {
+    "pick_date": "Choisir une date",
+    "time": "heure",
+    "clear": "Vider le champ {label}",
+    "zone": "Heure de l'espace de travail ({zone})"
+  },
+  "ActivityComposer": {
+    "type_label": "Type",
+    "type_CALL": "Appel",
+    "type_EMAIL": "E-mail",
+    "type_MEETING": "Réunion",
+    "type_NOTE": "Note",
+    "subject_label": "Objet",
+    "body_label": "Détails",
+    "when_label": "Quand",
+    "cancel": "Annuler",
+    "error_invalid_input": "Vérifiez les champs signalés"
+  },
+  "ActivityItem": {
+    "edit": "Modifier {subject}",
+    "delete": "Supprimer {subject}",
+    "delete_title": "Supprimer « {subject} » ?",
+    "delete_text": "Elle disparaît définitivement de l'historique.",
+    "delete_confirm": "Supprimer",
+    "cancel": "Annuler",
+    "deleted": "Activité supprimée",
+    "save": "Enregistrer",
+    "saved": "Activité enregistrée",
+    "by": "Saisie par {name}",
+    "by_former": "Saisie par un ancien membre",
+    "on": "Sur"
+  },
+  "ActivityTimeline": {
+    "title": "Activité",
+    "count": "{count, number}",
+    "log": "Enregistrer l'activité",
+    "logged": "Activité enregistrée",
+    "empty": "Rien n'a encore été saisi. Les appels, e-mails, réunions et notes s'affichent ici, du plus récent au plus ancien.",
+    "show_older": "Afficher les plus anciennes",
+    "older_failed": "Impossible de charger les activités plus anciennes. Réessayez."
+  },
+  "TaskRow": {
+    "complete": "Terminer {title}",
+    "complete_button": "Terminer",
+    "completed": "« {title} » terminée",
+    "status_OPEN": "Ouverte",
+    "status_COMPLETED": "Terminée",
+    "status_CANCELLED": "Annulée",
+    "overdue": "En retard",
+    "no_due": "Sans échéance",
+    "priority_LOW": "Basse",
+    "priority_MEDIUM": "Moyenne",
+    "priority_HIGH": "Haute",
+    "menu": "Autres actions pour {title}",
+    "reopen": "Rouvrir",
+    "reopened": "« {title} » rouverte",
+    "cancel_task": "Annuler la tâche",
+    "cancel_title": "Annuler « {title} » ?",
+    "cancel_text": "Elle passe dans les tâches annulées et peut être rouverte plus tard. Les tâches ne sont jamais supprimées.",
+    "keep": "La garder",
+    "cancelled": "« {title} » annulée",
+    "error_generic": "Ça n'a pas fonctionné. Réessayez."
+  },
+  "TaskTable": {
+    "done": "Faite",
+    "title": "Tâche",
+    "due": "Échéance",
+    "priority": "Priorité",
+    "assignee": "Responsable",
+    "linked": "Liée à",
+    "actions": "Actions"
+  },
+  "TaskPanel": {
+    "title": "Tâches",
+    "count": "{count, number}",
+    "show_closed": "Afficher les terminées et annulées",
+    "add": "Ajouter une tâche",
+    "empty": "Aucune tâche ouverte.",
+    "more": "{shown} sur {total} affichées.",
+    "closed_title": "Terminées et annulées ({count, number})",
+    "closed_empty": "Aucune pour l'instant."
+  },
+  "TaskDialog": {
+    "close": "Fermer",
+    "new_title": "Nouvelle tâche",
+    "edit_title": "Modifier la tâche",
+    "linked_to": "Sur {name}.",
+    "description": "Liez-la aux fiches qu'elle concerne, le cas échéant.",
+    "title_label": "Titre",
+    "description_label": "Description",
+    "due_label": "Échéance",
+    "priority_label": "Priorité",
+    "assignee_label": "Responsable",
+    "company_label": "Entreprise",
+    "contact_label": "Contact",
+    "lead_label": "Prospect",
+    "deal_label": "Affaire",
+    "links_hint": "Sur un contact ou une affaire, la tâche apparaît aussi sur son entreprise.",
+    "create": "Ajouter la tâche",
+    "save": "Enregistrer",
+    "created": "Tâche ajoutée",
+    "saved": "Tâche enregistrée",
+    "error_invalid_input": "Vérifiez les champs signalés"
+  },
+  "TasksPage": {
+    "title": "Tâches",
+    "description": "Ce qu'il reste à faire, par qui et pour quand.",
+    "new": "Nouvelle tâche",
+    "views_label": "Vues des tâches",
+    "view_mine": "Mes tâches",
+    "view_overdue": "En retard",
+    "view_upcoming": "7 prochains jours",
+    "view_completed": "Terminées",
+    "view_all": "Toutes",
+    "toolbar_label": "Rechercher des tâches",
+    "search_label": "Rechercher",
+    "search_placeholder": "Titre",
+    "list_heading": "{count, plural, =0 {Aucune tâche} one {# tâche} other {# tâches}}",
+    "empty_title_mine": "Rien sur votre liste",
+    "empty_text_mine": "Les tâches ouvertes qui vous sont attribuées s'affichent ici, les plus urgentes d'abord.",
+    "empty_title_overdue": "Rien en retard",
+    "empty_text_overdue": "Les tâches ouvertes dont l'échéance est passée s'affichent ici.",
+    "empty_title_upcoming": "Rien à rendre dans les 7 prochains jours",
+    "empty_text_upcoming": "Les tâches ouvertes à rendre d'ici une semaine s'affichent ici.",
+    "empty_title_completed": "Aucune tâche terminée pour l'instant",
+    "empty_text_completed": "Les tâches s'affichent ici une fois terminées, les plus récentes d'abord.",
+    "empty_title_all": "Aucune tâche pour l'instant",
+    "empty_text_all": "Ajoutez une tâche ici ou depuis une entreprise ou un contact, avec une échéance et un responsable."
+  },
+  "TaskPage": {
+    "back": "Retour aux tâches",
+    "details": "Détails de la tâche",
+    "due": "Échéance",
+    "priority": "Priorité",
+    "linked": "Liée à",
+    "created_by": "Créée par",
+    "created_by_former": "Un ancien membre",
+    "completed_at": "Terminée le",
+    "description": "Description",
+    "edit": "Modifier"
   },
   "DashboardPage": {
     "title": "Vue d'ensemble",

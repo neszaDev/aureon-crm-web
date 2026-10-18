@@ -1,0 +1,321 @@
+'use client';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { LoaderCircleIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { createTask, updateTask } from '@/actions/crm/TaskActions';
+import { ActionAlert } from '@/components/crm/ActionAlert';
+import { DateTimeField } from '@/components/crm/fields/DateTimeField';
+import { OwnerField } from '@/components/crm/fields/OwnerField';
+import { RecordPicker } from '@/components/crm/fields/RecordPicker';
+import { describedBy, FormField } from '@/components/FormField';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import { Textarea } from '@/components/ui/textarea';
+import type { ActionResult } from '@/libs/api/ApiError';
+import type { components } from '@/libs/api/schema';
+import { toInstant, toLocalInput } from '@/libs/crm/ZonedTime';
+import type { ActivityLink } from '@/validations/crm/ActivityValidation';
+import type { TaskFormValues, TaskValues } from '@/validations/crm/TaskValidation';
+import { TASK_PRIORITIES, TaskFormValidation } from '@/validations/crm/TaskValidation';
+
+type Task = components['schemas']['TaskResponse'];
+
+// The links a picker sets, by the backend's field.
+const LINKS = [
+  { field: 'company', id: 'companyId', kind: 'company' },
+  { field: 'contact', id: 'contactId', kind: 'contact' },
+  { field: 'lead', id: 'leadId', kind: 'lead' },
+  { field: 'deal', id: 'dealId', kind: 'deal' },
+] as const;
+
+const isFormField = (field: string): field is keyof TaskFormValues =>
+  field in TaskFormValidation.shape;
+
+/** What the dialog edits or starts from: a task, or the record a new one is on. */
+type TaskDialogProps = {
+  workspaceId: number;
+  task?: Task;
+  link?: ActivityLink;
+  linkLabel?: string;
+  members: components['schemas']['MemberRef'][];
+  me: number;
+  canAssign: boolean;
+  timeZone: string;
+};
+
+/**
+ * A linked record as its picker shows it.
+ * @param ref The record, if any.
+ * @returns Its id and name, or null.
+ */
+const pick = (ref?: { id: number; name?: string; fullName?: string }) =>
+  ref ? { id: ref.id, label: ref.name ?? ref.fullName ?? '' } : null;
+
+/**
+ * What the actions take from the form's values: the due time as an instant (an untouched one
+ * exactly as saved, seconds and all), the links by id.
+ * @param values The form's values.
+ * @param timeZone The workspace's time zone, which the due time was entered in.
+ * @param savedDueAt The saved due time, when the field wasn't touched.
+ * @returns The values to send.
+ */
+const toTaskValues = (
+  values: TaskFormValues,
+  timeZone: string,
+  savedDueAt: string | undefined,
+): TaskValues => ({
+  title: values.title,
+  description: values.description,
+  priority: values.priority,
+  assigneeId: values.assigneeId,
+  dueAt: savedDueAt ?? toInstant(values.dueAt, timeZone) ?? null,
+  companyId: values.company?.id ?? null,
+  contactId: values.contact?.id ?? null,
+  leadId: values.lead?.id ?? null,
+  dealId: values.deal?.id ?? null,
+});
+
+/**
+ * The form's starting values: the task's, or a new task for the caller, due never, on the
+ * record it is added from.
+ * @param props The dialog's props.
+ * @returns The values.
+ */
+const startingValues = (props: TaskDialogProps): TaskFormValues => {
+  const { task } = props;
+  const linked: Partial<Record<string, number>> = props.link ?? {};
+  const fromLink = (id: string) => {
+    const value = linked[id];
+    return value === undefined ? null : { id: value, label: props.linkLabel ?? '' };
+  };
+
+  return {
+    title: task?.title ?? '',
+    description: task?.description ?? '',
+    dueAt: task?.dueAt ? toLocalInput(task.dueAt, props.timeZone) : '',
+    priority: task?.priority ?? 'MEDIUM',
+    assigneeId: task ? (task.assignee?.userId ?? null) : props.me,
+    company: task ? pick(task.company) : fromLink('companyId'),
+    contact: task ? pick(task.contact) : fromLink('contactId'),
+    lead: task ? pick(task.lead) : fromLink('leadId'),
+    deal: task ? pick(task.deal) : fromLink('dealId'),
+  };
+};
+
+/**
+ * The task's fields, mounted each time the dialog opens, so it starts from the saved values.
+ * @param props The dialog's props.
+ * @param props.onDone Closes the dialog once saved.
+ * @returns The form.
+ */
+const TaskForm = (props: TaskDialogProps & { onDone: () => void }) => {
+  const t = useTranslations('TaskDialog');
+  const tRow = useTranslations('TaskRow');
+  const [failure, setFailure] = useState<ActionResult>();
+  const form = useForm<TaskFormValues>({
+    resolver: zodResolver(TaskFormValidation),
+    defaultValues: startingValues(props),
+  });
+  const { errors, isSubmitting } = form.formState;
+  const { task } = props;
+
+  const onSubmit = form.handleSubmit(async (values) => {
+    setFailure(undefined);
+    const body = toTaskValues(
+      values,
+      props.timeZone,
+      form.getFieldState('dueAt').isDirty ? undefined : task?.dueAt,
+    );
+    const result = task
+      ? await updateTask(props.workspaceId, task.id, task.version, body)
+      : await createTask(props.workspaceId, body);
+    if (result.ok) {
+      toast.success(task ? t('saved') : t('created'));
+      props.onDone();
+      return;
+    }
+
+    for (const [name, message] of Object.entries(result.fieldErrors ?? {})) {
+      const link = LINKS.find((item) => item.id === name);
+      const field = link?.field ?? name;
+      if (isFormField(field)) {
+        form.setError(field, { type: 'server', message });
+      }
+    }
+    setFailure(result);
+  });
+
+  return (
+    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+      <DialogHeader>
+        <DialogTitle>{task ? t('edit_title') : t('new_title')}</DialogTitle>
+        <DialogDescription>
+          {props.link && props.linkLabel
+            ? t('linked_to', { name: props.linkLabel })
+            : t('description')}
+        </DialogDescription>
+      </DialogHeader>
+      <ActionAlert result={failure} />
+      <FormField htmlFor="task-title" label={t('title_label')} error={errors.title}>
+        <Input
+          id="task-title"
+          autoComplete="off"
+          aria-invalid={errors.title ? true : undefined}
+          aria-describedby={describedBy('task-title')}
+          {...form.register('title')}
+        />
+      </FormField>
+      <FormField
+        htmlFor="task-description"
+        label={t('description_label')}
+        error={errors.description}
+      >
+        <Textarea
+          id="task-description"
+          aria-invalid={errors.description ? true : undefined}
+          aria-describedby={describedBy('task-description')}
+          {...form.register('description')}
+        />
+      </FormField>
+      <Controller
+        control={form.control}
+        name="dueAt"
+        render={(controller) => (
+          <DateTimeField
+            id="task-due"
+            label={t('due_label')}
+            value={controller.field.value}
+            onChange={(value) => {
+              controller.field.onChange(value);
+            }}
+            timeZone={props.timeZone}
+            clearable
+            error={errors.dueAt}
+          />
+        )}
+      />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FormField htmlFor="task-priority" label={t('priority_label')} error={errors.priority}>
+          <NativeSelect
+            id="task-priority"
+            aria-invalid={errors.priority ? true : undefined}
+            aria-describedby={describedBy('task-priority')}
+            {...form.register('priority')}
+          >
+            {TASK_PRIORITIES.map((priority) => (
+              <NativeSelectOption key={priority} value={priority}>
+                {tRow(`priority_${priority}`)}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </FormField>
+        <Controller
+          control={form.control}
+          name="assigneeId"
+          render={(controller) => (
+            <OwnerField
+              id="task-assignee"
+              label={t('assignee_label')}
+              value={controller.field.value}
+              onChange={(value) => {
+                controller.field.onChange(value);
+              }}
+              members={props.members}
+              me={props.me}
+              canAssign={props.canAssign}
+              allowUnassigned={task !== undefined}
+              error={errors.assigneeId}
+            />
+          )}
+        />
+      </div>
+      {/* Added from a record, the task is on it; from the Tasks page, on what is picked. */}
+      {!props.link && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {LINKS.map((link) => (
+            <Controller
+              key={link.field}
+              control={form.control}
+              name={link.field}
+              render={(controller) => (
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor={`task-${link.field}`}>{t(`${link.field}_label`)}</Label>
+                  <RecordPicker
+                    id={`task-${link.field}`}
+                    workspaceId={props.workspaceId}
+                    kind={link.kind}
+                    value={controller.field.value}
+                    onChange={(value) => {
+                      controller.field.onChange(value);
+                    }}
+                    invalid={errors[link.field] !== undefined}
+                  />
+                </div>
+              )}
+            />
+          ))}
+          <p className="text-[0.8125rem] text-muted-foreground sm:col-span-2">{t('links_hint')}</p>
+        </div>
+      )}
+      <DialogFooter>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
+          {task ? t('save') : t('create')}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+};
+
+/**
+ * A task in a dialog: a new one (on the record it is added from, or on any records picked), or
+ * an existing one to edit. The assignee starts as the caller; only `RECORDS_ASSIGN` changes it.
+ * A refusal shows in the dialog; once saved it closes with a toast.
+ * @param props Component props.
+ * @param props.trigger The button that opens it.
+ * @param props.workspaceId The workspace.
+ * @param props.task The task to edit; without it the dialog creates one.
+ * @param props.link The record a new task is on, such as `{ companyId: 7 }`.
+ * @param props.linkLabel That record's name.
+ * @param props.members The workspace's members, for the assignee.
+ * @param props.me The caller's user id.
+ * @param props.canAssign Whether the caller may give it to someone else (`RECORDS_ASSIGN`).
+ * @param props.timeZone The workspace's time zone, which the due time is entered in.
+ * @returns The trigger and its dialog.
+ */
+export const TaskDialog = (props: TaskDialogProps & { trigger: React.ReactElement }) => {
+  const t = useTranslations('TaskDialog');
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{props.trigger}</DialogTrigger>
+      <DialogContent
+        closeLabel={t('close')}
+        className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl"
+      >
+        <TaskForm
+          {...props}
+          onDone={() => {
+            setOpen(false);
+          }}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+};

@@ -1,7 +1,13 @@
 'use client';
 
 import { cn } from 'cn';
-import { Building2Icon, LayoutDashboardIcon, SettingsIcon, UsersIcon } from 'lucide-react';
+import {
+  Building2Icon,
+  LayoutDashboardIcon,
+  ListTodoIcon,
+  SettingsIcon,
+  UsersIcon,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/libs/I18nNavigation';
 
@@ -12,6 +18,7 @@ const crmNavItems = [
   { key: 'dashboard', section: '', href: '', icon: LayoutDashboardIcon },
   { key: 'companies', section: 'companies', href: '/companies', icon: Building2Icon },
   { key: 'contacts', section: 'contacts', href: '/contacts', icon: UsersIcon },
+  { key: 'tasks', section: 'tasks', href: '/tasks', icon: ListTodoIcon },
   { key: 'settings', section: 'settings', href: '/settings/workspace', icon: SettingsIcon },
 ] as const;
 

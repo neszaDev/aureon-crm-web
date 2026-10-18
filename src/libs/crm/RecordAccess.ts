@@ -5,14 +5,19 @@ type WithPermissions = { permissions: Permission[] };
 
 /**
  * Tells whether the caller may edit, archive or restore a record: with `RECORDS_EDIT_ANY`, or
- * when they own it. An unassigned record needs `RECORDS_EDIT_ANY`. The backend still checks.
+ * when it is theirs (its owner; a task's assignee or creator; an activity's author). A record
+ * none of them holds any more (unassigned, or theirs left) needs `RECORDS_EDIT_ANY`. The backend
+ * still checks.
  * @param workspace The workspace, with the caller's permissions.
  * @param me The caller's user id.
- * @param ownerId The record's owner, if any.
+ * @param people Whose it is (owner; assignee and creator; author), each if any.
  * @returns Whether the edit controls show.
  */
-export const canEditRecord = (workspace: WithPermissions, me: number, ownerId?: number) =>
-  can(workspace, 'RECORDS_EDIT_ANY') || ownerId === me;
+export const canEditRecord = (
+  workspace: WithPermissions,
+  me: number,
+  ...people: (number | undefined)[]
+) => can(workspace, 'RECORDS_EDIT_ANY') || people.includes(me);
 
 /**
  * Tells whether the caller may give a record to someone else, or unassign it

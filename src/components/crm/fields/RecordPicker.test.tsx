@@ -31,6 +31,8 @@ const CompanyField = (props: { initial: PickedRecord | null }) => {
 };
 
 const trigger = () => page.getByRole('combobox', { name: 'Company' });
+// The picker's own status, beside its list.
+const status = () => page.getByRole('dialog').getByRole('status');
 
 const pause = async (ms: number) => {
   const { promise, resolve } = Promise.withResolvers<undefined>();
@@ -124,6 +126,24 @@ describe(RecordPicker, () => {
     await expect.element(page.getByRole('listbox', { name: 'Results' })).toBeVisible();
     await expect.element(page.getByRole('option', { name: 'Globex (current)' })).toBeVisible();
     await expect.element(page.getByRole('option', { name: 'Acme', exact: true })).toBeVisible();
+  });
+
+  it('says how many results arrived', async () => {
+    vi.mocked(searchRecords)
+      .mockReset()
+      .mockResolvedValueOnce([
+        { id: 7, label: 'Acme' },
+        { id: 8, label: 'Acme Logistics' },
+        { id: 9, label: 'Globex' },
+      ])
+      .mockResolvedValueOnce([{ id: 9, label: 'Globex' }]);
+    await render(<CompanyField initial={null} />);
+
+    await trigger().click();
+    await expect.element(status()).toHaveTextContent('3 results');
+
+    await userEvent.keyboard('glo');
+    await expect.element(status()).toHaveTextContent(/^1 result$/u);
   });
 
   it('says when nothing matches', async () => {

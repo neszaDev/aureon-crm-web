@@ -19,9 +19,12 @@ const TagsField = (props: { initial?: string[] }) => {
   );
 };
 
-const input = () => page.getByLabelText('Tags');
+// Exact: the chip list's name, "Tags added", holds the word too.
+const input = () => page.getByLabelText('Tags', { exact: true });
 const value = () => page.getByTestId('tags');
 const status = () => page.getByRole('status');
+const said = () => document.querySelector('output > *');
+const suggestions = () => page.getByRole('list', { name: 'Tags in use', exact: true });
 const nineteen = Array.from({ length: 19 }, (_, index) => `tag-${index}`);
 
 describe(TagInput, () => {
@@ -91,7 +94,10 @@ describe(TagInput, () => {
 
     await userEvent.type(input(), 'vip,b2b,');
     await expect.element(status()).toHaveTextContent('b2b added');
-    await expect.element(page.getByRole('list', { name: 'Added' })).toBeVisible();
+    // An explicit role: Safari drops the list semantics of a list styled without bullets.
+    await expect
+      .element(page.getByRole('list', { name: 'Tags added', exact: true }))
+      .toHaveAttribute('role', 'list');
 
     await page.getByRole('button', { name: 'Remove vip' }).click();
     await expect.element(status()).toHaveTextContent('vip removed');
@@ -99,6 +105,44 @@ describe(TagInput, () => {
     await userEvent.click(input());
     await userEvent.keyboard('{Backspace}');
     await expect.element(status()).toHaveTextContent('b2b removed');
+  });
+
+  it('names its suggestions as a list', async () => {
+    await render(<TagsField />);
+
+    await userEvent.type(input(), 'p');
+
+    await expect.element(suggestions()).toHaveAttribute('role', 'list');
+  });
+
+  it('says a repeated message again: the announced words are a new node each time', async () => {
+    await render(<TagsField initial={['vip']} />);
+
+    await userEvent.type(input(), 'b2b{Enter}');
+    await expect.element(status()).toHaveTextContent('b2b added.');
+    const first = said();
+    await userEvent.keyboard('{Backspace}');
+    await expect.element(status()).toHaveTextContent('b2b removed.');
+    const second = said();
+
+    expect(first).not.toBeNull();
+    expect(second).not.toBe(first);
+  });
+
+  it("keeps the suggestions' room, hidden, when leaving the field adds the typed tag", async () => {
+    await render(<TagsField />);
+
+    await userEvent.type(input(), 'vi');
+    await expect.element(suggestions()).not.toHaveClass('invisible');
+    // As a press on Save does: the focus leaves the field. The row under the field must stay
+    // put until the release, or the click misses (checked in the styled app; tests run unstyled).
+    input().element().blur();
+
+    await expect.element(value()).toHaveTextContent(/^vi$/u);
+    await expect.element(suggestions()).toHaveClass('invisible');
+
+    await userEvent.click(input());
+    await expect.element(suggestions()).not.toBeInTheDocument();
   });
 
   it('adds what was typed when the field loses the focus', async () => {

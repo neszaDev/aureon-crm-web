@@ -21,8 +21,9 @@ const keepFocus = (event: React.MouseEvent) => {
  * A contact's tags as chips, for a form that controls them (react-hook-form `Controller`). Enter,
  * a comma or leaving the field adds the typed tag, trimmed and in lower case, unless it is
  * already there; Backspace in the empty input removes the last one. While typing, the
- * workspace's tags that hold the text are offered as buttons. A tag over 40 characters is
- * flagged on its chip. At 20 tags the input takes no more and says why (it stays focusable, so
+ * workspace's tags that hold the text are offered as buttons; leaving the field keeps their room
+ * (hidden) until it is focused again, so a click just under it still lands. A tag over 40
+ * characters is flagged on its chip. At 20 tags the input takes no more and says why (it stays focusable, so
  * Backspace still works); a pasted list past 20 is cut there. What it adds, removes or drops is
  * read out. Its label is a `<label htmlFor={id}>` outside it.
  * @param props Component props.
@@ -44,7 +45,11 @@ export const TagInput = (props: {
 }) => {
   const t = useTranslations('TagInput');
   const [text, setText] = useState('');
-  const [announcement, setAnnouncement] = useState('');
+  // Each message is a new node (`n` keys it), so the same words said twice are read twice.
+  const [announcement, setAnnouncement] = useState({ text: '', n: 0 });
+  // The suggestions shown as the focus left the field: their room stays (hidden) until it comes
+  // back, so what was under the pointer (Save) doesn't move between the press and the release.
+  const [kept, setKept] = useState<string[]>([]);
   const input = useRef<HTMLInputElement>(null);
   const full = props.value.length >= MAX_TAGS;
   const hintId = `${props.id}-hint`;
@@ -54,6 +59,9 @@ export const TagInput = (props: {
         .filter((tag) => tag.includes(typed) && !props.value.includes(tag))
         .slice(0, MAX_SUGGESTIONS)
     : [];
+  const say = (message: string) => {
+    setAnnouncement((current) => ({ text: message, n: current.n + 1 }));
+  };
 
   /**
    * Adds tags, and keeps `rest` (still being typed) in the input while there is room for it.
@@ -90,14 +98,14 @@ export const TagInput = (props: {
       .filter(Boolean)
       .join(' ');
     if (said) {
-      setAnnouncement(said);
+      say(said);
     }
   };
   const remove = (tags: string[]) => {
     const [tag] = tags;
     if (tag !== undefined) {
       props.onChange(props.value.filter((item) => item !== tag));
-      setAnnouncement(t('removed', { tag }));
+      say(t('removed', { tag }));
     }
   };
 
@@ -107,8 +115,12 @@ export const TagInput = (props: {
       onBlur={(event) => {
         // Leaving the field, not moving within it (a chip, a suggestion), adds what was typed.
         if (!event.currentTarget.contains(event.relatedTarget)) {
+          setKept(matches);
           add([text]);
         }
+      }}
+      onFocus={() => {
+        setKept([]);
       }}
     >
       <div
@@ -118,7 +130,9 @@ export const TagInput = (props: {
         )}
       >
         {props.value.length > 0 && (
-          <ul aria-label={t('chosen')} className="flex max-w-full flex-wrap gap-1.5">
+          // An explicit role: Safari drops the list semantics of a list without bullets.
+          // oxlint-disable-next-line jsx-a11y/no-redundant-roles -- see above
+          <ul role="list" aria-label={t('chosen')} className="flex max-w-full flex-wrap gap-1.5">
             {props.value.map((tag) => {
               const tooLong = tag.length > MAX_TAG_LENGTH;
 
@@ -182,9 +196,14 @@ export const TagInput = (props: {
           }}
         />
       </div>
-      {matches.length > 0 && (
-        <ul aria-label={t('suggestions')} className="flex flex-wrap gap-1.5">
-          {matches.map((tag) => (
+      {(matches.length > 0 || kept.length > 0) && (
+        <ul
+          // oxlint-disable-next-line jsx-a11y/no-redundant-roles -- as the chips' list
+          role="list"
+          aria-label={t('suggestions')}
+          className={cn('flex flex-wrap gap-1.5', matches.length === 0 && 'invisible')}
+        >
+          {(matches.length > 0 ? matches : kept).map((tag) => (
             <li key={tag}>
               <button
                 type="button"
@@ -206,7 +225,9 @@ export const TagInput = (props: {
       <p id={hintId} className="text-[0.8125rem] text-muted-foreground">
         {full ? t('limit', { max: MAX_TAGS }) : t('hint')}
       </p>
-      <output className="sr-only">{announcement}</output>
+      <output className="sr-only">
+        <span key={announcement.n}>{announcement.text}</span>
+      </output>
     </div>
   );
 };

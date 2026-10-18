@@ -16,6 +16,22 @@ describe(toInstant, () => {
     // Paris repeats 02:00-03:00 on 25 October 2026: the first 02:30 is still summer time.
     expect(toInstant('2026-10-25T02:30', 'Europe/Paris')).toBe('2026-10-25T00:30:00.000Z');
   });
+
+  it('reads nothing but a real local date and time to the minute', () => {
+    for (const local of [
+      '12345-10-18T09:00',
+      '+012345-10-18T09:00',
+      '2026-10-18T09:00:30',
+      '2026-10-18',
+      '2026-10-18T',
+      '2026-02-30T09:00',
+      '2026-10-18T24:00',
+      '2026-10-18T9:00',
+      '',
+    ]) {
+      expect(toInstant(local, 'Asia/Bangkok')).toBeUndefined();
+    }
+  });
 });
 
 describe(toLocalInput, () => {
@@ -30,7 +46,7 @@ describe(toLocalInput, () => {
       ['2026-07-01T23:45', 'America/Los_Angeles'],
       ['2026-01-15T00:05', 'Europe/Paris'],
     ] as const) {
-      expect(toLocalInput(toInstant(local, zone), zone)).toBe(local);
+      expect(toLocalInput(toInstant(local, zone) ?? '', zone)).toBe(local);
     }
   });
 });

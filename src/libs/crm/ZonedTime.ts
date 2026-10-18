@@ -19,15 +19,14 @@ const offsetAt = (time: number, timeZone: string) => {
 };
 
 /**
- * Reads a local date and time (a `datetime-local` value) in a time zone.
- * @param local `YYYY-MM-DDTHH:mm`.
- * @param timeZone The workspace's time zone.
- * @returns The ISO 8601 instant in UTC. A time the clocks skip moves forward by the gap; a time
- *   they repeat is the earlier one.
+ * The instant a zone shows a wall time at. A time the clocks skip moves forward by the gap; a
+ * time they repeat is the earlier one.
+ * @param wall The wall time as if it were UTC, in milliseconds.
+ * @param timeZone The time zone.
+ * @returns The ISO 8601 instant in UTC.
  */
-export const toInstant = (local: string, timeZone: string) => {
-  // The wall time as if it were UTC, then shifted by the offsets on either side of a change.
-  const wall = Date.parse(`${local}:00Z`);
+const fromWall = (wall: number, timeZone: string) => {
+  // Shifted by the offsets on either side of a change.
   const before = wall - offsetAt(wall - DAY, timeZone);
   const after = wall - offsetAt(wall + DAY, timeZone);
   // A candidate is right when the zone shows the wall time at it: both are in a repeated hour,
@@ -35,6 +34,24 @@ export const toInstant = (local: string, timeZone: string) => {
   const exact = [before, after].filter((time) => time + offsetAt(time, timeZone) === wall);
 
   return new Date(exact.length > 0 ? Math.min(...exact) : before).toISOString();
+};
+
+/**
+ * Reads a local date and time (a `datetime-local` value) in a time zone.
+ * @param local Exactly `YYYY-MM-DDTHH:mm` (4-digit year, no seconds), a real date and time.
+ * @param timeZone The workspace's time zone.
+ * @returns The ISO 8601 instant in UTC, or undefined for any other text. A time the clocks skip
+ *   moves forward by the gap; a time they repeat is the earlier one.
+ */
+export const toInstant = (local: string, timeZone: string) => {
+  const wall = Date.parse(`${local}:00Z`);
+  // Date.parse rolls 30 February over to March and 24:00 to the next day: it must read back.
+  const real =
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/u.test(local) &&
+    !Number.isNaN(wall) &&
+    new Date(wall).toISOString().startsWith(local);
+
+  return real ? fromWall(wall, timeZone) : undefined;
 };
 
 /**

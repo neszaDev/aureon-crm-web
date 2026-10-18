@@ -29,6 +29,13 @@ type ContactsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
+/**
+ * The company filter's name, which the picker shows without a search.
+ * @param lookup The company's lookup, when the list is filtered by one.
+ * @returns Its name, when it was found.
+ */
+const nameOf = (lookup?: Awaited<ReturnType<typeof getCompany>>) => lookup?.company?.name;
+
 export async function generateMetadata(props: ContactsPageProps): Promise<Metadata> {
   const { locale, workspaceId } = await props.params;
   const t = await getTranslations({ locale, namespace: 'ContactsPage' });
@@ -44,7 +51,7 @@ export default async function ContactsPage(props: ContactsPageProps) {
   const { companyId } = query.filters;
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
-  const [{ workspace }, { user }, list, members, sources, tags, companyName] = await Promise.all([
+  const [{ workspace }, { user }, list, members, sources, tags, company] = await Promise.all([
     getOpenWorkspace(locale, workspaceId),
     getCurrentUser(),
     getContacts(workspaceId, query),
@@ -52,11 +59,9 @@ export default async function ContactsPage(props: ContactsPageProps) {
     getLeadSources(workspaceId),
     getContactTags(workspaceId),
     // The company filter's name, which the picker shows without a search.
-    companyId === undefined
-      ? undefined
-      : getCompany(workspaceId, String(companyId)).then((result) => result.company?.name),
+    companyId === undefined ? undefined : getCompany(workspaceId, String(companyId)),
   ]);
-  if ([list, members, sources, tags].some((result) => result.unauthorized)) {
+  if ([list, members, sources, tags, company].some((result) => result?.unauthorized)) {
     return endRejectedSession(locale);
   }
   if (list.forbidden) {
@@ -119,7 +124,7 @@ export default async function ContactsPage(props: ContactsPageProps) {
         members={members.members}
         sources={sources.sources}
         tags={tags.tags}
-        companyName={companyName}
+        companyName={nameOf(company)}
       />
 
       {page ? (

@@ -144,7 +144,8 @@
     "website_format": "ป้อนที่อยู่เว็บที่ขึ้นต้นด้วย http:// หรือ https://",
     "employee_count_range": "ใช้จำนวนเต็มตั้งแต่ 0 ถึง 10,000,000",
     "too_many_tags": "ใช้แท็กได้ไม่เกิน 20 แท็ก",
-    "tag_length": "แต่ละแท็กยาว 1 ถึง 40 ตัวอักษร"
+    "tag_length": "แต่ละแท็กยาว 1 ถึง 40 ตัวอักษร",
+    "invalid_date_time": "ระบุวันที่และเวลา"
   },
   "DashboardLayout": {
     "meta_title": "แดชบอร์ด",
@@ -197,7 +198,8 @@
     "current": "ปัจจุบัน",
     "create_workspace": "สร้างพื้นที่ทำงาน",
     "all_workspaces": "พื้นที่ทำงานของคุณ",
-    "skip_to_content": "ข้ามไปที่เนื้อหา"
+    "skip_to_content": "ข้ามไปที่เนื้อหา",
+    "nav_tasks": "งาน"
   },
   "AccountMenu": {
     "label": "บัญชีของคุณ",
@@ -533,7 +535,8 @@
     "any": "ทุกคน",
     "me": "ฉัน",
     "unassigned": "ยังไม่มีผู้รับผิดชอบ",
-    "former": "อดีตสมาชิก"
+    "former": "อดีตสมาชิก",
+    "label_assignee": "ผู้รับมอบหมาย"
   },
   "OwnerField": {
     "you": "{name} (คุณ)",
@@ -547,7 +550,8 @@
   "RecordHeader": {
     "archived": "เก็บถาวรแล้ว",
     "owner": "ผู้รับผิดชอบ: {name}",
-    "unassigned": "ยังไม่มีผู้รับผิดชอบ"
+    "unassigned": "ยังไม่มีผู้รับผิดชอบ",
+    "assignee": "มอบหมายให้: {name}"
   },
   "RecordFacts": {
     "not_set": "ยังไม่ระบุ"
@@ -714,7 +718,14 @@
     "clear_company": "ล้างบริษัท",
     "results": "ผลการค้นหา",
     "current": "(ปัจจุบัน)",
-    "error": "ค้นหาไม่สำเร็จ ลองอีกครั้ง"
+    "error": "ค้นหาไม่สำเร็จ ลองอีกครั้ง",
+    "count": "{count, plural, other {พบ # รายการ}}",
+    "search_contact": "ค้นหาผู้ติดต่อ",
+    "clear_contact": "ล้างผู้ติดต่อ",
+    "search_lead": "ค้นหาลีด",
+    "clear_lead": "ล้างลีด",
+    "search_deal": "ค้นหาดีล",
+    "clear_deal": "ล้างดีล"
   },
   "TagInput": {
     "remove": "เอา {tag} ออก",
@@ -722,7 +733,7 @@
     "suggestions": "แท็กที่ใช้อยู่",
     "hint": "กด Enter หรือพิมพ์เครื่องหมายจุลภาคหลังแต่ละแท็ก",
     "limit": "ผู้ติดต่อหนึ่งคนมีแท็กได้ไม่เกิน {max} แท็ก เอาออกหนึ่งแท็กเพื่อเพิ่มแท็กใหม่",
-    "chosen": "ที่เพิ่มแล้ว",
+    "chosen": "แท็กที่เพิ่มแล้ว",
     "added": "เพิ่ม {tags} แล้ว",
     "removed": "เอา {tag} ออกแล้ว",
     "dropped": "ไม่ได้เพิ่ม {tags} ผู้ติดต่อหนึ่งคนมีแท็กได้ไม่เกิน {max} แท็ก",
@@ -731,6 +742,147 @@
   "SourceField": {
     "none": "ไม่ได้ระบุ",
     "archived": "{name} (เก็บถาวร)"
+  },
+  "DateTimeField": {
+    "pick_date": "เลือกวันที่",
+    "time": "เวลา",
+    "clear": "ล้าง{label}",
+    "zone": "เวลาของพื้นที่ทำงาน ({zone})"
+  },
+  "ActivityComposer": {
+    "type_label": "ประเภท",
+    "type_CALL": "โทร",
+    "type_EMAIL": "อีเมล",
+    "type_MEETING": "ประชุม",
+    "type_NOTE": "โน้ต",
+    "subject_label": "หัวข้อ",
+    "body_label": "รายละเอียด",
+    "when_label": "เมื่อ",
+    "cancel": "ยกเลิก",
+    "error_invalid_input": "ตรวจสอบช่องที่ทำเครื่องหมายไว้"
+  },
+  "ActivityItem": {
+    "edit": "แก้ไข {subject}",
+    "delete": "ลบ {subject}",
+    "delete_title": "ลบ “{subject}” ไหม",
+    "delete_text": "กิจกรรมนี้จะหายไปจากไทม์ไลน์อย่างถาวร",
+    "delete_confirm": "ลบ",
+    "cancel": "ยกเลิก",
+    "deleted": "ลบกิจกรรมแล้ว",
+    "save": "บันทึก",
+    "saved": "บันทึกกิจกรรมแล้ว",
+    "by": "บันทึกโดย {name}",
+    "by_former": "บันทึกโดยอดีตสมาชิก",
+    "on": "เกี่ยวกับ"
+  },
+  "ActivityTimeline": {
+    "title": "กิจกรรม",
+    "count": "{count, number}",
+    "log": "บันทึกกิจกรรม",
+    "logged": "บันทึกกิจกรรมแล้ว",
+    "empty": "ยังไม่มีการบันทึก การโทร อีเมล การประชุม และโน้ตจะแสดงที่นี่ โดยรายการล่าสุดอยู่บนสุด",
+    "show_older": "แสดงรายการเก่ากว่า",
+    "older_failed": "โหลดกิจกรรมก่อนหน้าไม่สำเร็จ ลองอีกครั้ง"
+  },
+  "TaskRow": {
+    "complete": "ทำเครื่องหมายว่าเสร็จ: {title}",
+    "complete_button": "ทำเสร็จ",
+    "completed": "“{title}” เสร็จแล้ว",
+    "status_OPEN": "เปิดอยู่",
+    "status_COMPLETED": "เสร็จแล้ว",
+    "status_CANCELLED": "ยกเลิกแล้ว",
+    "overdue": "เกินกำหนด",
+    "no_due": "ไม่มีกำหนด",
+    "priority_LOW": "ต่ำ",
+    "priority_MEDIUM": "ปานกลาง",
+    "priority_HIGH": "สูง",
+    "menu": "การดำเนินการเพิ่มเติมสำหรับ {title}",
+    "reopen": "เปิดอีกครั้ง",
+    "reopened": "เปิด “{title}” อีกครั้งแล้ว",
+    "cancel_task": "ยกเลิกงาน",
+    "cancel_title": "ยกเลิก “{title}” ไหม",
+    "cancel_text": "งานจะย้ายไปอยู่ในงานที่ยกเลิก และเปิดอีกครั้งได้ภายหลัง งานจะไม่ถูกลบ",
+    "keep": "เก็บไว้",
+    "cancelled": "ยกเลิก “{title}” แล้ว",
+    "error_generic": "ไม่สำเร็จ ลองอีกครั้ง"
+  },
+  "TaskTable": {
+    "done": "เสร็จ",
+    "title": "งาน",
+    "due": "กำหนดเสร็จ",
+    "priority": "ความสำคัญ",
+    "assignee": "ผู้รับมอบหมาย",
+    "linked": "เกี่ยวข้องกับ",
+    "actions": "การดำเนินการ"
+  },
+  "TaskPanel": {
+    "title": "งาน",
+    "count": "{count, number}",
+    "show_closed": "แสดงงานที่เสร็จและยกเลิกแล้ว",
+    "add": "เพิ่มงาน",
+    "empty": "ไม่มีงานที่เปิดอยู่",
+    "more": "แสดง {shown} จาก {total} รายการ",
+    "closed_title": "เสร็จและยกเลิกแล้ว ({count, number})",
+    "closed_empty": "ยังไม่มี"
+  },
+  "TaskDialog": {
+    "close": "ปิด",
+    "new_title": "งานใหม่",
+    "edit_title": "แก้ไขงาน",
+    "linked_to": "เกี่ยวกับ {name}",
+    "description": "เชื่อมโยงกับระเบียนที่เกี่ยวข้อง (ถ้ามี)",
+    "title_label": "ชื่องาน",
+    "description_label": "รายละเอียด",
+    "due_label": "กำหนดเสร็จ",
+    "priority_label": "ความสำคัญ",
+    "assignee_label": "ผู้รับมอบหมาย",
+    "company_label": "บริษัท",
+    "contact_label": "ผู้ติดต่อ",
+    "lead_label": "ลีด",
+    "deal_label": "ดีล",
+    "links_hint": "งานที่เชื่อมกับผู้ติดต่อหรือดีลจะแสดงที่บริษัทของระเบียนนั้นด้วย",
+    "create": "เพิ่มงาน",
+    "save": "บันทึกการเปลี่ยนแปลง",
+    "created": "เพิ่มงานแล้ว",
+    "saved": "บันทึกงานแล้ว",
+    "error_invalid_input": "ตรวจสอบช่องที่ทำเครื่องหมายไว้"
+  },
+  "TasksPage": {
+    "title": "งาน",
+    "description": "สิ่งที่ต้องทำ ใครรับผิดชอบ และเมื่อไร",
+    "new": "งานใหม่",
+    "views_label": "มุมมองงาน",
+    "view_mine": "งานของฉัน",
+    "view_overdue": "เกินกำหนด",
+    "view_upcoming": "7 วันข้างหน้า",
+    "view_completed": "เสร็จแล้ว",
+    "view_all": "ทั้งหมด",
+    "toolbar_label": "ค้นหางาน",
+    "search_label": "ค้นหา",
+    "search_placeholder": "ชื่องาน",
+    "list_heading": "{count, plural, =0 {ไม่มีงาน} other {# งาน}}",
+    "empty_title_mine": "ไม่มีงานในรายการของคุณ",
+    "empty_text_mine": "งานที่เปิดอยู่และมอบหมายให้คุณจะแสดงที่นี่ โดยงานที่ใกล้ถึงกำหนดอยู่ก่อน",
+    "empty_title_overdue": "ไม่มีงานที่เกินกำหนด",
+    "empty_text_overdue": "งานที่เปิดอยู่และเลยกำหนดแล้วจะแสดงที่นี่",
+    "empty_title_upcoming": "ไม่มีงานที่ถึงกำหนดใน 7 วันข้างหน้า",
+    "empty_text_upcoming": "งานที่เปิดอยู่และถึงกำหนดภายในหนึ่งสัปดาห์จะแสดงที่นี่",
+    "empty_title_completed": "ยังไม่มีงานที่เสร็จแล้ว",
+    "empty_text_completed": "งานที่ทำเสร็จจะแสดงที่นี่ โดยรายการล่าสุดอยู่ก่อน",
+    "empty_title_all": "ยังไม่มีงาน",
+    "empty_text_all": "เพิ่มงานที่นี่ หรือจากบริษัทหรือผู้ติดต่อ พร้อมกำหนดเสร็จและผู้รับมอบหมาย"
+  },
+  "TaskPage": {
+    "back": "กลับไปที่งาน",
+    "details": "รายละเอียดงาน",
+    "due": "กำหนดเสร็จ",
+    "priority": "ความสำคัญ",
+    "linked": "เกี่ยวข้องกับ",
+    "created_by": "สร้างโดย",
+    "created_by_former": "อดีตสมาชิก",
+    "completed_at": "เสร็จเมื่อ",
+    "description": "รายละเอียด",
+    "edit": "แก้ไข"
   },
   "DashboardPage": {
     "title": "ภาพรวม",

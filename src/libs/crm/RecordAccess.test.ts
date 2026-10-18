@@ -24,6 +24,18 @@ describe(canEditRecord, () => {
   });
 });
 
+describe('canEditRecord on a task', () => {
+  it("lets a sales rep edit a task they're assigned or created, and no other", () => {
+    // Assigned to someone else, created by them; assigned to them; neither.
+    expect(canEditRecord(rep, ME, 8, ME)).toBeTruthy();
+    expect(canEditRecord(rep, ME, ME)).toBeTruthy();
+    expect(canEditRecord(rep, ME, 8, 9)).toBeFalsy();
+    // Unassigned, its creator gone: a manager's.
+    expect(canEditRecord(rep, ME)).toBeFalsy();
+    expect(canEditRecord(manager, ME)).toBeTruthy();
+  });
+});
+
 describe(canAssign, () => {
   it('needs RECORDS_ASSIGN', () => {
     expect(canAssign(rep)).toBeFalsy();

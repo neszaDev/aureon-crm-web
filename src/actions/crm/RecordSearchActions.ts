@@ -23,6 +23,39 @@ const SEARCHES = {
     }));
     return { status: response.status, options };
   },
+  contact: async (api: Api, workspaceId: number, q?: string) => {
+    const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/contacts', {
+      params: { path: { workspaceId }, query: { q, size: 10 } },
+    });
+    const options: RecordOption[] | undefined = data?.content.map((contact) => ({
+      id: contact.id,
+      label: contact.fullName,
+      detail: contact.company?.name ?? contact.email,
+    }));
+    return { status: response.status, options };
+  },
+  lead: async (api: Api, workspaceId: number, q?: string) => {
+    const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/leads', {
+      params: { path: { workspaceId }, query: { q, size: 10 } },
+    });
+    const options: RecordOption[] | undefined = data?.content.map((lead) => ({
+      id: lead.id,
+      label: [lead.firstName, lead.lastName].filter(Boolean).join(' '),
+      detail: lead.companyName,
+    }));
+    return { status: response.status, options };
+  },
+  deal: async (api: Api, workspaceId: number, q?: string) => {
+    const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/deals', {
+      params: { path: { workspaceId }, query: { q, size: 10 } },
+    });
+    const options: RecordOption[] | undefined = data?.content.map((deal) => ({
+      id: deal.id,
+      label: deal.name,
+      detail: deal.company?.name,
+    }));
+    return { status: response.status, options };
+  },
 };
 
 /** The kinds of record a picker can link. */
@@ -36,6 +69,7 @@ export type RecordKind = keyof typeof SEARCHES;
  * @param kind The kind of record.
  * @param q The text typed so far; blank lists the first records.
  * @returns Up to 10 records.
+ * @throws {Error} When the backend refuses the search (any status but 401, which redirects).
  */
 export async function searchRecords(
   workspaceId: number,

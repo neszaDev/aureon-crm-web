@@ -26,7 +26,8 @@ export type PickedRecord = { id: number; label: string };
  * field shows the current record's name as given (no search); opening it lists the first active
  * records of the kind (ArrowDown opens it too), and typing searches them on the server
  * (`searchRecords`): the old results go at once, so Enter never picks one the text no longer
- * matches. A failed search says so. Clearable. Its label is a `<label htmlFor={id}>` outside it.
+ * matches. A failed search says so; the number of results is read out. Clearable. Its label is
+ * a `<label htmlFor={id}>` outside it.
  * @param props Component props.
  * @param props.id The field's id.
  * @param props.workspaceId The workspace searched.
@@ -89,7 +90,8 @@ export const RecordPicker = (props: {
       void search('');
     }
   };
-  let notice: string | undefined;
+  // The list's status, always read out; shown only while the list has no results to show.
+  let notice = t('count', { count: results.length });
   if (searching) {
     notice = t('searching');
   } else if (failed) {
@@ -97,6 +99,7 @@ export const RecordPicker = (props: {
   } else if (results.length === 0) {
     notice = t('empty');
   }
+  const shown = searching || failed || results.length === 0;
 
   return (
     <div className="relative w-full">
@@ -158,7 +161,7 @@ export const RecordPicker = (props: {
             />
             {/* Outside the listbox, which holds only options; read out as it changes. */}
             <output
-              className={notice ? 'px-2 py-6 text-center text-sm text-muted-foreground' : 'sr-only'}
+              className={shown ? 'px-2 py-6 text-center text-sm text-muted-foreground' : 'sr-only'}
             >
               {notice}
             </output>

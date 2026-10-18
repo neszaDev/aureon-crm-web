@@ -8,6 +8,7 @@ import { ArchiveButton } from '@/components/crm/record/ArchiveButton';
 import { RecordFacts } from '@/components/crm/record/RecordFacts';
 import { RecordHeader } from '@/components/crm/record/RecordHeader';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
+import { RecordWork } from '@/components/crm/record/RecordWork';
 import { Button } from '@/components/ui/button';
 import { CONTACT_LIST, getCompany, getContacts } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
@@ -156,6 +157,13 @@ export default async function CompanyPage(props: CompanyPageProps) {
         total={contacts.contacts.totalElements}
         contactsPath={`/app/${workspace.id}/contacts`}
         companyId={company.id}
+      />
+      {/* Its tasks and activity (a company's: those on its contacts and deals too). */}
+      <RecordWork
+        workspace={workspace}
+        me={user.id}
+        link={{ companyId: company.id }}
+        label={company.name}
       />
     </div>
   );

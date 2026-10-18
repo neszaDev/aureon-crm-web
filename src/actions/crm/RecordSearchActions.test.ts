@@ -41,6 +41,60 @@ describe(searchRecords, () => {
     });
   });
 
+  it('lists contacts by name, with their company or email', async () => {
+    const GET = mockGet({
+      status: 200,
+      data: {
+        content: [
+          { id: 3, fullName: 'Mia Chan', company: { id: 7, name: 'Acme' } },
+          { id: 4, fullName: 'Mia Lee', email: 'mia@lee.test' },
+        ],
+      },
+    });
+
+    await expect(searchRecords(1, 'contact', 'mia')).resolves.toStrictEqual([
+      { id: 3, label: 'Mia Chan', detail: 'Acme' },
+      { id: 4, label: 'Mia Lee', detail: 'mia@lee.test' },
+    ]);
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/contacts', {
+      params: { path: { workspaceId: 1 }, query: { q: 'mia', size: 10 } },
+    });
+  });
+
+  it('lists leads by name, with their company', async () => {
+    const GET = mockGet({
+      status: 200,
+      data: {
+        content: [
+          { id: 5, firstName: 'Noa', lastName: 'Park', companyName: 'Globex' },
+          { id: 6, firstName: 'Noa' },
+        ],
+      },
+    });
+
+    await expect(searchRecords(1, 'lead', 'noa')).resolves.toStrictEqual([
+      { id: 5, label: 'Noa Park', detail: 'Globex' },
+      { id: 6, label: 'Noa', detail: undefined },
+    ]);
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/leads', {
+      params: { path: { workspaceId: 1 }, query: { q: 'noa', size: 10 } },
+    });
+  });
+
+  it('lists deals by name, with their company', async () => {
+    const GET = mockGet({
+      status: 200,
+      data: { content: [{ id: 8, name: 'Acme renewal', company: { id: 7, name: 'Acme' } }] },
+    });
+
+    await expect(searchRecords(1, 'deal', 'renewal')).resolves.toStrictEqual([
+      { id: 8, label: 'Acme renewal', detail: 'Acme' },
+    ]);
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/deals', {
+      params: { path: { workspaceId: 1 }, query: { q: 'renewal', size: 10 } },
+    });
+  });
+
   it('sends no NUL characters, and no more text than the backend takes', async () => {
     const GET = mockGet({ status: 200, data: { content: [] } });
 

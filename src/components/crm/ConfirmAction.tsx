@@ -102,7 +102,13 @@ export const ConfirmAction = (props: {
               startTransition(async () => {
                 const result = await props.action();
                 if (result.ok) {
-                  setOpen(false);
+                  // A transition too (an update after `await` isn't one by itself), so the
+                  // dialog closes in the same commit as the action's own updates (a refreshed
+                  // page without the deleted row): the trigger is gone by the time it hands the
+                  // focus on, never just after.
+                  startTransition(() => {
+                    setOpen(false);
+                  });
                 } else {
                   setFailure(result);
                 }

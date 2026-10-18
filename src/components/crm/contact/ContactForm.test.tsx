@@ -64,7 +64,7 @@ describe(ContactForm, () => {
 
     await page.getByRole('combobox', { name: 'Company' }).click();
     await page.getByRole('option', { name: /Globex/u }).click();
-    await userEvent.type(page.getByLabelText('Tags'), 'VIP{Enter}');
+    await userEvent.type(page.getByLabelText('Tags', { exact: true }), 'VIP{Enter}');
     expect(action).not.toHaveBeenCalled();
     await page.getByRole('button', { name: 'Save changes' }).click();
 
@@ -92,7 +92,7 @@ describe(ContactForm, () => {
     await renderForm({ action: vi.fn<Action>().mockResolvedValue({ ok: true }) });
 
     await page.getByLabelText('Email').fill(' MIA@Acme.Test ');
-    await userEvent.type(page.getByLabelText('Tags'), 'alpha{Enter}');
+    await userEvent.type(page.getByLabelText('Tags', { exact: true }), 'alpha{Enter}');
     await page.getByRole('button', { name: 'Save changes' }).click();
 
     await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
@@ -110,7 +110,7 @@ describe(ContactForm, () => {
     const action = vi.fn<Action>();
     await renderForm({ action });
 
-    await userEvent.type(page.getByLabelText('Tags'), `${'x'.repeat(41)}{Enter}`);
+    await userEvent.type(page.getByLabelText('Tags', { exact: true }), `${'x'.repeat(41)}{Enter}`);
 
     await expect.element(page.getByText('Each tag takes 1 to 40 characters')).toBeVisible();
     expect(action).not.toHaveBeenCalled();

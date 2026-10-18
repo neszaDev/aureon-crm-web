@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { useState } from 'react';
+import { startTransition, Suspense, use, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
@@ -53,6 +53,59 @@ const NoRefButton = (props: {
   </button>
 );
 
+/**
+ * Rows read from a promise, as the app router reads a page's payload: a removal is a transition
+ * that commits only once its rows arrive, here 400 ms after the action answered.
+ * @param props Component props.
+ * @param props.rows The rows on their way.
+ * @param props.remove Removes a row.
+ * @returns The rows.
+ */
+const SlowRowList = (props: { rows: Promise<string[]>; remove: (row: string) => void }) =>
+  use(props.rows).map((row) => (
+    <ConfirmAction
+      key={row}
+      trigger={<button type="button">Delete {row}</button>}
+      title={`Delete ${row}?`}
+      description="It goes for good."
+      confirmLabel="Delete"
+      cancelLabel="Cancel"
+      fallbackFocus={() => document.querySelector<HTMLElement>('#rows-heading')}
+      action={async () => {
+        props.remove(row);
+        return await Promise.resolve({ ok: true });
+      }}
+    />
+  ));
+
+const LOADED = Promise.resolve(['Demo', 'Proposal']);
+
+const SlowRows = () => {
+  const [rows, setRows] = useState(LOADED);
+
+  return (
+    <section>
+      <h2 id="rows-heading" tabIndex={-1}>
+        Stages
+      </h2>
+      <Suspense>
+        <SlowRowList
+          rows={rows}
+          remove={(row) => {
+            const { promise, resolve } = Promise.withResolvers<string[]>();
+            setTimeout(() => {
+              resolve(['Demo', 'Proposal'].filter((item) => item !== row));
+            }, 400);
+            startTransition(() => {
+              setRows(promise);
+            });
+          }}
+        />
+      </Suspense>
+    </section>
+  );
+};
+
 const renderRows = async () => {
   await render(
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
@@ -69,6 +122,23 @@ describe(ConfirmAction, () => {
     await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click();
 
     await expect.element(page.getByRole('button', { name: 'Delete Demo' })).not.toBeInTheDocument();
+    await expect.element(page.getByRole('heading', { name: 'Stages' })).toHaveFocus();
+  });
+
+  it('moves the focus to the fallback when the row goes only after the action answered', async () => {
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <SlowRows />
+      </NextIntlClientProvider>,
+    );
+
+    await page.getByRole('button', { name: 'Delete Demo' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click();
+
+    await expect
+      .element(page.getByRole('button', { name: 'Delete Demo' }), { timeout: 3000 })
+      .not.toBeInTheDocument();
+    await expect.element(page.getByRole('alertdialog')).not.toBeInTheDocument();
     await expect.element(page.getByRole('heading', { name: 'Stages' })).toHaveFocus();
   });
 
