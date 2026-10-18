@@ -4,6 +4,7 @@ import type { ListQuery, ListSpec } from '@/libs/crm/ListQuery';
 import { PAGE_SIZES } from '@/libs/crm/ListQuery';
 import { toRecordId, toWorkspaceId } from '@/libs/crm/WorkspaceId';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
+import { LEAD_PRIORITIES, LEAD_STATUSES } from '@/validations/crm/LeadValidation';
 import { authedBackend, backend } from './Backend';
 import type { paths } from './schema';
 
@@ -64,6 +65,19 @@ export const CONTACT_LIST = {
   sorts: ['NAME', 'COMPANY', 'CREATED_AT', 'UPDATED_AT'],
   defaultSort: 'NAME',
   filters: { companyId: 'id', ownerId: 'id', sourceId: 'id', tag: 'text' },
+} as const satisfies ListSpec;
+
+/** The lead list's sorts and filters (api.md, Leads): several statuses, `followUpBefore` inclusive. */
+export const LEAD_LIST = {
+  sorts: ['CREATED_AT', 'UPDATED_AT', 'FOLLOW_UP_DATE', 'PRIORITY', 'NAME'],
+  defaultSort: 'CREATED_AT',
+  filters: {
+    status: { enum: LEAD_STATUSES, multiple: true },
+    ownerId: 'id',
+    sourceId: 'id',
+    priority: { enum: LEAD_PRIORITIES },
+    followUpBefore: 'date',
+  },
 } as const satisfies ListSpec;
 
 /** The Tasks page's views, its tabs: each a set of the task list's filters and a sort. */
@@ -298,6 +312,48 @@ export const getContact = cache(async (segment: string, id: string) => {
   });
 
   return { contact: data, ...flags(response.status) };
+});
+
+/**
+ * Loads a page of the workspace's leads, in full (`GET /workspaces/{id}/leads`).
+ * @param segment The `[workspaceId]` route segment.
+ * @param query The list query, read with `LEAD_LIST`.
+ * @returns The page and the outcome flags (`invalid`: the backend refused the query).
+ */
+export const getLeads = async (segment: string, query: ListQuery<typeof LEAD_LIST>) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { leads: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/leads', {
+    params: { path: { workspaceId }, query: listParams(query) },
+  });
+
+  return { leads: data, ...flags(response.status) };
+};
+
+/**
+ * Loads one lead (`GET /workspaces/{id}/leads/{id}`). Cached for the request, so the page and
+ * its metadata share one call.
+ * @param segment The `[workspaceId]` route segment.
+ * @param id The `[id]` route segment.
+ * @returns The lead and the outcome flags (`notFound` for a malformed id too).
+ */
+export const getLead = cache(async (segment: string, id: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  const leadId = toRecordId(id);
+  if (workspaceId === undefined || leadId === undefined) {
+    return { lead: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/leads/{id}', {
+    params: { path: { workspaceId, id: leadId } },
+  });
+
+  return { lead: data, ...flags(response.status) };
 });
 
 /**

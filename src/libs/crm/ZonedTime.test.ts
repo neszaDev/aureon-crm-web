@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { toInstant, toLocalInput } from './ZonedTime';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { toInstant, toLocalInput, todayIn } from './ZonedTime';
 
 describe(toInstant, () => {
   it('reads a local time in the given time zone', () => {
@@ -48,5 +48,20 @@ describe(toLocalInput, () => {
     ] as const) {
       expect(toLocalInput(toInstant(local, zone) ?? '', zone)).toBe(local);
     }
+  });
+});
+
+describe(todayIn, () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("is the date in the zone, which is another day than UTC's for part of every day", () => {
+    vi.useFakeTimers();
+    // 20:00 UTC on 18 October: already the 19th in Bangkok, still the 18th in New York.
+    vi.setSystemTime(new Date('2026-10-18T20:00:00Z'));
+
+    expect(todayIn('Asia/Bangkok')).toBe('2026-10-19');
+    expect(todayIn('America/New_York')).toBe('2026-10-18');
   });
 });

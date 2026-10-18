@@ -60,3 +60,13 @@ export const daysSince = (instant: string, now: Date) =>
  */
 export const recordNumber = (kind: keyof typeof RECORD_PREFIXES, id: number) =>
   `${RECORD_PREFIXES[kind]}-${String(id).padStart(4, '0')}`;
+
+/**
+ * A person's full name, as the API's `fullName` writes it: the first name, then the last if any.
+ * @param person Their first and last name.
+ * @param person.firstName The first name.
+ * @param person.lastName The last name, if any.
+ * @returns The name.
+ */
+export const fullName = (person: { firstName: string; lastName?: string }) =>
+  [person.firstName, person.lastName].filter(Boolean).join(' ');

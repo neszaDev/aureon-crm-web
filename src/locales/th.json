@@ -199,7 +199,8 @@
     "create_workspace": "สร้างพื้นที่ทำงาน",
     "all_workspaces": "พื้นที่ทำงานของคุณ",
     "skip_to_content": "ข้ามไปที่เนื้อหา",
-    "nav_tasks": "งาน"
+    "nav_tasks": "งาน",
+    "nav_leads": "ลีด"
   },
   "AccountMenu": {
     "label": "บัญชีของคุณ",
@@ -2870,5 +2871,158 @@
     "code_alt": "คิวอาร์โค้ดของ {text}",
     "text_label": "เนื้อหาของโค้ด",
     "label_label": "ป้ายกำกับ"
+  },
+  "LeadsPage": {
+    "title": "ลีด",
+    "description": "คนที่อาจกลายเป็นลูกค้า ตั้งแต่ติดต่อครั้งแรกจนถึงการแปลงเป็นผู้ติดต่อ",
+    "new": "เพิ่มลีด",
+    "toolbar_label": "ค้นหาลีด",
+    "search_label": "ค้นหา",
+    "search_placeholder": "ชื่อ บริษัท อีเมล หรือเบอร์โทร",
+    "status_label": "สถานะ",
+    "source_label": "แหล่งที่มา",
+    "source_any": "ทุกแหล่งที่มา",
+    "source_unknown": "ไม่พบแหล่งที่มา",
+    "priority_label": "ความสำคัญ",
+    "priority_any": "ทุกระดับ",
+    "follow_up_label": "ติดตามก่อนวันที่",
+    "list_heading": "{count, plural, =0 {ไม่มีลีด} other {ลีด # ราย}}",
+    "archived_heading": "{count, plural, =0 {ไม่มีลีดที่เก็บถาวร} other {ลีดที่เก็บถาวร # ราย}}",
+    "empty_title": "ยังไม่มีลีด",
+    "empty_text": "เพิ่มคนที่คุณอาจขายให้ ย้ายแต่ละรายจากใหม่ไปถึงผ่านเกณฑ์ แล้วแปลงเป็นผู้ติดต่อ บริษัท และดีล",
+    "archived_empty_text": "ลีดที่คุณเก็บถาวรจะแสดงที่นี่ และกู้คืนได้"
+  },
+  "NewLeadPage": {
+    "title": "เพิ่มลีด",
+    "description": "เพิ่มคนที่อาจกลายเป็นลูกค้า เมื่อผ่านเกณฑ์แล้วคุณแปลงเป็นผู้ติดต่อได้",
+    "submit": "สร้างลีด"
+  },
+  "EditLeadPage": {
+    "title": "แก้ไข {name}",
+    "description": "การเปลี่ยนแปลงจะแสดงกับทุกคนในพื้นที่ทำงานเมื่อบันทึกแล้ว",
+    "submit": "บันทึกการเปลี่ยนแปลง"
+  },
+  "LeadPage": {
+    "back": "กลับไปที่ลีด",
+    "details": "รายละเอียดลีด",
+    "email": "อีเมล",
+    "phone": "โทรศัพท์",
+    "job_title": "ตำแหน่งงาน",
+    "company": "บริษัท",
+    "source": "แหล่งที่มา",
+    "priority": "ความสำคัญ",
+    "follow_up": "การติดตาม",
+    "estimated_value": "มูลค่าโดยประมาณ",
+    "notes": "บันทึกย่อ",
+    "converted_on": "แปลงเมื่อ",
+    "edit": "แก้ไข"
+  },
+  "LeadForm": {
+    "first_name_label": "ชื่อ",
+    "last_name_label": "นามสกุล",
+    "company_label": "บริษัท",
+    "email_label": "อีเมล",
+    "phone_label": "โทรศัพท์",
+    "job_title_label": "ตำแหน่งงาน",
+    "owner_label": "ผู้รับผิดชอบ",
+    "source_label": "แหล่งที่มา",
+    "priority_label": "ความสำคัญ",
+    "follow_up_label": "วันที่ติดตาม",
+    "value_label": "มูลค่าโดยประมาณ",
+    "value_hint": "ตัวเลข อาจมีจุดและทศนิยมไม่เกิน 2 ตำแหน่ง",
+    "currency_label": "สกุลเงิน",
+    "currency_default": "สกุลเงินของพื้นที่ทำงาน ({code})",
+    "notes_label": "บันทึกย่อ",
+    "cancel": "ยกเลิก",
+    "saved": "บันทึกแล้ว",
+    "error_invalid_input": "ตรวจสอบช่องที่ทำเครื่องหมายไว้",
+    "error_generic": "ยังสร้างลีดไม่สำเร็จ ลองอีกครั้ง"
+  },
+  "LeadTable": {
+    "name": "ชื่อ",
+    "company": "บริษัท",
+    "status": "สถานะ",
+    "priority": "ความสำคัญ",
+    "follow_up": "การติดตาม",
+    "owner": "ผู้รับผิดชอบ",
+    "value": "มูลค่าโดยประมาณ",
+    "created": "สร้างเมื่อ"
+  },
+  "LeadStatus": {
+    "status_NEW": "ใหม่",
+    "status_CONTACTED": "ติดต่อแล้ว",
+    "status_QUALIFIED": "ผ่านเกณฑ์",
+    "status_UNQUALIFIED": "ไม่ผ่านเกณฑ์",
+    "status_CONVERTED": "แปลงแล้ว",
+    "priority_LOW": "ต่ำ",
+    "priority_MEDIUM": "ปานกลาง",
+    "priority_HIGH": "สูง"
+  },
+  "LeadFollowUp": {
+    "none": "ไม่มีการติดตาม",
+    "overdue": "เกินกำหนด"
+  },
+  "LeadStatusMenu": {
+    "trigger": "เปลี่ยนสถานะ",
+    "label": "ย้ายไปที่",
+    "moved": "เปลี่ยนสถานะเป็น {status} แล้ว",
+    "error_generic": "ไม่สำเร็จ ลองอีกครั้ง"
+  },
+  "UnqualifyDialog": {
+    "close": "ปิด",
+    "title": "ทำเครื่องหมาย {name} ว่าไม่ผ่านเกณฑ์",
+    "description": "บอกเหตุผลที่ลีดนี้ไม่เหมาะสม เหตุผลจะเก็บไว้กับลีด",
+    "reason_label": "เหตุผล",
+    "reason_hint": "ไม่เกิน 500 ตัวอักษร",
+    "submit": "ทำเครื่องหมายว่าไม่ผ่านเกณฑ์",
+    "done": "ทำเครื่องหมายลีดว่าไม่ผ่านเกณฑ์แล้ว",
+    "error_invalid_input": "ตรวจสอบช่องที่ทำเครื่องหมายไว้"
+  },
+  "ConvertDialog": {
+    "open": "แปลงลีด",
+    "close": "ปิด",
+    "title": "แปลง {name}",
+    "description": "เปลี่ยนลีดที่ผ่านเกณฑ์นี้เป็นผู้ติดต่อ เลือกบริษัท และเลือกว่าจะเปิดดีลหรือไม่ ลีดที่แปลงแล้วแก้ไขไม่ได้",
+    "company_legend": "บริษัท",
+    "company_create": "สร้าง {name}",
+    "company_link": "เชื่อมกับบริษัทที่มีอยู่",
+    "company_none": "ไม่มีบริษัท",
+    "company_label": "บริษัท",
+    "contact_legend": "ผู้ติดต่อ",
+    "contact_create": "สร้างจากลีดนี้",
+    "contact_link": "เชื่อมกับผู้ติดต่อที่มีอยู่",
+    "contact_label": "ผู้ติดต่อ",
+    "deal_legend": "ดีล",
+    "deal_switch": "สร้างดีล",
+    "deal_name_label": "ชื่อดีล",
+    "amount_label": "จำนวนเงิน",
+    "currency_label": "สกุลเงิน",
+    "stage_label": "ขั้นตอน",
+    "close_label": "วันที่คาดว่าจะปิดดีล",
+    "submit": "แปลง",
+    "done_title": "แปลงลีดแล้ว",
+    "done_text": "สิ่งที่ลีดนี้กลายเป็นมีดังนี้",
+    "already_title": "แปลงไปแล้ว",
+    "already_text": "ลีดนี้ถูกแปลงไปแล้ว จึงไม่มีอะไรถูกสร้างเพิ่ม สิ่งที่ลีดนี้กลายเป็นมีดังนี้",
+    "done": "เสร็จสิ้น",
+    "error_invalid_input": "ตรวจสอบช่องที่ทำเครื่องหมายไว้",
+    "error_generic": "ยังแปลงลีดไม่สำเร็จ ลองอีกครั้ง",
+    "deal_name_default": "{name} — ดีล"
+  },
+  "ConversionSummary": {
+    "label": "ผลการแปลง",
+    "company": "บริษัท",
+    "contact": "ผู้ติดต่อ",
+    "deal": "ดีล",
+    "no_company": "ไม่มีบริษัท",
+    "no_deal": "ไม่มีดีล"
+  },
+  "LeadLifecycle": {
+    "label": "วงจรของลีด",
+    "state_reached": "{name}: ผ่านแล้ว",
+    "state_current": "{name}: ขั้นปัจจุบัน",
+    "state_blank": "{name}: ยังไม่ถึง",
+    "reason_label": "เหตุผล:",
+    "hint": "ลีดเดินจากใหม่ไปติดต่อแล้วและผ่านเกณฑ์ หรือถูกทำเครื่องหมายว่าไม่ผ่านเกณฑ์พร้อมเหตุผล แปลงลีดที่ผ่านเกณฑ์เพื่อสร้างผู้ติดต่อ พร้อมบริษัทและดีลหากต้องการ"
   }
 }

@@ -35,6 +35,7 @@ export type PickedRecord = { id: number; label: string };
  * @param props.value The linked record, or null.
  * @param props.onChange Called with the picked record, or null when cleared.
  * @param props.placeholder What the field says without a record (default "None").
+ * @param props.initialQuery Text it opens with, searched at once, such as a lead's company name.
  * @param props.invalid Whether the field has an error.
  * @param props.describedBy The id of its hint or error.
  * @returns The field.
@@ -46,6 +47,7 @@ export const RecordPicker = (props: {
   value: PickedRecord | null;
   onChange: (value: PickedRecord | null) => void;
   placeholder?: string;
+  initialQuery?: string;
   invalid?: boolean;
   describedBy?: string;
 }) => {
@@ -86,8 +88,9 @@ export const RecordPicker = (props: {
     setOpen(next);
     window.clearTimeout(timer.current);
     if (next) {
-      setText('');
-      void search('');
+      const initial = props.initialQuery ?? '';
+      setText(initial);
+      void search(initial.trim());
     }
   };
   // The list's status, always read out; shown only while the list has no results to show.

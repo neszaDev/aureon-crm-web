@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { parseListQuery } from '@/libs/crm/ListQuery';
 import { authedBackend } from './Backend';
-import { COMPANY_LIST, getCompanies, taskViewQuery } from './CrmQueries';
+import { COMPANY_LIST, getCompanies, getLeads, LEAD_LIST, taskViewQuery } from './CrmQueries';
 
 vi.mock(import('server-only'), () => ({}));
 vi.mock(import('./Backend'), () => ({ authedBackend: vi.fn<typeof authedBackend>() }));
@@ -28,6 +28,41 @@ describe(getCompanies, () => {
       params: {
         path: { workspaceId: 7 },
         query: expect.objectContaining({ q: 'a'.repeat(201), page: 0, size: 20, sort: 'NAME' }),
+      },
+    });
+  });
+});
+
+describe(getLeads, () => {
+  it('asks for the statuses, the unassigned filter and the follow-up date as the backend names them', async () => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue({
+      data: { content: [] },
+      response: new Response(null, { status: 200 }),
+    });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await getLeads(
+      '7',
+      parseListQuery(LEAD_LIST, {
+        status: ['NEW', 'QUALIFIED', 'NOPE'],
+        ownerId: 'unassigned',
+        priority: 'HIGH',
+        followUpBefore: '2026-10-20',
+        sort: 'FOLLOW_UP_DATE',
+      }),
+    );
+
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/leads', {
+      params: {
+        path: { workspaceId: 7 },
+        query: expect.objectContaining({
+          status: ['NEW', 'QUALIFIED'],
+          unassigned: true,
+          priority: 'HIGH',
+          followUpBefore: '2026-10-20',
+          sort: 'FOLLOW_UP_DATE',
+        }),
       },
     });
   });

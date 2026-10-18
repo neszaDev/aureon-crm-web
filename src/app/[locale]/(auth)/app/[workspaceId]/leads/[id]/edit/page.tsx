@@ -1,0 +1,129 @@
+import type { Metadata } from 'next';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { updateLead } from '@/actions/crm/LeadActions';
+import { currencyOptions } from '@/components/crm/CreateWorkspaceForm';
+import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
+import { LeadForm } from '@/components/crm/lead/LeadForm';
+import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
+import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { getLead, getLeadSources, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
+import { getCurrentUser } from '@/libs/api/Queries';
+import type { components } from '@/libs/api/schema';
+import { endRejectedSession } from '@/libs/api/Session';
+import { fullName } from '@/libs/crm/Format';
+import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
+import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
+import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
+import { redirect } from '@/libs/I18nNavigation';
+import type { LeadValues } from '@/validations/crm/LeadValidation';
+
+type EditLeadPageProps = {
+  params: Promise<{ locale: string; workspaceId: string; id: string }>;
+};
+
+/**
+ * The form's values of a saved lead: what the inputs hold, an absent field empty.
+ * @param lead The lead.
+ * @returns The values.
+ */
+const formValues = (lead: components['schemas']['LeadResponse']): LeadValues => ({
+  firstName: lead.firstName,
+  lastName: lead.lastName ?? '',
+  companyName: lead.companyName ?? '',
+  email: lead.email ?? '',
+  phone: lead.phone ?? '',
+  jobTitle: lead.jobTitle ?? '',
+  sourceId: lead.source?.id ?? null,
+  ownerId: lead.owner?.userId ?? null,
+  priority: lead.priority,
+  followUpDate: lead.followUpDate ?? '',
+  estimatedValue: lead.estimatedValue ?? '',
+  currency: lead.currency ?? '',
+  notes: lead.notes ?? '',
+});
+
+export async function generateMetadata(props: EditLeadPageProps): Promise<Metadata> {
+  const { locale, workspaceId, id } = await props.params;
+  const t = await getTranslations({ locale, namespace: 'EditLeadPage' });
+  const tNotFound = await getTranslations({ locale, namespace: 'RecordNotFound' });
+  // The same cached calls as the page, which shows ForbiddenNotice to a member who can't edit.
+  const [{ lead, forbidden }, { user }, { workspace }] = await Promise.all([
+    getLead(workspaceId, id),
+    getCurrentUser(),
+    getWorkspace(workspaceId),
+  ]);
+  const refused =
+    lead && user && workspace && !canEditRecord(workspace, user.id, lead.owner?.userId);
+
+  return await workspacePageMetadata({
+    locale,
+    workspaceId,
+    title: lead ? t('title', { name: fullName(lead) }) : tNotFound('title'),
+    forbidden: forbidden || refused,
+  });
+}
+
+export default async function EditLeadPage(props: EditLeadPageProps) {
+  const { locale, workspaceId, id } = await props.params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'EditLeadPage' });
+  const tLead = await getTranslations({ locale, namespace: 'LeadPage' });
+
+  // The workspace (a cached call); a lost one is "not found" even on a client navigation.
+  const [{ workspace }, { user }, result, members, sources] = await Promise.all([
+    getOpenWorkspace(locale, workspaceId),
+    getCurrentUser(),
+    getLead(workspaceId, id),
+    getMembers(workspaceId),
+    getLeadSources(workspaceId),
+  ]);
+  if ([result, members, sources].some((item) => item.unauthorized)) {
+    return endRejectedSession(locale);
+  }
+  if (!workspace) {
+    throw new Error('Could not load the workspace');
+  }
+  const path = `/app/${workspace.id}/leads`;
+  if (result.notFound) {
+    return <RecordNotFound href={path} backLabel={tLead('back')} />;
+  }
+  const { lead } = result;
+  if (
+    result.forbidden ||
+    (lead && user && !canEditRecord(workspace, user.id, lead.owner?.userId))
+  ) {
+    return <ForbiddenNotice page />;
+  }
+  if (!lead || !user || !members.members || !sources.sources) {
+    throw new Error('Could not load the lead');
+  }
+  // A converted lead can't be edited (the backend refuses it): its page shows what it became.
+  if (lead.status === 'CONVERTED') {
+    return redirect({ href: `${path}/${lead.id}`, locale });
+  }
+
+  return (
+    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+      <SettingsHeader title={t('title', { name: fullName(lead) })} description={t('description')} />
+      <section
+        aria-label={fullName(lead)}
+        className="max-w-3xl rounded-lg border border-rule bg-card p-5 sm:p-6"
+      >
+        <LeadForm
+          action={updateLead.bind(null, workspace.id, lead.id, lead.version)}
+          defaults={formValues(lead)}
+          isEdit
+          members={members.members}
+          me={user.id}
+          canAssign={canAssign(workspace)}
+          sources={sources.sources}
+          defaultCurrency={workspace.defaultCurrency}
+          currencies={currencyOptions(locale)}
+          timeZone={workspace.timezone}
+          cancelHref={`${path}/${lead.id}`}
+          submitLabel={t('submit')}
+        />
+      </section>
+    </div>
+  );
+}

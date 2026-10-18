@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { daysSince, formatDate, formatInstant, formatMoney, recordNumber } from './Format';
+import {
+  daysSince,
+  formatDate,
+  formatInstant,
+  formatMoney,
+  fullName,
+  recordNumber,
+} from './Format';
 
 const HOUR = 60 * 60 * 1000;
 
@@ -61,5 +68,12 @@ describe(recordNumber, () => {
 
   it('keeps a longer id whole', () => {
     expect(recordNumber('company', 123_456)).toBe('C-123456');
+  });
+});
+
+describe(fullName, () => {
+  it('joins the first and last name, and takes a first name alone', () => {
+    expect(fullName({ firstName: 'Mia', lastName: 'Chan' })).toBe('Mia Chan');
+    expect(fullName({ firstName: 'Mia' })).toBe('Mia');
   });
 });

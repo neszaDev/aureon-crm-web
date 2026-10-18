@@ -199,7 +199,8 @@
     "create_workspace": "Créer un espace de travail",
     "all_workspaces": "Vos espaces de travail",
     "skip_to_content": "Aller au contenu",
-    "nav_tasks": "Tâches"
+    "nav_tasks": "Tâches",
+    "nav_leads": "Prospects"
   },
   "AccountMenu": {
     "label": "Votre compte",
@@ -2870,5 +2871,158 @@
     "code_alt": "QR code pour {text}",
     "text_label": "Contenu du code",
     "label_label": "Libellé"
+  },
+  "LeadsPage": {
+    "title": "Prospects",
+    "description": "Les personnes qui pourraient devenir clientes, du premier contact à la conversion.",
+    "new": "Nouveau prospect",
+    "toolbar_label": "Rechercher des prospects",
+    "search_label": "Rechercher",
+    "search_placeholder": "Nom, entreprise, e-mail ou téléphone",
+    "status_label": "Statut",
+    "source_label": "Source",
+    "source_any": "Toutes les sources",
+    "source_unknown": "Source inconnue",
+    "priority_label": "Priorité",
+    "priority_any": "Toutes les priorités",
+    "follow_up_label": "Relance avant le",
+    "list_heading": "{count, plural, =0 {Aucun prospect} one {# prospect} other {# prospects}}",
+    "archived_heading": "{count, plural, =0 {Aucun prospect archivé} one {# prospect archivé} other {# prospects archivés}}",
+    "empty_title": "Aucun prospect pour l'instant",
+    "empty_text": "Ajoutez les personnes à qui vous pourriez vendre. Faites passer chacune de Nouveau à Qualifié, puis convertissez-la en contact, en entreprise et en affaire.",
+    "archived_empty_text": "Les prospects archivés s'affichent ici, prêts à être restaurés."
+  },
+  "NewLeadPage": {
+    "title": "Nouveau prospect",
+    "description": "Ajoutez une personne qui pourrait devenir cliente. Vous pourrez la convertir en contact une fois qualifiée.",
+    "submit": "Créer le prospect"
+  },
+  "EditLeadPage": {
+    "title": "Modifier {name}",
+    "description": "Les modifications s'affichent pour tout l'espace une fois enregistrées.",
+    "submit": "Enregistrer les modifications"
+  },
+  "LeadPage": {
+    "back": "Retour aux prospects",
+    "details": "Détails du prospect",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "job_title": "Fonction",
+    "company": "Entreprise",
+    "source": "Source",
+    "priority": "Priorité",
+    "follow_up": "Relance",
+    "estimated_value": "Valeur estimée",
+    "notes": "Notes",
+    "converted_on": "Converti le",
+    "edit": "Modifier"
+  },
+  "LeadForm": {
+    "first_name_label": "Prénom",
+    "last_name_label": "Nom",
+    "company_label": "Entreprise",
+    "email_label": "E-mail",
+    "phone_label": "Téléphone",
+    "job_title_label": "Fonction",
+    "owner_label": "Propriétaire",
+    "source_label": "Source",
+    "priority_label": "Priorité",
+    "follow_up_label": "Date de relance",
+    "value_label": "Valeur estimée",
+    "value_hint": "Des chiffres, avec un point facultatif et jusqu'à 2 décimales.",
+    "currency_label": "Devise",
+    "currency_default": "Devise de l'espace de travail ({code})",
+    "notes_label": "Notes",
+    "cancel": "Annuler",
+    "saved": "Enregistré",
+    "error_invalid_input": "Vérifiez les champs signalés",
+    "error_generic": "Le prospect n'a pas été créé. Réessayez."
+  },
+  "LeadTable": {
+    "name": "Nom",
+    "company": "Entreprise",
+    "status": "Statut",
+    "priority": "Priorité",
+    "follow_up": "Relance",
+    "owner": "Propriétaire",
+    "value": "Valeur estimée",
+    "created": "Créé"
+  },
+  "LeadStatus": {
+    "status_NEW": "Nouveau",
+    "status_CONTACTED": "Contacté",
+    "status_QUALIFIED": "Qualifié",
+    "status_UNQUALIFIED": "Non qualifié",
+    "status_CONVERTED": "Converti",
+    "priority_LOW": "Basse",
+    "priority_MEDIUM": "Moyenne",
+    "priority_HIGH": "Haute"
+  },
+  "LeadFollowUp": {
+    "none": "Aucune relance",
+    "overdue": "En retard"
+  },
+  "LeadStatusMenu": {
+    "trigger": "Changer le statut",
+    "label": "Passer à",
+    "moved": "Statut changé : {status}",
+    "error_generic": "Ça n'a pas fonctionné. Réessayez."
+  },
+  "UnqualifyDialog": {
+    "close": "Fermer",
+    "title": "Marquer {name} comme non qualifié",
+    "description": "Dites pourquoi ce prospect ne convient pas. Le motif reste sur la fiche.",
+    "reason_label": "Motif",
+    "reason_hint": "500 caractères au plus.",
+    "submit": "Marquer comme non qualifié",
+    "done": "Prospect marqué comme non qualifié",
+    "error_invalid_input": "Vérifiez les champs signalés"
+  },
+  "ConvertDialog": {
+    "open": "Convertir le prospect",
+    "close": "Fermer",
+    "title": "Convertir {name}",
+    "description": "Transformez ce prospect qualifié en contact. Choisissez son entreprise, et s'il faut ouvrir une affaire. Un prospect converti ne peut plus être modifié.",
+    "company_legend": "Entreprise",
+    "company_create": "Créer {name}",
+    "company_link": "Rattacher une entreprise existante",
+    "company_none": "Aucune entreprise",
+    "company_label": "Entreprise",
+    "contact_legend": "Contact",
+    "contact_create": "Créer à partir de ce prospect",
+    "contact_link": "Rattacher un contact existant",
+    "contact_label": "Contact",
+    "deal_legend": "Affaire",
+    "deal_switch": "Créer une affaire",
+    "deal_name_label": "Nom de l'affaire",
+    "amount_label": "Montant",
+    "currency_label": "Devise",
+    "stage_label": "Étape",
+    "close_label": "Date de clôture prévue",
+    "submit": "Convertir",
+    "done_title": "Prospect converti",
+    "done_text": "Voici ce qu'il est devenu.",
+    "already_title": "Déjà converti",
+    "already_text": "Ce prospect était déjà converti : rien de nouveau n'a été créé. Voici ce qu'il est devenu.",
+    "done": "Terminé",
+    "error_invalid_input": "Vérifiez les champs signalés",
+    "error_generic": "Le prospect n'a pas été converti. Réessayez.",
+    "deal_name_default": "{name} — affaire"
+  },
+  "ConversionSummary": {
+    "label": "Conversion",
+    "company": "Entreprise",
+    "contact": "Contact",
+    "deal": "Affaire",
+    "no_company": "Aucune entreprise",
+    "no_deal": "Aucune affaire"
+  },
+  "LeadLifecycle": {
+    "label": "Cycle de vie du prospect",
+    "state_reached": "{name} : atteint",
+    "state_current": "{name} : en cours",
+    "state_blank": "{name} : pas atteint",
+    "reason_label": "Motif :",
+    "hint": "Un prospect passe de Nouveau à Contacté puis à Qualifié, ou est marqué Non qualifié avec un motif. Convertissez un prospect qualifié pour en faire un contact, avec une entreprise et une affaire si vous le souhaitez."
   }
 }

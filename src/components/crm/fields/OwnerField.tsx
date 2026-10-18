@@ -58,11 +58,11 @@ export const OwnerField = (props: {
     const owner = props.members.find((member) => member.userId === props.value);
 
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <span className="text-[0.8125rem] leading-snug font-medium text-muted-foreground">
           {props.label}
         </span>
-        <p className="flex min-h-10 items-center gap-2 font-medium">
+        <p className="flex min-h-10 items-center gap-2 font-medium break-words">
           {owner ? (
             <>
               <Seal name={owner.displayName} email={owner.email} size="sm" />
@@ -79,7 +79,7 @@ export const OwnerField = (props: {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex min-w-0 flex-col gap-2">
       <Label htmlFor={props.id}>{props.label}</Label>
       <Select
         value={props.value === null ? UNASSIGNED : String(props.value)}

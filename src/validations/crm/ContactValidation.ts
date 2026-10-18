@@ -3,8 +3,8 @@ import * as z from 'zod';
 const optionalText = (max: number) => z.string().trim().max(max, 'too_long');
 const optionalId = z.number().int().positive().nullable();
 
-// As ContactInput.EMAIL: an address with a dotted domain and no spaces.
-const EMAIL = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/u;
+// As ContactInput.EMAIL (a lead's too): an address with a dotted domain and no spaces.
+export const EMAIL = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/u;
 
 // Mirrors the backend's ContactInput (Create/UpdateContactRequest). Messages are `Validation`
 // translation keys. Text fields hold what the inputs hold; an empty one is sent as absent. Values

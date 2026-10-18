@@ -33,7 +33,9 @@ export const signUp = async (page: Page) => {
 };
 
 /**
- * Signs in through the UI and waits for the CRM home (`/app`).
+ * Signs in through the UI and waits for the CRM home: `/app`, or `/app/<id>` for an account that
+ * owns exactly one workspace (the app opens it at once, as it does for the e2e admin once it has
+ * created one).
  * @param page Playwright page.
  * @param credentials Email and password.
  * @param credentials.email Email address.
@@ -44,7 +46,7 @@ export const signIn = async (page: Page, credentials: { email: string; password:
   await page.getByLabel('Email address').fill(credentials.email);
   await page.getByLabel('Password').fill(credentials.password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/app$/u);
+  await expect(page).toHaveURL(/\/app(?:\/\d+)?$/u);
 };
 
 /**

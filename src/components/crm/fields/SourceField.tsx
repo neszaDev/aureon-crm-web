@@ -42,7 +42,7 @@ export const SourceField = (props: {
   const options = props.sources.filter((source) => !source.archived || source.id === props.value);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex min-w-0 flex-col gap-2">
       <Label htmlFor={props.id}>{props.label}</Label>
       <Select
         value={props.value === null ? NONE : String(props.value)}

@@ -12,7 +12,7 @@ vi.mock(import('@/actions/crm/RecordSearchActions'), () => ({
   searchRecords: vi.fn<typeof searchRecords>(),
 }));
 
-const CompanyField = (props: { initial: PickedRecord | null }) => {
+const CompanyField = (props: { initial: PickedRecord | null; initialQuery?: string }) => {
   const [company, setCompany] = useState(props.initial);
 
   return (
@@ -24,6 +24,7 @@ const CompanyField = (props: { initial: PickedRecord | null }) => {
         kind="company"
         value={company}
         onChange={setCompany}
+        initialQuery={props.initialQuery}
       />
       <output data-testid="company">{company ? `${company.id}:${company.label}` : 'none'}</output>
     </NextIntlClientProvider>
@@ -47,6 +48,21 @@ describe(RecordPicker, () => {
 
     await expect.element(trigger()).toHaveTextContent('Acme');
     expect(searchRecords).not.toHaveBeenCalled();
+  });
+
+  it('opens with the text it was given, searched', async () => {
+    vi.mocked(searchRecords)
+      .mockReset()
+      .mockResolvedValue([{ id: 7, label: 'Acme' }]);
+    await render(<CompanyField initial={null} initialQuery="Acme" />);
+
+    await trigger().click();
+
+    await expect.element(page.getByRole('option', { name: /Acme/u })).toBeVisible();
+    await expect
+      .element(page.getByRole('combobox', { name: 'Search companies' }))
+      .toHaveValue('Acme');
+    expect(searchRecords).toHaveBeenLastCalledWith(1, 'company', 'Acme');
   });
 
   it('searches as the user types and picks a result', async () => {

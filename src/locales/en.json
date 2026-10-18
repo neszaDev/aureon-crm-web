@@ -199,7 +199,8 @@
     "create_workspace": "Create workspace",
     "all_workspaces": "Your workspaces",
     "skip_to_content": "Skip to content",
-    "nav_tasks": "Tasks"
+    "nav_tasks": "Tasks",
+    "nav_leads": "Leads"
   },
   "AccountMenu": {
     "label": "Your account",
@@ -2870,5 +2871,158 @@
     "code_alt": "QR code for {text}",
     "text_label": "Content of the code",
     "label_label": "Label"
+  },
+  "LeadsPage": {
+    "title": "Leads",
+    "description": "People who may become customers, from first contact to conversion.",
+    "new": "New lead",
+    "toolbar_label": "Search leads",
+    "search_label": "Search",
+    "search_placeholder": "Name, company, email or phone",
+    "status_label": "Status",
+    "source_label": "Source",
+    "source_any": "Any source",
+    "source_unknown": "Unknown source",
+    "priority_label": "Priority",
+    "priority_any": "Any priority",
+    "follow_up_label": "Follow-up before",
+    "list_heading": "{count, plural, =0 {No leads} one {# lead} other {# leads}}",
+    "archived_heading": "{count, plural, =0 {No archived leads} one {# archived lead} other {# archived leads}}",
+    "empty_title": "No leads yet",
+    "empty_text": "Add the people you may sell to. Move each from New to Qualified, then convert it into a contact, a company and a deal.",
+    "archived_empty_text": "Leads you archive show here, ready to restore."
+  },
+  "NewLeadPage": {
+    "title": "New lead",
+    "description": "Add someone who may become a customer. You can convert them into a contact once they are qualified.",
+    "submit": "Create lead"
+  },
+  "EditLeadPage": {
+    "title": "Edit {name}",
+    "description": "Changes show for everyone in the workspace once saved.",
+    "submit": "Save changes"
+  },
+  "LeadPage": {
+    "back": "Back to leads",
+    "details": "Lead details",
+    "email": "Email",
+    "phone": "Phone",
+    "job_title": "Job title",
+    "company": "Company",
+    "source": "Source",
+    "priority": "Priority",
+    "follow_up": "Follow-up",
+    "estimated_value": "Estimated value",
+    "notes": "Notes",
+    "converted_on": "Converted on",
+    "edit": "Edit"
+  },
+  "LeadForm": {
+    "first_name_label": "First name",
+    "last_name_label": "Last name",
+    "company_label": "Company",
+    "email_label": "Email",
+    "phone_label": "Phone",
+    "job_title_label": "Job title",
+    "owner_label": "Owner",
+    "source_label": "Source",
+    "priority_label": "Priority",
+    "follow_up_label": "Follow-up date",
+    "value_label": "Estimated value",
+    "value_hint": "Digits with an optional dot and up to 2 decimals.",
+    "currency_label": "Currency",
+    "currency_default": "Workspace currency ({code})",
+    "notes_label": "Notes",
+    "cancel": "Cancel",
+    "saved": "Saved",
+    "error_invalid_input": "Check the highlighted fields",
+    "error_generic": "The lead wasn't created. Try again."
+  },
+  "LeadTable": {
+    "name": "Name",
+    "company": "Company",
+    "status": "Status",
+    "priority": "Priority",
+    "follow_up": "Follow-up",
+    "owner": "Owner",
+    "value": "Estimated value",
+    "created": "Created"
+  },
+  "LeadStatus": {
+    "status_NEW": "New",
+    "status_CONTACTED": "Contacted",
+    "status_QUALIFIED": "Qualified",
+    "status_UNQUALIFIED": "Unqualified",
+    "status_CONVERTED": "Converted",
+    "priority_LOW": "Low",
+    "priority_MEDIUM": "Medium",
+    "priority_HIGH": "High"
+  },
+  "LeadFollowUp": {
+    "none": "No follow-up",
+    "overdue": "Overdue"
+  },
+  "LeadStatusMenu": {
+    "trigger": "Change status",
+    "label": "Move to",
+    "moved": "Status changed to {status}",
+    "error_generic": "That didn't work. Try again."
+  },
+  "UnqualifyDialog": {
+    "close": "Close",
+    "title": "Mark {name} as unqualified",
+    "description": "Say why this lead isn't a fit. The reason stays on the lead.",
+    "reason_label": "Reason",
+    "reason_hint": "Up to 500 characters.",
+    "submit": "Mark as unqualified",
+    "done": "Lead marked as unqualified",
+    "error_invalid_input": "Check the highlighted fields"
+  },
+  "ConvertDialog": {
+    "open": "Convert lead",
+    "close": "Close",
+    "title": "Convert {name}",
+    "description": "Turn this qualified lead into a contact. Choose its company, and whether to open a deal. A converted lead can't be edited.",
+    "company_legend": "Company",
+    "company_create": "Create {name}",
+    "company_link": "Link an existing company",
+    "company_none": "No company",
+    "company_label": "Company",
+    "contact_legend": "Contact",
+    "contact_create": "Create from this lead",
+    "contact_link": "Link an existing contact",
+    "contact_label": "Contact",
+    "deal_legend": "Deal",
+    "deal_switch": "Create a deal",
+    "deal_name_label": "Deal name",
+    "amount_label": "Amount",
+    "currency_label": "Currency",
+    "stage_label": "Stage",
+    "close_label": "Expected close date",
+    "submit": "Convert",
+    "done_title": "Lead converted",
+    "done_text": "Here is what it became.",
+    "already_title": "Already converted",
+    "already_text": "This lead was already converted, so nothing new was made. Here is what it became.",
+    "done": "Done",
+    "error_invalid_input": "Check the highlighted fields",
+    "error_generic": "The lead wasn't converted. Try again.",
+    "deal_name_default": "{name} — deal"
+  },
+  "ConversionSummary": {
+    "label": "Conversion",
+    "company": "Company",
+    "contact": "Contact",
+    "deal": "Deal",
+    "no_company": "No company",
+    "no_deal": "No deal"
+  },
+  "LeadLifecycle": {
+    "label": "Lead lifecycle",
+    "state_reached": "{name}: reached",
+    "state_current": "{name}: current",
+    "state_blank": "{name}: not reached",
+    "reason_label": "Reason:",
+    "hint": "A lead moves from New to Contacted to Qualified, or is marked Unqualified with a reason. Convert a qualified lead to make it a contact, with a company and a deal if you want them."
   }
 }

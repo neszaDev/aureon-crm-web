@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { formatDate } from '@/libs/crm/Format';
-import { toLocalInput } from '@/libs/crm/ZonedTime';
+import { todayIn } from '@/libs/crm/ZonedTime';
 
 const CALENDAR_LOCALES: Record<string, typeof enUS> = { en: enUS, fr, th };
 // The time a picked day starts with when none was typed yet.
@@ -48,7 +48,8 @@ const fromCalendarDay = (date: Date) =>
  * `Controller`): a day from a calendar in a popover and a time input, the zone named under them.
  * The value is `YYYY-MM-DDTHH:mm` in that zone (empty for none); `toInstant` makes it an instant
  * on submit and `toLocalInput` makes a saved one a value. A day picked without a time starts at
- * 09:00; a time typed without a day is today's, there.
+ * 09:00; a time typed without a day is today's, there. With `dateOnly` it holds a day alone
+ * (`YYYY-MM-DD`, empty for none): no time input and no zone line.
  * @param props Component props.
  * @param props.id The day button's id; the label points at it.
  * @param props.label The field's label.
@@ -56,6 +57,7 @@ const fromCalendarDay = (date: Date) =>
  * @param props.onChange Called with the new value.
  * @param props.timeZone The workspace's time zone.
  * @param props.clearable Whether "no date" is a value (a "Clear" button empties it).
+ * @param props.dateOnly Whether it holds a day alone, such as a lead's follow-up date.
  * @param props.error The field's error.
  * @returns The field.
  */
@@ -66,6 +68,7 @@ export const DateTimeField = (props: {
   onChange: (value: string) => void;
   timeZone: string;
   clearable?: boolean;
+  dateOnly?: boolean;
   error?: HookFormFieldError;
 }) => {
   const t = useTranslations('DateTimeField');
@@ -78,7 +81,8 @@ export const DateTimeField = (props: {
   const descriptionId = describedBy(props.id);
   const zoneId = `${props.id}-zone`;
   // The error first, when there is one; the zone stays named under it.
-  const describedById = props.error ? `${descriptionId} ${zoneId}` : zoneId;
+  const zone = props.dateOnly ? undefined : zoneId;
+  const describedById = [props.error && descriptionId, zone].filter(Boolean).join(' ') || undefined;
   const invalid = props.error ? true : undefined;
 
   return (
@@ -122,29 +126,36 @@ export const DateTimeField = (props: {
                   new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(month),
               }}
               onSelect={(date) => {
-                props.onChange(`${fromCalendarDay(date)}T${time || DEFAULT_TIME}`);
+                props.onChange(
+                  props.dateOnly
+                    ? fromCalendarDay(date)
+                    : `${fromCalendarDay(date)}T${time || DEFAULT_TIME}`,
+                );
                 setOpen(false);
               }}
             />
           </PopoverContent>
         </Popover>
-        <span id={timeLabelId} className="sr-only">
-          {t('time')}
-        </span>
-        <Input
-          type="time"
-          value={time}
-          aria-labelledby={`${labelId} ${timeLabelId}`}
-          aria-describedby={describedById}
-          aria-invalid={invalid}
-          className="w-36"
-          onChange={(event) => {
-            const next = event.currentTarget.value;
-            // Today in the workspace's zone, for a time typed before any day.
-            const today = toLocalInput(new Date().toISOString(), props.timeZone).slice(0, 10);
-            props.onChange(next || day ? `${day || today}T${next}` : '');
-          }}
-        />
+        {!props.dateOnly && (
+          <>
+            <span id={timeLabelId} className="sr-only">
+              {t('time')}
+            </span>
+            <Input
+              type="time"
+              value={time}
+              aria-labelledby={`${labelId} ${timeLabelId}`}
+              aria-describedby={describedById}
+              aria-invalid={invalid}
+              className="w-36"
+              onChange={(event) => {
+                const next = event.currentTarget.value;
+                // Today in the workspace's zone, for a time typed before any day.
+                props.onChange(next || day ? `${day || todayIn(props.timeZone)}T${next}` : '');
+              }}
+            />
+          </>
+        )}
         {props.clearable && props.value && (
           <Button
             type="button"
@@ -162,9 +173,11 @@ export const DateTimeField = (props: {
         )}
       </div>
       <FieldError error={props.error} id={descriptionId} />
-      <p id={zoneId} className="text-[0.8125rem] text-muted-foreground">
-        {t('zone', { zone: props.timeZone.replaceAll('_', ' ') })}
-      </p>
+      {!props.dateOnly && (
+        <p id={zoneId} className="text-[0.8125rem] text-muted-foreground">
+          {t('zone', { zone: props.timeZone.replaceAll('_', ' ') })}
+        </p>
+      )}
     </div>
   );
 };

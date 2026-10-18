@@ -65,3 +65,11 @@ export const toLocalInput = (instant: string, timeZone: string) => {
 
   return new Date(time + offsetAt(time, timeZone)).toISOString().slice(0, 16);
 };
+
+/**
+ * Today's date in a time zone.
+ * @param timeZone The workspace's time zone.
+ * @returns `YYYY-MM-DD`.
+ */
+export const todayIn = (timeZone: string) =>
+  toLocalInput(new Date().toISOString(), timeZone).slice(0, 10);

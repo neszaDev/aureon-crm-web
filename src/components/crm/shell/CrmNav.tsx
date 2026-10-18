@@ -6,6 +6,7 @@ import {
   LayoutDashboardIcon,
   ListTodoIcon,
   SettingsIcon,
+  UserPlusIcon,
   UsersIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -13,11 +14,12 @@ import { Link, usePathname } from '@/libs/I18nNavigation';
 
 // The rail's sections, in order. `section` is the first URL segment under the workspace (empty
 // for its home); `href` is where the link lands. Slices add their entries here once their pages
-// exist: F2 leads, deals and tasks; F3 reports.
+// exist: F2 deals; F3 reports.
 const crmNavItems = [
   { key: 'dashboard', section: '', href: '', icon: LayoutDashboardIcon },
   { key: 'companies', section: 'companies', href: '/companies', icon: Building2Icon },
   { key: 'contacts', section: 'contacts', href: '/contacts', icon: UsersIcon },
+  { key: 'leads', section: 'leads', href: '/leads', icon: UserPlusIcon },
   { key: 'tasks', section: 'tasks', href: '/tasks', icon: ListTodoIcon },
   { key: 'settings', section: 'settings', href: '/settings/workspace', icon: SettingsIcon },
 ] as const;
