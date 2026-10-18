@@ -353,7 +353,7 @@ Firm and compact: one height for every primary action.
 - **Settings links:** a column from 1280px, a wrapping row of bordered paper links below it; the current link fills seal-tint with seal-ink text.
 - **Account:** your seal in the top bar opens the account menu (profile, theme, language, sign out).
 - **Record search:** from 768px a field-like button in the top bar ("Search records" and the shortcut, ⌘K or Ctrl K); below that an icon button. It opens a palette near the top of the screen (up to 512px wide) with 5 hits per kind under their headings, each a record number in mono, the name and a detail line.
-- **Reminders bell:** an icon button with a badge (white on the vermilion bar, seal on paper) counting overdue tasks, tasks due within 24 hours and leads whose follow-up is due; hidden at none, "20+" for a list the API may have cut. Its popover is a field sheet, 352px at most, with the three groups and a line saying reminders live in the app.
+- **Reminders bell:** an icon button with a badge (white on the vermilion bar, ink on paper: vermilion never colours a count) counting overdue tasks, tasks due within 24 hours and leads whose follow-up is due; hidden at none, "20+" for a list the API may have cut. Its popover is a field sheet, 352px at most, with the three groups and a line saying reminders live in the app. The layout's read is the first paint; the bell asks again on each navigation and when the tab returns, since a soft navigation keeps the layout.
 
 ### Tables
 - Heads in the label-table style, 40px tall, sentence case; rows divided by rule, 12px cell padding, muted on hover; tabular figures.

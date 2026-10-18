@@ -167,6 +167,33 @@ test.describe('Top bar', () => {
     await expect(popover.getByRole('region')).toHaveCount(1);
   });
 
+  test('picks up a reminder made meanwhile on the next navigation, without a reload', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request, { owner: 'Olivia Owner' });
+    const overdue = async (title: string) =>
+      await seed(request, owner, 'tasks', {
+        title,
+        dueAt: new Date(Date.now() - 48 * HOUR).toISOString(),
+        assigneeId: owner.userId,
+      });
+    await overdue('Send the proposal');
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(owner.path);
+    await expect(page.getByRole('button', { name: 'Reminders: 1' })).toBeVisible();
+    await waitForHydration(page.getByRole('button', { name: 'Reminders: 1' }));
+
+    // Someone assigns a second task: the layout isn't rendered again by a click on a link.
+    await overdue('Call Globex');
+    await page.getByRole('link', { name: 'Companies' }).first().click();
+    await expect(page).toHaveURL(/\/companies$/u);
+
+    await expect(page.getByRole('button', { name: 'Reminders: 2' })).toBeVisible();
+    await page.getByRole('button', { name: 'Reminders: 2' }).click();
+    await expect(page.getByRole('dialog', { name: 'Reminders' })).toContainText('Call Globex');
+  });
+
   test('says there is nothing to do, with no badge, when there are no reminders', async ({
     page,
     request,

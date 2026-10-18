@@ -8,6 +8,7 @@ import { WorkspaceSwitcher } from '@/components/crm/shell/WorkspaceSwitcher';
 import { WorkspaceMark } from '@/components/crm/WorkspaceMark';
 import { Toaster } from '@/components/ui/sonner';
 import type { components } from '@/libs/api/schema';
+import type { BellReminders } from '@/libs/crm/Reminders';
 
 type Schemas = components['schemas'];
 
@@ -28,7 +29,8 @@ const BAR_BUTTON =
  * @param props.workspace.timeZone Its time zone, for the reminders' due times.
  * @param props.workspaces Every workspace the user belongs to, for the switcher.
  * @param props.user The signed-in user.
- * @param props.reminders The caller's reminders; undefined when they could not be read.
+ * @param props.reminders The caller's reminders as the layout read them, the bell's first paint;
+ *   undefined when they could not be read.
  * @param props.children Page content.
  * @returns The shell.
  */
@@ -36,7 +38,7 @@ export const CrmShell = (props: {
   workspace: { id: number; name: string; timeZone: string };
   workspaces: Schemas['WorkspaceSummaryResponse'][];
   user: { email: string; displayName?: string };
-  reminders?: Schemas['RemindersResponse'];
+  reminders?: BellReminders;
   children: React.ReactNode;
 }) => {
   const t = useTranslations('CrmShell');

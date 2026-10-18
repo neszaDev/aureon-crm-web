@@ -42,6 +42,7 @@ const renderSearch = async () => {
   vi.mocked(Navigation.useRouter).mockReturnValue({ push });
   await render(
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+      <button type="button">Notes</button>
       <RecordSearch workspaceId={1} />
     </NextIntlClientProvider>,
   );
@@ -60,6 +61,12 @@ const pause = async (ms: number) => {
   await promise;
 };
 
+// Ctrl with the physical K key, which the layout names `key`.
+const press = (key: string) =>
+  document.dispatchEvent(
+    new KeyboardEvent('keydown', { key, code: 'KeyK', ctrlKey: true, bubbles: true }),
+  );
+
 describe(RecordSearch, () => {
   it('opens from its button, which shows the shortcut, and from Ctrl+K and Cmd+K', async () => {
     await renderSearch();
@@ -76,6 +83,34 @@ describe(RecordSearch, () => {
     await expect.element(field()).not.toBeInTheDocument();
     await userEvent.keyboard('{Meta>}k{/Meta}');
     await expect.element(field()).toBeVisible();
+  });
+
+  it('opens on the K key of any layout: a Thai one reports a Thai character, not "k"', async () => {
+    await renderSearch();
+    // Dvorak's Ctrl+T sits on the same key: a Latin letter that is not k is that layout's own.
+    press('t');
+    await pause(150);
+    expect(field().elements()).toHaveLength(0);
+
+    press('ะ');
+    await expect.element(field()).toBeVisible();
+  });
+
+  it('gives the focus back to where it was when opened with the shortcut, and to its button otherwise', async () => {
+    await renderSearch();
+    const notes = page.getByRole('button', { name: 'Notes' });
+    notes.element().focus();
+
+    await userEvent.keyboard('{Control>}k{/Control}');
+    await expect.element(field()).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await expect.element(field()).not.toBeInTheDocument();
+    await expect.element(notes).toHaveFocus();
+
+    await open();
+    await userEvent.keyboard('{Escape}');
+    await expect.element(field()).not.toBeInTheDocument();
+    await expect.element(trigger()).toHaveFocus();
   });
 
   it('asks nobody for fewer than 2 characters, and says how many it needs', async () => {

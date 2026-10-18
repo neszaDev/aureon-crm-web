@@ -1,7 +1,9 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { createContext, useContext } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
+import { loadReminders } from '@/actions/crm/ReminderActions';
 import type { cancelTask, completeTask, reopenTask } from '@/actions/crm/TaskActions';
 import * as TaskActions from '@/actions/crm/TaskActions';
 import { Toaster } from '@/components/ui/sonner';
@@ -13,6 +15,16 @@ type Reminders = components['schemas']['RemindersResponse'];
 type Task = components['schemas']['TaskResponse'];
 type Lead = components['schemas']['LeadResponse'];
 
+vi.mock(import('@/actions/crm/ReminderActions'), () => ({
+  loadReminders: vi.fn<typeof loadReminders>(),
+}));
+// The path is the test's to change; a context makes the bell render again when it does, as the
+// router's own hook does.
+const PathContext = createContext('/app/1');
+vi.mock(import('@/libs/I18nNavigation'), async (importOriginal) => ({
+  ...(await importOriginal()),
+  usePathname: () => useContext(PathContext),
+}));
 // `TaskDue` comes from the task row, which imports all three.
 vi.mock(import('@/actions/crm/TaskActions'), () => ({
   completeTask: vi.fn<typeof completeTask>(),
@@ -50,14 +62,21 @@ const LEAD: Lead = {
 const REMINDERS: Reminders = { overdueTasks: [LATE], dueSoonTasks: [SOON], followUpLeads: [LEAD] };
 const NONE: Reminders = { overdueTasks: [], dueSoonTasks: [], followUpLeads: [] };
 
-const Bell = (props: { reminders?: Reminders }) => (
+const Bell = (props: { reminders?: Reminders; path?: string }) => (
   <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-    <RemindersBell workspaceId={1} timeZone="Asia/Bangkok" reminders={props.reminders} />
+    <PathContext value={props.path ?? '/app/1'}>
+      <RemindersBell workspaceId={1} timeZone="Asia/Bangkok" reminders={props.reminders} />
+    </PathContext>
     <Toaster />
   </NextIntlClientProvider>
 );
 
 const bell = (name: string | RegExp) => page.getByRole('button', { name });
+const pause = async (ms: number) => {
+  const { promise, resolve } = Promise.withResolvers<undefined>();
+  setTimeout(resolve, ms);
+  await promise;
+};
 
 describe(RemindersBell, () => {
   it('hides the badge at 0 and says so in its label', async () => {
@@ -180,5 +199,111 @@ describe(RemindersBell, () => {
     await expect
       .element(page.getByText("Couldn't load your reminders. Reload the page to try again."))
       .toBeVisible();
+  });
+});
+
+// What the action answers when the backend failed.
+const NOTHING: Awaited<ReturnType<typeof loadReminders>> = undefined;
+
+describe('the bell refreshing itself', () => {
+  // The layout's reminders are only as new as its last render, which a soft navigation doesn't
+  // repeat: the bell asks again.
+  const FRESH: Reminders = {
+    ...REMINDERS,
+    dueSoonTasks: [SOON, task(44, 'Renew the contract')],
+  };
+
+  beforeEach(() => {
+    vi.mocked(loadReminders).mockReset();
+  });
+
+  it('asks again once for each navigation, not on the first paint, and shows the new count', async () => {
+    vi.mocked(loadReminders).mockResolvedValue(FRESH);
+    const { rerender } = await render(<Bell reminders={REMINDERS} />);
+    await expect.element(bell('Reminders: 3')).toBeVisible();
+    expect(loadReminders).not.toHaveBeenCalled();
+
+    await rerender(<Bell path="/app/1/tasks" reminders={REMINDERS} />);
+
+    await expect.element(bell('Reminders: 4')).toBeVisible();
+    // The same page rendering again asks nothing more.
+    await rerender(<Bell path="/app/1/tasks" reminders={REMINDERS} />);
+    await pause(100);
+    expect(loadReminders).toHaveBeenCalledExactlyOnceWith(1);
+  });
+
+  it('asks again when the tab comes back into view, and not when it goes out of it', async () => {
+    vi.mocked(loadReminders).mockResolvedValue(FRESH);
+    const visibility = vi.spyOn(document, 'visibilityState', 'get');
+    await render(<Bell reminders={REMINDERS} />);
+
+    visibility.mockReturnValue('hidden');
+    document.dispatchEvent(new Event('visibilitychange'));
+    await pause(100);
+    expect(loadReminders).not.toHaveBeenCalled();
+
+    visibility.mockReturnValue('visible');
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    await expect.element(bell('Reminders: 4')).toBeVisible();
+    expect(loadReminders).toHaveBeenCalledExactlyOnceWith(1);
+    visibility.mockRestore();
+  });
+
+  it.each([
+    ['the backend fails', () => vi.mocked(loadReminders).mockResolvedValue(NOTHING)],
+    [
+      'the request never gets through',
+      () => vi.mocked(loadReminders).mockRejectedValue(new Error('Failed to fetch')),
+    ],
+  ])('keeps the count it has when %s', async (_, fail) => {
+    fail();
+    const { rerender } = await render(<Bell reminders={REMINDERS} />);
+
+    await rerender(<Bell path="/app/1/tasks" reminders={REMINDERS} />);
+    await expect.poll(() => vi.mocked(loadReminders).mock.calls.length).toBe(1);
+    await pause(100);
+
+    await expect.element(bell('Reminders: 3')).toBeVisible();
+  });
+
+  it('lets a page that refreshed meanwhile beat an older answer, and a newer page an answer it had', async () => {
+    const slow = Promise.withResolvers<Reminders>();
+    vi.mocked(loadReminders).mockReturnValueOnce(slow.promise);
+    const { rerender } = await render(<Bell reminders={REMINDERS} />);
+    await rerender(<Bell path="/app/1/tasks" reminders={REMINDERS} />);
+    await expect.poll(() => vi.mocked(loadReminders).mock.calls.length).toBe(1);
+
+    // An action refreshed the page (the task was completed) while the request was out.
+    await rerender(<Bell path="/app/1/tasks" reminders={{ ...REMINDERS, overdueTasks: [] }} />);
+    slow.resolve(FRESH);
+    await pause(100);
+    await expect.element(bell('Reminders: 2')).toBeVisible();
+
+    // And the other way round: an answer shows until the page renders its own, newer reminders.
+    vi.mocked(loadReminders).mockResolvedValueOnce(FRESH);
+    await rerender(<Bell path="/app/1/leads" reminders={{ ...REMINDERS, overdueTasks: [] }} />);
+    await expect.element(bell('Reminders: 4')).toBeVisible();
+    await rerender(
+      <Bell
+        path="/app/1/leads"
+        reminders={{ ...REMINDERS, overdueTasks: [], followUpLeads: [] }}
+      />,
+    );
+    await expect.element(bell('Reminders: 1')).toBeVisible();
+  });
+
+  it('drops an answer that comes after a newer request was made', async () => {
+    const slow = Promise.withResolvers<Reminders>();
+    vi.mocked(loadReminders).mockReturnValueOnce(slow.promise).mockResolvedValueOnce(FRESH);
+    const { rerender } = await render(<Bell reminders={REMINDERS} />);
+    await rerender(<Bell path="/app/1/tasks" reminders={REMINDERS} />);
+    await rerender(<Bell path="/app/1/leads" reminders={REMINDERS} />);
+    await expect.element(bell('Reminders: 4')).toBeVisible();
+
+    slow.resolve({ ...FRESH, followUpLeads: [] });
+    await pause(100);
+
+    await expect.element(bell('Reminders: 4')).toBeVisible();
   });
 });

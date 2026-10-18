@@ -1,6 +1,26 @@
 import type { components } from '@/libs/api/schema';
 
-type Lists = { [List in keyof components['schemas']['RemindersResponse']]: readonly unknown[] };
+type Schemas = components['schemas'];
+type Lists = { [List in keyof Schemas['RemindersResponse']]: readonly unknown[] };
+
+/** What the bell shows of a task, and the version completing it needs. */
+export type BellTask = Pick<
+  Schemas['TaskResponse'],
+  'id' | 'title' | 'version' | 'dueAt' | 'overdue'
+>;
+
+/** What the bell shows of a lead: its name, and what tells whether its follow-up is late. */
+type BellLead = Pick<
+  Schemas['LeadResponse'],
+  'id' | 'firstName' | 'lastName' | 'followUpDate' | 'status'
+>;
+
+/** The reminders as the bell takes them, so full descriptions and notes don't ride every page. */
+export type BellReminders = {
+  overdueTasks: BellTask[];
+  dueSoonTasks: BellTask[];
+  followUpLeads: BellLead[];
+};
 
 // How many each reminder list holds at most (api.md, Tasks and reminders).
 const CAP = 20;
@@ -38,3 +58,28 @@ export const reminderBadge = (reminders: Lists) => {
 
   return `${reminderCount(reminders)}${capped ? '+' : ''}`;
 };
+
+const slimTask = (task: Schemas['TaskResponse']): BellTask => ({
+  id: task.id,
+  title: task.title,
+  version: task.version,
+  dueAt: task.dueAt,
+  overdue: task.overdue,
+});
+
+/**
+ * Cuts the reminders down to what the bell shows.
+ * @param reminders What `GET /reminders` sent.
+ * @returns The same lists, each task and lead reduced to the bell's fields.
+ */
+export const slimReminders = (reminders: Schemas['RemindersResponse']): BellReminders => ({
+  overdueTasks: reminders.overdueTasks.map(slimTask),
+  dueSoonTasks: reminders.dueSoonTasks.map(slimTask),
+  followUpLeads: reminders.followUpLeads.map((lead) => ({
+    id: lead.id,
+    firstName: lead.firstName,
+    lastName: lead.lastName,
+    followUpDate: lead.followUpDate,
+    status: lead.status,
+  })),
+});

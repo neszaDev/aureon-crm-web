@@ -3,7 +3,7 @@
 import { cn } from 'cn';
 import { SearchIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
 import type { SearchGroups } from '@/actions/crm/SearchActions';
 import { searchAll } from '@/actions/crm/SearchActions';
 import { Button } from '@/components/ui/button';
@@ -36,12 +36,17 @@ const subscribe = () => () => {
 };
 const isApple = () => /Mac|iPhone|iPad/u.test(navigator.userAgent);
 
+// The K key: its letter, or, on a layout whose keys give other characters (Thai, Cyrillic), the
+// key in that place. A Latin letter that is not k is the layout's own (Ctrl+T on Dvorak's K).
+const isKKey = (event: KeyboardEvent) =>
+  event.key.toLowerCase() === 'k' || (event.code === 'KeyK' && !/^[a-z]$/iu.test(event.key));
+
 /**
  * Finds a company, contact, lead or deal by what you type (at least 2 characters, after a short
  * pause), from any page: a button in the top bar, and ⌘K or Ctrl+K, open a palette of the first 5
  * of each kind. Arrow keys move through the hits and Enter opens the highlighted one. A hit shows
  * while a newer search is on its way, dimmed and out of reach, so Enter never opens a record the
- * text no longer matches.
+ * text no longer matches. Closed, it gives the focus back to what had it when the shortcut opened it.
  * @param props Component props.
  * @param props.workspaceId The workspace searched.
  * @param props.className Extra classes for the button (its colours on the vermilion bar).
@@ -59,17 +64,22 @@ export const RecordSearch = (props: { workspaceId: number; className?: string })
   const latest = useRef('');
   const timer = useRef(0);
   const apple = useSyncExternalStore(subscribe, isApple, () => false);
+  // What had the focus when the shortcut opened the palette, to give it back on closing; none
+  // when its button did, which keeps the focus.
+  const opener = useRef<HTMLElement | null>(null);
+  const openWithShortcut = useEffectEvent(() => {
+    if (!open) {
+      const active = document.activeElement;
+      opener.current = active instanceof HTMLElement && active !== document.body ? active : null;
+    }
+    setOpen(true);
+  });
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (
-        (event.metaKey || event.ctrlKey) &&
-        !event.altKey &&
-        !event.shiftKey &&
-        event.key.toLowerCase() === 'k'
-      ) {
+      if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && isKKey(event)) {
         event.preventDefault();
-        setOpen(true);
+        openWithShortcut();
       }
     };
     document.addEventListener('keydown', onKeyDown);
@@ -130,6 +140,7 @@ export const RecordSearch = (props: { workspaceId: number; className?: string })
       open={open}
       onOpenChange={(next) => {
         if (next) {
+          opener.current = null;
           setOpen(true);
         } else {
           close();
@@ -162,6 +173,14 @@ export const RecordSearch = (props: { workspaceId: number; className?: string })
       </DialogTrigger>
       <DialogContent
         showCloseButton={false}
+        onCloseAutoFocus={(event) => {
+          const back = opener.current;
+          opener.current = null;
+          if (back?.isConnected) {
+            event.preventDefault();
+            back.focus();
+          }
+        }}
         className="top-[8dvh] translate-y-0 gap-0 overflow-hidden p-0 sm:top-[14dvh] sm:max-w-lg"
       >
         <DialogTitle className="sr-only">{t('title')}</DialogTitle>

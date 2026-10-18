@@ -3,23 +3,30 @@
 import { cn } from 'cn';
 import { BellIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useId, useLayoutEffect, useOptimistic, useRef, useState, useTransition } from 'react';
+import {
+  useEffect,
+  useEffectEvent,
+  useId,
+  useLayoutEffect,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from 'react';
+import { loadReminders } from '@/actions/crm/ReminderActions';
 import { completeTask } from '@/actions/crm/TaskActions';
 import { LeadFollowUp, isFollowUpOverdue } from '@/components/crm/lead/LeadFollowUp';
 import { TaskDue } from '@/components/crm/task/TaskRow';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@/components/ui/popover';
-import type { components } from '@/libs/api/schema';
 import { fullName, recordNumber } from '@/libs/crm/Format';
+import type { BellReminders, BellTask } from '@/libs/crm/Reminders';
 import { listCount, reminderBadge, reminderCount } from '@/libs/crm/Reminders';
 import { todayIn } from '@/libs/crm/ZonedTime';
-import { Link } from '@/libs/I18nNavigation';
+import { Link, usePathname } from '@/libs/I18nNavigation';
 import { toastActionFailure } from '@/utils/ActionToast';
 import { useSettle } from '@/utils/SettleAction';
-
-type Reminders = components['schemas']['RemindersResponse'];
-type Task = components['schemas']['TaskResponse'];
 
 const ITEM = 'flex items-start gap-3 px-3 py-2';
 const TITLE = 'text-[0.9375rem] font-medium break-words text-foreground';
@@ -38,7 +45,7 @@ const TITLE = 'text-[0.9375rem] font-medium break-words text-foreground';
  * @returns The list item.
  */
 const ReminderTask = (props: {
-  task: Task;
+  task: BellTask;
   workspaceId: number;
   timeZone: string;
   headingId: string;
@@ -140,30 +147,75 @@ const Group = (props: { heading: string; length: number; children: React.ReactNo
  * The reminders bell: a badge with how many reminders you have (hidden at none) and a popover
  * with them, in three groups: your overdue tasks, your tasks due in the next 24 hours, and the
  * leads whose follow-up is due. Reminders live in the app only; the popover says so. The layout
- * reads them again after every action that refreshes the page, so completing a task, here or on
- * any page, updates the count.
+ * reads them when it renders (a full load, and after every action that refreshes the page, so
+ * completing a task, here or on any page, updates the count), which a soft navigation doesn't
+ * repeat. So the bell asks again itself on each navigation and when the tab comes back into view,
+ * for what time (a task entering the 24 hours, turning overdue) and other people changed. An
+ * answer shows until the page renders again with reminders of its own, which are newer; one that
+ * fails changes nothing.
  * @param props Component props.
  * @param props.workspaceId The workspace.
  * @param props.timeZone The workspace's time zone, for due times and "today".
- * @param props.reminders What `GET /reminders` sent; undefined when it could not be read.
+ * @param props.reminders What the layout read; undefined when it could not be.
  * @param props.className Extra classes for the trigger (colours on the vermilion bar).
  * @returns The bell and its popover.
  */
 export const RemindersBell = (props: {
   workspaceId: number;
   timeZone: string;
-  reminders?: Reminders;
+  reminders?: BellReminders;
   className?: string;
 }) => {
   const t = useTranslations('RemindersBell');
   const [open, setOpen] = useState(false);
   const headingId = useId();
-  const count = props.reminders ? reminderCount(props.reminders) : 0;
+  const pathname = usePathname();
+  // The last answer, and the layout's reminders it was asked beside: once the layout renders
+  // again its reminders are newer than the answer, and the answer is not looked at.
+  const [fresh, setFresh] = useState<{ from?: BellReminders; value: BellReminders }>();
+  const reminders = fresh && fresh.from === props.reminders ? fresh.value : props.reminders;
+  // Which request may still answer: the latest one.
+  const latest = useRef(0);
+  const seenPath = useRef(pathname);
+  const reload = useEffectEvent(async () => {
+    latest.current += 1;
+    const mine = latest.current;
+    let value: BellReminders | undefined;
+    try {
+      value = await loadReminders(props.workspaceId);
+    } catch {
+      value = undefined;
+    }
+    if (value && latest.current === mine) {
+      setFresh({ from: props.reminders, value });
+    }
+  });
+
+  // Not on the first paint, which is the layout's own read.
+  useEffect(() => {
+    if (seenPath.current !== pathname) {
+      seenPath.current = pathname;
+      void reload();
+    }
+  }, [pathname]);
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        void reload();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+
+  const count = reminders ? reminderCount(reminders) : 0;
   const today = todayIn(props.timeZone);
   const close = () => {
     setOpen(false);
   };
-  const taskItems = (tasks: Task[]) =>
+  const taskItems = (tasks: BellTask[]) =>
     tasks.map((task) => (
       <ReminderTask
         key={task.id}
@@ -181,18 +233,16 @@ export const RemindersBell = (props: {
         <Button
           variant="ghost"
           size="icon"
-          aria-label={
-            props.reminders ? t('label', { count: reminderBadge(props.reminders) }) : t('title')
-          }
+          aria-label={reminders ? t('label', { count: reminderBadge(reminders) }) : t('title')}
           className={cn('relative', props.className)}
         >
           <BellIcon />
-          {count > 0 && props.reminders && (
+          {count > 0 && reminders && (
             <span
               aria-hidden="true"
-              className="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-field px-1 text-[0.6875rem] leading-none font-bold text-seal-ink tabular-nums lg:bg-seal lg:text-on-seal"
+              className="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-field px-1 text-[0.6875rem] leading-none font-bold text-seal-ink tabular-nums lg:bg-foreground lg:text-background"
             >
-              {reminderBadge(props.reminders)}
+              {reminderBadge(reminders)}
             </span>
           )}
         </Button>
@@ -210,16 +260,16 @@ export const RemindersBell = (props: {
           {t('title')}
         </PopoverTitle>
         <div className="max-h-[min(24rem,60dvh)] overflow-y-auto pb-2">
-          {props.reminders ? (
+          {reminders ? (
             <>
-              <Group heading={t('overdue')} length={props.reminders.overdueTasks.length}>
-                {taskItems(props.reminders.overdueTasks)}
+              <Group heading={t('overdue')} length={reminders.overdueTasks.length}>
+                {taskItems(reminders.overdueTasks)}
               </Group>
-              <Group heading={t('due_soon')} length={props.reminders.dueSoonTasks.length}>
-                {taskItems(props.reminders.dueSoonTasks)}
+              <Group heading={t('due_soon')} length={reminders.dueSoonTasks.length}>
+                {taskItems(reminders.dueSoonTasks)}
               </Group>
-              <Group heading={t('follow_up')} length={props.reminders.followUpLeads.length}>
-                {props.reminders.followUpLeads.map((lead) => (
+              <Group heading={t('follow_up')} length={reminders.followUpLeads.length}>
+                {reminders.followUpLeads.map((lead) => (
                   <li key={lead.id} className={cn(ITEM, 'pl-10')}>
                     <span className="flex min-w-0 flex-col">
                       <Link

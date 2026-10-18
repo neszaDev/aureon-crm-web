@@ -31,7 +31,7 @@ src/actions/crm/*               CRM writes: workspaces, members, invitations (cr
 src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for pages), ApiError.ts,
                                 ActionFailure.ts, Session.ts, schema.d.ts (GENERATED, see below)
 src/libs/api/CrmQueries.ts      CRM reads for pages (workspaces, members, invitations, stages, sources, records, lists, the
-                                caller's reminders, which the workspace layout reads on every render)
+                                caller's reminders: the workspace layout reads them on every render, the bell again on each navigation)
 src/libs/api/RecordSearch.ts    the list searches behind the pickers (`searchRecords`) and the ⌘K record search (`searchAll`)
 src/libs/crm/*                  CRM logic: Permissions (`can`), RecordAccess (who may edit a record), WorkspaceId,
                                 Stages, PageMetadata, OpenWorkspace (`getOpenWorkspace`: a page's workspace, 401

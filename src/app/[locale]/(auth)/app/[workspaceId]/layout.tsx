@@ -6,6 +6,7 @@ import { PickerFrame } from '@/components/crm/shell/PickerFrame';
 import { getMyWorkspaces, getReminders, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
+import { slimReminders } from '@/libs/crm/Reminders';
 
 export default async function WorkspaceLayout(props: {
   children: React.ReactNode;
@@ -14,8 +15,9 @@ export default async function WorkspaceLayout(props: {
   const { locale, workspaceId } = await props.params;
   setRequestLocale(locale);
 
-  // The reminders are read with the rest, each time the layout renders: on a full load, and after
-  // every action that refreshes the page, so the bell's count follows what changed.
+  // The reminders are read with the rest each time the layout renders: on a full load, and after
+  // every action that refreshes the page. That is the bell's first paint; a soft navigation
+  // doesn't render the layout again, so the bell asks for itself from then on.
   const [{ user }, current, mine, reminders] = await Promise.all([
     getCurrentUser(),
     getWorkspace(workspaceId),
@@ -47,7 +49,7 @@ export default async function WorkspaceLayout(props: {
       workspaces={mine.workspaces}
       user={{ email: user.email, displayName: user.displayName }}
       // Any other answer (a 5xx) leaves the bell saying so, and the page usable.
-      reminders={reminders.reminders}
+      reminders={reminders.reminders && slimReminders(reminders.reminders)}
     >
       {props.children}
     </CrmShell>
