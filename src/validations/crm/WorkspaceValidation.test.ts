@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { WorkspaceValidation } from './WorkspaceValidation';
+import { CurrencyCode, WorkspaceValidation } from './WorkspaceValidation';
 
 const valid = { name: 'Northwind Supply', defaultCurrency: 'USD', timezone: 'Asia/Bangkok' };
 
@@ -28,10 +28,17 @@ describe('workspace validation', () => {
       expect(firstMessage({ defaultCurrency: 'THB' })).toBeUndefined();
     });
 
-    it('rejects lower case, the wrong length and unknown codes', () => {
+    it('leaves which codes exist to the backend', () => {
+      // Browsers and Node don't list the same currencies, so the form checks only the shape.
+      expect(CurrencyCode.parse('XAD')).toBe('XAD');
+      expect(firstMessage({ defaultCurrency: 'ABC' })).toBeUndefined();
+    });
+
+    it('rejects lower case and the wrong length', () => {
       expect(firstMessage({ defaultCurrency: 'usd' })).toBe('invalid_currency');
       expect(firstMessage({ defaultCurrency: 'US' })).toBe('invalid_currency');
-      expect(firstMessage({ defaultCurrency: 'ABC' })).toBe('invalid_currency');
+      expect(firstMessage({ defaultCurrency: 'USDT' })).toBe('invalid_currency');
+      expect(firstMessage({ defaultCurrency: '' })).toBe('invalid_currency');
     });
   });
 
