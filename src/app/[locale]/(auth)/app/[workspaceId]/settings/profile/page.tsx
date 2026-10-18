@@ -25,7 +25,7 @@ export default async function ProfilePage(props: ProfilePageProps) {
 
   // The layout has loaded the user (a cached call) and handled its failures.
   const { user } = await getCurrentUser();
-  if (!user?.email) {
+  if (!user) {
     throw new Error('Could not load your profile');
   }
 

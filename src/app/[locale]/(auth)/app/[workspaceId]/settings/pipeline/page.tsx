@@ -44,7 +44,7 @@ export default async function PipelinePage(props: PipelinePageProps) {
   if (stages.forbidden) {
     return <ForbiddenNotice page />;
   }
-  if (workspace?.id === undefined || !stages.stages) {
+  if (!workspace || !stages.stages) {
     throw new Error('Could not load the pipeline');
   }
   const canManage = can(workspace, 'SETTINGS_MANAGE');

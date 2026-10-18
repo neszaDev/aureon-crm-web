@@ -28,20 +28,14 @@ type Schemas = components['schemas'];
  * @param date Formats an instant as a date.
  * @returns The rows.
  */
-const toMemberRows = (members: Schemas['MemberResponse'][], date: (iso?: string) => string) =>
-  members.flatMap((member) =>
-    member.userId === undefined || !member.role
-      ? []
-      : [
-          {
-            userId: member.userId,
-            email: member.email ?? '',
-            displayName: member.displayName,
-            role: member.role,
-            joined: date(member.joinedAt),
-          },
-        ],
-  );
+const toMemberRows = (members: Schemas['MemberResponse'][], date: (iso: string) => string) =>
+  members.map((member) => ({
+    userId: member.userId,
+    email: member.email,
+    displayName: member.displayName,
+    role: member.role,
+    joined: date(member.joinedAt),
+  }));
 
 /**
  * The pending invitations as the list shows them. Only owners revoke an owner invitation.
@@ -52,23 +46,17 @@ const toMemberRows = (members: Schemas['MemberResponse'][], date: (iso?: string)
  */
 const toPendingInvitations = (
   invitations: Schemas['InvitationResponse'][],
-  date: (iso?: string) => string,
+  date: (iso: string) => string,
   ownerRules: boolean,
 ) =>
-  invitations.flatMap((invitation) =>
-    invitation.id === undefined || !invitation.role
-      ? []
-      : [
-          {
-            id: invitation.id,
-            email: invitation.email ?? '',
-            role: invitation.role,
-            invitedBy: invitation.invitedBy?.displayName ?? invitation.invitedBy?.email,
-            expires: date(invitation.expiresAt),
-            canRevoke: ownerRules || invitation.role !== 'OWNER',
-          },
-        ],
-  );
+  invitations.map((invitation) => ({
+    id: invitation.id,
+    email: invitation.email,
+    role: invitation.role,
+    invitedBy: invitation.invitedBy?.displayName ?? invitation.invitedBy?.email,
+    expires: date(invitation.expiresAt),
+    canRevoke: ownerRules || invitation.role !== 'OWNER',
+  }));
 
 export async function generateMetadata(props: MembersPageProps): Promise<Metadata> {
   const { locale, workspaceId } = await props.params;
@@ -116,7 +104,7 @@ export default async function MembersPage(props: MembersPageProps) {
     getCurrentUser(),
     getOpenWorkspace(locale, workspaceId),
   ]);
-  if (user?.id === undefined || workspace?.id === undefined || !workspace.role) {
+  if (!user || !workspace) {
     throw new Error('Could not load the workspace');
   }
   const canManage = can(workspace, 'MEMBERS_MANAGE');
@@ -129,10 +117,8 @@ export default async function MembersPage(props: MembersPageProps) {
   }
 
   const ownerRules = workspace.role === 'OWNER';
-  const date = (iso?: string) =>
-    iso
-      ? format.dateTime(new Date(iso), { dateStyle: 'medium', timeZone: workspace.timezone })
-      : '';
+  const date = (iso: string) =>
+    format.dateTime(new Date(iso), { dateStyle: 'medium', timeZone: workspace.timezone });
   const rows = toMemberRows(loaded.members, date);
   const pending = loaded.invitations && toPendingInvitations(loaded.invitations, date, ownerRules);
 
@@ -146,7 +132,7 @@ export default async function MembersPage(props: MembersPageProps) {
             <InviteDialog
               action={createInvitation.bind(null, workspace.id)}
               roles={assignableRoles(workspace.role)}
-              timeZone={workspace.timezone ?? 'UTC'}
+              timeZone={workspace.timezone}
             />
           )
         }

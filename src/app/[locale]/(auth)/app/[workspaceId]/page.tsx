@@ -54,7 +54,7 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
 
   const base = `/app/${workspace.id}/settings`;
   // Your next steps: the ones you completed carry your seal.
-  const sealOfUser = initialsOf(user.displayName, user.email ?? '');
+  const sealOfUser = initialsOf(user.displayName, user.email);
   const memberCount = members.members?.length ?? 0;
   const steps = [
     {
@@ -88,9 +88,9 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
       show: !can(workspace, 'SETTINGS_MANAGE'),
     },
   ].filter((step) => step.show);
-  const currencyName = workspace.defaultCurrency
-    ? new Intl.DisplayNames(locale, { type: 'currency' }).of(workspace.defaultCurrency)
-    : undefined;
+  const currencyName = new Intl.DisplayNames(locale, { type: 'currency' }).of(
+    workspace.defaultCurrency,
+  );
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -104,9 +104,7 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
       <dl className="grid overflow-hidden rounded-lg border border-rule bg-card sm:grid-cols-3">
         <div className="border-b border-rule px-5 py-3.5 sm:border-r sm:border-b-0">
           <dt className="text-[0.8125rem] font-medium text-muted-foreground">{t('fact_role')}</dt>
-          <dd className="mt-0.5 text-lg font-semibold">
-            {workspace.role && tRole(`role_${workspace.role}`)}
-          </dd>
+          <dd className="mt-0.5 text-lg font-semibold">{tRole(`role_${workspace.role}`)}</dd>
         </div>
         <div className="border-b border-rule px-5 py-3.5 sm:border-r sm:border-b-0">
           <dt className="text-[0.8125rem] font-medium text-muted-foreground">
@@ -122,7 +120,7 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
             {t('fact_timezone')}
           </dt>
           <dd className="mt-0.5 text-lg font-semibold break-words">
-            {workspace.timezone?.replaceAll('_', ' ')}
+            {workspace.timezone.replaceAll('_', ' ')}
           </dd>
         </div>
       </dl>
@@ -191,7 +189,7 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
                   key={member.userId}
                   className="flex min-h-12 items-center gap-3 border-t border-rule px-5 py-2"
                 >
-                  <Seal name={member.displayName} email={member.email ?? ''} size="sm" />
+                  <Seal name={member.displayName} email={member.email} size="sm" />
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[0.9375rem] font-medium">
                       {member.displayName ?? member.email}
@@ -203,11 +201,9 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
                       <span className="truncate text-sm text-muted-foreground">{member.email}</span>
                     )}
                   </span>
-                  {member.role && (
-                    <span className="shrink-0 text-sm text-muted-foreground">
-                      {tRole(`role_${member.role}`)}
-                    </span>
-                  )}
+                  <span className="shrink-0 text-sm text-muted-foreground">
+                    {tRole(`role_${member.role}`)}
+                  </span>
                 </li>
               ))}
               {memberCount > MEMBERS_SHOWN && (

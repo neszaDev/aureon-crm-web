@@ -55,11 +55,9 @@ export const WorkspaceSwitcher = (props: {
                 <WorkspaceMark name={name} className="size-6 border-[1.5px] text-[0.625rem]" />
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate font-medium">{name}</span>
-                  {workspace.role && (
-                    <span className="text-xs text-muted-foreground">
-                      {tRole(`role_${workspace.role}`)}
-                    </span>
-                  )}
+                  <span className="text-xs text-muted-foreground">
+                    {tRole(`role_${workspace.role}`)}
+                  </span>
                 </span>
                 {current && (
                   <>

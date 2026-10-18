@@ -33,7 +33,7 @@ export default async function WorkspaceLayout(props: {
     );
   }
   const { workspace } = current;
-  if (!user?.email || workspace?.id === undefined || !mine.workspaces) {
+  if (!user || !workspace || !mine.workspaces) {
     // A 5xx or a malformed answer: the error boundary offers a retry, never a sign-in loop.
     throw new Error('Could not load the workspace');
   }

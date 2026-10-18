@@ -42,22 +42,11 @@ export default async function SourcesPage(props: SourcesPageProps) {
   if (sources.forbidden) {
     return <ForbiddenNotice page />;
   }
-  if (workspace?.id === undefined || !sources.sources) {
+  if (!workspace || !sources.sources) {
     throw new Error('Could not load the lead sources');
   }
   const canManage = can(workspace, 'SETTINGS_MANAGE');
-  const rows = sources.sources.flatMap((source) =>
-    source.id === undefined || source.version === undefined
-      ? []
-      : [
-          {
-            id: source.id,
-            name: source.name ?? '',
-            archived: source.archived ?? false,
-            version: source.version,
-          },
-        ],
-  );
+  const rows = sources.sources;
 
   return (
     <>

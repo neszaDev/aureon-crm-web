@@ -73,11 +73,9 @@ export default async function AppPage(props: AppPageProps) {
               <WorkspaceMark name={workspace.name} className="size-9" />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="font-semibold break-words text-foreground">{workspace.name}</span>
-                {workspace.role && (
-                  <span className="text-sm text-muted-foreground">
-                    {tRole(`role_${workspace.role}`)}
-                  </span>
-                )}
+                <span className="text-sm text-muted-foreground">
+                  {tRole(`role_${workspace.role}`)}
+                </span>
               </span>
               <ChevronRightIcon
                 aria-hidden="true"
