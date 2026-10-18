@@ -140,7 +140,9 @@
     "invalid_time_zone": "Choose a time zone from the list",
     "password_too_many_bytes": "Too long. Use fewer characters: Thai and accented letters count as more than one (limit 72).",
     "probability_range": "Use a whole number from 0 to 100",
-    "money_format": "Enter an amount like 1250.50: digits, an optional dot and up to 2 decimals"
+    "money_format": "Enter an amount like 1250.50: digits, an optional dot and up to 2 decimals",
+    "website_format": "Enter a web address starting with http:// or https://",
+    "employee_count_range": "Use a whole number from 0 to 10,000,000"
   },
   "DashboardLayout": {
     "meta_title": "Dashboard",
@@ -183,6 +185,7 @@
   "CrmShell": {
     "nav_label": "Workspace navigation",
     "nav_dashboard": "Dashboard",
+    "nav_companies": "Companies",
     "nav_settings": "Settings",
     "open_menu": "Open menu",
     "close_menu": "Close menu",
@@ -503,6 +506,120 @@
     "error_invalid_input": "Check the highlighted fields",
     "error_wrong_password": "This isn't your current password",
     "error_generic": "The password wasn't changed. Try again."
+  },
+  "RecordList": {
+    "pager_label": "Pages",
+    "range": "{from}–{to} of {total}",
+    "page_size": "Per page",
+    "previous": "Previous",
+    "next": "Next",
+    "view_label": "Show",
+    "view_active": "Active",
+    "view_archived": "Archived",
+    "filtered_title": "Nothing matches",
+    "filtered_text": "Try other words, or clear the filters to see everything.",
+    "clear_filters": "Clear filters",
+    "invalid_title": "These filters can't be used together",
+    "invalid_text": "The link holds a search or filters the list can't apply. Reset the list to start again.",
+    "invalid_reset": "Reset the list"
+  },
+  "OwnerField": {
+    "you": "{name} (you)",
+    "unassigned": "Unassigned",
+    "read_only": "Your role can't give it to someone else."
+  },
+  "RecordNotFound": {
+    "title": "This record can't be found",
+    "text": "It may have been deleted, or the link is wrong."
+  },
+  "RecordHeader": {
+    "archived": "Archived",
+    "owner": "Owned by {name}",
+    "unassigned": "Unassigned"
+  },
+  "RecordFacts": {
+    "not_set": "Not set"
+  },
+  "RecordActions": {
+    "archive": "Archive",
+    "restore": "Restore",
+    "archive_title": "Archive {name}?",
+    "archive_text": "It leaves the lists and searches, and its history stays. You can restore it from the archived view.",
+    "archive_confirm": "Archive",
+    "cancel": "Cancel",
+    "archived": "{name} archived",
+    "restored": "{name} restored",
+    "error_generic": "That didn't work. Try again."
+  },
+  "DuplicateWarning": {
+    "title": "{count, plural, one {A record looks like this one} other {# records look like this one}}",
+    "text": "Check them first, so the same one isn't entered twice. Saving stays possible.",
+    "new_tab": "(opens in a new tab)"
+  },
+  "CompaniesPage": {
+    "title": "Companies",
+    "description": "The organisations you sell to, with their people and deals.",
+    "new": "New company",
+    "toolbar_label": "Search companies",
+    "search_label": "Search",
+    "search_placeholder": "Name, website or phone",
+    "industry_label": "Industry",
+    "industry_placeholder": "Exact name, such as Retail",
+    "owner_label": "Owner",
+    "owner_any": "Anyone",
+    "owner_me": "Me",
+    "owner_unassigned": "Unassigned",
+    "list_heading": "{count, plural, =0 {No companies} one {# company} other {# companies}}",
+    "archived_heading": "{count, plural, =0 {No archived companies} one {# archived company} other {# archived companies}}",
+    "empty_title": "No companies yet",
+    "empty_text": "Add the organisations you sell to. Their contacts and deals hang off them."
+  },
+  "CompanyTable": {
+    "name": "Name",
+    "industry": "Industry",
+    "owner": "Owner",
+    "contacts": "Contacts",
+    "open_deals": "Open deals",
+    "updated": "Updated",
+    "unassigned": "Unassigned"
+  },
+  "CompanyForm": {
+    "name_label": "Company name",
+    "industry_label": "Industry",
+    "industry_hint": "Such as Retail or Logistics. The list filters by it.",
+    "website_label": "Website",
+    "website_hint": "Starts with https://",
+    "phone_label": "Phone",
+    "employees_label": "Employees",
+    "owner_label": "Owner",
+    "address_label": "Address",
+    "notes_label": "Notes",
+    "cancel": "Cancel",
+    "saved": "Saved",
+    "error_invalid_input": "Check the highlighted fields",
+    "error_generic": "The company wasn't created. Try again."
+  },
+  "NewCompanyPage": {
+    "title": "New company",
+    "description": "Add an organisation you sell to. Its contacts and deals can follow once it's saved.",
+    "submit": "Create company"
+  },
+  "CompanyPage": {
+    "back": "Back to companies",
+    "details": "Company details",
+    "industry": "Industry",
+    "website": "Website",
+    "phone": "Phone",
+    "address": "Address",
+    "employees": "Employees",
+    "notes": "Notes",
+    "edit": "Edit",
+    "new_tab": "(opens in a new tab)"
+  },
+  "EditCompanyPage": {
+    "title": "Edit {name}",
+    "description": "Changes show for everyone in the workspace once saved.",
+    "submit": "Save changes"
   },
   "DashboardPage": {
     "title": "Overview",

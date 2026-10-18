@@ -11,7 +11,7 @@ vi.mock(import('@/libs/api/Session'), () => ({
 }));
 vi.mock(import('@/libs/api/CrmQueries'), () => ({ getWorkspace: vi.fn<typeof getWorkspace>() }));
 
-const FLAGS = { unauthorized: false, forbidden: false, notFound: false };
+const FLAGS = { unauthorized: false, forbidden: false, notFound: false, invalid: false };
 
 describe(getOpenWorkspace, () => {
   beforeEach(() => {

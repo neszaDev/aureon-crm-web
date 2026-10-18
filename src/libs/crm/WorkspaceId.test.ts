@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { toWorkspaceId } from './WorkspaceId';
+import { toRecordId, toWorkspaceId } from './WorkspaceId';
 
 describe(toWorkspaceId, () => {
   it('reads a positive id of up to 15 digits', () => {
@@ -16,6 +16,15 @@ describe(toWorkspaceId, () => {
   it('rejects anything that is not a plain number', () => {
     for (const segment of ['', 'abc', '-1', '1.5', '1e3', ' 1', '1234567890123456']) {
       expect(toWorkspaceId(segment)).toBeUndefined();
+    }
+  });
+});
+
+describe(toRecordId, () => {
+  it('reads a record id by the same rules', () => {
+    expect(toRecordId('42')).toBe(42);
+    for (const segment of ['0', '007', 'abc', '-1', '1.5', '1234567890123456']) {
+      expect(toRecordId(segment)).toBeUndefined();
     }
   });
 });

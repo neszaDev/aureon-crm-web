@@ -140,7 +140,9 @@
     "invalid_time_zone": "Choisissez un fuseau horaire dans la liste",
     "password_too_many_bytes": "Trop long. Utilisez moins de caractères : les lettres thaïes et accentuées comptent pour plus d'un (limite 72).",
     "probability_range": "Utilisez un nombre entier de 0 à 100",
-    "money_format": "Saisissez un montant comme 1250.50 : des chiffres, un point facultatif et jusqu'à 2 décimales"
+    "money_format": "Saisissez un montant comme 1250.50 : des chiffres, un point facultatif et jusqu'à 2 décimales",
+    "website_format": "Saisissez une adresse web commençant par http:// ou https://",
+    "employee_count_range": "Utilisez un nombre entier de 0 à 10 000 000"
   },
   "DashboardLayout": {
     "meta_title": "Tableau de bord",
@@ -183,6 +185,7 @@
   "CrmShell": {
     "nav_label": "Navigation de l'espace de travail",
     "nav_dashboard": "Tableau de bord",
+    "nav_companies": "Entreprises",
     "nav_settings": "Paramètres",
     "open_menu": "Ouvrir le menu",
     "close_menu": "Fermer le menu",
@@ -503,6 +506,120 @@
     "error_invalid_input": "Vérifiez les champs signalés",
     "error_wrong_password": "Ce n'est pas votre mot de passe actuel",
     "error_generic": "Le mot de passe n'a pas été changé. Réessayez."
+  },
+  "RecordList": {
+    "pager_label": "Pages",
+    "range": "{from}–{to} sur {total}",
+    "page_size": "Par page",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "view_label": "Afficher",
+    "view_active": "Actives",
+    "view_archived": "Archivées",
+    "filtered_title": "Aucun résultat",
+    "filtered_text": "Essayez d'autres mots, ou effacez les filtres pour tout voir.",
+    "clear_filters": "Effacer les filtres",
+    "invalid_title": "Ces filtres ne peuvent pas aller ensemble",
+    "invalid_text": "Le lien contient une recherche ou des filtres que la liste ne peut pas appliquer. Réinitialisez la liste pour recommencer.",
+    "invalid_reset": "Réinitialiser la liste"
+  },
+  "OwnerField": {
+    "you": "{name} (vous)",
+    "unassigned": "Sans propriétaire",
+    "read_only": "Votre rôle ne permet pas de l'attribuer à quelqu'un d'autre."
+  },
+  "RecordNotFound": {
+    "title": "Cette fiche est introuvable",
+    "text": "Elle a peut-être été supprimée, ou le lien est erroné."
+  },
+  "RecordHeader": {
+    "archived": "Archivée",
+    "owner": "Propriétaire : {name}",
+    "unassigned": "Sans propriétaire"
+  },
+  "RecordFacts": {
+    "not_set": "Non renseigné"
+  },
+  "RecordActions": {
+    "archive": "Archiver",
+    "restore": "Restaurer",
+    "archive_title": "Archiver {name} ?",
+    "archive_text": "La fiche quitte les listes et les recherches, son historique reste. Vous pourrez la restaurer depuis les archives.",
+    "archive_confirm": "Archiver",
+    "cancel": "Annuler",
+    "archived": "Fiche archivée : {name}",
+    "restored": "Fiche restaurée : {name}",
+    "error_generic": "Ça n'a pas fonctionné. Réessayez."
+  },
+  "DuplicateWarning": {
+    "title": "{count, plural, one {Une fiche ressemble à celle-ci} other {# fiches ressemblent à celle-ci}}",
+    "text": "Vérifiez-les d'abord, pour ne pas saisir deux fois la même. Vous pouvez quand même enregistrer.",
+    "new_tab": "(s'ouvre dans un nouvel onglet)"
+  },
+  "CompaniesPage": {
+    "title": "Entreprises",
+    "description": "Les organisations à qui vous vendez, avec leurs contacts et leurs affaires.",
+    "new": "Nouvelle entreprise",
+    "toolbar_label": "Rechercher des entreprises",
+    "search_label": "Rechercher",
+    "search_placeholder": "Nom, site web ou téléphone",
+    "industry_label": "Secteur",
+    "industry_placeholder": "Nom exact, par exemple Commerce",
+    "owner_label": "Propriétaire",
+    "owner_any": "Tout le monde",
+    "owner_me": "Moi",
+    "owner_unassigned": "Sans propriétaire",
+    "list_heading": "{count, plural, =0 {Aucune entreprise} one {# entreprise} other {# entreprises}}",
+    "archived_heading": "{count, plural, =0 {Aucune entreprise archivée} one {# entreprise archivée} other {# entreprises archivées}}",
+    "empty_title": "Aucune entreprise pour l'instant",
+    "empty_text": "Ajoutez les organisations à qui vous vendez. Leurs contacts et leurs affaires s'y rattachent."
+  },
+  "CompanyTable": {
+    "name": "Nom",
+    "industry": "Secteur",
+    "owner": "Propriétaire",
+    "contacts": "Contacts",
+    "open_deals": "Affaires en cours",
+    "updated": "Modifiée",
+    "unassigned": "Sans propriétaire"
+  },
+  "CompanyForm": {
+    "name_label": "Nom de l'entreprise",
+    "industry_label": "Secteur",
+    "industry_hint": "Par exemple Commerce ou Logistique. La liste filtre par secteur.",
+    "website_label": "Site web",
+    "website_hint": "Commence par https://",
+    "phone_label": "Téléphone",
+    "employees_label": "Effectif",
+    "owner_label": "Propriétaire",
+    "address_label": "Adresse",
+    "notes_label": "Notes",
+    "cancel": "Annuler",
+    "saved": "Enregistré",
+    "error_invalid_input": "Vérifiez les champs signalés",
+    "error_generic": "L'entreprise n'a pas été créée. Réessayez."
+  },
+  "NewCompanyPage": {
+    "title": "Nouvelle entreprise",
+    "description": "Ajoutez une organisation à qui vous vendez. Ses contacts et ses affaires pourront suivre une fois enregistrée.",
+    "submit": "Créer l'entreprise"
+  },
+  "CompanyPage": {
+    "back": "Retour aux entreprises",
+    "details": "Détails de l'entreprise",
+    "industry": "Secteur",
+    "website": "Site web",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "employees": "Effectif",
+    "notes": "Notes",
+    "edit": "Modifier",
+    "new_tab": "(s'ouvre dans un nouvel onglet)"
+  },
+  "EditCompanyPage": {
+    "title": "Modifier {name}",
+    "description": "Les modifications s'affichent pour tout l'espace une fois enregistrées.",
+    "submit": "Enregistrer les modifications"
   },
   "DashboardPage": {
     "title": "Vue d'ensemble",

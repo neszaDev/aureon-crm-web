@@ -1,13 +1,20 @@
 import 'server-only';
 import { cache } from 'react';
-import { toWorkspaceId } from '@/libs/crm/WorkspaceId';
+import type { ListQuery, ListSpec } from '@/libs/crm/ListQuery';
+import { toRecordId, toWorkspaceId } from '@/libs/crm/WorkspaceId';
 import { authedBackend, backend } from './Backend';
 
 // Read-side CRM calls for server components, like `Queries.ts`. Each returns the data plus
-// `unauthorized` (401: the session is gone), `forbidden` (403) and `notFound` (404: unknown,
-// or not a member: the backend answers both alike). Anything else leaves the data undefined.
+// `unauthorized` (401: the session is gone), `forbidden` (403), `notFound` (404: unknown,
+// or not a member: the backend answers both alike) and `invalid` (400: a list's query it
+// refuses). Anything else leaves the data undefined.
 
-const NOT_FOUND = { unauthorized: false, forbidden: false, notFound: true } as const;
+const NOT_FOUND = {
+  unauthorized: false,
+  forbidden: false,
+  notFound: true,
+  invalid: false,
+} as const;
 
 /**
  * Reads the outcome flags of a backend response.
@@ -18,7 +25,31 @@ const flags = (status: number) => ({
   unauthorized: status === 401,
   forbidden: status === 403,
   notFound: status === 404,
+  invalid: status === 400,
 });
+
+/**
+ * A list query as its endpoint's params: the filters are already named as the backend names them.
+ * @param query The list query.
+ * @returns The query params.
+ */
+const listParams = <S extends ListSpec>(query: ListQuery<S>) => ({
+  ...query.filters,
+  q: query.q,
+  archived: query.archived,
+  unassigned: query.unassigned,
+  page: query.page,
+  size: query.size,
+  sort: query.sort,
+  direction: query.direction,
+});
+
+/** The company list's sorts and filters (api.md, Companies). */
+export const COMPANY_LIST = {
+  sorts: ['NAME', 'CREATED_AT', 'UPDATED_AT'],
+  defaultSort: 'NAME',
+  filters: { ownerId: 'id', industry: 'text' },
+} as const satisfies ListSpec;
 
 /**
  * Loads the signed-in user's workspaces (`GET /workspaces`), by name.
@@ -129,6 +160,48 @@ export const getLeadSources = cache(async (segment: string) => {
   });
 
   return { sources: data, ...flags(response.status) };
+});
+
+/**
+ * Loads a page of the workspace's companies (`GET /workspaces/{id}/companies`).
+ * @param segment The `[workspaceId]` route segment.
+ * @param query The list query, read with `COMPANY_LIST`.
+ * @returns The page and the outcome flags (`invalid`: the backend refused the query).
+ */
+export const getCompanies = async (segment: string, query: ListQuery<typeof COMPANY_LIST>) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { companies: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/companies', {
+    params: { path: { workspaceId }, query: listParams(query) },
+  });
+
+  return { companies: data, ...flags(response.status) };
+};
+
+/**
+ * Loads one company (`GET /workspaces/{id}/companies/{id}`). Cached for the request, so the page
+ * and its metadata share one call.
+ * @param segment The `[workspaceId]` route segment.
+ * @param id The `[id]` route segment.
+ * @returns The company and the outcome flags (`notFound` for a malformed id too).
+ */
+export const getCompany = cache(async (segment: string, id: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  const companyId = toRecordId(id);
+  if (workspaceId === undefined || companyId === undefined) {
+    return { company: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/companies/{id}', {
+    params: { path: { workspaceId, id: companyId } },
+  });
+
+  return { company: data, ...flags(response.status) };
 });
 
 /**
