@@ -1,6 +1,7 @@
 import { cn } from 'cn';
 import { ChevronDownIcon } from 'lucide-react';
 import * as React from 'react';
+import { fieldStates, fieldSurface } from '@/components/ui/field-surface';
 
 type NativeSelectProps = Omit<React.ComponentProps<'select'>, 'size'> & {
   size?: 'sm' | 'default';
@@ -19,7 +20,11 @@ function NativeSelect({ className, size = 'default', ...props }: NativeSelectPro
       <select
         data-slot="native-select"
         data-size={size}
-        className="h-10 w-full min-w-0 appearance-none rounded-md border border-input bg-field py-2 pr-9 pl-3 text-base text-foreground shadow-ply transition-[border-color,box-shadow] outline-none select-none placeholder:text-muted-foreground hover:border-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-60 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/15 data-[size=sm]:h-8 data-[size=sm]:py-1 data-[size=sm]:pr-8 data-[size=sm]:pl-2.5 data-[size=sm]:text-sm sm:text-[0.9375rem]"
+        className={cn(
+          fieldSurface,
+          fieldStates,
+          'h-10 w-full min-w-0 appearance-none py-2 pr-9 pl-3 select-none placeholder:text-muted-foreground data-[size=sm]:h-8 data-[size=sm]:py-1 data-[size=sm]:pr-8 data-[size=sm]:pl-2.5 data-[size=sm]:text-sm',
+        )}
         {...props}
       />
       <ChevronDownIcon

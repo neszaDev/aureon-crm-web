@@ -2,7 +2,7 @@
 
 import { cn } from 'cn';
 import { SearchIcon } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { ListQuery } from '@/libs/crm/ListQuery';
@@ -41,12 +41,6 @@ export const SearchBox = (props: {
   const [shown, setShown] = useState(value);
   const [pending, setPending] = useState<string[]>([]);
   const timer = useRef(0);
-  // The value the URL holds once every request has landed: the last one still on its way, or
-  // the URL's own. Asking for it again would refetch the same list.
-  const lastAsked = useRef(value);
-  useEffect(() => {
-    lastAsked.current = pending.at(-1) ?? shown;
-  }, [pending, shown]);
 
   // The URL changed. One of this box's requests landing leaves the text alone, as the user may
   // have typed on (even back to an earlier value); any other change (Back, "Clear filters")
@@ -80,6 +74,11 @@ export const SearchBox = (props: {
           onChange={(event) => {
             const input = event.currentTarget;
             setText(input.value);
+            // The value the URL holds once every request has landed: the last one still on its
+            // way, or the URL's own. Asking for it again would refetch the same list. Read at the
+            // keystroke: this box's requests landing during the pause leave it as is, and a change
+            // it didn't ask for (Back) puts the URL's value in the box, at worst asked for again.
+            const lastAsked = pending.at(-1) ?? shown;
             window.clearTimeout(timer.current);
             timer.current = window.setTimeout(() => {
               // Gone: the user followed a link meanwhile.
@@ -87,10 +86,9 @@ export const SearchBox = (props: {
                 return;
               }
               const next = input.value.trim();
-              if (next === lastAsked.current) {
+              if (next === lastAsked) {
                 return;
               }
-              lastAsked.current = next;
               setPending((asked) => [...asked, next]);
               router.replace(
                 listHref(props.path, props.query, { [props.param]: next || undefined }),

@@ -219,6 +219,16 @@ export const parseListQuery = <S extends ListSpec>(
 };
 
 /**
+ * Tells whether a list query narrows the records: a search, an owner filter (Unassigned too) or
+ * any other filter. The archived view, the sort and the paging don't. An empty list that is
+ * filtered says "Nothing matches" rather than "Nothing yet".
+ * @param query The list query.
+ * @returns Whether it filters.
+ */
+export const isFiltered = <S extends ListSpec>(query: ListQuery<S>) =>
+  [query.q, query.unassigned, ...Object.values(query.filters)].some((value) => value !== undefined);
+
+/**
  * The direction a sort takes without `direction`: dates, amounts and priorities descending,
  * names and due dates ascending.
  * @param sort The sort.

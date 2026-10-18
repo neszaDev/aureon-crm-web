@@ -240,6 +240,8 @@ export const ContactForm = (props: {
               onChange={(tags) => {
                 controller.field.onChange(tags);
                 setSaved(false);
+                // A tag that is too long says so as it goes in, not at submit.
+                void form.trigger('tags');
               }}
               suggestions={props.tags}
               invalid={Boolean(tagsError)}

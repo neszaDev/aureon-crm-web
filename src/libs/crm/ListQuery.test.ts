@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ListSpec } from './ListQuery';
-import { listHref, naturalDirection, parseListQuery } from './ListQuery';
+import { isFiltered, listHref, naturalDirection, parseListQuery } from './ListQuery';
 
 const SPEC = {
   sorts: ['NAME', 'CREATED_AT', 'UPDATED_AT'],
@@ -150,5 +150,21 @@ describe(listHref, () => {
     expect(listHref(PATH, parseListQuery(SPEC, {}), { status: ['NEW', 'QUALIFIED'] })).toBe(
       `${PATH}?status=NEW&status=QUALIFIED`,
     );
+  });
+});
+
+describe(isFiltered, () => {
+  const filtered = (query: Record<string, string>) => isFiltered(parseListQuery(SPEC, query));
+
+  it('leaves the archive, the sort, the paging and dropped values out', () => {
+    expect(filtered({ archived: 'true', sort: 'UPDATED_AT', page: '2', size: '50' })).toBeFalsy();
+    expect(filtered({ ownerId: 'abc' })).toBeFalsy();
+  });
+
+  it('counts a search, an owner filter or any other filter', () => {
+    expect(filtered({ q: 'acme' })).toBeTruthy();
+    expect(filtered({ ownerId: 'unassigned' })).toBeTruthy();
+    expect(filtered({ overdue: 'false' })).toBeTruthy();
+    expect(filtered({ status: 'NEW' })).toBeTruthy();
   });
 });

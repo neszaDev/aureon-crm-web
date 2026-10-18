@@ -525,7 +525,15 @@
     "invalid_title": "These filters can't be used together",
     "invalid_text": "The link holds a search or filters the list can't apply. Reset the list to start again.",
     "invalid_reset": "Reset the list",
-    "view_active_link": "Back to the active list"
+    "view_active_link": "Back to the active list",
+    "unassigned": "Unassigned"
+  },
+  "OwnerFilter": {
+    "label": "Owner",
+    "any": "Anyone",
+    "me": "Me",
+    "unassigned": "Unassigned",
+    "former": "Former member"
   },
   "OwnerField": {
     "you": "{name} (you)",
@@ -569,11 +577,6 @@
     "search_placeholder": "Name, website or phone",
     "industry_label": "Industry",
     "industry_placeholder": "Exact name, such as Retail",
-    "owner_label": "Owner",
-    "owner_any": "Anyone",
-    "owner_me": "Me",
-    "owner_unassigned": "Unassigned",
-    "owner_former": "Former member",
     "list_heading": "{count, plural, =0 {No companies} one {# company} other {# companies}}",
     "archived_heading": "{count, plural, =0 {No archived companies} one {# archived company} other {# archived companies}}",
     "empty_title": "No companies yet",
@@ -586,8 +589,7 @@
     "owner": "Owner",
     "contacts": "Contacts",
     "open_deals": "Open deals",
-    "updated": "Updated",
-    "unassigned": "Unassigned"
+    "updated": "Updated"
   },
   "CompanyForm": {
     "name_label": "Company name",
@@ -644,11 +646,6 @@
     "company_label": "Company",
     "company_any": "Any company",
     "company_unknown": "Unknown company",
-    "owner_label": "Owner",
-    "owner_any": "Anyone",
-    "owner_me": "Me",
-    "owner_unassigned": "Unassigned",
-    "owner_former": "Former member",
     "source_label": "Source",
     "source_any": "Any source",
     "source_unknown": "Unknown source",
@@ -668,7 +665,6 @@
     "owner": "Owner",
     "tags": "Tags",
     "updated": "Updated",
-    "unassigned": "Unassigned",
     "tags_more": "+{count}",
     "tags_more_label": "{count, plural, one {and # more tag} other {and # more tags}}"
   },
@@ -715,14 +711,22 @@
     "searching": "Searching…",
     "empty": "Nothing found",
     "search_company": "Search companies",
-    "clear_company": "Clear company"
+    "clear_company": "Clear company",
+    "results": "Results",
+    "current": "(current)",
+    "error": "Couldn't search. Try again."
   },
   "TagInput": {
     "remove": "Remove {tag}",
     "add": "Add {tag}",
     "suggestions": "Tags in use",
     "hint": "Press Enter or type a comma after each tag.",
-    "limit": "A contact takes at most {max} tags. Remove one to add another."
+    "limit": "A contact takes at most {max} tags. Remove one to add another.",
+    "chosen": "Added",
+    "added": "{tags} added.",
+    "removed": "{tag} removed.",
+    "dropped": "{tags} not added: a contact takes at most {max} tags.",
+    "too_long": "(too long)"
   },
   "SourceField": {
     "none": "None",

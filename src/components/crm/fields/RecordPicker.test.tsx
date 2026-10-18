@@ -32,6 +32,12 @@ const CompanyField = (props: { initial: PickedRecord | null }) => {
 
 const trigger = () => page.getByRole('combobox', { name: 'Company' });
 
+const pause = async (ms: number) => {
+  const { promise, resolve } = Promise.withResolvers<undefined>();
+  setTimeout(resolve, ms);
+  await promise;
+};
+
 describe(RecordPicker, () => {
   it("shows the current record's name without searching", async () => {
     vi.mocked(searchRecords).mockClear();
@@ -74,6 +80,69 @@ describe(RecordPicker, () => {
 
     await expect.element(page.getByRole('option', { name: /Globex/u })).toBeVisible();
     expect(page.getByRole('option', { name: /Acme/u }).elements()).toHaveLength(0);
+  });
+
+  it('takes no Enter on the old results while a search is on its way', async () => {
+    const slow = Promise.withResolvers<{ id: number; label: string }[]>();
+    vi.mocked(searchRecords)
+      .mockReset()
+      .mockResolvedValueOnce([{ id: 7, label: 'Acme' }])
+      .mockReturnValueOnce(slow.promise);
+    await render(<CompanyField initial={null} />);
+
+    await trigger().click();
+    await expect.element(page.getByRole('option', { name: /Acme/u })).toBeVisible();
+    // Enter at once, then again past the typing pause, before the answer.
+    await userEvent.keyboard('glo{Enter}');
+    await pause(400);
+    await userEvent.keyboard('{Enter}');
+
+    expect(page.getByTestId('company').element()).toHaveTextContent('none');
+    await expect.element(page.getByText('Searching…')).toBeVisible();
+
+    slow.resolve([{ id: 9, label: 'Globex' }]);
+    await expect.element(page.getByRole('option', { name: /Globex/u })).toBeVisible();
+    await userEvent.keyboard('{Enter}');
+
+    await expect.element(page.getByTestId('company')).toHaveTextContent('9:Globex');
+  });
+
+  it('names its list and marks the current record', async () => {
+    vi.mocked(searchRecords)
+      .mockReset()
+      .mockResolvedValueOnce([
+        { id: 7, label: 'Acme' },
+        { id: 9, label: 'Globex' },
+      ]);
+    await render(<CompanyField initial={{ id: 9, label: 'Globex' }} />);
+
+    // ArrowDown on the closed field opens it, as on a select.
+    trigger().element().focus();
+    await userEvent.keyboard('{ArrowDown}');
+
+    await expect.element(page.getByRole('dialog', { name: 'Search companies' })).toBeVisible();
+    await expect.element(page.getByRole('listbox', { name: 'Results' })).toBeVisible();
+    await expect.element(page.getByRole('option', { name: 'Globex (current)' })).toBeVisible();
+    await expect.element(page.getByRole('option', { name: 'Acme', exact: true })).toBeVisible();
+  });
+
+  it('says when nothing matches', async () => {
+    vi.mocked(searchRecords).mockReset().mockResolvedValueOnce([]);
+    await render(<CompanyField initial={null} />);
+
+    await trigger().click();
+
+    await expect.element(page.getByText('Nothing found')).toBeVisible();
+  });
+
+  it('says when the search failed, rather than that nothing matches', async () => {
+    vi.mocked(searchRecords).mockReset().mockRejectedValueOnce(new Error('403'));
+    await render(<CompanyField initial={null} />);
+
+    await trigger().click();
+
+    await expect.element(page.getByText("Couldn't search. Try again.")).toBeVisible();
+    expect(page.getByText('Nothing found').elements()).toHaveLength(0);
   });
 
   it('clears the record', async () => {

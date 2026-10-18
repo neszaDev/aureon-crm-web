@@ -1,9 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { authedBackend } from '@/libs/api/Backend';
+import { redirectIfUnauthorized } from '@/libs/api/Session';
 import { searchRecords } from './RecordSearchActions';
 
 vi.mock(import('server-only'), () => ({}));
 vi.mock(import('@/libs/api/Backend'), () => ({ authedBackend: vi.fn<typeof authedBackend>() }));
+// Its real module needs Next's runtime; a 401 redirects to sign-in there.
+vi.mock(import('@/libs/api/Session'), () => ({
+  redirectIfUnauthorized: vi.fn<typeof redirectIfUnauthorized>(),
+}));
 
 const mockGet = (result: { data?: unknown; status: number }) => {
   const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue({
@@ -46,10 +51,18 @@ describe(searchRecords, () => {
     });
   });
 
-  it('finds nothing when the backend refuses', async () => {
+  it('fails when the backend refuses, so the picker can say so', async () => {
     mockGet({ status: 403 });
 
-    await expect(searchRecords(1, 'company', '')).resolves.toStrictEqual([]);
+    await expect(searchRecords(1, 'company', '')).rejects.toThrow('403');
+  });
+
+  it('ends a session the backend no longer accepts, as other reads do', async () => {
+    vi.mocked(redirectIfUnauthorized).mockClear();
+    mockGet({ status: 401 });
+
+    await expect(searchRecords(1, 'company', '')).rejects.toThrow('401');
+    expect(redirectIfUnauthorized).toHaveBeenCalledWith(401);
   });
 
   it('finds nothing for a kind it has no search for', async () => {

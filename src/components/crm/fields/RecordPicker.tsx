@@ -1,5 +1,6 @@
 'use client';
 
+import { cn } from 'cn';
 import { ChevronsUpDownIcon, XIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
@@ -7,12 +8,12 @@ import type { RecordKind, RecordOption } from '@/actions/crm/RecordSearchActions
 import { searchRecords } from '@/actions/crm/RecordSearchActions';
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
+import { fieldStates, fieldSurface } from '@/components/ui/field-surface';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 const TYPING_PAUSE_MS = 250;
@@ -23,8 +24,9 @@ export type PickedRecord = { id: number; label: string };
 /**
  * Links a record: the way every form and filter picks a company, contact, lead or deal. The
  * field shows the current record's name as given (no search); opening it lists the first active
- * records of the kind, and typing searches them on the server (`searchRecords`). Clearable. Its
- * label is a `<label htmlFor={id}>` outside it.
+ * records of the kind (ArrowDown opens it too), and typing searches them on the server
+ * (`searchRecords`): the old results go at once, so Enter never picks one the text no longer
+ * matches. A failed search says so. Clearable. Its label is a `<label htmlFor={id}>` outside it.
  * @param props Component props.
  * @param props.id The field's id.
  * @param props.workspaceId The workspace searched.
@@ -51,36 +53,54 @@ export const RecordPicker = (props: {
   const [text, setText] = useState('');
   const [results, setResults] = useState<RecordOption[]>([]);
   const [searching, setSearching] = useState(false);
+  const [failed, setFailed] = useState(false);
   // The search whose answer the list may show: an earlier one answering late is dropped.
   const latest = useRef('');
   const timer = useRef(0);
   const trigger = useRef<HTMLButtonElement>(null);
   const listId = `${props.id}-list`;
 
-  const search = async (q: string) => {
+  // Asked for, or typed and about to be: what the list shows is gone until it answers.
+  const awaitAnswer = (q: string) => {
     latest.current = q;
+    setResults([]);
+    setFailed(false);
     setSearching(true);
-    const found = await searchRecords(props.workspaceId, props.kind, q).catch(() => []);
+  };
+  const search = async (q: string) => {
+    awaitAnswer(q);
+    let found: RecordOption[] | undefined;
+    try {
+      found = await searchRecords(props.workspaceId, props.kind, q);
+    } catch {
+      found = undefined;
+    }
     if (latest.current === q) {
-      setResults(found);
+      setResults(found ?? []);
+      setFailed(found === undefined);
       setSearching(false);
     }
   };
+  const openChange = (next: boolean) => {
+    setOpen(next);
+    window.clearTimeout(timer.current);
+    if (next) {
+      setText('');
+      void search('');
+    }
+  };
+  let notice: string | undefined;
+  if (searching) {
+    notice = t('searching');
+  } else if (failed) {
+    notice = t('error');
+  } else if (results.length === 0) {
+    notice = t('empty');
+  }
 
   return (
     <div className="relative w-full">
-      <Popover
-        open={open}
-        onOpenChange={(next) => {
-          setOpen(next);
-          window.clearTimeout(timer.current);
-          if (next) {
-            setText('');
-            setResults([]);
-            void search('');
-          }
-        }}
-      >
+      <Popover open={open} onOpenChange={openChange}>
         <PopoverTrigger asChild>
           <button
             ref={trigger}
@@ -94,8 +114,19 @@ export const RecordPicker = (props: {
             aria-controls={listId}
             aria-invalid={props.invalid ? true : undefined}
             aria-describedby={props.describedBy}
-            className="flex h-10 w-full min-w-0 items-center justify-between gap-1.5 rounded-md border border-input bg-field py-2 pr-2.5 pl-3 text-left text-base text-foreground shadow-ply transition-[border-color,box-shadow] outline-none hover:border-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/15 data-[clearable=true]:pr-16 sm:text-[0.9375rem]"
+            className={cn(
+              fieldSurface,
+              fieldStates,
+              'flex h-10 w-full min-w-0 items-center justify-between gap-1.5 py-2 pr-2.5 pl-3 text-left data-[clearable=true]:pr-16',
+            )}
             data-clearable={props.value !== null}
+            onKeyDown={(event) => {
+              // As on a select: the arrow keys open the list.
+              if (!open && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+                event.preventDefault();
+                openChange(true);
+              }
+            }}
           >
             <span className={props.value ? 'truncate' : 'truncate text-muted-foreground'}>
               {props.value?.label ?? props.placeholder ?? t('none')}
@@ -108,6 +139,7 @@ export const RecordPicker = (props: {
         </PopoverTrigger>
         <PopoverContent
           id={listId}
+          aria-label={t(`search_${props.kind}`)}
           align="start"
           className="w-(--radix-popover-trigger-width) min-w-64 p-0"
         >
@@ -118,17 +150,19 @@ export const RecordPicker = (props: {
               onValueChange={(next) => {
                 setText(next);
                 window.clearTimeout(timer.current);
+                awaitAnswer(next.trim());
                 timer.current = window.setTimeout(() => {
                   void search(next.trim());
                 }, TYPING_PAUSE_MS);
               }}
             />
-            <CommandList>
-              {searching && results.length === 0 ? (
-                <p className="py-6 text-center text-sm text-muted-foreground">{t('searching')}</p>
-              ) : (
-                <CommandEmpty>{t('empty')}</CommandEmpty>
-              )}
+            {/* Outside the listbox, which holds only options; read out as it changes. */}
+            <output
+              className={notice ? 'px-2 py-6 text-center text-sm text-muted-foreground' : 'sr-only'}
+            >
+              {notice}
+            </output>
+            <CommandList label={t('results')}>
               <CommandGroup>
                 {results.map((option) => (
                   <CommandItem
@@ -141,7 +175,12 @@ export const RecordPicker = (props: {
                     }}
                   >
                     <span className="flex min-w-0 flex-col">
-                      <span className="break-words">{option.label}</span>
+                      <span className="break-words">
+                        {option.label}
+                        {option.id === props.value?.id && (
+                          <span className="sr-only"> {t('current')}</span>
+                        )}
+                      </span>
                       {option.detail && (
                         <span className="text-xs break-all text-muted-foreground">
                           {option.detail}

@@ -19,7 +19,7 @@ import {
 } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
-import { listHref, parseListQuery } from '@/libs/crm/ListQuery';
+import { isFiltered, listHref, parseListQuery } from '@/libs/crm/ListQuery';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { Link, redirect } from '@/libs/I18nNavigation';
@@ -44,7 +44,7 @@ export default async function ContactsPage(props: ContactsPageProps) {
   const { companyId } = query.filters;
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
-  const [{ workspace }, { user }, list, members, sources, tags, company] = await Promise.all([
+  const [{ workspace }, { user }, list, members, sources, tags, companyName] = await Promise.all([
     getOpenWorkspace(locale, workspaceId),
     getCurrentUser(),
     getContacts(workspaceId, query),
@@ -52,9 +52,11 @@ export default async function ContactsPage(props: ContactsPageProps) {
     getLeadSources(workspaceId),
     getContactTags(workspaceId),
     // The company filter's name, which the picker shows without a search.
-    companyId === undefined ? undefined : getCompany(workspaceId, String(companyId)),
+    companyId === undefined
+      ? undefined
+      : getCompany(workspaceId, String(companyId)).then((result) => result.company?.name),
   ]);
-  if ([list, members, sources, tags, company].some((result) => result?.unauthorized)) {
+  if ([list, members, sources, tags].some((result) => result.unauthorized)) {
     return endRejectedSession(locale);
   }
   if (list.forbidden) {
@@ -81,9 +83,6 @@ export default async function ContactsPage(props: ContactsPageProps) {
       locale,
     });
   }
-  const filtered = [query.q, query.unassigned, ...Object.values(query.filters)].some(
-    (value) => value !== undefined,
-  );
   const newContact = (
     <Button asChild>
       <Link href={`${path}/new`}>
@@ -96,7 +95,7 @@ export default async function ContactsPage(props: ContactsPageProps) {
   let empty = (
     <ListEmpty variant="none" title={t('empty_title')} text={t('empty_text')} action={newContact} />
   );
-  if (filtered) {
+  if (isFiltered(query)) {
     empty = <ListEmpty variant="filtered" clearHref={path} />;
   } else if (query.archived) {
     empty = (
@@ -120,7 +119,7 @@ export default async function ContactsPage(props: ContactsPageProps) {
         members={members.members}
         sources={sources.sources}
         tags={tags.tags}
-        company={company}
+        companyName={companyName}
       />
 
       {page ? (

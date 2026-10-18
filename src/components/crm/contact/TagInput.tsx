@@ -1,19 +1,30 @@
 'use client';
 
+import { cn } from 'cn';
 import { PlusIcon, XIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
+import { fieldSurface } from '@/components/ui/field-surface';
 
-// As the backend: at most 20 tags a contact.
+// As the backend: at most 20 tags a contact, each at most 40 characters.
 const MAX_TAGS = 20;
+const MAX_TAG_LENGTH = 40;
 const MAX_SUGGESTIONS = 8;
 
+// Keeps the focus in the input when a chip's or a suggestion's button is clicked (Safari doesn't
+// focus a clicked button), so leaving the field, not the click, adds what was typed.
+const keepFocus = (event: React.MouseEvent) => {
+  event.preventDefault();
+};
+
 /**
- * A contact's tags as chips, for a form that controls them (react-hook-form `Controller`). Enter
- * or a comma adds the typed tag, trimmed and in lower case, unless it is already there; Backspace
- * in the empty input removes the last one. While typing, the workspace's tags that hold the text
- * are offered as buttons. At 20 tags the input takes no more and says why (it stays focusable,
- * so Backspace still works). Its label is a `<label htmlFor={id}>` outside it.
+ * A contact's tags as chips, for a form that controls them (react-hook-form `Controller`). Enter,
+ * a comma or leaving the field adds the typed tag, trimmed and in lower case, unless it is
+ * already there; Backspace in the empty input removes the last one. While typing, the
+ * workspace's tags that hold the text are offered as buttons. A tag over 40 characters is
+ * flagged on its chip. At 20 tags the input takes no more and says why (it stays focusable, so
+ * Backspace still works); a pasted list past 20 is cut there. What it adds, removes or drops is
+ * read out. Its label is a `<label htmlFor={id}>` outside it.
  * @param props Component props.
  * @param props.id The input's id.
  * @param props.value The tags.
@@ -33,6 +44,7 @@ export const TagInput = (props: {
 }) => {
   const t = useTranslations('TagInput');
   const [text, setText] = useState('');
+  const [announcement, setAnnouncement] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const full = props.value.length >= MAX_TAGS;
   const hintId = `${props.id}-hint`;
@@ -43,44 +55,101 @@ export const TagInput = (props: {
         .slice(0, MAX_SUGGESTIONS)
     : [];
 
-  const add = (raw: string[]) => {
+  /**
+   * Adds tags, and keeps `rest` (still being typed) in the input while there is room for it.
+   * @param raw The tags, as typed.
+   * @param rest What follows the last comma.
+   */
+  const add = (raw: string[], rest = '') => {
     const next = [...props.value];
-    for (const item of raw) {
-      const tag = item.trim().toLowerCase();
-      if (tag && !next.includes(tag) && next.length < MAX_TAGS) {
+    const added: string[] = [];
+    const dropped: string[] = [];
+    const isNew = (tag: string) => tag !== '' && !next.includes(tag) && !dropped.includes(tag);
+    for (const tag of raw.map((item) => item.trim().toLowerCase())) {
+      if (isNew(tag) && next.length < MAX_TAGS) {
         next.push(tag);
+        added.push(tag);
+      } else if (isNew(tag)) {
+        dropped.push(tag);
       }
     }
-    if (next.length > props.value.length) {
+    // No room left for what is still being typed: dropped too, not stuck in a read-only input.
+    const room = next.length < MAX_TAGS;
+    const last = rest.trim().toLowerCase();
+    if (!room && isNew(last)) {
+      dropped.push(last);
+    }
+    if (added.length > 0) {
       props.onChange(next);
+    }
+    setText(room ? rest : '');
+    const said = [
+      added.length > 0 ? t('added', { tags: added.join(', ') }) : '',
+      dropped.length > 0 ? t('dropped', { tags: dropped.join(', '), max: MAX_TAGS }) : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+    if (said) {
+      setAnnouncement(said);
+    }
+  };
+  const remove = (tags: string[]) => {
+    const [tag] = tags;
+    if (tag !== undefined) {
+      props.onChange(props.value.filter((item) => item !== tag));
+      setAnnouncement(t('removed', { tag }));
     }
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex min-h-10 w-full flex-wrap items-center gap-1.5 rounded-md border border-input bg-field px-2 py-1.5 shadow-ply transition-[border-color,box-shadow] hover:border-muted-foreground has-focus-visible:border-ring has-focus-visible:ring-3 has-focus-visible:ring-ring/20 has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/15">
+    <div
+      className="flex flex-col gap-2"
+      onBlur={(event) => {
+        // Leaving the field, not moving within it (a chip, a suggestion), adds what was typed.
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          add([text]);
+        }
+      }}
+    >
+      <div
+        className={cn(
+          fieldSurface,
+          'flex min-h-10 w-full flex-wrap items-center gap-1.5 px-2 py-1.5 has-focus-visible:border-ring has-focus-visible:ring-3 has-focus-visible:ring-ring/20 has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/15',
+        )}
+      >
         {props.value.length > 0 && (
-          <ul className="flex max-w-full flex-wrap gap-1.5">
-            {props.value.map((tag) => (
-              <li
-                key={tag}
-                className="flex min-h-7 max-w-full items-center gap-0.5 rounded-sm border border-rule bg-muted pr-0.5 pl-2 text-sm"
-              >
-                <span className="min-w-0 break-all">{tag}</span>
-                <button
-                  type="button"
-                  aria-label={t('remove', { tag })}
-                  className="flex size-6 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:bg-field hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                  onClick={() => {
-                    props.onChange(props.value.filter((item) => item !== tag));
-                    // The button goes with its tag: the focus stays in the field.
-                    input.current?.focus();
-                  }}
+          <ul aria-label={t('chosen')} className="flex max-w-full flex-wrap gap-1.5">
+            {props.value.map((tag) => {
+              const tooLong = tag.length > MAX_TAG_LENGTH;
+
+              return (
+                <li
+                  key={tag}
+                  className={cn(
+                    'flex min-h-7 max-w-full items-center gap-0.5 rounded-sm border border-rule bg-muted pr-0.5 pl-2 text-sm',
+                    tooLong && 'border-destructive text-danger',
+                  )}
                 >
-                  <XIcon aria-hidden="true" className="size-3.5" />
-                </button>
-              </li>
-            ))}
+                  <span className="min-w-0 break-all">
+                    {tag}
+                    {tooLong && <span className="sr-only"> {t('too_long')}</span>}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={t('remove', { tag })}
+                    className="flex size-6 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:bg-field hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                    onMouseDown={keepFocus}
+                    onClick={() => {
+                      remove([tag]);
+                      // The button goes with its tag: the focus stays in the field.
+                      input.current?.focus();
+                    }}
+                  >
+                    <XIcon aria-hidden="true" className="size-3.5" />
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
         <input
@@ -94,13 +163,12 @@ export const TagInput = (props: {
           aria-disabled={full ? true : undefined}
           aria-invalid={props.invalid ? true : undefined}
           aria-describedby={props.errorId ? `${hintId} ${props.errorId}` : hintId}
-          className="h-7 min-w-28 flex-1 bg-transparent px-1 text-base text-foreground outline-none placeholder:text-muted-foreground aria-disabled:cursor-not-allowed sm:text-[0.9375rem]"
+          className="h-7 min-w-28 flex-1 bg-transparent px-1 outline-none placeholder:text-muted-foreground aria-disabled:cursor-not-allowed"
           onChange={(event) => {
             // A comma ends a tag, typed or pasted: what follows the last one is still being typed.
             const parts = event.currentTarget.value.split(',');
             const rest = parts.pop() ?? '';
-            add(parts);
-            setText(rest);
+            add(parts, rest);
           }}
           onKeyDown={(event) => {
             // Enter that ends an IME composition (Japanese, Chinese) only confirms the text.
@@ -108,9 +176,8 @@ export const TagInput = (props: {
               // Never submits the form.
               event.preventDefault();
               add([text]);
-              setText('');
-            } else if (event.key === 'Backspace' && text === '' && props.value.length > 0) {
-              props.onChange(props.value.slice(0, -1));
+            } else if (event.key === 'Backspace' && text === '') {
+              remove(props.value.slice(-1));
             }
           }}
         />
@@ -123,9 +190,9 @@ export const TagInput = (props: {
                 type="button"
                 aria-label={t('add', { tag })}
                 className="flex h-7 items-center gap-1 rounded-sm border border-input bg-field px-2 text-sm text-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+                onMouseDown={keepFocus}
                 onClick={() => {
                   add([tag]);
-                  setText('');
                   input.current?.focus();
                 }}
               >
@@ -139,6 +206,7 @@ export const TagInput = (props: {
       <p id={hintId} className="text-[0.8125rem] text-muted-foreground">
         {full ? t('limit', { max: MAX_TAGS }) : t('hint')}
       </p>
+      <output className="sr-only">{announcement}</output>
     </div>
   );
 };

@@ -87,4 +87,32 @@ describe(ContactForm, () => {
     await expect.element(link).toHaveAttribute('href', '/app/1/contacts/7');
     expect(findDuplicates).toHaveBeenCalledWith({ email: 'MIA@acme.test', phone: '' }, 42);
   });
+
+  it('shows what was stored after saving: the email in lower case, the tags sorted', async () => {
+    await renderForm({ action: vi.fn<Action>().mockResolvedValue({ ok: true }) });
+
+    await page.getByLabelText('Email').fill(' MIA@Acme.Test ');
+    await userEvent.type(page.getByLabelText('Tags'), 'alpha{Enter}');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+
+    await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
+    await expect.element(page.getByLabelText('Email')).toHaveValue('mia@acme.test');
+    expect(
+      page
+        .getByRole('list', { name: 'Added' })
+        .getByRole('button')
+        .elements()
+        .map((button) => button.getAttribute('aria-label')),
+    ).toStrictEqual(['Remove alpha', 'Remove b2b']);
+  });
+
+  it('says a tag is too long as soon as it is added', async () => {
+    const action = vi.fn<Action>();
+    await renderForm({ action });
+
+    await userEvent.type(page.getByLabelText('Tags'), `${'x'.repeat(41)}{Enter}`);
+
+    await expect.element(page.getByText('Each tag takes 1 to 40 characters')).toBeVisible();
+    expect(action).not.toHaveBeenCalled();
+  });
 });

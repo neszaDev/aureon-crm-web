@@ -1,7 +1,7 @@
 import { useLocale, useTranslations } from 'next-intl';
+import { TagBadge } from '@/components/crm/contact/TagBadge';
+import { OwnerCell } from '@/components/crm/list/OwnerCell';
 import { SortHeader } from '@/components/crm/list/SortHeader';
-import { Seal } from '@/components/crm/Seal';
-import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -98,31 +98,12 @@ export const ContactTable = (props: {
               {contact.email ? <span className="break-all">{contact.email}</span> : none}
             </TableCell>
             <TableCell className="tabular-nums max-lg:hidden">{contact.phone ?? none}</TableCell>
-            <TableCell className="whitespace-normal">
-              {contact.owner ? (
-                <span className="flex items-center gap-2">
-                  <Seal name={contact.owner.displayName} email={contact.owner.email} size="sm" />
-                  {/* Wraps rather than truncating: touch and keyboard users can't hover a title. */}
-                  <span className="max-w-40 min-w-0 break-words">
-                    {contact.owner.displayName ?? contact.owner.email}
-                  </span>
-                </span>
-              ) : (
-                <span className="text-muted-foreground">{t('unassigned')}</span>
-              )}
-            </TableCell>
+            <OwnerCell owner={contact.owner} />
             <TableCell className="whitespace-normal max-lg:hidden">
               {contact.tags.length > 0 ? (
                 <span className="flex max-w-56 flex-wrap items-center gap-1">
                   {contact.tags.slice(0, SHOWN_TAGS).map((tag) => (
-                    // Sentence case: DESIGN.md's label rule (the primitive's uppercase is the demos').
-                    <Badge
-                      key={tag}
-                      variant="outline"
-                      className="h-auto min-h-6 max-w-full text-xs font-medium tracking-normal break-all whitespace-normal normal-case"
-                    >
-                      {tag}
-                    </Badge>
+                    <TagBadge key={tag} tag={tag} />
                   ))}
                   {contact.tags.length > SHOWN_TAGS && (
                     <span className="text-xs text-muted-foreground tabular-nums">

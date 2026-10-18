@@ -3,6 +3,7 @@ import { ArchivedToggle } from '@/components/crm/list/ArchivedToggle';
 import type { FilterOption } from '@/components/crm/list/FilterSelect';
 import { FilterSelect } from '@/components/crm/list/FilterSelect';
 import { ListToolbar } from '@/components/crm/list/ListToolbar';
+import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
 import { RecordFilter } from '@/components/crm/list/RecordFilter';
 import { SearchBox } from '@/components/crm/list/SearchBox';
 import type { CONTACT_LIST } from '@/libs/api/CrmQueries';
@@ -20,7 +21,7 @@ import type { ListQuery } from '@/libs/crm/ListQuery';
  * @param props.members The workspace's members.
  * @param props.sources Every lead source, archived ones included.
  * @param props.tags The tags of the workspace's active contacts.
- * @param props.company The lookup of the company filtered by, if any: its name when found.
+ * @param props.companyName The name of the company filtered by, when it was found.
  * @returns The toolbar.
  */
 export const ContactFilters = (props: {
@@ -31,22 +32,11 @@ export const ContactFilters = (props: {
   members: components['schemas']['MemberResponse'][];
   sources: components['schemas']['LeadSourceResponse'][];
   tags: string[];
-  company?: { company?: { name: string } };
+  companyName?: string;
 }) => {
   const t = useTranslations('ContactsPage');
   const tSource = useTranslations('SourceField');
   const { companyId, tag } = props.query.filters;
-  const ownerOptions: FilterOption[] = [
-    { value: String(props.me.id), label: t('owner_me'), person: props.me },
-    { value: 'unassigned', label: t('owner_unassigned') },
-    ...props.members
-      .filter((member) => member.userId !== props.me.id)
-      .map((member) => ({
-        value: String(member.userId),
-        label: member.displayName ?? member.email,
-        person: member,
-      })),
-  ];
   const sourceOptions: FilterOption[] = props.sources.map((source) => ({
     value: String(source.id),
     label: source.archived ? tSource('archived', { name: source.name }) : source.name,
@@ -74,18 +64,15 @@ export const ContactFilters = (props: {
         value={
           companyId === undefined
             ? null
-            : { id: companyId, label: props.company?.company?.name ?? t('company_unknown') }
+            : { id: companyId, label: props.companyName ?? t('company_unknown') }
         }
         path={props.path}
         query={props.query}
       />
-      <FilterSelect
+      <OwnerFilter
         id="contacts-owner"
-        label={t('owner_label')}
-        anyLabel={t('owner_any')}
-        missingLabel={t('owner_former')}
-        param="ownerId"
-        options={ownerOptions}
+        me={props.me}
+        members={props.members}
         path={props.path}
         query={props.query}
       />

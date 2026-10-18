@@ -2,12 +2,12 @@ import { PencilIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { archiveContact, restoreContact } from '@/actions/crm/ContactActions';
+import { TagBadge } from '@/components/crm/contact/TagBadge';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { ArchiveButton } from '@/components/crm/record/ArchiveButton';
 import { RecordFacts } from '@/components/crm/record/RecordFacts';
 import { RecordHeader } from '@/components/crm/record/RecordHeader';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getContact } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
@@ -97,8 +97,12 @@ export default async function ContactPage(props: ContactPageProps) {
         facts={[
           {
             label: t('email'),
+            // Encoded: a stored address can hold `?subject=…`, which must not fill in a message.
             value: contact.email && (
-              <a href={`mailto:${contact.email}`} className="break-all text-seal-ink">
+              <a
+                href={`mailto:${encodeURIComponent(contact.email)}`}
+                className="break-all text-seal-ink"
+              >
                 {contact.email}
               </a>
             ),
@@ -135,13 +139,7 @@ export default async function ContactPage(props: ContactPageProps) {
                 <ul className="flex flex-wrap gap-1.5">
                   {contact.tags.map((tag) => (
                     <li key={tag} className="max-w-full">
-                      {/* Sentence case: DESIGN.md's label rule (the primitive's uppercase is the demos'). */}
-                      <Badge
-                        variant="outline"
-                        className="h-auto min-h-6 max-w-full text-xs font-medium tracking-normal break-all whitespace-normal normal-case"
-                      >
-                        {tag}
-                      </Badge>
+                      <TagBadge tag={tag} />
                     </li>
                   ))}
                 </ul>

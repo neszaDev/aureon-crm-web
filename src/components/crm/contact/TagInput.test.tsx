@@ -13,13 +13,16 @@ const TagsField = (props: { initial?: string[] }) => {
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
       <label htmlFor="tags">Tags</label>
       <TagInput id="tags" value={tags} onChange={setTags} suggestions={['b2b', 'partner', 'vip']} />
-      <output data-testid="tags">{tags.join(',')}</output>
+      {/* Not an <output>: that is a status, as the field's announcements are. */}
+      <span data-testid="tags">{tags.join(',')}</span>
     </NextIntlClientProvider>
   );
 };
 
 const input = () => page.getByLabelText('Tags');
 const value = () => page.getByTestId('tags');
+const status = () => page.getByRole('status');
+const nineteen = Array.from({ length: 19 }, (_, index) => `tag-${index}`);
 
 describe(TagInput, () => {
   it('adds the typed tag on a comma, and on Enter, trimmed and in lower case', async () => {
@@ -81,5 +84,50 @@ describe(TagInput, () => {
 
     await expect.element(input()).toHaveValue('');
     await expect.element(value()).toHaveTextContent(twenty.join(','));
+  });
+
+  it('says what it added and removed, and names its chips', async () => {
+    await render(<TagsField />);
+
+    await userEvent.type(input(), 'vip,b2b,');
+    await expect.element(status()).toHaveTextContent('b2b added');
+    await expect.element(page.getByRole('list', { name: 'Added' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Remove vip' }).click();
+    await expect.element(status()).toHaveTextContent('vip removed');
+
+    await userEvent.click(input());
+    await userEvent.keyboard('{Backspace}');
+    await expect.element(status()).toHaveTextContent('b2b removed');
+  });
+
+  it('adds what was typed when the field loses the focus', async () => {
+    await render(<TagsField />);
+
+    await userEvent.type(input(), 'Urgent');
+    await userEvent.tab();
+
+    await expect.element(value()).toHaveTextContent(/^urgent$/u);
+    await expect.element(input()).toHaveValue('');
+  });
+
+  it('drops a pasted overflow past 20 tags and says so, leaving nothing stuck', async () => {
+    await render(<TagsField initial={nineteen} />);
+
+    await input().fill('a,b,c');
+
+    await expect.element(value()).toHaveTextContent([...nineteen, 'a'].join(','));
+    await expect.element(input()).toHaveValue('');
+    await expect
+      .element(status())
+      .toHaveTextContent('a added. b, c not added: a contact takes at most 20 tags.');
+  });
+
+  it('flags a tag longer than 40 characters at once', async () => {
+    await render(<TagsField />);
+
+    await userEvent.type(input(), `${'x'.repeat(41)}{Enter}`);
+
+    await expect.element(page.getByText('(too long)')).toBeInTheDocument();
   });
 });

@@ -525,7 +525,15 @@
     "invalid_title": "Ces filtres ne peuvent pas aller ensemble",
     "invalid_text": "Le lien contient une recherche ou des filtres que la liste ne peut pas appliquer. Réinitialisez la liste pour recommencer.",
     "invalid_reset": "Réinitialiser la liste",
-    "view_active_link": "Revenir aux fiches actives"
+    "view_active_link": "Revenir aux fiches actives",
+    "unassigned": "Sans propriétaire"
+  },
+  "OwnerFilter": {
+    "label": "Propriétaire",
+    "any": "Tout le monde",
+    "me": "Moi",
+    "unassigned": "Sans propriétaire",
+    "former": "Ancien membre"
   },
   "OwnerField": {
     "you": "{name} (vous)",
@@ -569,11 +577,6 @@
     "search_placeholder": "Nom, site web ou téléphone",
     "industry_label": "Secteur",
     "industry_placeholder": "Nom exact, par exemple Commerce",
-    "owner_label": "Propriétaire",
-    "owner_any": "Tout le monde",
-    "owner_me": "Moi",
-    "owner_unassigned": "Sans propriétaire",
-    "owner_former": "Ancien membre",
     "list_heading": "{count, plural, =0 {Aucune entreprise} one {# entreprise} other {# entreprises}}",
     "archived_heading": "{count, plural, =0 {Aucune entreprise archivée} one {# entreprise archivée} other {# entreprises archivées}}",
     "empty_title": "Aucune entreprise pour l'instant",
@@ -586,8 +589,7 @@
     "owner": "Propriétaire",
     "contacts": "Contacts",
     "open_deals": "Affaires en cours",
-    "updated": "Modifiée",
-    "unassigned": "Sans propriétaire"
+    "updated": "Modifiée"
   },
   "CompanyForm": {
     "name_label": "Nom de l'entreprise",
@@ -644,11 +646,6 @@
     "company_label": "Entreprise",
     "company_any": "Toutes les entreprises",
     "company_unknown": "Entreprise inconnue",
-    "owner_label": "Propriétaire",
-    "owner_any": "Tout le monde",
-    "owner_me": "Moi",
-    "owner_unassigned": "Sans propriétaire",
-    "owner_former": "Ancien membre",
     "source_label": "Source",
     "source_any": "Toutes les sources",
     "source_unknown": "Source inconnue",
@@ -668,7 +665,6 @@
     "owner": "Propriétaire",
     "tags": "Étiquettes",
     "updated": "Modifié",
-    "unassigned": "Sans propriétaire",
     "tags_more": "+{count}",
     "tags_more_label": "{count, plural, one {et # autre étiquette} other {et # autres étiquettes}}"
   },
@@ -715,14 +711,22 @@
     "searching": "Recherche…",
     "empty": "Aucun résultat",
     "search_company": "Rechercher une entreprise",
-    "clear_company": "Effacer l'entreprise"
+    "clear_company": "Effacer l'entreprise",
+    "results": "Résultats",
+    "current": "(choix actuel)",
+    "error": "La recherche a échoué. Réessayez."
   },
   "TagInput": {
     "remove": "Retirer {tag}",
     "add": "Ajouter {tag}",
     "suggestions": "Étiquettes déjà utilisées",
     "hint": "Appuyez sur Entrée ou tapez une virgule après chaque étiquette.",
-    "limit": "Un contact a au plus {max} étiquettes. Retirez-en une pour en ajouter une autre."
+    "limit": "Un contact a au plus {max} étiquettes. Retirez-en une pour en ajouter une autre.",
+    "chosen": "Ajoutées",
+    "added": "Ajouté : {tags}.",
+    "removed": "Retiré : {tag}.",
+    "dropped": "Non ajouté : {tags}. Un contact a au plus {max} étiquettes.",
+    "too_long": "(trop longue)"
   },
   "SourceField": {
     "none": "Aucune",

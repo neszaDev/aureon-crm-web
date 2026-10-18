@@ -4,19 +4,18 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CompanyTable } from '@/components/crm/company/CompanyTable';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { ArchivedToggle } from '@/components/crm/list/ArchivedToggle';
-import type { FilterOption } from '@/components/crm/list/FilterSelect';
-import { FilterSelect } from '@/components/crm/list/FilterSelect';
 import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
 import { ListEmpty } from '@/components/crm/list/ListEmpty';
 import { ListPager } from '@/components/crm/list/ListPager';
 import { ListToolbar } from '@/components/crm/list/ListToolbar';
+import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
 import { SearchBox } from '@/components/crm/list/SearchBox';
 import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { Button } from '@/components/ui/button';
 import { COMPANY_LIST, getCompanies, getMembers } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
-import { listHref, parseListQuery } from '@/libs/crm/ListQuery';
+import { isFiltered, listHref, parseListQuery } from '@/libs/crm/ListQuery';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { Link, redirect } from '@/libs/I18nNavigation';
@@ -66,20 +65,6 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
       locale,
     });
   }
-  const filtered =
-    [query.q, query.unassigned].some((value) => value !== undefined) ||
-    Object.keys(query.filters).length > 0;
-  const ownerOptions: FilterOption[] = [
-    { value: String(user.id), label: t('owner_me'), person: user },
-    { value: 'unassigned', label: t('owner_unassigned') },
-    ...members.members
-      .filter((member) => member.userId !== user.id)
-      .map((member) => ({
-        value: String(member.userId),
-        label: member.displayName ?? member.email,
-        person: member,
-      })),
-  ];
   const newCompany = (
     <Button asChild>
       <Link href={`${path}/new`}>
@@ -92,7 +77,7 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
   let empty = (
     <ListEmpty variant="none" title={t('empty_title')} text={t('empty_text')} action={newCompany} />
   );
-  if (filtered) {
+  if (isFiltered(query)) {
     empty = <ListEmpty variant="filtered" clearHref={path} />;
   } else if (query.archived) {
     empty = (
@@ -125,13 +110,10 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
           path={path}
           query={query}
         />
-        <FilterSelect
+        <OwnerFilter
           id="companies-owner"
-          label={t('owner_label')}
-          anyLabel={t('owner_any')}
-          missingLabel={t('owner_former')}
-          param="ownerId"
-          options={ownerOptions}
+          me={user}
+          members={members.members}
           path={path}
           query={query}
         />

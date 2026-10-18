@@ -1,6 +1,6 @@
 import { useLocale, useTranslations } from 'next-intl';
+import { OwnerCell } from '@/components/crm/list/OwnerCell';
 import { SortHeader } from '@/components/crm/list/SortHeader';
-import { Seal } from '@/components/crm/Seal';
 import {
   Table,
   TableBody,
@@ -70,19 +70,7 @@ export const CompanyTable = (props: {
             <TableCell className="whitespace-normal max-md:hidden">
               {company.industry ?? <span className="text-muted-foreground">—</span>}
             </TableCell>
-            <TableCell className="whitespace-normal">
-              {company.owner ? (
-                <span className="flex items-center gap-2">
-                  <Seal name={company.owner.displayName} email={company.owner.email} size="sm" />
-                  {/* Wraps rather than truncating: touch and keyboard users can't hover a title. */}
-                  <span className="max-w-40 min-w-0 break-words">
-                    {company.owner.displayName ?? company.owner.email}
-                  </span>
-                </span>
-              ) : (
-                <span className="text-muted-foreground">{t('unassigned')}</span>
-              )}
-            </TableCell>
+            <OwnerCell owner={company.owner} />
             <TableCell className="text-right tabular-nums max-lg:hidden">
               {company.contactCount}
             </TableCell>

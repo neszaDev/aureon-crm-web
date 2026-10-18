@@ -4,6 +4,7 @@ import { cn } from 'cn';
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from 'lucide-react';
 import { Select as SelectPrimitive } from 'radix-ui';
 import * as React from 'react';
+import { fieldStates, fieldSurface } from '@/components/ui/field-surface';
 
 // Themed for Aureon: the trigger is a control on the white field, sized and focused like Input.
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
@@ -27,7 +28,9 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex w-fit items-center justify-between gap-1.5 rounded-md border border-input bg-field py-2 pr-2.5 pl-3 text-base whitespace-nowrap text-foreground shadow-ply transition-[border-color,box-shadow] outline-none select-none hover:border-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-60 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/15 data-placeholder:text-muted-foreground data-[size=default]:h-10 data-[size=sm]:h-8 data-[size=sm]:py-1 data-[size=sm]:pl-2.5 data-[size=sm]:text-sm sm:text-[0.9375rem] *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        fieldSurface,
+        fieldStates,
+        "flex w-fit items-center justify-between gap-1.5 py-2 pr-2.5 pl-3 whitespace-nowrap select-none data-placeholder:text-muted-foreground data-[size=default]:h-10 data-[size=sm]:h-8 data-[size=sm]:py-1 data-[size=sm]:pl-2.5 data-[size=sm]:text-sm *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
