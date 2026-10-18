@@ -30,7 +30,8 @@ src/actions/crm/*               CRM writes: workspaces, members, invitations (cr
 src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for pages), ApiError.ts,
                                 ActionFailure.ts, Session.ts, schema.d.ts (GENERATED, see below)
 src/libs/api/CrmQueries.ts      CRM reads for pages (workspaces, members, invitations, stages, sources)
-src/libs/crm/*                  CRM logic: Permissions (`can`), WorkspaceId, Stages, PageMetadata
+src/libs/crm/*                  CRM logic: Permissions (`can`), WorkspaceId, Stages, PageMetadata,
+                                OpenWorkspace (`getOpenWorkspace`: a page's workspace, 401 and 404 handled)
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
 src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens
 src/validations/                zod schemas mirroring the backend's request rules (CRM: crm/*)
@@ -77,7 +78,8 @@ Use `pnpm` (version pinned in `package.json` → `packageManager`), never npm or
 - `schema.d.ts` is **generated**: after a backend API change run `make api-types` and commit it.
   Type errors that follow are the point: fix the callers.
 - The backend's error body is `ApiError` (hand-written in `ApiError.ts`; not in its spec). Map
-  failures with `toActionError`; handle 401 by redirecting to sign-in.
+  failures with `toActionError` (CRM actions: `actionFailure`); a 401 ends the session through
+  `/api/session/expired`, as the CRM rules below say.
 - Keep zod rules in `src/validations/` in sync with the backend's request constraints.
 
 ## CRM rules

@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { Link } from '@/libs/I18nNavigation';
 
-// Catches `notFound()` from the workspace layout: an unknown workspace, or one the user isn't a
-// member of (the backend answers 404 for both, so ids can't be probed).
+// Catches `notFound()` from the workspace layout, and from a page's `getOpenWorkspace` on a
+// client navigation: an unknown workspace, or one the user isn't (or is no longer) a member of
+// (the backend answers 404 for both, so ids can't be probed). It means "workspace gone" only.
 export default async function WorkspaceNotFoundPage() {
   const t = await getTranslations('CrmNotFound');
   const { user } = await getCurrentUser();
