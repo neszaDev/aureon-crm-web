@@ -1,6 +1,6 @@
 'use server';
 
-import { getLocale } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { refresh } from 'next/cache';
 import { actionFailure } from '@/libs/api/ActionFailure';
 import type { ActionResult } from '@/libs/api/ApiError';
@@ -25,7 +25,8 @@ export async function changeMemberRole(
 ): Promise<ActionResult> {
   const parsed = MemberRoleValidation.safeParse({ role });
   if (!parsed.success) {
-    return { ok: false };
+    const t = await getTranslations('MembersTable');
+    return { ok: false, message: t('error_generic') };
   }
 
   const api = await authedBackend();

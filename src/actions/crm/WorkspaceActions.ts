@@ -4,9 +4,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { refresh } from 'next/cache';
 import { actionFailure } from '@/libs/api/ActionFailure';
 import type { ActionResult } from '@/libs/api/ApiError';
-import { toActionError } from '@/libs/api/ApiError';
 import { authedBackend } from '@/libs/api/Backend';
-import { redirectIfUnauthorized } from '@/libs/api/Session';
 import { redirect } from '@/libs/I18nNavigation';
 import type { WorkspaceValues } from '@/validations/crm/WorkspaceValidation';
 import { WorkspaceValidation } from '@/validations/crm/WorkspaceValidation';
@@ -25,9 +23,11 @@ export async function createWorkspace(values: WorkspaceValues): Promise<ActionRe
 
   const api = await authedBackend();
   const { data, error, response } = await api.POST('/api/v1/workspaces', { body: parsed.data });
-  await redirectIfUnauthorized(response.status);
-  if (!response.ok || data?.id === undefined) {
-    return toActionError(error, t('error_generic'));
+  if (!response.ok) {
+    return await actionFailure(response, error);
+  }
+  if (data?.id === undefined) {
+    return { ok: false, message: t('error_generic') };
   }
 
   return redirect({ href: `/app/${data.id}`, locale: await getLocale() });
