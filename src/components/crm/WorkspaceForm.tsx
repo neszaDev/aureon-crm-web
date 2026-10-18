@@ -92,7 +92,16 @@ export const WorkspaceForm = (props: {
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+    <form
+      method="post"
+      onSubmit={onSubmit}
+      // "Saved" is about the values sent: an edit takes it away.
+      onChange={() => {
+        setSaved(false);
+      }}
+      className="flex flex-col gap-5"
+      noValidate
+    >
       <ActionAlert result={failure} />
 
       <FormField

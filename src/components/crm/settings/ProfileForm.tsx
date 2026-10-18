@@ -54,7 +54,16 @@ export const ProfileForm = (props: {
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+    <form
+      method="post"
+      onSubmit={onSubmit}
+      // "Saved" is about the values sent: an edit takes it away.
+      onChange={() => {
+        setSaved(false);
+      }}
+      className="flex flex-col gap-5"
+      noValidate
+    >
       <ActionAlert result={failure} />
       <div className="flex items-center gap-3.5">
         <Seal name={name.trim() || undefined} email={props.email} size="lg" />

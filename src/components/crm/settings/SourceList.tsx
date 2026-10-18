@@ -85,7 +85,12 @@ const SourceForm = (props: {
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex min-w-0 flex-1 flex-col gap-3" noValidate>
+    <form
+      method="post"
+      onSubmit={onSubmit}
+      className="flex min-w-0 flex-1 flex-col gap-3"
+      noValidate
+    >
       <ActionAlert result={failure} />
       <FormField htmlFor={props.id} label={t('name_label')} error={errors.name}>
         <Input
@@ -120,10 +125,16 @@ const SourceForm = (props: {
  * @param props Component props.
  * @param props.source The source.
  * @param props.canManage Whether the caller may change the sources.
+ * @param props.headingId The list's heading, which takes the focus after a delete.
  * @param props.actions The source actions.
  * @returns The list item.
  */
-const SourceItem = (props: { source: Source; canManage: boolean; actions: SourceActions }) => {
+const SourceItem = (props: {
+  source: Source;
+  canManage: boolean;
+  headingId: string;
+  actions: SourceActions;
+}) => {
   const t = useTranslations('SourceList');
   const tError = useTranslations('ActionError');
   const [editing, setEditing] = useState(false);
@@ -244,6 +255,7 @@ const SourceItem = (props: { source: Source; canManage: boolean; actions: Source
                 description={t('delete_text')}
                 confirmLabel={t('delete_confirm')}
                 cancelLabel={t('cancel')}
+                fallbackFocus={() => document.querySelector<HTMLElement>(`#${props.headingId}`)}
                 action={async () => await props.actions.remove(props.source.id)}
               />
             </span>
@@ -260,12 +272,14 @@ const SourceItem = (props: { source: Source; canManage: boolean; actions: Source
  * @param props Component props.
  * @param props.sources Every source, archived ones included, by name.
  * @param props.canManage Whether the caller may change them.
+ * @param props.headingId The id of the heading above the list (focusable), for after a delete.
  * @param props.actions The source actions, bound to the workspace.
  * @returns The list and the form to add a source.
  */
 export const SourceList = (props: {
   sources: Source[];
   canManage: boolean;
+  headingId: string;
   actions: SourceActions;
 }) => {
   const t = useTranslations('SourceList');
@@ -279,6 +293,7 @@ export const SourceList = (props: {
               key={source.id}
               source={source}
               canManage={props.canManage}
+              headingId={props.headingId}
               actions={props.actions}
             />
           ))}

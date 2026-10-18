@@ -101,7 +101,12 @@ const StageForm = (props: {
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex min-w-0 flex-1 flex-col gap-3" noValidate>
+    <form
+      method="post"
+      onSubmit={onSubmit}
+      className="flex min-w-0 flex-1 flex-col gap-3"
+      noValidate
+    >
       <ActionAlert result={failure} />
       <div className="flex flex-wrap items-start gap-3">
         <FormField
@@ -168,6 +173,7 @@ const StageForm = (props: {
  * @param props.canManage Whether the caller may change the pipeline.
  * @param props.saving Whether an order is being saved (moves wait for it).
  * @param props.focusKey The move button to focus after the list changed (`<id>:<offset>`).
+ * @param props.headingId The list's heading, which takes the focus after a delete.
  * @param props.actions The stage actions.
  * @param props.onMove Saves the order with this open stage moved by one place.
  * @returns The list item.
@@ -179,6 +185,7 @@ const StageItem = (props: {
   canManage: boolean;
   saving: boolean;
   focusKey?: string;
+  headingId: string;
   actions: StageActions;
   onMove: (offset: -1 | 1, focusKey: string) => Promise<void>;
 }) => {
@@ -334,6 +341,7 @@ const StageItem = (props: {
                   description={t('delete_text')}
                   confirmLabel={t('delete_confirm')}
                   cancelLabel={t('cancel')}
+                  fallbackFocus={() => document.querySelector<HTMLElement>(`#${props.headingId}`)}
                   action={async () => await props.actions.remove(props.stage.id)}
                 />
               )}
@@ -353,12 +361,14 @@ const StageItem = (props: {
  * @param props Component props.
  * @param props.stages The stages, by position.
  * @param props.canManage Whether the caller may change the pipeline.
+ * @param props.headingId The id of the heading above the list (focusable), for after a delete.
  * @param props.actions The stage actions, bound to the workspace.
  * @returns The list, its status line and the form to add a stage.
  */
 export const StageList = (props: {
   stages: Stage[];
   canManage: boolean;
+  headingId: string;
   actions: StageActions;
 }) => {
   const t = useTranslations('StageList');
@@ -488,6 +498,7 @@ export const StageList = (props: {
                 canManage={props.canManage}
                 saving={saving}
                 focusKey={focusKey}
+                headingId={props.headingId}
                 actions={props.actions}
                 onMove={async (offset, nextFocus) => {
                   await saveOrder(

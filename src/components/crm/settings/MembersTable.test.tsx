@@ -48,6 +48,7 @@ const renderTable = async (options: {
         callerRole={options.callerRole}
         canManage
         workspaceName="Acme"
+        headingId="members-heading"
         actions={{
           changeRole: options.changeRole ?? vi.fn<ChangeRole>().mockResolvedValue({ ok: true }),
           remove: vi.fn<Remove>().mockResolvedValue({ ok: true }),
@@ -97,6 +98,36 @@ describe(MembersTable, () => {
       expect(page.getByRole('alertdialog').elements()).toHaveLength(0);
     });
 
+    it("locks a member's role while its change saves", async () => {
+      const { promise, resolve } = Promise.withResolvers<ActionResult>();
+      const changeRole = vi.fn<ChangeRole>().mockReturnValue(promise);
+      await renderTable({
+        members: [OWNER, ADMIN, MANAGER],
+        me: ADMIN.userId,
+        callerRole: 'ADMIN',
+        changeRole,
+      });
+      const select = page.getByLabelText('Role of Mia Manager');
+      const element = select.element();
+      if (!(element instanceof HTMLSelectElement)) {
+        throw new TypeError('Expected a select');
+      }
+      element.focus();
+
+      await select.selectOptions('SALES_REP');
+      await expect.element(select).toHaveAttribute('aria-disabled', 'true');
+      // A browser still lets you pick from it; Playwright refuses to, so pick as the DOM does.
+      element.value = 'ADMIN';
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+
+      // The second change is ignored, and the select keeps the focus.
+      await expect.element(select).toHaveValue('SALES_REP');
+      await expect.element(select).toHaveFocus();
+      resolve({ ok: true });
+      await expect.element(select).not.toHaveAttribute('aria-disabled');
+      expect(changeRole).toHaveBeenCalledOnce();
+    });
+
     it('asks before changing your own role', async () => {
       const changeRole = vi.fn<ChangeRole>().mockResolvedValue({ ok: true });
       await renderTable({
@@ -137,6 +168,7 @@ describe(MembersTable, () => {
             callerRole={role}
             canManage={role === 'ADMIN'}
             workspaceName="Acme"
+            headingId="members-heading"
             actions={{
               changeRole: async (_userId, next) => {
                 setRole(next);

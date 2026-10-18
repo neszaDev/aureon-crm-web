@@ -60,7 +60,15 @@ export const PasswordForm = (props: {
 
   return (
     // POST: a submit before hydration must not put the passwords in the URL.
-    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+    <form
+      method="post"
+      onSubmit={onSubmit}
+      onChange={() => {
+        setChanged(false);
+      }}
+      className="flex flex-col gap-5"
+      noValidate
+    >
       <ActionAlert result={failure} />
       {FIELDS.map((field) => (
         <FormField

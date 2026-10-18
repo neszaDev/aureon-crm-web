@@ -45,6 +45,7 @@ type MemberActions = {
  * @param props.manageable Whether the caller may change this member's role or remove them.
  * @param props.roles The roles the caller may give.
  * @param props.workspaceName The workspace, named in the confirmations.
+ * @param props.headingId The table's heading, which takes the focus after a removal.
  * @param props.actions The member actions.
  * @returns The table row.
  */
@@ -55,6 +56,7 @@ const MemberTableRow = (props: {
   manageable: boolean;
   roles: readonly WorkspaceRole[];
   workspaceName: string;
+  headingId: string;
   actions: MemberActions;
 }) => {
   const t = useTranslations('MembersTable');
@@ -103,10 +105,13 @@ const MemberTableRow = (props: {
               size="sm"
               aria-label={t('role_of', { name })}
               value={role}
-              className="min-w-32"
+              // One change at a time, so no second PUT while this one saves. aria-disabled, not
+              // disabled: a disabled select drops the focus to the page.
+              aria-disabled={isPending || undefined}
+              className="min-w-32 has-[select[aria-disabled=true]]:opacity-50"
               onChange={(event) => {
                 const next = props.roles.find((item) => item === event.target.value);
-                if (!next) {
+                if (!next || isPending) {
                   return;
                 }
                 if (props.isMe) {
@@ -201,6 +206,7 @@ const MemberTableRow = (props: {
               description={t('remove_text')}
               confirmLabel={t('remove')}
               cancelLabel={t('cancel')}
+              fallbackFocus={() => document.querySelector<HTMLElement>(`#${props.headingId}`)}
               action={async () => await props.actions.remove(props.member.userId)}
             />
           )
@@ -221,6 +227,7 @@ const MemberTableRow = (props: {
  * @param props.callerRole The signed-in user's role here.
  * @param props.canManage Whether they have `MEMBERS_MANAGE`.
  * @param props.workspaceName The workspace's name.
+ * @param props.headingId The id of the heading above the table (focusable), for after a removal.
  * @param props.actions Changes a role; removes a member.
  * @returns The table.
  */
@@ -230,6 +237,7 @@ export const MembersTable = (props: {
   callerRole: WorkspaceRole;
   canManage: boolean;
   workspaceName: string;
+  headingId: string;
   actions: MemberActions;
 }) => {
   const t = useTranslations('MembersTable');
@@ -260,6 +268,7 @@ export const MembersTable = (props: {
             manageable={props.canManage && (ownerRules || member.role !== 'OWNER')}
             roles={roles}
             workspaceName={props.workspaceName}
+            headingId={props.headingId}
             actions={props.actions}
           />
         ))}

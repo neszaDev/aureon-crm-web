@@ -25,6 +25,7 @@ const renderList = async (reorder: Reorder, canManage = true) => {
       <StageList
         stages={STAGES}
         canManage={canManage}
+        headingId="stages-heading"
         actions={{ create: done, update: done, remove: done, reorder }}
       />
     </NextIntlClientProvider>,

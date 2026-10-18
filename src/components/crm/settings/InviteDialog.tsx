@@ -75,7 +75,7 @@ const InviteForm = (props: {
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <DialogHeader>
         <DialogTitle>{t('title')}</DialogTitle>
         <DialogDescription>{t('description')}</DialogDescription>

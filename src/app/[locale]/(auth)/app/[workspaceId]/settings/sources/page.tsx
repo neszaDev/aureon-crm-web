@@ -66,7 +66,7 @@ export default async function SourcesPage(props: SourcesPageProps) {
         aria-labelledby="sources-heading"
         className="overflow-hidden rounded-lg border border-rule bg-card"
       >
-        <h2 id="sources-heading" className="px-4 pt-4 pb-3 font-semibold sm:px-5">
+        <h2 id="sources-heading" tabIndex={-1} className="px-4 pt-4 pb-3 font-semibold sm:px-5">
           {t('sources_heading', { count: rows.length })}
         </h2>
         {!canManage && (
@@ -75,6 +75,7 @@ export default async function SourcesPage(props: SourcesPageProps) {
         <SourceList
           sources={rows}
           canManage={canManage}
+          headingId="sources-heading"
           actions={{
             create: createLeadSource.bind(null, workspace.id),
             update: updateLeadSource.bind(null, workspace.id),

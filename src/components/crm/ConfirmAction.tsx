@@ -1,7 +1,7 @@
 'use client';
 
 import { LoaderCircleIcon } from 'lucide-react';
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { ActionAlert } from '@/components/crm/ActionAlert';
 import {
   AlertDialog,
@@ -25,6 +25,8 @@ import type { ActionResult } from '@/libs/api/ApiError';
  * @param props.open Whether it is open, when the caller controls it.
  * @param props.onOpenChange Called when it opens or closes.
  * @param props.returnFocus Without a trigger: the element that takes the focus back on close.
+ * @param props.fallbackFocus Takes the focus when the trigger is gone on close, e.g. the list's
+ *   heading after its row was deleted (instead of the page's start).
  * @param props.title The question.
  * @param props.description What happens.
  * @param props.children A note under the description.
@@ -38,6 +40,7 @@ export const ConfirmAction = (props: {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   returnFocus?: () => HTMLElement | null | undefined;
+  fallbackFocus?: () => HTMLElement | null | undefined;
   title: string;
   description: string;
   children?: React.ReactNode;
@@ -48,6 +51,7 @@ export const ConfirmAction = (props: {
   const [ownOpen, setOwnOpen] = useState(false);
   const [failure, setFailure] = useState<ActionResult>();
   const [isPending, startTransition] = useTransition();
+  const trigger = useRef<HTMLButtonElement>(null);
   const open = props.open ?? ownOpen;
   const setOpen = (next: boolean) => {
     setOwnOpen(next);
@@ -57,15 +61,22 @@ export const ConfirmAction = (props: {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      {props.trigger && <AlertDialogTrigger asChild>{props.trigger}</AlertDialogTrigger>}
+      {props.trigger && (
+        <AlertDialogTrigger asChild ref={trigger}>
+          {props.trigger}
+        </AlertDialogTrigger>
+      )}
       <AlertDialogContent
-        onCloseAutoFocus={
-          props.returnFocus &&
-          ((event) => {
+        onCloseAutoFocus={(event) => {
+          // A trigger still there takes the focus back by default; once its row is gone (a
+          // confirmed delete), the ref is empty and the fallback takes it.
+          const target =
+            props.returnFocus?.() ?? (trigger.current ? null : props.fallbackFocus?.());
+          if (target) {
             event.preventDefault();
-            props.returnFocus?.()?.focus();
-          })
-        }
+            target.focus();
+          }
+        }}
       >
         <AlertDialogHeader>
           <AlertDialogTitle>{props.title}</AlertDialogTitle>

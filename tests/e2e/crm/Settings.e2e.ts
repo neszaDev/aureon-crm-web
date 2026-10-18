@@ -146,6 +146,8 @@ test.describe('Settings', () => {
       .click();
     await page.getByRole('alertdialog').getByRole('button', { name: 'Revoke' }).click();
     await expect(page.getByText('No pending invitations.')).toBeVisible();
+    // The row and its button are gone: the list's heading takes the focus.
+    await expect(page.getByRole('heading', { name: 'Pending invitations' })).toBeFocused();
 
     // In French, the link opens the French page.
     await page.goto(`${workspace.replace('/app/', '/fr/app/')}/settings/members`);
@@ -233,6 +235,7 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'Delete Demo booked' }).click();
     await page.getByRole('alertdialog').getByRole('button', { name: 'Delete stage' }).click();
     await expect.poll(async () => await stageOrder(page)).toEqual([...defaults, 'Won', 'Lost']);
+    await expect(page.getByRole('heading', { name: 'Stages' })).toBeFocused();
   });
 
   test('asks to reload a pipeline that changed in another tab', async ({ page }) => {
@@ -300,6 +303,7 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'Delete Trade show' }).click();
     await page.getByRole('alertdialog').getByRole('button', { name: 'Delete source' }).click();
     await expect(list.getByText('Trade show')).toHaveCount(0);
+    await expect(page.getByRole('heading', { level: 2, name: /sources$/u })).toBeFocused();
   });
 
   test('changes your display name and password', async ({ page }) => {
@@ -315,6 +319,11 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'Save profile' }).click();
     await expect(page.getByText('Saved', { exact: true })).toBeVisible();
     await expect(account).toHaveText('AL');
+    // An edit after saving takes the confirmation away.
+    await page.getByLabel('Display name').press('End');
+    await page.getByLabel('Display name').press('Backspace');
+    await expect(page.getByText('Saved', { exact: true })).toHaveCount(0);
+    await page.getByLabel('Display name').fill('Ana Lima');
 
     const current = page.getByLabel('Current password');
     await current.fill('not-my-password');
@@ -327,7 +336,10 @@ test.describe('Settings', () => {
     await page.getByLabel('New password', { exact: true }).fill(NEW_PASSWORD);
     await page.getByLabel('Confirm the new password').fill(NEW_PASSWORD);
     await page.getByRole('button', { name: 'Change password' }).click();
-    await expect(page.getByText('Password changed. Other devices are signed out.')).toBeVisible();
+    const changed = page.getByText('Password changed. Other devices are signed out.');
+    await expect(changed).toBeVisible();
+    await current.fill('x');
+    await expect(changed).toHaveCount(0);
 
     // This browser stays signed in with the new session.
     await page.reload();

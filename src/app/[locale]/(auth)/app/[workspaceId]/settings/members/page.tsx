@@ -156,7 +156,7 @@ export default async function MembersPage(props: MembersPageProps) {
         aria-labelledby="members-heading"
         className="overflow-hidden rounded-lg border border-rule bg-card"
       >
-        <h2 id="members-heading" className="px-5 pt-4 pb-2 font-semibold">
+        <h2 id="members-heading" tabIndex={-1} className="px-5 pt-4 pb-2 font-semibold">
           {t('members_heading', { count: rows.length })}
         </h2>
         <MembersTable
@@ -165,6 +165,7 @@ export default async function MembersPage(props: MembersPageProps) {
           callerRole={workspace.role}
           canManage={canManage}
           workspaceName={workspace.name ?? ''}
+          headingId="members-heading"
           actions={{
             changeRole: changeMemberRole.bind(null, workspace.id),
             remove: removeMember.bind(null, workspace.id),
@@ -177,13 +178,14 @@ export default async function MembersPage(props: MembersPageProps) {
           aria-labelledby="invitations-heading"
           className="overflow-hidden rounded-lg border border-rule bg-card"
         >
-          <h2 id="invitations-heading" className="px-5 pt-4 pb-3 font-semibold">
+          <h2 id="invitations-heading" tabIndex={-1} className="px-5 pt-4 pb-3 font-semibold">
             {t('invitations_heading')}
           </h2>
           {pending ? (
             <PendingInvitations
               invitations={pending}
               revoke={revokeInvitation.bind(null, workspace.id)}
+              headingId="invitations-heading"
             />
           ) : (
             <div className="border-t border-rule p-4">

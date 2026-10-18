@@ -80,6 +80,18 @@ describe(WorkspaceForm, () => {
     await expect.element(submit).toBeEnabled();
   });
 
+  it('clears "Saved" once the form is edited again', async () => {
+    await renderForm(vi.fn<Action>().mockResolvedValue({ ok: true }));
+    const saved = page.getByText('Saved', { exact: true });
+
+    await page.getByLabelText('Workspace name').fill('Acme');
+    await page.getByRole('button', { name: 'Create workspace' }).click();
+    await expect.element(saved).toBeVisible();
+    await page.getByLabelText('Workspace name').fill('Acme Trading');
+
+    await expect.element(saved).not.toBeInTheDocument();
+  });
+
   it('shows the backend field errors under their fields and its message above', async () => {
     await renderForm(
       vi.fn<Action>().mockResolvedValue({

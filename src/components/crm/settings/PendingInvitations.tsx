@@ -23,11 +23,13 @@ export type PendingInvitation = {
  * @param props Component props.
  * @param props.invitations The invitations.
  * @param props.revoke Revokes one (`revokeInvitation` bound to the workspace).
+ * @param props.headingId The id of the heading above the list (focusable), for after a revoke.
  * @returns The list, or a short explanation when it is empty.
  */
 export const PendingInvitations = (props: {
   invitations: PendingInvitation[];
   revoke: (invitationId: number) => Promise<ActionResult>;
+  headingId: string;
 }) => {
   const t = useTranslations('PendingInvitations');
   const tRole = useTranslations('Roles');
@@ -75,6 +77,7 @@ export const PendingInvitations = (props: {
               description={t('revoke_text')}
               confirmLabel={t('revoke')}
               cancelLabel={t('cancel')}
+              fallbackFocus={() => document.querySelector<HTMLElement>(`#${props.headingId}`)}
               action={async () => await props.revoke(invitation.id)}
             />
           )}
