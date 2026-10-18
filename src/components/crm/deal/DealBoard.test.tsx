@@ -45,6 +45,7 @@ const deal = (over: Partial<Deal> & Pick<Deal, 'id' | 'name'>): Deal => ({
   owner: MIA,
   company: { id: 7, name: 'Acme' },
   archived: false,
+  signatures: [],
   updatedAt: '2026-10-10T09:00:00Z',
   version: 3,
   ...over,

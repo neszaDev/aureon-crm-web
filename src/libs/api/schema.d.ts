@@ -388,6 +388,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workspaces/{workspaceId}/companies/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["export_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/workspaces/{workspaceId}/companies/{id}": {
         parameters: {
             query?: never;
@@ -468,6 +484,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workspaces/{workspaceId}/contacts/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["export_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/workspaces/{workspaceId}/contacts/tags": {
         parameters: {
             query?: never;
@@ -532,6 +564,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workspaces/{workspaceId}/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/workspaces/{workspaceId}/deals": {
         parameters: {
             query?: never;
@@ -556,6 +604,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["board"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/deals/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["export_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -718,6 +782,22 @@ export interface paths {
         get: operations["list_2"];
         put?: never;
         post: operations["create_3"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/leads/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["export"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -900,6 +980,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workspaces/{workspaceId}/reports/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["activities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/reports/follow-ups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["followUps"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/reports/funnel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["funnel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/reports/pipeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["pipeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/reports/won-lost": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["wonLost"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/workspaces/{workspaceId}/tasks": {
         parameters: {
             query?: never;
@@ -988,6 +1148,10 @@ export interface components {
             /** Format: int64 */
             workspaceId: number;
         };
+        ActivityReport: {
+            byUser: components["schemas"]["UserActivity"][];
+            period: components["schemas"]["PeriodDto"];
+        };
         ActivityResponse: {
             author?: components["schemas"]["MemberRef"];
             body?: string;
@@ -1011,7 +1175,7 @@ export interface components {
         };
         ApiError: {
             /** @enum {string} */
-            code?: "VALIDATION_FAILED" | "TEXT_INVALID" | "PIPELINE_CHANGED" | "FORBIDDEN" | "REGISTRATION_DISABLED" | "OWNER_ONLY" | "INVITATION_EMAIL_MISMATCH" | "NOT_FOUND" | "VERSION_CONFLICT" | "CONFLICT" | "EMAIL_TAKEN" | "OWN_ACCOUNT" | "ACCOUNT_OWNS_WORKSPACE" | "LAST_OWNER" | "ALREADY_MEMBER" | "ALREADY_INVITED" | "INVITATION_NOT_PENDING" | "DUPLICATE_NAME" | "STAGE_PROTECTED" | "STAGE_IN_USE" | "SOURCE_IN_USE" | "LEAD_CONVERTED" | "LEAD_NOT_QUALIFIED" | "TASK_STATUS_CONFLICT" | "RATE_LIMITED";
+            code?: "VALIDATION_FAILED" | "TEXT_INVALID" | "PIPELINE_CHANGED" | "EXPORT_TOO_LARGE" | "FORBIDDEN" | "REGISTRATION_DISABLED" | "OWNER_ONLY" | "INVITATION_EMAIL_MISMATCH" | "NOT_FOUND" | "VERSION_CONFLICT" | "CONFLICT" | "EMAIL_TAKEN" | "OWN_ACCOUNT" | "ACCOUNT_OWNS_WORKSPACE" | "LAST_OWNER" | "ALREADY_MEMBER" | "ALREADY_INVITED" | "INVITATION_NOT_PENDING" | "DUPLICATE_NAME" | "STAGE_PROTECTED" | "STAGE_IN_USE" | "SOURCE_IN_USE" | "LEAD_CONVERTED" | "LEAD_NOT_QUALIFIED" | "TASK_STATUS_CONFLICT" | "RATE_LIMITED";
             error: string;
             fieldErrors: {
                 [key: string]: string;
@@ -1031,7 +1195,7 @@ export interface components {
         };
         AuditEventResponse: {
             /** @enum {string} */
-            action: "CREATE" | "UPDATE" | "ARCHIVE" | "RESTORE" | "DELETE" | "STATUS_CHANGE" | "CONVERT" | "STAGE_CHANGE" | "COMPLETE" | "REOPEN" | "CANCEL" | "INVITE" | "INVITE_REVOKE" | "JOIN" | "ROLE_CHANGE" | "MEMBER_REMOVE" | "LEAVE";
+            action: "CREATE" | "UPDATE" | "ARCHIVE" | "RESTORE" | "DELETE" | "STATUS_CHANGE" | "CONVERT" | "STAGE_CHANGE" | "COMPLETE" | "REOPEN" | "CANCEL" | "INVITE" | "INVITE_REVOKE" | "JOIN" | "ROLE_CHANGE" | "MEMBER_REMOVE" | "LEAVE" | "EXPORT";
             actor?: components["schemas"]["AuditActor"];
             changes: {
                 [key: string]: unknown;
@@ -1163,6 +1327,28 @@ export interface components {
             tags: string[];
             /** Format: date-time */
             updatedAt: string;
+        };
+        CountedLeads: {
+            /** Format: int64 */
+            count: number;
+            first: components["schemas"]["LeadResponse"][];
+        };
+        CountedTasks: {
+            /** Format: int64 */
+            count: number;
+            first: components["schemas"]["TaskResponse"][];
+        };
+        Counts: {
+            /** Format: int64 */
+            companies: number;
+            /** Format: int64 */
+            contacts: number;
+            /** Format: int64 */
+            openDeals: number;
+            /** Format: int64 */
+            openLeads: number;
+            /** Format: int64 */
+            overdueTasks: number;
         };
         CreateActivityRequest: {
             body?: string;
@@ -1307,6 +1493,18 @@ export interface components {
             role: "OWNER" | "ADMIN" | "MANAGER" | "SALES_REP";
             token: string;
         };
+        DashboardResponse: {
+            byStage: components["schemas"]["StageBucket"][];
+            counts: components["schemas"]["Counts"];
+            lost: components["schemas"]["LostSummary"];
+            myOverdueTasks: components["schemas"]["TaskResponse"][];
+            myUpcomingTasks: components["schemas"]["TaskResponse"][];
+            openPipeline: components["schemas"]["PipelineTotal"][];
+            period: components["schemas"]["PeriodDto"];
+            recentActivities: components["schemas"]["ActivityResponse"][];
+            recentChanges: components["schemas"]["AuditEventResponse"][];
+            won: components["schemas"]["WonSummary"];
+        };
         DealDraft: {
             /** @example 1250.00 */
             amount: string;
@@ -1371,6 +1569,7 @@ export interface components {
             owner?: components["schemas"]["MemberRef"];
             /** Format: int32 */
             probability: number;
+            signatures: components["schemas"]["StageSignature"][];
             stage: components["schemas"]["StageRef"];
             /** Format: date-time */
             stageEnteredAt: string;
@@ -1390,6 +1589,24 @@ export interface components {
             name: string;
             /** Format: int64 */
             size: number;
+        };
+        FollowUpReport: {
+            dueLeads: components["schemas"]["CountedLeads"];
+            overdueTasks: components["schemas"]["CountedTasks"];
+            upcomingTasks: components["schemas"]["CountedTasks"];
+        };
+        FunnelReport: {
+            /** Format: int64 */
+            created: number;
+            /** Format: date */
+            historyFrom?: string;
+            period: components["schemas"]["PeriodDto"];
+            stages: components["schemas"]["FunnelStep"][];
+        };
+        FunnelStep: {
+            /** Format: int64 */
+            reached: number;
+            stage: components["schemas"]["StageResponse"];
         };
         HistoryStageRef: {
             /** Format: int64 */
@@ -1493,6 +1710,10 @@ export interface components {
             email: string;
             password: string;
         };
+        LostSummary: {
+            /** Format: int64 */
+            count: number;
+        };
         MemberRef: {
             displayName?: string;
             email: string;
@@ -1514,12 +1735,27 @@ export interface components {
             amount: string;
             currency: string;
         };
+        MonthBucket: {
+            /** Format: int64 */
+            lost: number;
+            /** @example 2026-09 */
+            month: string;
+            /** Format: int64 */
+            won: number;
+            wonTotals: components["schemas"]["MoneyTotal"][];
+        };
         MoveDealRequest: {
             lostReason?: string;
             /** Format: int64 */
             stageId: number;
             /** Format: int64 */
             version: number;
+        };
+        OwnerBucket: {
+            /** Format: int64 */
+            count: number;
+            owner?: components["schemas"]["MemberRef"];
+            totals: components["schemas"]["MoneyTotal"][];
         };
         PageActivityResponse: {
             content: components["schemas"]["ActivityResponse"][];
@@ -1712,10 +1948,27 @@ export interface components {
             sort?: components["schemas"]["SortObject"];
             unpaged?: boolean;
         };
+        PeriodDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+        };
         PersonRef: {
             fullName: string;
             /** Format: int64 */
             id: number;
+        };
+        PipelineReport: {
+            byOwner: components["schemas"]["OwnerBucket"][];
+            byStage: components["schemas"]["StageBucket"][];
+        };
+        PipelineTotal: {
+            /** @example 1250.00 */
+            amount: string;
+            currency: string;
+            /** @example 625.00 */
+            weightedAmount: string;
         };
         Ref: {
             /** Format: int64 */
@@ -1747,6 +2000,12 @@ export interface components {
             sorted?: boolean;
             unsorted?: boolean;
         };
+        StageBucket: {
+            /** Format: int64 */
+            count: number;
+            stage: components["schemas"]["StageResponse"];
+            totals: components["schemas"]["MoneyTotal"][];
+        };
         StageChangeResponse: {
             /** Format: date-time */
             changedAt: string;
@@ -1775,6 +2034,11 @@ export interface components {
             probability: number;
             /** Format: int64 */
             version: number;
+        };
+        StageSignature: {
+            by?: components["schemas"]["MemberRef"];
+            /** Format: int64 */
+            stageId: number;
         };
         StatusCount: {
             /** Format: int64 */
@@ -1983,6 +2247,19 @@ export interface components {
             /** Format: int64 */
             version: number;
         };
+        UserActivity: {
+            /** Format: int64 */
+            calls: number;
+            /** Format: int64 */
+            emails: number;
+            /** Format: int64 */
+            meetings: number;
+            /** Format: int64 */
+            notes: number;
+            /** Format: int64 */
+            tasksCompleted: number;
+            user?: components["schemas"]["MemberRef"];
+        };
         UserResponse: {
             /** Format: date-time */
             createdAt: string;
@@ -1996,6 +2273,15 @@ export interface components {
         VersionRequest: {
             /** Format: int64 */
             version: number;
+        };
+        WonLostReport: {
+            months: components["schemas"]["MonthBucket"][];
+            period: components["schemas"]["PeriodDto"];
+        };
+        WonSummary: {
+            /** Format: int64 */
+            count: number;
+            totals: components["schemas"]["MoneyTotal"][];
         };
         WorkspaceResponse: {
             /** Format: date-time */
@@ -2935,6 +3221,34 @@ export interface operations {
             };
         };
     };
+    export_3: {
+        parameters: {
+            query?: {
+                q?: string;
+                ownerId?: number;
+                unassigned?: boolean;
+                industry?: string;
+                archived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The CSV file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
     get_5: {
         parameters: {
             query?: never;
@@ -3116,6 +3430,36 @@ export interface operations {
             };
         };
     };
+    export_2: {
+        parameters: {
+            query?: {
+                q?: string;
+                companyId?: number;
+                ownerId?: number;
+                unassigned?: boolean;
+                sourceId?: number;
+                tag?: string;
+                archived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The CSV file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
     tags: {
         parameters: {
             query?: never;
@@ -3234,6 +3578,31 @@ export interface operations {
             };
         };
     };
+    dashboard: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DashboardResponse"];
+                };
+            };
+        };
+    };
     list_5: {
         parameters: {
             query?: {
@@ -3320,6 +3689,39 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BoardResponse"];
+                };
+            };
+        };
+    };
+    export_1: {
+        parameters: {
+            query?: {
+                q?: string;
+                stageId?: number;
+                status?: "OPEN" | "WON" | "LOST";
+                ownerId?: number;
+                unassigned?: boolean;
+                companyId?: number;
+                contactId?: number;
+                closeFrom?: string;
+                closeTo?: string;
+                archived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The CSV file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
                 };
             };
         };
@@ -3698,6 +4100,37 @@ export interface operations {
             };
         };
     };
+    export: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: ("NEW" | "CONTACTED" | "QUALIFIED" | "UNQUALIFIED" | "CONVERTED")[];
+                ownerId?: number;
+                unassigned?: boolean;
+                sourceId?: number;
+                priority?: "LOW" | "MEDIUM" | "HIGH";
+                followUpBefore?: string;
+                archived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The CSV file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
     get_2: {
         parameters: {
             query?: never;
@@ -4058,6 +4491,125 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RemindersResponse"];
+                };
+            };
+        };
+    };
+    activities: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ActivityReport"];
+                };
+            };
+        };
+    };
+    followUps: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FollowUpReport"];
+                };
+            };
+        };
+    };
+    funnel: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FunnelReport"];
+                };
+            };
+        };
+    };
+    pipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PipelineReport"];
+                };
+            };
+        };
+    };
+    wonLost: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WonLostReport"];
                 };
             };
         };
