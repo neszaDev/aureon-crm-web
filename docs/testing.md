@@ -50,6 +50,15 @@ BACKEND_URL=http://localhost:8081 pnpm exec playwright test --project=chromium -
 BACKEND_URL=http://localhost:8081 pnpm exec playwright test tests/e2e/crm --project=chromium --workers=1
 ```
 
+Against a production build instead of the dev server (what CI's image runs), start it with the
+app's own address, which the invitation tests compare their links with:
+
+```sh
+pnpm build
+BACKEND_URL=http://localhost:8081 APP_URL=http://localhost:3105 pnpm exec next start -p 3105
+E2E_BASE_URL=http://localhost:3105 BACKEND_URL=http://localhost:8081 pnpm exec playwright test --project=chromium --workers=1
+```
+
 One worker keeps the dev server, the API and Postgres within a laptop's memory and keeps the
 per-email sign-in limit predictable; don't run it next to a Maven build of the API. The
 `EXPIRED` invitation test ages its own invitation row with `psql` inside the API's Postgres
@@ -69,15 +78,35 @@ refresh token rotated), auth errors, the failed-sign-in limit, form validation, 
 with the summary, file upload/download/delete with type and size errors, and admin user
 management (hidden from regular users, search, role change, delete, no self-edit).
 
-The CRM specs (helpers: `createWorkspace` and `expectNoA11yViolations` in
-`tests/e2e/crm/helpers.ts`, which runs axe on the main CRM pages and dialogs they open):
+The CRM specs. Their helpers are in `tests/e2e/crm/helpers.ts`: `expectNoA11yViolations` (axe on
+a page or an open dialog, once it has its title and has stopped animating), `createWorkspace`,
+the API seeding (`seedWorkspace`, `addMember`, `seed`, `stagesOf`, `apiCall`: accounts, members
+and records made through the API, which is how a test gets 25 companies or a second rep without
+clicking), the UI creators (`createCompany`, `createContact`, `createLead`), `waitForHydration`
+(a form typed into before React hydrates it loses what was typed) and `expectNoSidewaysScroll`:
 
 | Spec | Covers |
 |---|---|
 | `tests/e2e/Workspace.e2e.ts` | First workspace from the create form (browser time zone), the shell and its skip link, the switcher between workspaces, "Workspace not found" for non-members, the rail as a drawer on a phone in Thai |
 | `tests/e2e/crm/Settings.e2e.ts` | Rename and currency, the 409 reload, the last owner (own-role confirmation, leave note), invitation links (shown once, in the inviter's language, revoke), stages (add, move by button and keyboard drag, rename, delete; Won and Lost pinned), a pipeline or source changed in another tab, lead sources, display name and password, an expired session in an action, dark and Thai from the account menu, every settings page at 390 px in Thai |
 | `tests/e2e/crm/Invitation.e2e.ts` | Registering through a link, joining signed in (also after the access cookie expired), a link for another email, an existing account sent to sign in and back, accepted, revoked, expired and unknown links, a phone in Thai |
+| `tests/e2e/crm/Records.e2e.ts` | A company (a look-alike warns, saving stays possible) and a contact at it; a call logged on the contact showing on the company's timeline; a lead marked contacted and qualified, then converted into a linked company, a contact and a 1,250.00 EUR deal, once even when double-clicked; a task due tomorrow on the deal, completed from `/tasks` and found under completed; search, sort, filters and pages over 25 API-seeded companies, with a member's removal leaving their companies "Unassigned"; a hand-edited URL falling back to the defaults; a search over 200 characters showing the reset notice, not an error page; a second tab's stale edit showing the reload message; the Unqualify and Convert dialogs scrolling to their buttons on a short phone; the record pages with long Thai text at 390 px |
+| `tests/e2e/crm/Pipeline.e2e.ts` | Every stage on the board; a pointer drag between stages (persists, history, the stamp row signed by whoever moved the deal into each stage); keyboard drag and "Move to…"; Lost asking for a reason (board and Move dialog) and cancelling moving nothing; a drop outside every column cancelling; a sales rep with no handle, menu, Move, Edit or Archive on another rep's deal, and a forged move refused (below); "Workspace not found" for another workspace's deal; the board on a phone (one column, menu moves) and the board and list in Thai at 390 px |
 | `tests/e2e/Auth.e2e.ts` | Also the CRM's redirects: `/app` deep links keep `?next=`, sign-in and sign-up keep it between them |
+
+### Dragging and forged actions
+
+dnd-kit's sensor needs the pointer to travel, so `dragTo` is too fast: `Pipeline.e2e.ts` presses
+with `page.mouse`, moves in steps and releases (the keyboard works too: focus the handle, Space,
+the arrows, Space). The board scrolls sideways inside the page, so a card of a late stage is the
+one to drop on Lost. Wait for the server's answer (`page.waitForResponse` on the action's POST,
+which carries a `Next-Action` header) before reloading: a reload cancels a request still on its
+way.
+
+A server action can be called with another id than the UI meant. The forged-move test moves the
+rep's own deal through the real UI, and `page.route` rewrites the deal id in the action's request
+body (a JSON array of its arguments, `[workspaceId, dealId, { stageId, version }]`) to another
+rep's deal: the backend's 403 must show as the translated toast, and nothing may move.
 
 ## Accessibility
 

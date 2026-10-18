@@ -26,21 +26,25 @@ src/app/[locale]/(marketing)/   public pages (home, about)
 src/app/[locale]/(auth)/        (center)/ sign-in, sign-up, invite/[token]; app/** (the CRM);
                                 dashboard/** (the boilerplate's demos)
 src/actions/                    server actions: the only place that mutates via the backend
-src/actions/crm/*               CRM writes: workspaces, members, invitations (create, accept), pipeline, sources
+src/actions/crm/*               CRM writes: workspaces, members, invitations (create, accept), pipeline, sources,
+                                companies, contacts, leads (status, convert), deals (move), tasks, activities
 src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for pages), ApiError.ts,
                                 ActionFailure.ts, Session.ts, schema.d.ts (GENERATED, see below)
-src/libs/api/CrmQueries.ts      CRM reads for pages (workspaces, members, invitations, stages, sources)
-src/libs/crm/*                  CRM logic: Permissions (`can`), WorkspaceId, Stages, PageMetadata,
-                                OpenWorkspace (`getOpenWorkspace`: a page's workspace, 401 and 404 handled),
-                                Format (money, dates, record numbers), ZonedTime (workspace-zone inputs)
+src/libs/api/CrmQueries.ts      CRM reads for pages (workspaces, members, invitations, stages, sources, records, lists)
+src/libs/crm/*                  CRM logic: Permissions (`can`), RecordAccess (who may edit a record), WorkspaceId,
+                                Stages, PageMetadata, OpenWorkspace (`getOpenWorkspace`: a page's workspace, 401
+                                and 404 handled), Format (money, dates, record numbers), ZonedTime (workspace-zone
+                                inputs), ListQuery (a list's state from its URL), DealHistory (stamp row signers)
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
 src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens
 src/validations/                zod schemas mirroring the backend's request rules (CRM: crm/*)
 src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx shadcn add`)
 src/components/report/          Marksheet domain UI: marks, totals, results table (demos only)
-src/components/crm/**           the CRM: shell/ (rail, switcher, account menu), settings/, seals, forms
+src/components/crm/**           the CRM: shell/ (rail, switcher, account menu), settings/, seals, and per record:
+                                company/ contact/ lead/ deal/ task/ activity/, with the shared list/ (list kit),
+                                record/ (header, facts, archive) and fields/ (pickers, owner, date and time)
 src/components/ src/templates/  UI (MarketingTemplate, AppShell); src/locales/*.json  all user-visible text
-tests/e2e/                      Playwright, always against the real backend (crm/*: the CRM specs)
+tests/e2e/                      Playwright, always against the real backend (crm/*: the CRM specs and their helpers)
 docker/  env/  scripts/  docs/  same roles as in the API repo
 ```
 

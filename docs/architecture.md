@@ -72,6 +72,8 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
 | `/app/new` | Create another workspace |
 | `/app/{workspaceId}` | The workspace's dashboard (for now a welcome with next steps and the members) |
 | `/app/{workspaceId}/settings/{workspace,members,roles,pipeline,sources,profile}` | Settings: name, currency and time zone; members and invitation links; the role matrix; pipeline stages; lead sources; your display name and password |
+| `/app/{workspaceId}/companies`, `/contacts`, `/leads`, `/deals` | The record lists (deals: `?view=list`; the default is the board). Each has `/new`, `/{id}` (the record page) and `/{id}/edit` |
+| `/app/{workspaceId}/tasks`, `/tasks/{id}` | Tasks: the list with its views (mine, overdue, next 7 days, completed, all) and a task's page |
 | `/invite/{token}` | Public: an invitation's preview, then register, sign in or join (`(center)` layout, like sign-in and sign-up) |
 
 - `app/layout.tsx` loads the signed-in user; a 401 ends the session (`/api/session/expired`), a
@@ -86,6 +88,28 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
   (`src/libs/crm/Permissions.ts`) says the caller can't do, and still handle the backend's 403.
 - Writes are server actions in `src/actions/crm/`, bound to the workspace id. Record edits send
   the `version` they read; a stale one (409) is "Someone else changed this", with a reload.
+
+### Record pages
+
+- **Lists** keep their whole state in the URL (`?q&page&size&sort&direction&<filters>`, parsed by
+  `src/libs/crm/ListQuery.ts`), so every view is linkable and rendered on the server. A value the
+  list can't use (`?page=-1&sort=DROP`) falls back to its default; a query the backend still
+  refuses (a search over 200 characters) shows `InvalidFilterNotice` with a link that resets the
+  list, never an error page. The list kit is `src/components/crm/list/` (search, sort headers,
+  filters, pager, empty states).
+- **A record's page** is `RecordHeader` (mono record number `C/P/L/D/T` + 4 digits, name, owner's
+  seal, actions the caller may take), the record's facts, and `RecordWork`: its tasks and its
+  activity timeline (a company's holds its contacts' and deals' too). A record that 404s is
+  `RecordNotFound` inside the shell; only a lost workspace is "Workspace not found".
+- **Leads** move New, Contacted, Qualified (or Unqualified with a reason) from a status menu and
+  convert in a dialog into a company, a contact and a deal; a repeated conversion returns the
+  first result (`alreadyConverted`), so a double click makes one deal.
+- **Deals** are a board and a list. The board (`DealBoard`, dnd-kit) moves a card by pointer or
+  keyboard, or from "Move to…"; only the people who may move the deal (its owner, or
+  `RECORDS_EDIT_ANY`) get the handle and the menu. A drop outside every column cancels; a drop on
+  Lost asks for the reason first. A refused move puts the card back and says why in a toast. A
+  deal's page shows the stamp row (`StampRow`: each reached stage signed by whoever moved the
+  deal into it) and the stage history.
 
 ## Rendering
 
