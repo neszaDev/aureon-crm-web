@@ -6,7 +6,8 @@ import { cn } from 'cn';
  * @param props Component props.
  * @param props.seal The signing member's initials.
  * @param props.days The open stage's time in it, formatted ("8d").
- * @param props.children Extra content, such as a screen-reader label.
+ * @param props.children Extra content, such as a screen-reader label: the initials and days are
+ *   hidden from assistive technology, so the label speaks for the box.
  * @returns The box.
  */
 export const StampBox = (props: { seal?: string; days?: string; children?: React.ReactNode }) => (
@@ -18,12 +19,18 @@ export const StampBox = (props: { seal?: string; days?: string; children?: React
     )}
   >
     {props.seal && (
-      <span className="grid size-7 -rotate-8 place-items-center rounded-full border-[1.5px] border-seal-ink text-[0.6875rem] leading-none font-bold">
+      <span
+        aria-hidden="true"
+        className="grid size-7 -rotate-8 place-items-center rounded-full border-[1.5px] border-seal-ink text-[0.6875rem] leading-none font-bold"
+      >
         {props.seal}
       </span>
     )}
     {props.days && (
-      <span className="font-mono text-[0.6875rem] leading-none font-bold tabular-nums">
+      <span
+        aria-hidden="true"
+        className="font-mono text-[0.6875rem] leading-none font-bold tabular-nums"
+      >
         {props.days}
       </span>
     )}

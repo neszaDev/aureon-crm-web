@@ -1,7 +1,15 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckIcon, CopyIcon, EyeOffIcon, LoaderCircleIcon, UserPlusIcon } from 'lucide-react';
+import { cn } from 'cn';
+import {
+  CheckIcon,
+  CircleAlertIcon,
+  CopyIcon,
+  EyeOffIcon,
+  LoaderCircleIcon,
+  UserPlusIcon,
+} from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
@@ -178,9 +186,19 @@ const InvitationLink = (props: { invitation: CreatedInvitation; timeZone: string
             {t('copy')}
           </Button>
         </div>
-        <output className={copied === false ? 'text-sm text-danger' : 'text-sm text-success'}>
+        <output
+          className={cn(
+            'flex items-start gap-1.5 text-sm',
+            copied === false ? 'font-medium text-danger' : 'text-success',
+          )}
+        >
           {copied === true && t('copied')}
-          {copied === false && t('copy_failed')}
+          {copied === false && (
+            <>
+              <CircleAlertIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+              {t('copy_failed')}
+            </>
+          )}
         </output>
       </div>
       <p className="text-sm text-muted-foreground">

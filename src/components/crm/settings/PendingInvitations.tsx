@@ -41,13 +41,17 @@ export const PendingInvitations = (props: {
   return (
     <ul>
       {props.invitations.map((invitation) => (
+        // Below sm the row stacks like a member's: the whole email and details, then revoke.
         <li
           key={invitation.id}
-          className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule px-5 py-3"
+          className="flex items-center gap-x-3 gap-y-2 border-t border-rule px-5 py-3 max-sm:grid max-sm:grid-cols-[auto_minmax(0,1fr)] max-sm:items-start"
         >
-          <MailIcon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-          <span className="flex min-w-0 flex-1 basis-48 flex-col">
-            <span className="truncate font-medium">{invitation.email}</span>
+          <MailIcon
+            aria-hidden="true"
+            className="size-4 shrink-0 text-muted-foreground max-sm:mt-1"
+          />
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="font-medium max-sm:break-all sm:truncate">{invitation.email}</span>
             <span className="text-[0.8125rem] text-muted-foreground">
               {invitation.invitedBy
                 ? t('details_by', {
@@ -68,9 +72,10 @@ export const PendingInvitations = (props: {
                   variant="ghost"
                   size="sm"
                   aria-label={t('revoke_label', { email: invitation.email })}
+                  className="max-sm:col-start-2 max-sm:justify-self-start"
                 >
                   <XIcon data-icon="inline-start" />
-                  <span className="max-md:sr-only">{t('revoke')}</span>
+                  <span className="sm:max-md:sr-only">{t('revoke')}</span>
                 </Button>
               }
               title={t('revoke_title', { email: invitation.email })}

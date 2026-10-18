@@ -103,20 +103,24 @@ export default async function WorkspacePage(props: WorkspacePageProps) {
 
       <dl className="grid overflow-hidden rounded-lg border border-rule bg-card sm:grid-cols-3">
         <div className="border-b border-rule px-5 py-3.5 sm:border-r sm:border-b-0">
-          <dt className="text-[0.8125rem] text-muted-foreground">{t('fact_role')}</dt>
+          <dt className="text-[0.8125rem] font-medium text-muted-foreground">{t('fact_role')}</dt>
           <dd className="mt-0.5 text-lg font-semibold">
             {workspace.role && tRole(`role_${workspace.role}`)}
           </dd>
         </div>
         <div className="border-b border-rule px-5 py-3.5 sm:border-r sm:border-b-0">
-          <dt className="text-[0.8125rem] text-muted-foreground">{t('fact_currency')}</dt>
+          <dt className="text-[0.8125rem] font-medium text-muted-foreground">
+            {t('fact_currency')}
+          </dt>
           <dd className="mt-0.5 flex flex-wrap items-baseline gap-x-2">
             <span className="text-lg font-semibold">{workspace.defaultCurrency}</span>
             <span className="text-sm text-muted-foreground">{currencyName}</span>
           </dd>
         </div>
         <div className="px-5 py-3.5">
-          <dt className="text-[0.8125rem] text-muted-foreground">{t('fact_timezone')}</dt>
+          <dt className="text-[0.8125rem] font-medium text-muted-foreground">
+            {t('fact_timezone')}
+          </dt>
           <dd className="mt-0.5 text-lg font-semibold break-words">
             {workspace.timezone?.replaceAll('_', ' ')}
           </dd>

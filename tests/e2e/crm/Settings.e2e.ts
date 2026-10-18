@@ -416,6 +416,32 @@ test.describe('Settings', () => {
     await expectNoA11yViolations(page);
   });
 
+  test.describe('on a phone', () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test('stacks a pending invitation with its whole email', async ({ page }) => {
+      const { workspace } = await startAcme(page);
+      await page.goto(`${workspace}/settings/members`);
+      const email = 'a.very.long.colleague.name@subsidiary.example.com';
+      await page.getByRole('button', { name: 'Invite member' }).click();
+      await page.getByLabel('Email address').fill(email);
+      await page.getByRole('button', { name: 'Create invitation link' }).click();
+      await page.getByRole('button', { name: 'Done' }).click();
+
+      const pending = page.getByRole('region', { name: 'Pending invitations' });
+      const shown = pending.getByText(email);
+      await expect(shown).toBeVisible();
+      // Wrapped, not cut off with an ellipsis; the revoke button sits under it.
+      expect(await shown.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+      const revoke = await pending.getByRole('button', { name: /^Revoke/u }).boundingBox();
+      const text = await shown.boundingBox();
+      expect(revoke && text && revoke.y >= text.y + text.height).toBe(true);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        390,
+      );
+    });
+  });
+
   test.describe('on a phone, in Thai', () => {
     test.use({ viewport: { width: 390, height: 844 } });
 

@@ -64,12 +64,14 @@ export const RolesMatrix = (props: { current?: WorkspaceRole }) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-full whitespace-normal">{t('ability')}</TableHead>
+              <TableHead className="w-full text-[0.8125rem] whitespace-normal">
+                {t('ability')}
+              </TableHead>
               {WORKSPACE_ROLES.map((role) => (
                 <TableHead
                   key={role}
                   className={cn(
-                    'px-3 text-center text-[0.8125rem] tracking-normal whitespace-normal normal-case',
+                    'px-3 text-center text-[0.8125rem] whitespace-normal',
                     role === props.current && 'bg-seal-tint text-seal-ink',
                   )}
                 >

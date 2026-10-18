@@ -70,6 +70,28 @@ describe(InviteDialog, () => {
     expect(page.getByLabelText('Invitation link', { exact: true }).elements()).toHaveLength(0);
   });
 
+  it('says a failed copy in words with an icon', async () => {
+    await renderDialog(
+      vi.fn<Invite>().mockResolvedValue({
+        ok: true,
+        invitation: {
+          email: 'ana@example.com',
+          role: 'MANAGER',
+          expiresAt: '2026-10-25T03:00:00Z',
+          link: LINK,
+        },
+      }),
+    );
+    vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('Denied'));
+
+    await invite('ana@example.com');
+    await page.getByRole('button', { name: 'Copy link' }).click();
+
+    const failure = page.getByText("Couldn't copy. Select the link and copy it yourself.");
+    await expect.element(failure).toBeVisible();
+    expect(failure.element().querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+  });
+
   it('keeps the link open on Escape and an outside click, closing only on purpose', async () => {
     await renderDialog(
       vi.fn<Invite>().mockResolvedValue({

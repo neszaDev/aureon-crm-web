@@ -15,9 +15,10 @@ const buttonVariants = cva(
           'border-input bg-field text-foreground shadow-ply hover:border-muted-foreground hover:bg-accent aria-expanded:bg-accent',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-border',
         ghost: 'text-foreground hover:bg-accent aria-expanded:bg-accent',
-        // Dark crimson is too light to carry white text, so dark mode tints instead of filling.
+        // Dark crimson is too light to carry white text, so dark mode tints instead of filling;
+        // light tints keep its text at 4.5:1 or more on paper and field, hover included (18%: 4.67:1).
         destructive:
-          'bg-destructive text-white shadow-ply hover:bg-destructive/90 focus-visible:ring-destructive dark:bg-destructive/16 dark:text-destructive dark:shadow-none dark:hover:bg-destructive/24',
+          'bg-destructive text-white shadow-ply hover:bg-destructive/90 focus-visible:ring-destructive dark:bg-destructive/12 dark:text-destructive dark:shadow-none dark:hover:bg-destructive/18',
         link: 'h-auto px-0 text-seal-ink underline-offset-4 hover:underline',
         // For the boilerplate demo's folder-green fields.
         inverse:
