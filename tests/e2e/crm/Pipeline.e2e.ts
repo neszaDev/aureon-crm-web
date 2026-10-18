@@ -14,7 +14,7 @@ import {
   waitForHydration,
 } from './helpers';
 
-// The board is as wide as its six columns and scrolls inside the page: the first three show.
+// The default pipeline's six columns fit the content column of a 1440 px screen, in one frame.
 test.use({ viewport: { width: 1440, height: 900 } });
 
 /**
@@ -75,18 +75,6 @@ const dragAndSave = async (page: Page, handle: Locator, target: Locator) => {
   await untilSaved(page, async () => {
     await drag(page, handle, target);
   });
-};
-
-/**
- * Scrolls the board to its last columns, so a card of a late stage can be dropped on Lost.
- * @param page Playwright page, on the board.
- */
-const scrollToLast = async (page: Page) => {
-  await column(page, 'Lost')
-    .locator('..')
-    .evaluate((board) => {
-      board.scrollLeft = board.scrollWidth;
-    });
 };
 
 /**
@@ -170,6 +158,22 @@ test.describe('Pipeline', () => {
     await expect(column(page, 'Qualification')).toContainText('1 deal');
     await expect(column(page, 'Qualification')).toContainText('€1,250.00');
     await expect(column(page, 'Needs analysis')).toContainText('No deals');
+    // Won and Lost are slim: their name, count and a link to the list, no room for cards.
+    await expect(column(page, 'Won')).toContainText('0 deals');
+    await expect(
+      column(page, 'Lost').getByRole('link', { name: 'View in list: Lost' }),
+    ).toBeVisible();
+    const won = await column(page, 'Won').boundingBox();
+    expect(won?.width).toBeLessThan(100);
+    // Nothing to scroll to: all six fit, so the edge fade is off and the page doesn't scroll.
+    const board = await column(page, 'Qualification')
+      .locator('..')
+      .evaluate((node) => ({
+        fits: node.scrollWidth <= node.clientWidth,
+        fade: getComputedStyle(node.querySelector('.board-fade') ?? node).opacity,
+        page: document.documentElement.scrollWidth <= window.innerWidth,
+      }));
+    expect(board).toStrictEqual({ fits: true, fade: '0', page: true });
     await expectNoA11yViolations(page);
 
     await dragAndSave(page, handleOf(page, 'Acme seats'), column(page, 'Needs analysis'));
@@ -203,8 +207,10 @@ test.describe('Pipeline', () => {
     await expect(history.getByRole('listitem').nth(2)).toContainText('Created in Qualification');
     await expect(history.getByRole('listitem').nth(2)).toContainText('Mia Manager');
     const row = page.getByRole('list', { name: 'Deal progress' });
-    await expect(row.getByText('Qualification: reached, signed by Mia Manager')).toBeVisible();
-    await expect(row.getByText('Needs analysis: reached, signed by Olivia Owner')).toBeVisible();
+    await expect(row.getByText('Qualification: reached, moved here by Mia Manager')).toBeVisible();
+    await expect(
+      row.getByText('Needs analysis: reached, moved here by Olivia Owner'),
+    ).toBeVisible();
     await expect(row.getByText('Proposal: current, 0 days')).toBeVisible();
     await expectNoA11yViolations(page);
   });
@@ -241,14 +247,15 @@ test.describe('Pipeline', () => {
     await expect(dialog.getByText('Moving it here closes the deal as won.')).toBeVisible();
     await dialog.getByRole('button', { name: 'Move deal' }).click();
     await expect(page.getByText('Acme seats moved to Won')).toBeVisible();
-    await expect(column(page, 'Won').getByRole('link', { name: 'Acme seats' })).toBeVisible();
+    // Won is slim: it counts the deal, and the card is no longer on the board.
+    await expect(column(page, 'Won')).toContainText('1 deal');
+    await expect(page.getByRole('link', { name: 'Acme seats', exact: true })).toHaveCount(0);
   });
 
   test('moves a deal to Lost only with a reason', async ({ page, request }) => {
     const { owner, mia, deal } = await seedBoard(request, 'Negotiation');
     const second = await seed(request, mia, 'deals', { name: 'Beta rollout', amount: '800.00' });
     await openBoard(page, owner, 'Acme seats');
-    await scrollToLast(page);
     const stays = column(page, 'Negotiation').locator('a', { hasText: 'Acme seats' });
 
     // Dropped on Lost, the card asks why and waits; cancelling moves nothing.
@@ -270,9 +277,14 @@ test.describe('Pipeline', () => {
     await untilSaved(page, async () => {
       await dialog.getByRole('button', { name: 'Mark as lost' }).click();
     });
-    await expect(column(page, 'Lost').getByRole('link', { name: 'Acme seats' })).toBeVisible();
+    // Lost is slim: the card leaves the board, the column counts it and links to the list of it.
+    await expect(column(page, 'Lost')).toContainText('1 deal');
+    await expect(stays).toHaveCount(0);
     await page.reload();
-    await expect(column(page, 'Lost').getByRole('link', { name: 'Acme seats' })).toBeVisible();
+    await expect(column(page, 'Lost')).toContainText('1 deal');
+    await expect(column(page, 'Lost')).toContainText('€1,250');
+    await column(page, 'Lost').getByRole('link', { name: 'View in list: Lost' }).click();
+    await expect(page).toHaveURL(/view=list&stageId=\d+/u);
     await page.getByRole('link', { name: 'Acme seats' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Acme seats' })).toBeVisible();
     await expect(page.getByText('Why it was lost')).toBeVisible();

@@ -405,7 +405,13 @@ test.describe('Records', () => {
         const height = page.viewportSize()?.height ?? 0;
         // Measured once it has finished opening: it zooms in, so its box changes until then.
         await page.waitForFunction(() =>
-          document.getAnimations().every((animation) => animation.playState !== 'running'),
+          document
+            .getAnimations()
+            .every(
+              (animation) =>
+                animation.playState !== 'running' ||
+                !(animation.timeline instanceof DocumentTimeline),
+            ),
         );
         const box = await dialog.boundingBox();
         expect(box && box.y >= 0 && box.y + box.height <= height).toBe(true);

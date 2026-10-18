@@ -15,8 +15,15 @@ const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
  * @param page Playwright page.
  */
 export const expectNoA11yViolations = async (page: Page) => {
+  // Time-based animations only: a scroll-driven one (the deal board's edge fade) is "running" for
+  // as long as the page is, and never finishes.
   await page.waitForFunction(() =>
-    document.getAnimations().every((animation) => animation.playState !== 'running'),
+    document
+      .getAnimations()
+      .every(
+        (animation) =>
+          animation.playState !== 'running' || !(animation.timeline instanceof DocumentTimeline),
+      ),
   );
   // Last, so no gap is left between the check and axe's reading of the page.
   await expect(page).not.toHaveTitle('');
