@@ -14,7 +14,9 @@ const emptyOr = (schema: z.ZodType, message: string) =>
     .string()
     .trim()
     .refine((value) => value === '' || schema.safeParse(value).success, message);
-const Reason = z.string().trim().max(500, 'too_long');
+/** The longest reason a deal can be lost for (the backend's `lostReason`). */
+export const REASON_MAX = 500;
+const Reason = z.string().trim().max(REASON_MAX, 'too_long');
 
 // Mirrors the backend's DealInput (Create/UpdateDealRequest). Messages are `Validation`
 // translation keys. Text fields hold what the inputs hold; an empty one is sent as absent, which
@@ -47,13 +49,24 @@ export type DealValues = z.infer<typeof DealValidation>;
 
 /**
  * The Move dialog's fields: the stage, and the reason when that stage is Lost (`lost`, which the
- * dialog sets from the stage's kind). A reason counts only for Lost.
+ * dialog sets from the stage's kind). A reason counts, and is checked, only for Lost.
  */
 export const MoveFormValidation = z
-  .object({ stageId: z.number().int().positive(), lost: z.boolean(), lostReason: Reason })
-  .refine((move) => !move.lost || move.lostReason !== '', {
-    message: 'required',
-    path: ['lostReason'],
+  .object({
+    stageId: z.number().int().positive(),
+    lost: z.boolean(),
+    // Whatever was typed: another stage ignores it, so only Lost checks it.
+    lostReason: z.string().trim(),
+  })
+  .superRefine((move, context) => {
+    if (!move.lost) {
+      return;
+    }
+    if (move.lostReason === '') {
+      context.addIssue({ code: 'custom', message: 'required', path: ['lostReason'] });
+    } else if (move.lostReason.length > REASON_MAX) {
+      context.addIssue({ code: 'custom', message: 'too_long', path: ['lostReason'] });
+    }
   });
 
 export type MoveFormValues = z.infer<typeof MoveFormValidation>;

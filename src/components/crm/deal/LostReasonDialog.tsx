@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import type { LostReasonValues } from '@/validations/crm/DealValidation';
-import { LostReasonValidation } from '@/validations/crm/DealValidation';
+import { LostReasonValidation, REASON_MAX } from '@/validations/crm/DealValidation';
 
 /**
  * The reason field, mounted each time the dialog opens, so it starts empty.
@@ -54,6 +54,7 @@ const LostReasonForm = (props: { dealName: string; onConfirm: (reason: string) =
       >
         <Textarea
           id="lost-reason"
+          maxLength={REASON_MAX}
           autoFocus
           aria-invalid={errors.reason ? true : undefined}
           aria-describedby={describedBy('lost-reason')}
@@ -81,6 +82,8 @@ const LostReasonForm = (props: { dealName: string; onConfirm: (reason: string) =
  * @param props.onOpenChange Called when it opens or closes.
  * @param props.dealName The deal's name, for the title.
  * @param props.onConfirm Called with the reason; the dialog closes.
+ * @param props.returnFocus The element that takes the focus back on close (the card's handle,
+ *   which the keyboard drag came from).
  * @returns The dialog.
  */
 export const LostReasonDialog = (props: {
@@ -88,12 +91,22 @@ export const LostReasonDialog = (props: {
   onOpenChange: (open: boolean) => void;
   dealName: string;
   onConfirm: (reason: string) => void;
+  returnFocus?: () => HTMLElement | null | undefined;
 }) => {
   const t = useTranslations('LostReasonDialog');
 
   return (
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
-      <DialogContent closeLabel={t('close')}>
+      <DialogContent
+        closeLabel={t('close')}
+        onCloseAutoFocus={(event) => {
+          const target = props.returnFocus?.();
+          if (target) {
+            event.preventDefault();
+            target.focus();
+          }
+        }}
+      >
         <LostReasonForm
           dealName={props.dealName}
           onConfirm={(reason) => {

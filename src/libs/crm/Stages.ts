@@ -1,5 +1,8 @@
 import type { components } from '@/libs/api/schema';
 
+/** A stage as a deal names it: its id, name and kind (the generated `StageRef`). */
+export type StageRef = components['schemas']['StageRef'];
+
 /** A pipeline stage with the fields the settings use. */
 export type Stage = {
   id: number;

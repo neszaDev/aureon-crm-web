@@ -7,10 +7,10 @@ import { initialsOf } from '@/components/crm/Seal';
 import { StampBox } from '@/components/crm/StampBox';
 import type { components } from '@/libs/api/schema';
 import { daysSince } from '@/libs/crm/Format';
+import type { StageRef } from '@/libs/crm/Stages';
 
 type Member = components['schemas']['MemberRef'];
 type Kind = 'OPEN' | 'WON' | 'LOST';
-type Stage = { id: number; name: string; kind: Kind };
 type State = 'reached' | 'current' | 'blank' | 'unknown' | 'won' | 'lost';
 
 /**
@@ -28,7 +28,7 @@ type State = 'reached' | 'current' | 'blank' | 'unknown' | 'won' | 'lost';
  * @returns The list item.
  */
 const StampRowBox = (props: {
-  stage: Stage;
+  stage: StageRef;
   state: State;
   days: number;
   member?: Member;
@@ -68,7 +68,7 @@ const StampRowBox = (props: {
         {props.state === 'lost' && (
           <span
             aria-hidden="true"
-            className="font-mono text-[0.625rem] leading-none font-bold tracking-tighter"
+            className="font-mono text-[0.6875rem] leading-none font-bold tracking-tighter"
           >
             {t('lost_word')}
           </span>
@@ -101,7 +101,7 @@ const StampRowBox = (props: {
  * @returns The state.
  */
 const stateOf = (
-  stage: Stage,
+  stage: StageRef,
   index: number,
   deal: { kind: Kind; index: number; signed: Set<number> },
 ): State => {
@@ -143,7 +143,7 @@ const stateOf = (
  * @returns The row.
  */
 export const StampRow = (props: {
-  stages: Stage[];
+  stages: StageRef[];
   current: { stageId: number; kind: Kind; enteredAt: string };
   signatures?: Record<number, Member | undefined>;
   now: Date;

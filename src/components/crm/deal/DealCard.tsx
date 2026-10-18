@@ -15,10 +15,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { components } from '@/libs/api/schema';
 import { formatDate, formatMoney, recordNumber } from '@/libs/crm/Format';
+import type { StageRef } from '@/libs/crm/Stages';
 import { Link } from '@/libs/I18nNavigation';
 
 type Deal = components['schemas']['DealSummary'];
-type Stage = { id: number; name: string; kind: 'OPEN' | 'WON' | 'LOST' };
 
 /**
  * What a board card shows: the deal's number in mono, its name (a link to the deal), its company,
@@ -36,14 +36,13 @@ type Stage = { id: number; name: string; kind: 'OPEN' | 'WON' | 'LOST' };
 export const DealCardBody = (props: {
   deal: Deal;
   workspaceId: number;
-  stages: Stage[];
+  stages: StageRef[];
   now: Date;
   controls?: React.ReactNode;
   className?: string;
 }) => {
   const t = useTranslations('DealCard');
   const locale = useLocale();
-  const { deal } = props;
 
   return (
     <div
@@ -55,46 +54,46 @@ export const DealCardBody = (props: {
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col">
           <span className="font-mono text-[0.8125rem] text-muted-foreground tabular-nums">
-            {recordNumber('deal', deal.id)}
+            {recordNumber('deal', props.deal.id)}
           </span>
           <Link
-            href={`/app/${props.workspaceId}/deals/${deal.id}`}
+            href={`/app/${props.workspaceId}/deals/${props.deal.id}`}
             className="text-[0.9375rem] font-medium break-words text-foreground"
           >
-            {deal.name}
+            {props.deal.name}
           </Link>
         </div>
         {props.controls}
       </div>
-      {deal.company && (
-        <span className="text-sm break-words text-muted-foreground">{deal.company.name}</span>
+      {props.deal.company && (
+        <span className="text-sm break-words text-muted-foreground">{props.deal.company.name}</span>
       )}
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold tabular-nums">
-          {formatMoney(deal.amount, deal.currency, locale)}
+          {formatMoney(props.deal.amount, props.deal.currency, locale)}
         </span>
-        {deal.owner && (
+        {props.deal.owner && (
           <Seal
-            name={deal.owner.displayName}
-            email={deal.owner.email}
+            name={props.deal.owner.displayName}
+            email={props.deal.owner.email}
             size="sm"
-            title={deal.owner.displayName ?? deal.owner.email}
+            title={props.deal.owner.displayName ?? props.deal.owner.email}
           />
         )}
       </div>
       <StampRow
         stages={props.stages}
         current={{
-          stageId: deal.stage.id,
-          kind: deal.stage.kind,
-          enteredAt: deal.stageEnteredAt,
+          stageId: props.deal.stage.id,
+          kind: props.deal.stage.kind,
+          enteredAt: props.deal.stageEnteredAt,
         }}
         now={props.now}
         size="compact"
       />
-      {deal.expectedCloseDate && (
+      {props.deal.expectedCloseDate && (
         <span className="text-sm text-muted-foreground tabular-nums">
-          {t('close', { date: formatDate(deal.expectedCloseDate, locale) })}
+          {t('close', { date: formatDate(props.deal.expectedCloseDate, locale) })}
         </span>
       )}
     </div>
@@ -104,7 +103,7 @@ export const DealCardBody = (props: {
 /**
  * One card of a board column. A deal the caller may move (`movable`) has a drag handle, which
  * the pointer and the keyboard both use (from 768 px up), and a menu with "Move to…", which is
- * how a phone moves it; both show on hover or focus. Without the right to move it the card has
+ * how a phone moves it; both show on hover (where there is hover) or focus, and always on a touch screen. Without the right to move it the card has
  * neither. A deal whose move is on its way (`busy`) can't be picked up again.
  * @param props Component props.
  * @param props.deal The deal.
@@ -119,7 +118,7 @@ export const DealCardBody = (props: {
 export const DealCard = (props: {
   deal: Deal;
   workspaceId: number;
-  stages: Stage[];
+  stages: StageRef[];
   now: Date;
   movable: boolean;
   busy: boolean;
@@ -143,9 +142,10 @@ export const DealCard = (props: {
         className={cn(isDragging && 'opacity-40', props.busy && 'opacity-70')}
         controls={
           props.movable && (
-            <span className="-mt-1 -mr-1.5 flex shrink-0 items-center md:opacity-0 md:group-focus-within/card:opacity-100 md:group-hover/card:opacity-100 md:has-[[data-state=open]]:opacity-100">
+            <span className="-mt-1 -mr-1.5 flex shrink-0 items-center md:group-focus-within/card:opacity-100 md:group-hover/card:opacity-100 md:has-[[data-state=open]]:opacity-100 [@media(hover:hover)]:md:opacity-0">
               <Button
                 ref={setActivatorNodeRef}
+                id={`deal-handle-${props.deal.id}`}
                 variant="ghost"
                 size="icon-sm"
                 className="cursor-grab touch-none active:cursor-grabbing max-md:hidden"

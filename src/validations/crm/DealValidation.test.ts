@@ -115,6 +115,12 @@ describe('move validation', () => {
     ).toStrictEqual([['lostReason', 'too_long']]);
   });
 
+  it('caps the reason at 500 characters only for Lost: another stage ignores what was typed', () => {
+    expect(
+      issues(MoveFormValidation, { stageId: 13, lost: false, lostReason: 'a'.repeat(600) }),
+    ).toStrictEqual([]);
+  });
+
   it('takes the move the action sends: a stage, the version and an optional reason', () => {
     expect(issues(MoveValidation, { stageId: 2, version: 4 })).toStrictEqual([]);
     expect(issues(MoveValidation, { stageId: 2, version: 4, lostReason: 'x' })).toStrictEqual([]);

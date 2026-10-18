@@ -25,6 +25,7 @@ const none = <span className="text-muted-foreground">—</span>;
  * @param props Component props.
  * @param props.rows The deals.
  * @param props.path The deals page's path; a deal's page is under it.
+ * @param props.companiesPath The companies list; a company's page is under it.
  * @param props.query The current list query.
  * @param props.timeZone The workspace's time zone, for the dates of change.
  * @returns The table.
@@ -32,6 +33,7 @@ const none = <span className="text-muted-foreground">—</span>;
 export const DealTable = (props: {
   rows: components['schemas']['DealSummary'][];
   path: string;
+  companiesPath: string;
   query: ListQuery;
   timeZone: string;
 }) => {
@@ -83,7 +85,7 @@ export const DealTable = (props: {
             <TableCell className="whitespace-normal max-md:hidden">
               {deal.company ? (
                 <Link
-                  href={`${props.path.replace(/\/deals$/u, '')}/companies/${deal.company.id}`}
+                  href={`${props.companiesPath}/${deal.company.id}`}
                   className="break-words text-foreground"
                 >
                   {deal.company.name}

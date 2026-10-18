@@ -23,47 +23,50 @@ export const DealFacts = (props: {
 }) => {
   const t = useTranslations('DealPage');
   const locale = useLocale();
-  const { deal } = props;
   const base = `/app/${props.workspaceId}`;
   const lostReason = {
     label: t('lost_reason'),
-    value: deal.lostReason && <span className="whitespace-pre-line">{deal.lostReason}</span>,
+    value: props.deal.lostReason && (
+      <span className="whitespace-pre-line">{props.deal.lostReason}</span>
+    ),
   };
   const closedOn = {
     label: t('closed_on'),
-    value: deal.closedAt && formatInstant(deal.closedAt, { locale, timeZone: props.timeZone }),
+    value:
+      props.deal.closedAt &&
+      formatInstant(props.deal.closedAt, { locale, timeZone: props.timeZone }),
   };
   const probability = new Intl.NumberFormat(locale, { style: 'percent' }).format(
-    deal.probability / 100,
+    props.deal.probability / 100,
   );
 
   return (
     <RecordFacts
       label={t('details')}
       facts={[
-        ...(deal.status === 'LOST' ? [lostReason] : []),
+        ...(props.deal.status === 'LOST' ? [lostReason] : []),
         {
           label: t('company'),
-          value: deal.company && (
-            <Link href={`${base}/companies/${deal.company.id}`} className={linkClass}>
-              {deal.company.name}
+          value: props.deal.company && (
+            <Link href={`${base}/companies/${props.deal.company.id}`} className={linkClass}>
+              {props.deal.company.name}
             </Link>
           ),
         },
         {
           label: t('contact'),
-          value: deal.contact && (
-            <Link href={`${base}/contacts/${deal.contact.id}`} className={linkClass}>
-              {deal.contact.fullName}
+          value: props.deal.contact && (
+            <Link href={`${base}/contacts/${props.deal.contact.id}`} className={linkClass}>
+              {props.deal.contact.fullName}
             </Link>
           ),
         },
-        { label: t('source'), value: deal.source?.name },
+        { label: t('source'), value: props.deal.source?.name },
         {
           label: t('lead'),
-          value: deal.lead && (
-            <Link href={`${base}/leads/${deal.lead.id}`} className={linkClass}>
-              {deal.lead.fullName}
+          value: props.deal.lead && (
+            <Link href={`${base}/leads/${props.deal.lead.id}`} className={linkClass}>
+              {props.deal.lead.fullName}
             </Link>
           ),
         },
@@ -71,18 +74,20 @@ export const DealFacts = (props: {
           label: t('probability'),
           // The deal's own, or else its stage's, which says so.
           value:
-            deal.probabilityOverride === undefined
+            props.deal.probabilityOverride === undefined
               ? `${probability} ${t('from_stage')}`
               : probability,
         },
         {
           label: t('expected_close'),
-          value: deal.expectedCloseDate && formatDate(deal.expectedCloseDate, locale),
+          value: props.deal.expectedCloseDate && formatDate(props.deal.expectedCloseDate, locale),
         },
-        ...(deal.closedAt ? [closedOn] : []),
+        ...(props.deal.closedAt ? [closedOn] : []),
         {
           label: t('notes'),
-          value: deal.notes && <span className="whitespace-pre-line">{deal.notes}</span>,
+          value: props.deal.notes && (
+            <span className="whitespace-pre-line">{props.deal.notes}</span>
+          ),
         },
       ]}
     />

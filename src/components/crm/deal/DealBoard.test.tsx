@@ -76,26 +76,30 @@ const COLUMNS: Column[] = [
   { stage: LOST, count: 0, totals: [], deals: [] },
 ];
 
+const board = (
+  over: Partial<Parameters<typeof DealBoard>[0]> = {},
+  columns: Column[] = COLUMNS,
+) => (
+  <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+    <p>Outside the board</p>
+    <DealBoard
+      workspaceId={1}
+      columns={columns}
+      me={1}
+      permissions={[]}
+      path="/app/1/deals"
+      query={{ params: { q: 'acme' } }}
+      now={NOW}
+      {...over}
+    />
+    <Toaster />
+  </NextIntlClientProvider>
+);
+
 const renderBoard = async (
   over: Partial<Parameters<typeof DealBoard>[0]> = {},
   columns: Column[] = COLUMNS,
-) => {
-  await render(
-    <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-      <DealBoard
-        workspaceId={1}
-        columns={columns}
-        me={1}
-        permissions={[]}
-        path="/app/1/deals"
-        query={{ params: { q: 'acme' } }}
-        now={NOW}
-        {...over}
-      />
-      <Toaster />
-    </NextIntlClientProvider>,
-  );
-};
+) => await render(board(over, columns));
 
 const column = (name: string) => page.getByRole('region', { name, exact: true });
 const card = (name: string) => page.getByRole('link', { name, exact: true });
@@ -113,6 +117,50 @@ const drag = async (name: string, columns: number) => {
     (columns > 0 ? '{ArrowRight}' : '{ArrowLeft}').repeat(Math.abs(columns)),
   );
   await userEvent.keyboard(' ');
+};
+
+// A moment for the drag to measure itself, waited out by polling the clock.
+const pause = async () => {
+  const start = performance.now();
+  await expect.poll(() => performance.now() - start, { interval: 20 }).toBeGreaterThan(80);
+};
+
+const centre = (element: Element) => {
+  const rect = element.getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+};
+
+const send = (type: string, to: EventTarget, point: { x: number; y: number }) =>
+  to.dispatchEvent(
+    new PointerEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      isPrimary: true,
+      pointerId: 1,
+      pointerType: 'mouse',
+      button: 0,
+      buttons: type === 'pointerup' ? 0 : 1,
+      clientX: point.x,
+      clientY: point.y,
+    }),
+  );
+
+/**
+ * Drags with the pointer, in the steps a hand takes: press on the source, move a little (which
+ * starts the drag), move to the target's centre, release. The drag measures itself between the
+ * events, so each waits for a moment.
+ * @param source The handle.
+ * @param target Where to release.
+ */
+const pointerDrag = async (source: Element, target: Element) => {
+  const from = centre(source);
+  send('pointerdown', source, from);
+  await pause();
+  send('pointermove', document, { x: from.x + 24, y: from.y + 8 });
+  await pause();
+  send('pointermove', document, centre(target));
+  await pause();
+  send('pointerup', document, centre(target));
 };
 
 describe(DealBoard, () => {
@@ -347,5 +395,191 @@ describe(DealBoard, () => {
 
     await expect.element(column('Proposal')).toBeVisible();
     await expect.element(column('Qualification')).not.toBeInTheDocument();
+  });
+
+  it('moves a card dropped on a column with the pointer', async () => {
+    vi.mocked(DealActions.moveDeal).mockResolvedValue({ ok: true, version: 4 });
+    await renderBoard();
+
+    await pointerDrag(handle('D-0101 Mine to move').element(), column('Proposal').element());
+
+    await expect
+      .element(column('Proposal').getByRole('link', { name: 'Mine to move' }))
+      .toBeVisible();
+    expect(DealActions.moveDeal).toHaveBeenCalledExactlyOnceWith(1, 101, {
+      stageId: 12,
+      version: 3,
+      lostReason: undefined,
+    });
+  });
+
+  it('moves nothing when a card is released outside every column', async () => {
+    await renderBoard();
+
+    await pointerDrag(
+      handle('D-0101 Mine to move').element(),
+      page.getByText('Outside the board').element(),
+    );
+
+    // The drop is cancelled: said so, and no move, no dialog, the card where it was.
+    await expect.element(page.getByText('Moving Mine to move was cancelled.')).toBeInTheDocument();
+    expect(DealActions.moveDeal).not.toHaveBeenCalled();
+    expect(page.getByRole('dialog').elements()).toHaveLength(0);
+    await expect
+      .element(column('Qualification').getByRole('link', { name: 'Mine to move' }))
+      .toBeVisible();
+  });
+
+  it('closes a deal as won with a drop on Won, and the card shows it', async () => {
+    vi.mocked(DealActions.moveDeal).mockResolvedValue({ ok: true, version: 4 });
+    await renderBoard();
+
+    await drag('D-0101 Mine to move', 2);
+
+    const won = column('Won').getByRole('link', { name: 'Mine to move' });
+
+    await expect.element(won).toBeVisible();
+    expect(DealActions.moveDeal).toHaveBeenCalledExactlyOnceWith(1, 101, {
+      stageId: 13,
+      version: 3,
+      lostReason: undefined,
+    });
+    await expect.element(column('Won').getByText('Won: reached')).toBeInTheDocument();
+  });
+
+  it('puts a card back, with the toast, when a move to Lost with its reason is refused', async () => {
+    vi.mocked(DealActions.moveDeal).mockResolvedValue({
+      ok: false,
+      message: "Your role doesn't allow this.",
+    });
+    await renderBoard();
+    await drag('D-0101 Mine to move', 3);
+
+    await page.getByLabelText('Reason').fill('Went with a rival');
+    await page.getByRole('button', { name: 'Mark as lost' }).click();
+
+    await expect.element(page.getByText("Your role doesn't allow this.")).toBeVisible();
+    await expect
+      .element(column('Qualification').getByRole('link', { name: 'Mine to move' }))
+      .toBeVisible();
+    expect(column('Lost').getByRole('link', { name: 'Mine to move' }).elements()).toHaveLength(0);
+  });
+
+  it('moves a card again with the version its first move returned, before any refresh', async () => {
+    vi.mocked(DealActions.moveDeal).mockResolvedValue({ ok: true, version: 4 });
+    await renderBoard();
+    await drag('D-0101 Mine to move', 1);
+    await expect
+      .element(column('Proposal').getByRole('link', { name: 'Mine to move' }))
+      .toBeVisible();
+
+    await drag('D-0101 Mine to move', 1);
+
+    await expect.element(column('Won').getByRole('link', { name: 'Mine to move' })).toBeVisible();
+    expect(DealActions.moveDeal).toHaveBeenLastCalledWith(1, 101, {
+      stageId: 13,
+      version: 4,
+      lostReason: undefined,
+    });
+  });
+
+  it('shows the server again once a refresh brings new columns, not the move it answered', async () => {
+    vi.mocked(DealActions.moveDeal).mockResolvedValue({ ok: true, version: 4 });
+    const screen = await renderBoard();
+    await drag('D-0101 Mine to move', 1);
+    await expect
+      .element(column('Proposal').getByRole('link', { name: 'Mine to move' }))
+      .toBeVisible();
+
+    // Someone else then moved it to Won: the refresh shows it there, not where this board put it.
+    const moved = {
+      ...MINE,
+      stage: { id: 13, name: 'Won', kind: 'WON' as const },
+      status: 'WON' as const,
+      version: 5,
+    };
+    await screen.rerender(
+      board({}, [
+        { ...FIRST_COLUMN, count: 1, deals: [RILEYS] },
+        { stage: PROPOSAL, count: 0, totals: [], deals: [] },
+        { stage: WON, count: 1, totals: [], deals: [moved] },
+        { stage: LOST, count: 0, totals: [], deals: [] },
+      ]),
+    );
+
+    await expect.element(column('Won').getByRole('link', { name: 'Mine to move' })).toBeVisible();
+    expect(column('Proposal').getByRole('link', { name: 'Mine to move' }).elements()).toHaveLength(
+      0,
+    );
+  });
+
+  it('keeps the focus on the moved card after a keyboard drop', async () => {
+    vi.mocked(DealActions.moveDeal).mockResolvedValue({ ok: true, version: 4 });
+    await renderBoard();
+
+    await drag('D-0101 Mine to move', 1);
+
+    await expect
+      .element(column('Proposal').getByRole('link', { name: 'Mine to move' }))
+      .toBeVisible();
+    await expect.element(handle('D-0101 Mine to move')).toHaveFocus();
+  });
+
+  it('keeps a pending move on a card that cannot be picked up again until it is answered', async () => {
+    const answer = Promise.withResolvers<Move>();
+    vi.mocked(DealActions.moveDeal).mockReturnValue(answer.promise);
+    await renderBoard();
+
+    await drag('D-0101 Mine to move', 1);
+    await drag('D-0101 Mine to move', 1);
+
+    expect(DealActions.moveDeal).toHaveBeenCalledOnce();
+    answer.resolve({ ok: true, version: 4 });
+  });
+
+  it('reveals a card\u2019s handle and menu on hover only where there is hover', async () => {
+    await renderBoard();
+
+    const controls = handle('D-0101 Mine to move').element().parentElement;
+
+    expect(controls?.className).toContain('[@media(hover:hover)]:md:opacity-0');
+    expect(controls?.className).not.toMatch(/(^| )md:opacity-0/u);
+  });
+
+  it('keeps the deal’s name in the Lost dialog’s title while it closes', async () => {
+    await renderBoard();
+    await drag('D-0101 Mine to move', 3);
+    await expect
+      .element(page.getByRole('dialog', { name: 'Mark Mine to move as lost' }))
+      .toBeVisible();
+
+    await page.getByRole('button', { name: 'Cancel' }).click();
+
+    // Right after the click the dialog is still fading out, with its title as it was.
+    expect(document.body.textContent).not.toContain('Mark  as lost');
+  });
+
+  it('gives the focus back to the card’s handle when the Lost dialog is cancelled', async () => {
+    await renderBoard();
+    await drag('D-0101 Mine to move', 3);
+    await expect
+      .element(page.getByRole('dialog', { name: 'Mark Mine to move as lost' }))
+      .toBeVisible();
+
+    await page.getByRole('button', { name: 'Cancel' }).click();
+
+    await expect.element(handle('D-0101 Mine to move')).toHaveFocus();
+  });
+
+  it('puts the focus on the handle of the card moved to Lost, once its reason is given', async () => {
+    vi.mocked(DealActions.moveDeal).mockResolvedValue({ ok: true, version: 4 });
+    await renderBoard();
+    await drag('D-0101 Mine to move', 3);
+
+    await page.getByLabelText('Reason').fill('Went with a rival');
+    await page.getByRole('button', { name: 'Mark as lost' }).click();
+
+    await expect.element(column('Lost').getByRole('link', { name: 'Mine to move' })).toBeVisible();
+    await expect.element(handle('D-0101 Mine to move')).toHaveFocus();
   });
 });

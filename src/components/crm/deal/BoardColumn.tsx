@@ -33,9 +33,8 @@ export const BoardColumn = (props: {
 }) => {
   const t = useTranslations('BoardColumn');
   const locale = useLocale();
-  const { stage, count, totals } = props.column;
-  const { setNodeRef, isOver } = useDroppable({ id: stage.id });
-  const headingId = `board-stage-${stage.id}`;
+  const { setNodeRef, isOver } = useDroppable({ id: props.column.stage.id });
+  const headingId = `board-stage-${props.column.stage.id}`;
 
   return (
     <section
@@ -50,15 +49,15 @@ export const BoardColumn = (props: {
       <header className="flex flex-col gap-1 px-0.5">
         <div className="flex items-baseline justify-between gap-2">
           <h2 id={headingId} className="font-semibold break-words">
-            {stage.name}
+            {props.column.stage.name}
           </h2>
           <span className="shrink-0 text-sm text-muted-foreground tabular-nums">
-            {t('count', { count })}
+            {t('count', { count: props.column.count })}
           </span>
         </div>
-        {totals.length > 0 && (
+        {props.column.totals.length > 0 && (
           <ul aria-label={t('totals')} className="flex flex-col">
-            {totals.map((total) => (
+            {props.column.totals.map((total) => (
               <li key={total.currency} className="text-[0.9375rem] font-medium tabular-nums">
                 {formatMoney(total.amount, total.currency, locale)}
               </li>
@@ -71,16 +70,16 @@ export const BoardColumn = (props: {
       ) : (
         <p className="px-0.5 text-sm text-muted-foreground">{t('empty')}</p>
       )}
-      {count > props.column.deals.length && (
+      {props.column.count > props.column.deals.length && (
         <p className="px-0.5 text-sm text-muted-foreground">
           {t.rich('more', {
             shown: props.column.deals.length,
-            count,
+            count: props.column.count,
             link: (chunks) => (
               <Link
                 href={listHref(props.path, props.query, {
                   view: 'list',
-                  stageId: String(stage.id),
+                  stageId: String(props.column.stage.id),
                 })}
                 className="font-medium text-seal-ink"
               >

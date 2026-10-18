@@ -32,8 +32,7 @@ export const DealsListSection = async (props: {
 }) => {
   const t = await getTranslations('DealsPage');
   const locale = await getLocale();
-  const { query, path } = props;
-  const list = await getDeals(String(props.workspace.id), query);
+  const list = await getDeals(String(props.workspace.id), props.query);
   if (list.unauthorized) {
     return endRejectedSession(locale);
   }
@@ -41,7 +40,7 @@ export const DealsListSection = async (props: {
     return <ForbiddenNotice page />;
   }
   // Without its search and filters, but still the table.
-  const listPath = listHref(path, { params: {} }, { view: 'list' });
+  const listPath = listHref(props.path, { params: {} }, { view: 'list' });
   if (list.invalid) {
     return <InvalidFilterNotice resetHref={listPath} />;
   }
@@ -51,14 +50,17 @@ export const DealsListSection = async (props: {
   }
   if (rows.content.length === 0 && rows.totalPages > 0) {
     return redirect({
-      href: listHref(path, query, {
+      href: listHref(props.path, props.query, {
         page: rows.totalPages > 1 ? String(rows.totalPages - 1) : undefined,
       }),
       locale,
     });
   }
   // `view` narrows nothing.
-  const filtered = isFiltered({ ...query, filters: { ...query.filters, view: undefined } });
+  const filtered = isFiltered({
+    ...props.query,
+    filters: { ...props.query.filters, view: undefined },
+  });
   let empty = (
     <ListEmpty
       variant="none"
@@ -69,12 +71,12 @@ export const DealsListSection = async (props: {
   );
   if (filtered) {
     empty = <ListEmpty variant="filtered" clearHref={listPath} />;
-  } else if (query.archived) {
+  } else if (props.query.archived) {
     empty = (
       <ListEmpty
         variant="archived"
         text={t('archived_empty_text')}
-        activeHref={listHref(path, query, { archived: undefined })}
+        activeHref={listHref(props.path, props.query, { archived: undefined })}
       />
     );
   }
@@ -85,7 +87,7 @@ export const DealsListSection = async (props: {
       className="overflow-hidden rounded-lg border border-rule bg-card"
     >
       <h2 id="deals-heading" className="px-4 pt-4 pb-3 font-semibold sm:px-5">
-        {query.archived
+        {props.query.archived
           ? t('archived_heading', { count: rows.totalElements })
           : t('list_heading', { count: rows.totalElements })}
       </h2>
@@ -94,12 +96,13 @@ export const DealsListSection = async (props: {
           <div className="border-t border-rule">
             <DealTable
               rows={rows.content}
-              path={path}
-              query={query}
+              path={props.path}
+              companiesPath={`/app/${props.workspace.id}/companies`}
+              query={props.query}
               timeZone={props.workspace.timezone}
             />
           </div>
-          <ListPager path={path} query={query} total={rows.totalElements} />
+          <ListPager path={props.path} query={props.query} total={rows.totalElements} />
         </>
       ) : (
         empty

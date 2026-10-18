@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
 import messages from '@/locales/en.json';
+import fr from '@/locales/fr.json';
 // The box size and the press are styles.
 import '@/styles/global.css';
 import { StampRow } from './StampRow';
@@ -209,5 +210,19 @@ describe(StampRow, () => {
     );
 
     expect(document.querySelector('.stamp-press')).toBeNull();
+  });
+
+  it('sets the word Lost at the stamp size, and the longest translation still fits the box', async () => {
+    await render(
+      <NextIntlClientProvider locale="fr" messages={fr} timeZone="UTC">
+        <StampRow {...row({ current: { stageId: 5, kind: 'LOST', enteredAt: ENTERED } })} />
+      </NextIntlClientProvider>,
+    );
+
+    const word = page.getByText('Perdu', { exact: true }).element();
+    const box = word.closest('.size-9');
+
+    expect(getComputedStyle(word).fontSize).toBe('11px');
+    expect(word.getBoundingClientRect().width).toBeLessThanOrEqual(box?.clientWidth ?? 0);
   });
 });

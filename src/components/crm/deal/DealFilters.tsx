@@ -43,7 +43,6 @@ export const DealFilters = (props: {
 }) => {
   const t = useTranslations('DealsPage');
   const tStatus = useTranslations('DealStatus');
-  const { companyId, contactId } = props.query.filters;
 
   return (
     <ListToolbar label={t('toolbar_label')}>
@@ -72,9 +71,12 @@ export const DealFilters = (props: {
         kind="company"
         param="companyId"
         value={
-          companyId === undefined
+          props.query.filters.companyId === undefined
             ? null
-            : { id: companyId, label: props.companyName ?? t('company_unknown') }
+            : {
+                id: props.query.filters.companyId,
+                label: props.companyName ?? t('company_unknown'),
+              }
         }
         path={props.path}
         query={props.query}
@@ -89,9 +91,12 @@ export const DealFilters = (props: {
             kind="contact"
             param="contactId"
             value={
-              contactId === undefined
+              props.query.filters.contactId === undefined
                 ? null
-                : { id: contactId, label: props.contactName ?? t('contact_unknown') }
+                : {
+                    id: props.query.filters.contactId,
+                    label: props.contactName ?? t('contact_unknown'),
+                  }
             }
             path={props.path}
             query={props.query}

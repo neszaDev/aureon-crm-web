@@ -22,16 +22,15 @@ import {
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import type { ActionResult } from '@/libs/api/ApiError';
+import type { StageRef } from '@/libs/crm/Stages';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import type { MoveFormValues } from '@/validations/crm/DealValidation';
-import { MoveFormValidation } from '@/validations/crm/DealValidation';
-
-type Stage = { id: number; name: string; kind: 'OPEN' | 'WON' | 'LOST' };
+import { MoveFormValidation, REASON_MAX } from '@/validations/crm/DealValidation';
 
 type MoveProps = {
   workspaceId: number;
   deal: { id: number; name: string; version: number; stageId: number };
-  stages: Stage[];
+  stages: StageRef[];
 };
 
 const FIELDS: Record<string, keyof MoveFormValues> = {
@@ -121,6 +120,7 @@ const MoveForm = (props: MoveProps & { onDone: () => void }) => {
         >
           <Textarea
             id="move-reason"
+            maxLength={REASON_MAX}
             aria-invalid={errors.lostReason ? true : undefined}
             aria-describedby={describedBy('move-reason')}
             {...form.register('lostReason')}

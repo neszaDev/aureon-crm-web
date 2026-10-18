@@ -92,15 +92,14 @@ const columnCoordinates: KeyboardCoordinateGetter = (event, args) => {
 };
 
 /**
- * A column of the board under the pointer, else the nearest one (the keyboard has no pointer).
+ * The column under the pointer: a pointer drag released over anything else (the header, the
+ * filters, the space beside the board) is over no column, and moves nothing. The keyboard has no
+ * pointer, so it takes the column nearest to the card.
  * @param args The drag's context.
  * @returns The colliding columns.
  */
-const collideColumns: typeof closestCenter = (args) => {
-  const within = pointerWithin(args);
-
-  return within.length > 0 ? within : closestCenter(args);
-};
+const collideColumns: typeof closestCenter = (args) =>
+  args.pointerCoordinates ? pointerWithin(args) : closestCenter(args);
 
 /**
  * The deal board: one column per stage, in order, each with its count, totals per currency and
@@ -136,7 +135,8 @@ export const DealBoard = (props: {
   // The columns the last render took the pending moves against: a refresh brings new ones, and
   // a move the server has answered is then in them.
   const [seen, setSeen] = useState(props.columns);
-  const [asking, setAsking] = useState<{ deal: Deal; stage: Stage }>();
+  // The deal dropped on Lost, kept while the dialog closes so its title doesn't blank.
+  const [asking, setAsking] = useState<{ deal: Deal; stage: Stage; open: boolean }>();
   const [menuDeal, setMenuDeal] = useState<Deal>();
   const [dragging, setDragging] = useState<Deal>();
   const [selected, setSelected] = useState(props.columns[0]?.stage.id);
@@ -282,7 +282,7 @@ export const DealBoard = (props: {
           }
           if (stage.kind === 'LOST') {
             // Not moved yet: the reason comes first.
-            setAsking({ deal, stage });
+            setAsking({ deal, stage, open: true });
           } else {
             void startMove(deal, stage);
           }
@@ -340,13 +340,16 @@ export const DealBoard = (props: {
         </DragOverlay>
       </DndContext>
       <LostReasonDialog
-        open={asking !== undefined}
+        open={asking?.open ?? false}
         onOpenChange={(open) => {
           if (!open) {
-            setAsking(undefined);
+            setAsking((current) => current && { ...current, open: false });
           }
         }}
         dealName={asking?.deal.name ?? ''}
+        returnFocus={() =>
+          document.querySelector<HTMLElement>(`#deal-handle-${asking?.deal.id ?? ''}`)
+        }
         onConfirm={(reason) => {
           if (asking) {
             void startMove(asking.deal, asking.stage, reason);
