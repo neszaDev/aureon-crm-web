@@ -8,8 +8,10 @@ flowchart LR
   P -->|no access cookie + refresh cookie| R[POST /auth/refresh]
   P --> RSC[Server components<br/>libs/api/Queries.ts]
   B -->|form submit| SA[Server actions<br/>src/actions/*]
+  B -->|Export CSV| RH[Route handler<br/>app/api/crm/**]
   RSC -->|Bearer access token| API[(Spring API)]
   SA -->|Bearer access token| API
+  RH -->|Bearer access token| API
   R --> API
   API --> PG[(PostgreSQL)]
 ```
@@ -75,10 +77,13 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
 |---|---|
 | `/app` | The signed-in home: the create form with no workspace, the workspace itself with one, the list with several (`PickerFrame`: wordmark and your seal over one column) |
 | `/app/new` | Create another workspace |
-| `/app/{workspaceId}` | The workspace's dashboard (for now a welcome with next steps and the members) |
-| `/app/{workspaceId}/settings/{workspace,members,roles,pipeline,sources,profile}` | Settings: name, currency and time zone; members and invitation links; the role matrix; pipeline stages; lead sources; your display name and password |
+| `/app/{workspaceId}` | The dashboard (`?from&to`: the period of its won and lost); an empty workspace starts with its first records |
+| `/app/{workspaceId}/settings/{workspace,members,roles,pipeline,sources,audit,profile}` | Settings: name, currency and time zone; members and invitation links; the role matrix; pipeline stages; lead sources; the audit trail (`?entityType&actorId&page`, owners and admins); your display name and password |
 | `/app/{workspaceId}/companies`, `/contacts`, `/leads`, `/deals` | The record lists (deals: `?view=list`; the default is the board). Each has `/new`, `/{id}` (the record page) and `/{id}/edit` |
 | `/app/{workspaceId}/tasks`, `/tasks/{id}` | Tasks: the list with its views (mine, overdue, next 7 days, completed, all) and a task's page |
+| `/app/{workspaceId}/reports` | The reports, one tab at a time (`?tab=pipeline\|won-lost\|funnel\|activities\|follow-ups&from&to`) |
+| `/api/crm/{workspaceId}/export/{list}` | Route handler: the CSV of a list (companies, contacts, leads, deals) for its page's filters, streamed from the backend |
+| `/`, `/about` | Public: the landing page (real captures of the app in `public/landing/`) and About, static per locale |
 | `/invite/{token}` | Public: an invitation's preview, then register, sign in or join (`(center)` layout, like sign-in and sign-up) |
 
 - `app/layout.tsx` loads the signed-in user; a 401 ends the session (`/api/session/expired`), a
@@ -115,6 +120,25 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
   Lost asks for the reason first. A refused move puts the card back and says why in a toast. A
   deal's page shows the stamp row (`StampRow`: each reached stage signed by whoever moved the
   deal into it) and the stage history.
+
+### Insights
+
+- **The dashboard and the reports** read the API's figures through `CrmQueries.ts` and show them as
+  they are: no re-aggregation on the page, never a sum across currencies, each period labelled from
+  the `period` the response names. The period lives in the URL (`?from&to`); `PeriodQuery.ts`
+  keeps only real days, `from` ≤ `to`, at most 366 days apart, and drops anything else for the
+  API's default (the last 30 days in the workspace's time zone). Every chart (recharts, through
+  `components/ui/chart.tsx`, colours `--chart-1..5`, never colour alone) has its data in a table.
+- **Record search** (`RecordSearch`, ⌘K) and **the reminders bell** live in the shell's top bar.
+  The search asks the four lists (`q`, 5 each) through a server action; the bell's count comes from
+  `GET /reminders`, read by the workspace layout and again by the bell on every navigation.
+  Reminders are in-app only.
+- **The CSV export** is the one route handler that talks to the backend: the list's Export button
+  fetches it with the page's filters and saves the file once all of it has arrived, under the
+  backend's name. It refuses `HEAD` and a request the browser marks cross-site (a link on another
+  site would otherwise export, and audit, in the user's name). Only roles with `EXPORT` see it.
+- **The audit trail** is a settings page for `AUDIT_READ`; every record's page has its own
+  History (`RecordHistory`), readable by every member.
 
 ## Rendering
 

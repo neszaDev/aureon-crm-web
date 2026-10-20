@@ -16,7 +16,7 @@ inherited from [nextjs-boilerplate](https://github.com/neszaDev/nextjs-boilerpla
 remote for updates. Tokens live in httpOnly cookies and never reach browser JS. Who the product
 is for: [PRODUCT.md](PRODUCT.md); its look: [DESIGN.md](DESIGN.md).
 Architecture: [docs/architecture.md](docs/architecture.md). Guides:
-[configuration](docs/configuration.md) · [backend integration](docs/backend-integration.md) ·
+[user guide](docs/user-guide.md) · [configuration](docs/configuration.md) · [backend integration](docs/backend-integration.md) ·
 [testing](docs/testing.md) · [CI/CD](docs/ci.md).
 
 ## Layout
@@ -29,7 +29,8 @@ src/actions/                    server actions: the only place that mutates via 
 src/app/api/                    route handlers: session/expired (ends a rejected session), crm/[workspaceId]/export/[list]
                                 (a list's CSV, streamed from the backend)
 src/actions/crm/*               CRM writes: workspaces, members, invitations (create, accept), pipeline, sources,
-                                companies, contacts, leads (status, convert), deals (move), tasks, activities
+                                companies, contacts, leads (status, convert), deals (move), tasks, activities; and the
+                                reads client components make: the ⌘K search, the pickers, the bell's refresh, older history
 src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for pages), ApiError.ts,
                                 ActionFailure.ts, Session.ts, schema.d.ts (GENERATED, see below)
 src/libs/api/CrmQueries.ts      CRM reads for pages (workspaces, members, invitations, stages, sources, records, lists, the
@@ -56,8 +57,10 @@ src/components/crm/**           the CRM: shell/ (rail, switcher, account menu, r
                                 company/ contact/ lead/ deal/ task/ activity/, with the shared list/ (list kit),
                                 record/ (header, facts, archive) and fields/ (pickers, owner, date and time)
 src/components/ src/templates/  UI (MarketingTemplate, AppShell); src/locales/*.json  all user-visible text
-tests/e2e/                      Playwright, always against the real backend (crm/*: the CRM specs and their helpers)
-docker/  env/  scripts/  docs/  same roles as in the API repo
+tests/e2e/                      Playwright, always against the real backend (crm/*: the CRM specs and their helpers;
+                                Journey.e2e.ts: the brief's 10-step journey)
+public/landing/                 the landing page's real captures of the app (`scripts/capture-landing.ts`; its README)
+docker/  env/  scripts/  docs/  same roles as in the API repo (docs/user-guide.md: the CRM's workflows)
 ```
 
 ## Commands

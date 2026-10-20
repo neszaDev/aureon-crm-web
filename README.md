@@ -2,11 +2,12 @@
 
 The web app of **Aureon CRM**, a multi-user CRM for small and medium-sized businesses, on
 **Next.js 16** (App Router, React 19, TypeScript, Tailwind v4, shadcn/ui, next-intl). Every
-business is a workspace; people join one through an invitation link and get a role in it. Today
-the app has sign-in and sign-up, the workspace picker and the CRM shell, workspace settings,
-members and invitation links, the pipeline's stages and the lead sources, in English, French and
-Thai, in light and dark themes. Companies, contacts, leads, deals, tasks and the dashboard follow
-([the plan](docs/plans/0004-crm.md)).
+business is a workspace; people join one through an invitation link and get a role in it (owner,
+admin, manager or sales rep). It has companies and contacts, leads that convert into a contact and a
+deal, a drag-and-drop pipeline whose stamp row shows who moved each deal, tasks with in-app
+reminders, activities, a record search, a dashboard and five reports, CSV export and an audit
+trail, in English, French and Thai, in light and dark themes. How to use it:
+[the user guide](docs/user-guide.md).
 
 Its backend is [aureon-crm-api](https://github.com/neszaDev/aureon-crm-api) (Spring Boot and
 PostgreSQL). The CRM's specification, data model, permission matrix and REST contract live there,
@@ -18,6 +19,19 @@ types are generated from its OpenAPI spec.
 The repo was split from [nextjs-boilerplate](https://github.com/neszaDev/nextjs-boilerplate),
 itself based on [Next.js Boilerplate](https://github.com/ixartz/Next-js-Boilerplate) by ixartz
 (MIT). The boilerplate's demo pages stay at `/dashboard/**` as a component gallery.
+
+## Screens
+
+Real captures of the running app, on the API's demo data (from `public/landing/`, where the
+landing page shows them; see its README for how they are made):
+
+| Dashboard | Deals board |
+|---|---|
+| ![The dashboard](public/landing/dashboard-light.webp) | ![The deals board](public/landing/board-light.webp) |
+| **A won deal: its stamp row and stage history** | **Reports** |
+| ![A won deal](public/landing/deal-light.webp) | ![The reports](public/landing/reports-light.webp) |
+| **My tasks, with the reminders open** | **On a phone, in Thai** |
+| ![Tasks and reminders](public/landing/tasks-light.webp) | ![The board on a phone, in Thai](public/landing/board-390-th-light.webp) |
 
 ## Prerequisites
 
@@ -44,8 +58,19 @@ itself based on [Next.js Boilerplate](https://github.com/ixartz/Next-js-Boilerpl
    pnpm dev     # the app on http://localhost:3000
    ```
 
-Sign up at `/sign-up` and create your first workspace. The end-to-end tests run against the same
-API, one worker at a time:
+Sign up at `/sign-up` and create your first workspace.
+
+### Demo data
+
+To look around a populated CRM, start the API with `DEMO_DATA=true` in its `env/.env` (local and
+dev profiles only). It seeds, once, a fictional workspace **Northwind Supply (demo)** (USD,
+Asia/Bangkok) with companies, contacts, leads in every status, deals in every stage with months of
+history, tasks and activities, and four members, one per role. Their logins and the password are in
+the API's [`docs/crm/README.md`](https://github.com/neszaDev/aureon-crm-api/blob/feat/crm/docs/crm/README.md#try-it)
+(owner, admin, manager and sales rep, so each role can be tried). The tests never use it: each
+one makes its own accounts and workspace.
+
+The end-to-end tests run against the same API, one worker at a time:
 
 ```sh
 pnpm exec playwright test --project=chromium --workers=1
@@ -75,11 +100,15 @@ Run `make` to list them all. Against the API repo on 8081, regenerate the types 
 ```
 src/app/[locale]/   pages: (marketing) public, (auth) sign-in/up, invite links, app/** (the CRM)
                     and dashboard/** (the boilerplate's demos)
-src/components/crm/ the CRM: shell/ (rail, switcher, account menu), settings/, seals, forms
-src/actions/        server actions (auth; crm/: workspaces, members, invitations, pipeline, sources)
+src/app/api/crm/    the CSV export route (streams a list's file from the backend)
+src/components/crm/ the CRM: shell/ (rail, switcher, search, reminders bell, account menu),
+                    dashboard/, reports/, audit/, settings/, a folder per record, the list kit
+src/actions/        server actions (auth; crm/: every CRM write, and the reads client components need)
 src/libs/api/       typed backend client, read queries (CrmQueries.ts), error mapping, schema
+src/libs/crm/       CRM logic: permissions, list and period URLs, formatting, time zones
 src/proxy.ts        i18n routing + auth (protects /app and /dashboard, refreshes tokens)
-tests/e2e/          Playwright, always against the real backend (crm/: the CRM flows)
+public/landing/     the landing page's captures of the app
+tests/e2e/          Playwright, always against the real backend (crm/: the CRM flows and the journey)
 docker/  env/  scripts/  docs/  .github/   same roles as in the API repo
 ```
 
@@ -100,6 +129,7 @@ Then run `make verify` and the end-to-end tests, and open a PR into `dev`.
 
 | Guide | Covers |
 |---|---|
+| [User guide](docs/user-guide.md) | The CRM's workflows, and who may do what |
 | [Architecture](docs/architecture.md) | Request flow, auth/session design, the CRM's routes and shell, where code goes |
 | [Backend integration](docs/backend-integration.md) | Typed client, regenerating types, errors, adding an endpoint |
 | [Configuration](docs/configuration.md) | Every environment variable |
