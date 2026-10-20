@@ -1,7 +1,9 @@
+import { createHash } from 'node:crypto';
 import createMiddleware from 'next-intl/middleware';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { backend } from '@/libs/api/Backend';
+import type { SessionTokens } from '@/libs/Auth';
 import {
   ACCESS_TOKEN_COOKIE,
   isSecureAppUrl,
@@ -35,6 +37,44 @@ const refreshSession = async (refreshToken: string) => {
     });
 
   return toSessionTokens(result?.data);
+};
+
+// How long a refresh's result is shared after it settles, and how many are shared at once.
+const REFRESH_SHARE_MS = 5000;
+const MAX_SHARED_REFRESHES = 1000;
+// Refreshes on their way or just settled, by the hash of the refresh token they used.
+const sharedRefreshes = new Map<string, Promise<SessionTokens | undefined>>();
+
+/**
+ * Refreshes a session once for every request holding its refresh token: those that arrive
+ * together (two tabs, the bell, a prefetch, an export) or within a few seconds after share one
+ * call and its new tokens, where each on its own would lose the rotation to the first and be sent
+ * to sign in. Per server process: other instances rely on the API's reuse grace. The map keeps
+ * a hash of the token, never the token, drops each entry a few seconds after it settles, and
+ * holds a bounded number; past it a request refreshes on its own.
+ * @param refreshToken Current refresh token.
+ * @returns New tokens, or `undefined` if the backend rejected the token or is unreachable.
+ */
+const sharedRefresh = async (refreshToken: string) => {
+  // Read and stored before any await, so requests arriving together find the first one's.
+  const key = createHash('sha256').update(refreshToken).digest('hex');
+  const shared = sharedRefreshes.get(key);
+  if (shared) {
+    return await shared;
+  }
+
+  const refresh = refreshSession(refreshToken);
+  if (sharedRefreshes.size >= MAX_SHARED_REFRESHES) {
+    return await refresh;
+  }
+  sharedRefreshes.set(key, refresh);
+  try {
+    return await refresh;
+  } finally {
+    setTimeout(() => {
+      sharedRefreshes.delete(key);
+    }, REFRESH_SHARE_MS);
+  }
 };
 
 /**
@@ -80,7 +120,7 @@ export default async function proxy(request: NextRequest) {
   // too, without sending anyone to sign in.
   if ((protectedMatch || crmApi || INVITE_PATH.test(pathname)) && !hasAccessToken) {
     const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
-    const tokens = refreshToken ? await refreshSession(refreshToken) : undefined;
+    const tokens = refreshToken ? await sharedRefresh(refreshToken) : undefined;
 
     if (!tokens) {
       // Don't delete cookies here: a parallel request may have just rotated them successfully.

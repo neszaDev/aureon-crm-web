@@ -1,6 +1,6 @@
 import { unstable_doesMiddlewareMatch } from 'next/experimental/testing/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import proxy, { config } from './proxy';
 
 const { refresh, routeI18n } = vi.hoisted(() => ({
@@ -36,7 +36,48 @@ const exportRequest = (cookie: string) =>
     headers: { cookie },
   });
 
+const TOKENS = {
+  accessToken: 'fresh-access',
+  refreshToken: 'fresh-refresh',
+  expiresIn: 900,
+  refreshExpiresIn: 2_592_000,
+};
+
+/**
+ * A request for a CRM page from a browser whose access cookie expired.
+ * @param refreshToken The refresh token it holds.
+ * @returns The request.
+ */
+const pageRequest = (refreshToken: string) =>
+  new NextRequest('http://localhost:3000/app/7/deals', {
+    headers: { cookie: `refresh_token=${refreshToken}` },
+  });
+
+/**
+ * What a response tells the browser: where it goes, if anywhere, and the cookies it stores.
+ * @param response The proxy's response.
+ * @returns Its location and session cookies.
+ */
+const outcome = (response: Response) => {
+  const { cookies } = NextResponse.next({ headers: response.headers });
+
+  return {
+    location: response.headers.get('location'),
+    access: cookies.get('access_token')?.value,
+    refresh: cookies.get('refresh_token')?.value,
+  };
+};
+
 describe(proxy, () => {
+  // Each test starts with no refresh shared from an earlier one: the grace runs on fake timers.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  });
+  afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+  });
+
   it('sends a GET to sign in even with an action id', async () => {
     const response = await proxy(actionRequest('GET'));
 
@@ -121,5 +162,104 @@ describe(proxy, () => {
     expect(refresh).not.toHaveBeenCalled();
     expect(response.headers.get('x-middleware-next')).toBe('1');
     expect(routeI18n).not.toHaveBeenCalled();
+  });
+
+  describe('with requests that arrive together with one expired session', () => {
+    it.each([2, 5])(
+      'refreshes it once for %i requests, and gives every one the same new cookies',
+      async (count) => {
+        refresh.mockClear();
+        routeI18n.mockClear();
+        const answer = Promise.withResolvers<{ data?: unknown; response: Response }>();
+        refresh.mockReturnValueOnce(answer.promise);
+        routeI18n.mockImplementation((request) => NextResponse.next({ request }));
+
+        const responses = Array.from(
+          { length: count },
+          async () => await proxy(pageRequest('shared')),
+        );
+        answer.resolve({ data: TOKENS, response: new Response(null, { status: 200 }) });
+        const answered = await Promise.all(responses);
+        const outcomes = answered.map(outcome);
+
+        expect(refresh).toHaveBeenCalledExactlyOnceWith('/api/v1/auth/refresh', {
+          body: { refreshToken: 'shared' },
+        });
+        expect(outcomes).toStrictEqual(
+          Array.from({ length: count }, () => ({
+            location: null,
+            access: 'fresh-access',
+            refresh: 'fresh-refresh',
+          })),
+        );
+      },
+    );
+
+    it('ends the session the same way for every request when the one refresh fails', async () => {
+      refresh.mockClear();
+      routeI18n.mockClear();
+      const answer = Promise.withResolvers<{ data?: unknown; response: Response }>();
+      refresh.mockReturnValueOnce(answer.promise);
+
+      const responses = Array.from({ length: 3 }, async () => await proxy(pageRequest('refused')));
+      answer.resolve({ response: new Response(null, { status: 401 }) });
+      const answered = await Promise.all(responses);
+      const outcomes = answered.map(outcome);
+
+      expect(refresh).toHaveBeenCalledOnce();
+      expect(outcomes).toStrictEqual(
+        Array.from({ length: 3 }, () => ({
+          location: 'http://localhost:3000/sign-in?next=%2Fapp%2F7%2Fdeals',
+          access: undefined,
+          refresh: undefined,
+        })),
+      );
+    });
+
+    it('gives a request just after it the same result, and refreshes again after a few seconds', async () => {
+      refresh.mockClear();
+      routeI18n.mockImplementation((request) => NextResponse.next({ request }));
+      refresh.mockResolvedValue({ data: TOKENS, response: new Response(null, { status: 200 }) });
+
+      const first = outcome(await proxy(pageRequest('late')));
+      const late = outcome(await proxy(pageRequest('late')));
+
+      expect(refresh).toHaveBeenCalledOnce();
+      expect(late).toStrictEqual(first);
+
+      vi.advanceTimersByTime(5000);
+      await proxy(pageRequest('late'));
+
+      expect(refresh).toHaveBeenCalledTimes(2);
+      refresh.mockResolvedValue({ response: new Response(null, { status: 401 }) });
+    });
+
+    it('refreshes each refresh token on its own', async () => {
+      refresh.mockClear();
+      routeI18n.mockImplementation((request) => NextResponse.next({ request }));
+
+      await Promise.all([proxy(pageRequest('one')), proxy(pageRequest('two'))]);
+
+      expect(refresh).toHaveBeenCalledTimes(2);
+    });
+
+    it('holds a bounded number of shared refreshes: past it, a request refreshes on its own', async () => {
+      refresh.mockClear();
+      routeI18n.mockImplementation((request) => NextResponse.next({ request }));
+      const answer = Promise.withResolvers<{ data?: unknown; response: Response }>();
+      refresh.mockReturnValue(answer.promise);
+      // A thousand sessions refreshing at once (or a flood of made-up tokens) fill the map.
+      const filling = Array.from(
+        { length: 1000 },
+        async (_, index) => await proxy(pageRequest(`t${index}`)),
+      );
+
+      const extra = [proxy(pageRequest('extra')), proxy(pageRequest('extra'))];
+
+      expect(refresh).toHaveBeenCalledTimes(1002);
+      answer.resolve({ response: new Response(null, { status: 401 }) });
+      await Promise.all([...filling, ...extra]);
+      refresh.mockResolvedValue({ response: new Response(null, { status: 401 }) });
+    });
   });
 });

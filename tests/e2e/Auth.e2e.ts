@@ -127,6 +127,41 @@ test.describe('Auth', () => {
       expect(after.find((c) => c.name === 'refresh_token')?.value).not.toBe(before);
     });
 
+    test('refreshes an expired session once for requests that arrive together', async ({
+      page,
+      context,
+    }) => {
+      const email = await signUp(page);
+      await context.clearCookies({ name: 'access_token' });
+
+      // Two tabs, the bell, a prefetch and an export at once, with the same refresh token: none
+      // is sent to sign in, and all store the same new session.
+      const responses = await Promise.all(
+        Array.from(
+          { length: 5 },
+          async () => await page.request.get('/dashboard', { maxRedirects: 0 }),
+        ),
+      );
+
+      expect(responses.map((response) => response.status())).toStrictEqual([
+        200, 200, 200, 200, 200,
+      ]);
+      const stored = responses.flatMap((response) =>
+        response
+          .headersArray()
+          .filter(
+            (header) =>
+              header.name.toLowerCase() === 'set-cookie' &&
+              header.value.startsWith('refresh_token='),
+          )
+          .map((header) => header.value.split(';')[0]),
+      );
+      expect(stored.length).toBeGreaterThan(0);
+      expect(new Set(stored).size).toBe(1);
+      await page.goto('/dashboard');
+      await expect(page.getByText(`Hello ${email}!`)).toBeVisible();
+    });
+
     test('slows down repeated failed sign-ins for one email', async ({ page }) => {
       const email = await signUp(page);
       await signOut(page);
