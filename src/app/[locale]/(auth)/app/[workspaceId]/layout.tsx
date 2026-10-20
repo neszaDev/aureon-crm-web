@@ -7,6 +7,7 @@ import { getMyWorkspaces, getReminders, getWorkspace } from '@/libs/api/CrmQueri
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
 import { slimReminders } from '@/libs/crm/Reminders';
+import { todayIn } from '@/libs/crm/ZonedTime';
 
 export default async function WorkspaceLayout(props: {
   children: React.ReactNode;
@@ -49,7 +50,9 @@ export default async function WorkspaceLayout(props: {
       workspaces={mine.workspaces}
       user={{ email: user.email, displayName: user.displayName }}
       // Any other answer (a 5xx) leaves the bell saying so, and the page usable.
-      reminders={reminders.reminders && slimReminders(reminders.reminders)}
+      reminders={
+        reminders.reminders && slimReminders(reminders.reminders, todayIn(workspace.timezone))
+      }
     >
       {props.children}
     </CrmShell>

@@ -5,6 +5,7 @@ import { TaskTable } from '@/components/crm/task/TaskTable';
 import type { components } from '@/libs/api/schema';
 import { fullName, recordNumber } from '@/libs/crm/Format';
 import type { BellReminders } from '@/libs/crm/Reminders';
+import { REMINDER_CAP } from '@/libs/crm/Reminders';
 import { todayIn } from '@/libs/crm/ZonedTime';
 import { Link } from '@/libs/I18nNavigation';
 
@@ -65,8 +66,9 @@ export const FollowUps = (props: {
 }) => {
   const t = useTranslations('FollowUps');
   const today = todayIn(props.workspace.timezone);
-  const count = (length: number) =>
-    length >= CAP ? t('count_capped', { count: CAP }) : t('count', { count: length });
+  // A full list may be a cut: the tasks' at 8 (the dashboard's), the leads' at 20 (the reminders').
+  const count = (length: number, cap = CAP) =>
+    length >= cap ? t('count_capped', { count: cap }) : t('count', { count: length });
   const tasks = (list: Task[]) => (
     <TaskTable
       tasks={list}
@@ -101,7 +103,7 @@ export const FollowUps = (props: {
         <Group
           title={t('leads')}
           items={props.leads.length}
-          count={t('count', { count: props.leads.length })}
+          count={count(props.leads.length, REMINDER_CAP)}
           empty={t('leads_none')}
         >
           <ul>

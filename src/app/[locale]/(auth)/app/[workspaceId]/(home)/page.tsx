@@ -143,7 +143,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
           me={user.id}
           overdue={data.myOverdueTasks}
           upcoming={data.myUpcomingTasks}
-          leads={reminders.reminders && slimReminders(reminders.reminders).followUpLeads}
+          leads={reminders.reminders && slimReminders(reminders.reminders, today).followUpLeads}
         />
       </div>
 

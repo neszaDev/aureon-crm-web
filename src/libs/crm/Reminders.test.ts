@@ -43,7 +43,7 @@ describe(reminderBadge, () => {
 });
 
 describe(slimReminders, () => {
-  it('keeps what the bell shows and the version a completion needs, and nothing else', () => {
+  it('keeps what the bell shows and the version a completion needs, and nothing else, with the day they were read', () => {
     const task = {
       id: 42,
       title: 'Send the proposal',
@@ -74,7 +74,10 @@ describe(slimReminders, () => {
     } as const;
 
     expect(
-      slimReminders({ overdueTasks: [task], dueSoonTasks: [], followUpLeads: [lead] }),
+      slimReminders(
+        { overdueTasks: [task], dueSoonTasks: [], followUpLeads: [lead] },
+        '2026-10-20',
+      ),
     ).toStrictEqual({
       overdueTasks: [
         {
@@ -95,6 +98,7 @@ describe(slimReminders, () => {
           status: 'CONTACTED',
         },
       ],
+      today: '2026-10-20',
     });
   });
 });

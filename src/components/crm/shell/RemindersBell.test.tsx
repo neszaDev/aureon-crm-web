@@ -8,10 +8,11 @@ import type { cancelTask, completeTask, reopenTask } from '@/actions/crm/TaskAct
 import * as TaskActions from '@/actions/crm/TaskActions';
 import { Toaster } from '@/components/ui/sonner';
 import type { components } from '@/libs/api/schema';
+import type { BellReminders } from '@/libs/crm/Reminders';
 import messages from '@/locales/en.json';
 import { RemindersBell } from './RemindersBell';
 
-type Reminders = components['schemas']['RemindersResponse'];
+type Reminders = BellReminders;
 type Task = components['schemas']['TaskResponse'];
 type Lead = components['schemas']['LeadResponse'];
 
@@ -59,8 +60,19 @@ const LEAD: Lead = {
   updatedAt: '2026-10-01T00:00:00Z',
   version: 1,
 };
-const REMINDERS: Reminders = { overdueTasks: [LATE], dueSoonTasks: [SOON], followUpLeads: [LEAD] };
-const NONE: Reminders = { overdueTasks: [], dueSoonTasks: [], followUpLeads: [] };
+// Read on 19 October in the workspace's zone.
+const REMINDERS: Reminders = {
+  overdueTasks: [LATE],
+  dueSoonTasks: [SOON],
+  followUpLeads: [LEAD],
+  today: '2026-10-19',
+};
+const NONE: Reminders = {
+  overdueTasks: [],
+  dueSoonTasks: [],
+  followUpLeads: [],
+  today: '2026-10-19',
+};
 
 const Bell = (props: { reminders?: Reminders; path?: string }) => (
   <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
@@ -229,7 +241,7 @@ describe('the bell refreshing itself', () => {
     // The same page rendering again asks nothing more.
     await rerender(<Bell path="/app/1/tasks" reminders={REMINDERS} />);
     await pause(100);
-    expect(loadReminders).toHaveBeenCalledExactlyOnceWith(1);
+    expect(loadReminders).toHaveBeenCalledExactlyOnceWith(1, 'Asia/Bangkok');
   });
 
   it('asks again when the tab comes back into view, and not when it goes out of it', async () => {
@@ -246,7 +258,7 @@ describe('the bell refreshing itself', () => {
     document.dispatchEvent(new Event('visibilitychange'));
 
     await expect.element(bell('Reminders: 4')).toBeVisible();
-    expect(loadReminders).toHaveBeenCalledExactlyOnceWith(1);
+    expect(loadReminders).toHaveBeenCalledExactlyOnceWith(1, 'Asia/Bangkok');
     visibility.mockRestore();
   });
 
@@ -291,6 +303,22 @@ describe('the bell refreshing itself', () => {
       />,
     );
     await expect.element(bell('Reminders: 1')).toBeVisible();
+  });
+
+  it('tells a late follow-up by the day the reminders were read, so it turns late past midnight', async () => {
+    // Read on 1 October: the follow-up is due that day, not late.
+    const first: Reminders = { ...NONE, followUpLeads: [LEAD], today: '2026-10-01' };
+    vi.mocked(loadReminders).mockResolvedValue({ ...first, today: '2026-10-02' });
+    const { rerender } = await render(<Bell reminders={first} />);
+    await bell('Reminders: 1').click();
+    const leads = page.getByRole('region', { name: /Leads to follow up/u });
+    await expect.element(leads.getByText('Oct 1, 2026')).toBeVisible();
+    expect(leads.getByText('Overdue', { exact: true }).elements()).toHaveLength(0);
+
+    // Asked again on the 2nd: the same lead, now late.
+    await rerender(<Bell path="/app/1/tasks" reminders={first} />);
+
+    await expect.element(leads.getByText('Overdue', { exact: true })).toBeVisible();
   });
 
   it('drops an answer that comes after a newer request was made', async () => {

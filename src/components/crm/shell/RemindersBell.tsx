@@ -23,7 +23,6 @@ import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@/compone
 import { fullName, recordNumber } from '@/libs/crm/Format';
 import type { BellReminders, BellTask } from '@/libs/crm/Reminders';
 import { listCount, reminderBadge, reminderCount } from '@/libs/crm/Reminders';
-import { todayIn } from '@/libs/crm/ZonedTime';
 import { Link, usePathname } from '@/libs/I18nNavigation';
 import { toastActionFailure } from '@/utils/ActionToast';
 import { useSettle } from '@/utils/SettleAction';
@@ -152,10 +151,11 @@ const Group = (props: { heading: string; length: number; children: React.ReactNo
  * repeat. So the bell asks again itself on each navigation and when the tab comes back into view,
  * for what time (a task entering the 24 hours, turning overdue) and other people changed. An
  * answer shows until the page renders again with reminders of its own, which are newer; one that
- * fails changes nothing.
+ * fails changes nothing. A lead's follow-up is late by the day the reminders were read on, which
+ * they carry, so it turns late with the next read past midnight, not when the bell rendered.
  * @param props Component props.
  * @param props.workspaceId The workspace.
- * @param props.timeZone The workspace's time zone, for due times and "today".
+ * @param props.timeZone The workspace's time zone, for due times and the day a read is on.
  * @param props.reminders What the layout read; undefined when it could not be.
  * @param props.className Extra classes for the trigger (colours on the vermilion bar).
  * @returns The bell and its popover.
@@ -182,8 +182,10 @@ export const RemindersBell = (props: {
     const mine = latest.current;
     let value: BellReminders | undefined;
     try {
-      value = await loadReminders(props.workspaceId);
+      value = await loadReminders(props.workspaceId, props.timeZone);
     } catch {
+      // Unreachable, or a 401: the action's redirect to sign-in still navigates (Next's action
+      // reducer), and only the rejection it leaves here is dropped; the bell keeps its count.
       value = undefined;
     }
     if (value && latest.current === mine) {
@@ -211,7 +213,6 @@ export const RemindersBell = (props: {
   }, []);
 
   const count = reminders ? reminderCount(reminders) : 0;
-  const today = todayIn(props.timeZone);
   const close = () => {
     setOpen(false);
   };
@@ -285,7 +286,7 @@ export const RemindersBell = (props: {
                         </span>
                         <LeadFollowUp
                           date={lead.followUpDate}
-                          overdue={isFollowUpOverdue(lead, today)}
+                          overdue={isFollowUpOverdue(lead, reminders.today)}
                         />
                       </span>
                     </span>

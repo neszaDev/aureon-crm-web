@@ -15,15 +15,19 @@ type BellLead = Pick<
   'id' | 'firstName' | 'lastName' | 'followUpDate' | 'status'
 >;
 
-/** The reminders as the bell takes them, so full descriptions and notes don't ride every page. */
+/**
+ * The reminders as the bell takes them, so full descriptions and notes don't ride every page, and
+ * the workspace's day they were read on (`YYYY-MM-DD`), which tells a late follow-up.
+ */
 export type BellReminders = {
   overdueTasks: BellTask[];
   dueSoonTasks: BellTask[];
   followUpLeads: BellLead[];
+  today: string;
 };
 
 // How many each reminder list holds at most (api.md, Tasks and reminders).
-const CAP = 20;
+export const REMINDER_CAP = 20;
 
 const listsOf = (reminders: Lists) => [
   reminders.overdueTasks,
@@ -45,7 +49,8 @@ export const reminderCount = (reminders: Lists) =>
  * @param length How many the list holds.
  * @returns The count, e.g. `3` or `20+`.
  */
-export const listCount = (length: number) => (length >= CAP ? `${CAP}+` : String(length));
+export const listCount = (length: number) =>
+  length >= REMINDER_CAP ? `${REMINDER_CAP}+` : String(length);
 
 /**
  * The bell's badge: the count, with a plus when a list is at the cap, since the count is then a
@@ -54,7 +59,7 @@ export const listCount = (length: number) => (length >= CAP ? `${CAP}+` : String
  * @returns The badge text, e.g. `6` or `24+`.
  */
 export const reminderBadge = (reminders: Lists) => {
-  const capped = listsOf(reminders).some((list) => list.length >= CAP);
+  const capped = listsOf(reminders).some((list) => list.length >= REMINDER_CAP);
 
   return `${reminderCount(reminders)}${capped ? '+' : ''}`;
 };
@@ -70,9 +75,13 @@ const slimTask = (task: Schemas['TaskResponse']): BellTask => ({
 /**
  * Cuts the reminders down to what the bell shows.
  * @param reminders What `GET /reminders` sent.
- * @returns The same lists, each task and lead reduced to the bell's fields.
+ * @param today The workspace's day as they were read (`todayIn`).
+ * @returns The same lists, each task and lead reduced to the bell's fields, and the day.
  */
-export const slimReminders = (reminders: Schemas['RemindersResponse']): BellReminders => ({
+export const slimReminders = (
+  reminders: Schemas['RemindersResponse'],
+  today: string,
+): BellReminders => ({
   overdueTasks: reminders.overdueTasks.map(slimTask),
   dueSoonTasks: reminders.dueSoonTasks.map(slimTask),
   followUpLeads: reminders.followUpLeads.map((lead) => ({
@@ -82,4 +91,5 @@ export const slimReminders = (reminders: Schemas['RemindersResponse']): BellRemi
     followUpDate: lead.followUpDate,
     status: lead.status,
   })),
+  today,
 });

@@ -50,6 +50,14 @@ const props = (extra: Partial<Props> = {}): Props => ({
   ...extra,
 });
 
+const lead = (id: number) => ({
+  id,
+  firstName: 'Noa',
+  lastName: `Park ${id}`,
+  followUpDate: '2026-10-01',
+  status: 'CONTACTED' as const,
+});
+
 const followUps = async (value: Props) =>
   await render(
     <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
@@ -89,6 +97,20 @@ describe(FollowUps, () => {
     await followUps(props({ upcoming: eight }));
 
     await expect.element(page.getByRole('heading', { name: 'My upcoming tasks 8+' })).toBeVisible();
+  });
+
+  it("counts the leads as the bell does: a list of 20, the reminders' cut, with a plus", async () => {
+    const eight = await followUps(props({ leads: Array.from({ length: 8 }, (_, id) => lead(id)) }));
+    // The tasks' cut is 8; the leads' is 20.
+    await expect
+      .element(page.getByRole('heading', { name: 'My leads to follow up 8', exact: true }))
+      .toBeVisible();
+    await eight.unmount();
+
+    await followUps(props({ leads: Array.from({ length: 20 }, (_, id) => lead(id)) }));
+    await expect
+      .element(page.getByRole('heading', { name: 'My leads to follow up 20+' }))
+      .toBeVisible();
   });
 
   it('says so for an empty group, and that the leads could not be read when they could not', async () => {

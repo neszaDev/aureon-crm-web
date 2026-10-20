@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { authedBackend } from '@/libs/api/Backend';
 import { redirectIfUnauthorized } from '@/libs/api/Session';
 import { loadReminders } from './ReminderActions';
@@ -30,13 +30,19 @@ const TASK = {
 };
 
 describe(loadReminders, () => {
-  it("reads the caller's reminders of the workspace, slimmed to what the bell shows", async () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("reads the caller's reminders of the workspace, slimmed to what the bell shows, with the workspace's day", async () => {
+    // 18:00 UTC on the 20th is already the 21st in Bangkok.
+    vi.useFakeTimers({ now: new Date('2026-10-20T18:00:00Z'), toFake: ['Date'] });
     const GET = mockGet({
       status: 200,
       data: { overdueTasks: [TASK], dueSoonTasks: [], followUpLeads: [] },
     });
 
-    await expect(loadReminders(7)).resolves.toStrictEqual({
+    await expect(loadReminders(7, 'Asia/Bangkok')).resolves.toStrictEqual({
       overdueTasks: [
         {
           id: 42,
@@ -48,6 +54,7 @@ describe(loadReminders, () => {
       ],
       dueSoonTasks: [],
       followUpLeads: [],
+      today: '2026-10-21',
     });
     expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/reminders', {
       params: { path: { workspaceId: 7 } },
@@ -58,7 +65,7 @@ describe(loadReminders, () => {
     vi.mocked(redirectIfUnauthorized).mockClear();
     mockGet({ status: 401 });
 
-    await expect(loadReminders(7)).resolves.toBeUndefined();
+    await expect(loadReminders(7, 'Asia/Bangkok')).resolves.toBeUndefined();
     expect(redirectIfUnauthorized).toHaveBeenCalledWith(401);
   });
 
@@ -66,7 +73,7 @@ describe(loadReminders, () => {
     vi.mocked(redirectIfUnauthorized).mockClear();
     mockGet({ status: 503 });
 
-    await expect(loadReminders(7)).resolves.toBeUndefined();
+    await expect(loadReminders(7, 'Asia/Bangkok')).resolves.toBeUndefined();
     expect(redirectIfUnauthorized).not.toHaveBeenCalled();
   });
 
@@ -74,7 +81,14 @@ describe(loadReminders, () => {
     const GET = mockGet({ status: 200, data: {} });
 
     // @ts-expect-error -- what a crafted call could send
-    await expect(loadReminders({ id: 7 })).resolves.toBeUndefined();
+    await expect(loadReminders({ id: 7 }, 'Asia/Bangkok')).resolves.toBeUndefined();
+    expect(GET).not.toHaveBeenCalled();
+  });
+
+  it('asks the backend nothing for a time zone that is not one', async () => {
+    const GET = mockGet({ status: 200, data: {} });
+
+    await expect(loadReminders(7, 'Not/A_Zone')).rejects.toThrow(RangeError);
     expect(GET).not.toHaveBeenCalled();
   });
 });
