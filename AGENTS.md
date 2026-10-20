@@ -172,12 +172,13 @@ and the tokens in `src/styles/global.css`; see `DESIGN.md`. Responsive. No unnec
   too, so a test that asserts the error text and `aria-invalid` catches it; the e2e suite should
   also pass against `pnpm build` + `next start`.
 - Await a server action in a client component through `useSettle` (`src/utils/SettleAction.ts`):
-  `await settle(action(...))`. An action rejects outright when the browser is offline or the API
-  can't be reached; from a transition that throws to the error boundary and blanks the page, and
-  in a form it leaves nothing on screen. `settle` turns it into a failed result with the
-  translated "couldn't reach the server" message, which the usual feedback shows (a toast for a
-  row action, `ActionAlert` in a form or dialog). A dialog that sends a request stays open while
-  it is on its way (`useInFlight`, `src/utils/InFlight.ts`).
+  `await settle(action(...))`. An action rejects outright when the browser is offline, the server
+  can't be reached or it fails on the action; from a transition that throws to the error boundary
+  and blanks the page, and in a form it leaves nothing on screen. `settle` turns it into a failed
+  result, which the usual feedback shows (a toast for a row action, `ActionAlert` in a form or
+  dialog): "couldn't reach the server" when the request never got through (fetch's `TypeError`),
+  the generic "that didn't work" when the server failed on it. A dialog that sends a request stays
+  open while it is on its way (`useInFlight`, `src/utils/InFlight.ts`).
 - A form that stays mounted after a save has to clear or rebase its fields in a way that still
   works once compiled. The React Compiler (production builds, and the vitest `ui` project) runs
   `form.register(...)` once per field instead of on every render, and react-hook-form finds a

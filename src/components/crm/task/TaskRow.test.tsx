@@ -88,7 +88,7 @@ describe(TaskRow, () => {
     const record = (event: Event) => uncaught.push(event);
     window.addEventListener('error', record);
     window.addEventListener('unhandledrejection', record);
-    vi.mocked(TaskActions.completeTask).mockRejectedValue(new Error('Failed to fetch'));
+    vi.mocked(TaskActions.completeTask).mockRejectedValue(new TypeError('Failed to fetch'));
     await renderRow(TASK);
 
     await checkbox().click();

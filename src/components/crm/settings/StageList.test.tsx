@@ -112,7 +112,7 @@ describe(StageList, () => {
       rejections.push(event.reason);
     };
     window.addEventListener('unhandledrejection', record);
-    await renderList(vi.fn<Reorder>().mockRejectedValue(new Error('Network down')));
+    await renderList(vi.fn<Reorder>().mockRejectedValue(new TypeError('Failed to fetch')));
 
     await page.getByRole('button', { name: 'Move Qualified up' }).click();
 

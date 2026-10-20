@@ -161,7 +161,7 @@ describe(CompanyForm, () => {
   });
 
   it('shows the alert and enables submit again when the request never gets through', async () => {
-    const action = vi.fn<Action>().mockRejectedValue(new Error('Failed to fetch'));
+    const action = vi.fn<Action>().mockRejectedValue(new TypeError('Failed to fetch'));
     await renderForm({ action });
     const submit = page.getByRole('button', { name: 'Save changes' });
 

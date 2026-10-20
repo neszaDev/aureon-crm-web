@@ -183,7 +183,7 @@ describe(ConfirmAction, () => {
           description="It goes for good."
           confirmLabel="Delete"
           cancelLabel="Cancel"
-          action={async () => await Promise.reject(new Error('Failed to fetch'))}
+          action={async () => await Promise.reject(new TypeError('Failed to fetch'))}
         />
       </NextIntlClientProvider>,
     );

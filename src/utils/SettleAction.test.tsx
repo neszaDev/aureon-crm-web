@@ -45,6 +45,23 @@ describe(useSettle, () => {
     });
   });
 
+  it('turns an action the server failed on into the generic refusal, not the network one', async () => {
+    const settle = await settleOf();
+    // What the browser gets when the action throws on the server: an error with a digest, its
+    // message hidden in production; or a reply that isn't the action's (a proxy's 502 page).
+    const crashed = Object.assign(new Error('An error occurred in the Server Components render.'), {
+      digest: '2381234567',
+    });
+
+    await expect(settle(Promise.reject(crashed))).resolves.toStrictEqual({
+      ok: false,
+      message: messages.ApiError.generic,
+    });
+    await expect(
+      settle(Promise.reject(new Error('An unexpected response was received from the server.'))),
+    ).resolves.toStrictEqual({ ok: false, message: messages.ApiError.generic });
+  });
+
   it('rethrows a redirect, which is how an action answers (an ended session), not a failure', async () => {
     const settle = await settleOf();
 

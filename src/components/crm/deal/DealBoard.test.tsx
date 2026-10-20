@@ -435,7 +435,7 @@ describe(DealBoard, () => {
   });
 
   it('puts the card back and says so when the request never gets through', async () => {
-    vi.mocked(DealActions.moveDeal).mockRejectedValue(new Error('Failed to fetch'));
+    vi.mocked(DealActions.moveDeal).mockRejectedValue(new TypeError('Failed to fetch'));
     await renderBoard();
 
     await drag('D-0101 Mine to move', 1);

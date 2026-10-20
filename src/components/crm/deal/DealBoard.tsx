@@ -26,6 +26,7 @@ import type { ListQuery } from '@/libs/crm/ListQuery';
 import type { Permission } from '@/libs/crm/Permissions';
 import { canEditRecord } from '@/libs/crm/RecordAccess';
 import { toastActionFailure } from '@/utils/ActionToast';
+import { useSettle } from '@/utils/SettleAction';
 
 type Column = components['schemas']['BoardColumn'];
 type Deal = components['schemas']['DealSummary'];
@@ -145,6 +146,7 @@ export const DealBoard = (props: {
 }) => {
   const t = useTranslations('DealBoard');
   const tError = useTranslations('ActionError');
+  const settle = useSettle();
   const [moves, setMoves] = useState<Record<number, PendingMove>>({});
   // The columns the last render took the pending moves against: a refresh brings new ones, and
   // a move the server has answered is then in them.
@@ -211,17 +213,14 @@ export const DealBoard = (props: {
         settled: false,
       },
     }));
-    let result: MoveResult;
-    try {
-      result = await moveDeal(props.workspaceId, deal.id, {
+    // A request that failed outright is a refusal too: the card goes back.
+    const result: MoveResult = await settle(
+      moveDeal(props.workspaceId, deal.id, {
         stageId: stage.id,
         version: deal.version,
         lostReason,
-      });
-    } catch {
-      // Nothing came back: the deal is where the server last said, so the card goes back.
-      result = { ok: false, message: tError('network') };
-    }
+      }),
+    );
     inFlight.current.delete(deal.id);
     if (result.ok) {
       const version = result.version ?? deal.version;

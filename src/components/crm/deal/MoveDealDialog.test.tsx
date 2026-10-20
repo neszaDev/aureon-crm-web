@@ -120,7 +120,7 @@ describe(MoveDealDialog, () => {
   });
 
   it('shows the alert inside the dialog when the request never gets through', async () => {
-    vi.mocked(DealActions.moveDeal).mockRejectedValue(new Error('Failed to fetch'));
+    vi.mocked(DealActions.moveDeal).mockRejectedValue(new TypeError('Failed to fetch'));
     await openDialog();
 
     await submit().click();
