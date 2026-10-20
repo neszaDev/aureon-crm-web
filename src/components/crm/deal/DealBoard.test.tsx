@@ -104,7 +104,7 @@ const renderBoard = async (
 
 // The fade at the board's edge: it shows (1) while more is there to scroll to.
 const fadeOpacity = () =>
-  getComputedStyle(document.querySelector('.board-fade') ?? document.body).opacity;
+  getComputedStyle(document.querySelector('.scroll-fade') ?? document.body).opacity;
 
 const column = (name: string) => page.getByRole('region', { name, exact: true });
 const card = (name: string) => page.getByRole('link', { name, exact: true });

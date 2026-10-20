@@ -5,6 +5,7 @@ import { page } from 'vitest/browser';
 import en from '@/locales/en.json';
 import fr from '@/locales/fr.json';
 import { ChartTable } from './ChartTable';
+import '@/styles/global.css';
 
 const table = async (locale: 'en' | 'fr' = 'en') =>
   await render(
@@ -43,6 +44,19 @@ describe(ChartTable, () => {
     await expect.element(stageTable()).toBeVisible();
     await page.viewport(1440, 900);
     await expect.element(stageTable()).toBeVisible();
+  });
+
+  it('keeps its button unfilled while open: open is how it rests, not a selection', async () => {
+    await table();
+
+    const button = page.getByRole('button', { name: 'Table', exact: true });
+    await expect.element(button).toHaveAttribute('aria-expanded', 'true');
+    expect(getComputedStyle(button.element()).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    // Under the pointer it fills as a ghost button does.
+    await button.hover();
+    await expect
+      .poll(() => getComputedStyle(button.element()).backgroundColor)
+      .not.toBe('rgba(0, 0, 0, 0)');
   });
 
   it('is open at once on a wide screen, with no click', async () => {

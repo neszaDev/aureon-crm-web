@@ -345,7 +345,7 @@ export const DealBoard = (props: {
           })}
           <div
             aria-hidden="true"
-            className="board-fade pointer-events-none sticky right-0 -ml-12 w-12 shrink-0 self-stretch max-md:hidden"
+            className="pointer-events-none sticky right-0 -ml-12 w-12 shrink-0 scroll-fade self-stretch max-md:hidden"
           />
         </div>
         {/* No glide home after a drop: the card has already moved, or been put back, and a glide

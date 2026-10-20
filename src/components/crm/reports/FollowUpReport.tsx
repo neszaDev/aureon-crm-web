@@ -97,7 +97,10 @@ export const FollowUpReport = (props: {
           <span className="font-mono tabular-nums">{recordNumber('task', task.id)}</span>
           <TaskDue dueAt={task.dueAt} overdue={task.overdue} timeZone={props.workspace.timezone} />
         </span>
-        <ReportMember member={task.assignee} none={t('unassigned')} />
+        {/* Who holds it, under its title: secondary, never louder than the title. */}
+        <span className="text-sm text-muted-foreground">
+          <ReportMember member={task.assignee} none={t('unassigned')} />
+        </span>
       </li>
     ));
 
@@ -146,7 +149,9 @@ export const FollowUpReport = (props: {
                 overdue={isFollowUpOverdue(lead, props.today)}
               />
             </span>
-            <ReportMember member={lead.owner} none={t('unassigned')} />
+            <span className="text-sm text-muted-foreground">
+              <ReportMember member={lead.owner} none={t('unassigned')} />
+            </span>
           </li>
         ))}
       </Group>

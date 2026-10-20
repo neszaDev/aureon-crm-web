@@ -109,7 +109,8 @@ export const StageDistribution = (props: {
                 <YAxis
                   type="category"
                   dataKey="name"
-                  width={104}
+                  // "Needs analysis" and a Thai stage name each on one line.
+                  width={124}
                   tickLine={false}
                   axisLine={false}
                 />

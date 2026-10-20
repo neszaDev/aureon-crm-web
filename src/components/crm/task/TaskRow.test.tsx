@@ -8,7 +8,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { Table, TableBody } from '@/components/ui/table';
 import type { components } from '@/libs/api/schema';
 import messages from '@/locales/en.json';
-import { TaskRow } from './TaskRow';
+import { TaskDue, TaskRow } from './TaskRow';
 
 type Task = components['schemas']['TaskResponse'];
 
@@ -129,6 +129,21 @@ describe(TaskRow, () => {
     await menu().click();
     await expect.element(page.getByRole('menuitem', { name: 'Reopen' })).toBeVisible();
     expect(page.getByRole('menuitem', { name: 'Cancel task' }).elements()).toHaveLength(0);
+  });
+
+  it('keeps the due date and the due time each whole, so a narrow cell breaks only between them', async () => {
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <TaskDue dueAt="2026-10-19T09:30:00Z" overdue={false} timeZone="Asia/Bangkok" />
+      </NextIntlClientProvider>,
+    );
+
+    const due = page.getByText(/^Oct 19, 2026, 4:30\sPM$/u);
+    await expect.element(due).toBeVisible();
+    const kept = [...due.element().querySelectorAll('.whitespace-nowrap')].map((part) =>
+      part.textContent.replaceAll(/\s/gu, ' '),
+    );
+    expect(kept).toStrictEqual(['Oct 19, 2026', '4:30 PM']);
   });
 
   it('marks an overdue task in words, not colour alone', async () => {

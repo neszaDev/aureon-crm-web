@@ -64,6 +64,29 @@ export const formatInstant = (
   }).format(new Date(instant));
 
 /**
+ * An instant as `formatInstant` writes it with its time, in its parts: the date, what the language
+ * puts between it and the time (", " in English), and the time, so each can be kept whole.
+ * @param instant An ISO 8601 instant.
+ * @param opts Options.
+ * @param opts.locale The page's locale.
+ * @param opts.timeZone The workspace's time zone.
+ * @returns The date, the text between and the time; joined, they are `formatInstant`'s text.
+ */
+export const instantParts = (instant: string, opts: { locale: string; timeZone: string }) => {
+  const full = formatInstant(instant, { ...opts, withTime: true });
+  const date = formatInstant(instant, opts);
+  const time = new Intl.DateTimeFormat(opts.locale, {
+    timeStyle: 'short',
+    timeZone: opts.timeZone,
+  }).format(new Date(instant));
+
+  // shortcut: a language that writes the time first (none of en, fr, th) stays one whole part.
+  return full.startsWith(date) && full.endsWith(time)
+    ? { date, between: full.slice(date.length, full.length - time.length), time }
+    : { date: full, between: '', time: '' };
+};
+
+/**
  * Shows a date-only value as that same day in every time zone.
  * @param date A `YYYY-MM-DD` date.
  * @param locale The page's locale.

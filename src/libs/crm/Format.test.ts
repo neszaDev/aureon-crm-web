@@ -5,6 +5,7 @@ import {
   formatDate,
   formatInstant,
   formatMoney,
+  instantParts,
   formatMonth,
   formatPeriod,
   fullName,
@@ -86,6 +87,25 @@ describe(formatInstant, () => {
     expect(formatInstant(instant, { locale: 'en', timeZone: 'UTC', withTime: true })).toMatch(
       /^Oct 18, 2026, 5:30\sPM$/u,
     );
+  });
+});
+
+describe(instantParts, () => {
+  it('splits an instant into its date and its time, with what the language puts between', () => {
+    const instant = '2026-10-19T09:30:00Z';
+
+    for (const locale of ['en', 'fr', 'th']) {
+      const parts = instantParts(instant, { locale, timeZone: 'Asia/Bangkok' });
+      expect(`${parts.date}${parts.between}${parts.time}`).toBe(
+        formatInstant(instant, { locale, timeZone: 'Asia/Bangkok', withTime: true }),
+      );
+      expect(parts.date).toBe(formatInstant(instant, { locale, timeZone: 'Asia/Bangkok' }));
+    }
+    expect(instantParts(instant, { locale: 'en', timeZone: 'Asia/Bangkok' })).toMatchObject({
+      date: 'Oct 19, 2026',
+      between: ', ',
+      time: expect.stringMatching(/^4:30\sPM$/u),
+    });
   });
 });
 

@@ -392,6 +392,40 @@ test.describe('Dashboard', () => {
     expect(height).toBeLessThanOrEqual(lineHeight + 1);
   });
 
+  test("writes each open stage's name on one line beside its bar, a Thai one too", async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
+    await apiSend(request, owner, 'POST', `/workspaces/${owner.workspaceId}/pipeline-stages`, {
+      name: 'วิเคราะห์ความต้องการ',
+      probability: 30,
+    });
+    await seed(request, owner, 'deals', { name: 'Renewal', amount: '100.00' });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(owner.path);
+
+    // The chart's stage names, as drawn: a name the axis can't hold is broken into lines (one
+    // tspan each), or runs past the chart's left edge.
+    const names = page.locator(
+      'section[aria-labelledby="stages-heading"] text.recharts-cartesian-axis-tick-value',
+    );
+    await expect(names).toHaveCount(5);
+    const drawn = await names.evaluateAll((texts) =>
+      texts.map((text) => ({
+        name: text.textContent,
+        lines: text.querySelectorAll('tspan').length,
+        inside: text instanceof SVGGraphicsElement && text.getBBox().x >= 0,
+      })),
+    );
+    expect(drawn).toStrictEqual(
+      ['Qualification', 'Needs analysis', 'Proposal', 'Negotiation', 'วิเคราะห์ความต้องการ'].map(
+        (name) => ({ name, lines: 1, inside: true }),
+      ),
+    );
+  });
+
   test.describe('on a phone, in Thai', () => {
     test.use({ viewport: { width: 390, height: 844 } });
 

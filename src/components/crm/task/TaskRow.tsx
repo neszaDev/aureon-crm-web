@@ -20,7 +20,7 @@ import {
 import { TableCell, TableRow } from '@/components/ui/table';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
-import { formatInstant, recordNumber } from '@/libs/crm/Format';
+import { instantParts, recordNumber } from '@/libs/crm/Format';
 import { Link } from '@/libs/I18nNavigation';
 import { toastActionFailure } from '@/utils/ActionToast';
 import { useSettle } from '@/utils/SettleAction';
@@ -44,6 +44,7 @@ export const TaskDue = (props: { dueAt?: string; overdue: boolean; timeZone: str
   if (!props.dueAt) {
     return <span className="text-muted-foreground">{t('no_due')}</span>;
   }
+  const due = instantParts(props.dueAt, { locale, timeZone: props.timeZone });
 
   return (
     <span
@@ -58,7 +59,12 @@ export const TaskDue = (props: { dueAt?: string; overdue: boolean; timeZone: str
           {t('overdue')}
         </span>
       )}
-      {formatInstant(props.dueAt, { locale, timeZone: props.timeZone, withTime: true })}
+      {/* Each part whole: a narrow cell breaks between the date and the time only. */}
+      <span>
+        <span className="whitespace-nowrap">{due.date}</span>
+        {due.between}
+        <span className="whitespace-nowrap">{due.time}</span>
+      </span>
     </span>
   );
 };

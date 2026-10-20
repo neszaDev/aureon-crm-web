@@ -407,16 +407,17 @@
 
 /*
  * The deal board scrolls sideways when its stages don't fit. Its scrollbar stays in view, drawn
- * in the palette (the control stroke on the muted track); a fade at the right edge, in the
- * ground's own colour, says there is more, and goes once the end is in view. Where scroll-driven
- * animations are unsupported the fade is skipped and the scrollbar says it.
+ * in the palette (the control stroke on the muted track). A fade at the right edge of a sideways
+ * scroller (the board, a report's wide table), in the colour under it (`--fade-to`, the ground by
+ * default), says there is more, and goes once the end is in view. Where scroll-driven animations
+ * are unsupported the fade is skipped and the scrollbar says it.
  */
 .board-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--input) var(--muted);
 }
 
-@keyframes board-fade {
+@keyframes scroll-fade {
   from {
     opacity: 1;
   }
@@ -426,14 +427,14 @@
   }
 }
 
-.board-fade {
+.scroll-fade {
   opacity: 0;
-  background-image: linear-gradient(to left, var(--ground), transparent);
+  background-image: linear-gradient(to left, var(--fade-to, var(--ground)), transparent);
 }
 
 @supports (animation-timeline: scroll()) {
-  .board-fade {
-    animation: board-fade linear both;
+  .scroll-fade {
+    animation: scroll-fade linear both;
     animation-timeline: scroll(nearest inline);
     animation-range: max(0%, calc(100% - 3rem)) 100%;
   }

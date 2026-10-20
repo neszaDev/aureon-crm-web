@@ -28,7 +28,8 @@ export const ChartTable = (props: { children: React.ReactNode }) => {
           size="sm"
           aria-expanded={open}
           aria-controls={id}
-          className="-ml-2.5"
+          // Open is how it rests, not a selection: no fill, except under the pointer.
+          className="-ml-2.5 aria-expanded:bg-transparent aria-expanded:hover:bg-accent"
           onClick={() => {
             setOpen(!open);
           }}

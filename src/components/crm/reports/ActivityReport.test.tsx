@@ -5,6 +5,7 @@ import { page } from 'vitest/browser';
 import en from '@/locales/en.json';
 import fr from '@/locales/fr.json';
 import { ActivityReport } from './ActivityReport';
+import '@/styles/global.css';
 
 type Props = Parameters<typeof ActivityReport>[0];
 
@@ -58,7 +59,43 @@ const rows = () =>
     .slice(1)
     .map((row) => [...row.children].map(textOf));
 
+// The fade at the table's right edge: it shows (1) while more columns are there to scroll to.
+const fadeOpacity = () =>
+  getComputedStyle(document.querySelector('.scroll-fade') ?? document.body).opacity;
+
 describe(ActivityReport, () => {
+  it('fades its right edge on a phone while columns are hidden, until the last is in view', async () => {
+    await render(
+      <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
+        <div style={{ width: 358 }}>
+          <ActivityReport report={REPORT} />
+        </div>
+      </NextIntlClientProvider>,
+    );
+    const region = page.getByRole('region', { name: 'Activity table' }).element();
+
+    expect(region.scrollWidth).toBeGreaterThan(region.clientWidth);
+    await expect.poll(fadeOpacity).toBe('1');
+
+    region.scrollTo({ left: region.scrollWidth });
+
+    await expect.poll(fadeOpacity).toBe('0');
+  });
+
+  it('shows no fade where every column fits', async () => {
+    await render(
+      <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
+        <div style={{ width: 900 }}>
+          <ActivityReport report={REPORT} />
+        </div>
+      </NextIntlClientProvider>,
+    );
+    const region = page.getByRole('region', { name: 'Activity table' }).element();
+
+    expect(region.scrollWidth).toBe(region.clientWidth);
+    expect(fadeOpacity()).toBe('0');
+  });
+
   it('lists the members in the order the API sent, each count as sent and the row total', async () => {
     await report(REPORT);
 

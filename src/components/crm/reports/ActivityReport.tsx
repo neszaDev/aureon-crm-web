@@ -33,9 +33,9 @@ export const ActivityReport = (props: { report: components['schemas']['ActivityR
           aria-label={t('table')}
           // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a scrollable region must take the focus (WCAG 2.1.1)
           tabIndex={0}
-          className="overflow-x-auto border-t border-rule outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+          className="flex overflow-x-auto border-t border-rule outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
         >
-          <table className="w-full min-w-[34rem] text-sm">
+          <table className="w-full min-w-[34rem] shrink-0 text-sm">
             <TableHeader>
               <TableRow>
                 <TableHead scope="col" className={MEMBER}>
@@ -73,6 +73,11 @@ export const ActivityReport = (props: { report: components['schemas']['ActivityR
               ))}
             </TableBody>
           </table>
+          {/* While columns are hidden past the right edge, it fades there (global.css). */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none sticky right-0 -ml-10 w-10 shrink-0 scroll-fade self-stretch [--fade-to:var(--card)]"
+          />
         </section>
       ) : (
         <p className="border-t border-rule px-4 py-6 text-muted-foreground sm:px-5">{t('empty')}</p>

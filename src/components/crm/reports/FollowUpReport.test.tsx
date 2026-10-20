@@ -7,6 +7,7 @@ import type { components } from '@/libs/api/schema';
 import en from '@/locales/en.json';
 import fr from '@/locales/fr.json';
 import { FollowUpReport } from './FollowUpReport';
+import '@/styles/global.css';
 
 // The task due time lives with the rows, which import the task actions.
 vi.mock(import('@/actions/crm/TaskActions'), () => ({
@@ -71,8 +72,35 @@ const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en') =>
   );
 
 const group = (name: string) => page.getByRole('region', { name });
+const style = (element: Element) => getComputedStyle(element);
 
 describe(FollowUpReport, () => {
+  it("sets who holds an item in the secondary size and ink, under the item's title", async () => {
+    await report({
+      ...REPORT,
+      dueLeads: {
+        count: 1,
+        first: [
+          {
+            ...lead(3, 'Noa', '2026-10-17'),
+            owner: { userId: 4, displayName: 'Morgan Manager', email: '4@demo.test' },
+          },
+        ],
+      },
+    });
+    const muted = style(page.getByText('T-0005').element()).color;
+
+    for (const [name, title] of [
+      ['Riley Rep', 'Send the contract'],
+      ['Morgan Manager', 'Noa Park'],
+    ] as const) {
+      const member = style(page.getByText(name, { exact: true }).element());
+      expect(member.fontSize).toBe('14px');
+      expect(member.color).toBe(muted);
+      expect(style(page.getByRole('link', { name: title }).element()).fontSize).toBe('15px');
+    }
+  });
+
   it('shows the three groups with the workspace-wide counts as sent', async () => {
     await report(REPORT);
 
