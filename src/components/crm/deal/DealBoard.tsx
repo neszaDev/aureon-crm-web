@@ -13,6 +13,7 @@ import {
 } from '@dnd-kit/core';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import type { MoveResult } from '@/actions/crm/DealActions';
 import { moveDeal } from '@/actions/crm/DealActions';
 import { BoardColumn } from '@/components/crm/deal/BoardColumn';
@@ -104,6 +105,19 @@ const focusColumn = (stage: Stage) => {
 };
 
 /**
+ * Tells whether a refused move should give the focus back to the card's handle: a drop on Won or
+ * Lost took it to that column's heading (the card had left the screen), and it is still there,
+ * or lost; never from where the user took it meanwhile.
+ * @param stage Where the card was dropped.
+ * @returns Whether to hand the focus back.
+ */
+const handsFocusBack = (stage: Stage) =>
+  stage.kind !== 'OPEN' &&
+  [document.querySelector(`#board-stage-${stage.id}`), document.body].includes(
+    document.activeElement,
+  );
+
+/**
  * The column under the pointer: a pointer drag released over anything else (the header, the
  * filters, the space beside the board) is over no column, and moves nothing. The keyboard has no
  * pointer, so it takes the column nearest to the card.
@@ -118,7 +132,8 @@ const collideColumns: typeof closestCenter = (args) =>
  * cards. A card the caller may move is dragged to another column with the pointer or the keyboard
  * (Space to pick up, Left and Right to cross columns, Space to drop), or moved from its menu.
  * A drop moves the card at once and asks the backend (`moveDeal`); a refusal or a failed request
- * puts the card back and says why in a toast (a stale version with a reload). A drop on Lost asks
+ * puts the card back and says why in a toast (a stale version with a reload), and the focus
+ * back on its handle from a Won or Lost heading. A drop on Lost asks
  * for the reason first: the card stays where it was until it is given, and cancelling moves
  * nothing. Once saved, the server's refresh brings the counts, totals and cards as they are.
  * From 768 px the Won and Lost columns are slim (name, count, totals, a link to the list) so the
@@ -229,9 +244,19 @@ export const DealBoard = (props: {
         return move ? { ...current, [deal.id]: { ...move, version, settled: true } } : current;
       });
     } else {
-      setMoves((current) =>
-        Object.fromEntries(Object.entries(current).filter(([id]) => Number(id) !== deal.id)),
-      );
+      const handBack = handsFocusBack(stage);
+      // Drawn back at once, so the handle the focus returns to is the card's new one.
+      flushSync(() => {
+        setMoves((current) =>
+          Object.fromEntries(Object.entries(current).filter(([id]) => Number(id) !== deal.id)),
+        );
+      });
+      if (handBack) {
+        // After the frame in which a quick refusal's drop still focuses the column.
+        requestAnimationFrame(() => {
+          document.querySelector<HTMLElement>(`#deal-handle-${deal.id}`)?.focus();
+        });
+      }
       toastActionFailure(result, t('error_generic'), tError('reload'));
     }
   };
@@ -344,7 +369,8 @@ export const DealBoard = (props: {
           })}
           <div
             aria-hidden="true"
-            className="pointer-events-none sticky right-0 -ml-12 w-12 shrink-0 scroll-fade self-stretch max-md:hidden"
+            // Its margin takes back the gap before it too: the board fits with 8 px to spare.
+            className="pointer-events-none sticky right-0 -ml-14 w-12 shrink-0 scroll-fade self-stretch max-md:hidden"
           />
         </div>
         {/* No glide home after a drop: the card has already moved, or been put back, and a glide

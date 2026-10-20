@@ -249,7 +249,9 @@ describe(DealBoard, () => {
     await page.getByLabelText('Stage shown').selectOptions('13');
 
     await expect.element(column('Won').getByRole('link', { name: 'Won big' })).toBeVisible();
-    await expect.element(column('Won').getByText('$47,000', { exact: true })).toBeVisible();
+    // A full column: its totals keep their cents, as the open columns' do.
+    await expect.element(column('Won').getByText('$47,000.00', { exact: true })).toBeVisible();
+    await expect.element(column('Won').getByText('$47,000', { exact: true })).not.toBeVisible();
     expect(
       column('Won')
         .getByRole('link', { name: /View in list/u })
@@ -288,6 +290,13 @@ describe(DealBoard, () => {
 
     expect(scroller?.scrollWidth).toBe(scroller?.clientWidth);
     expect(fadeOpacity()).toBe('0');
+    // With room to spare: a content column a few pixels narrower doesn't scroll by one.
+    expect((scroller?.clientWidth ?? 0) - (scroller?.scrollWidth ?? 0)).toBe(0);
+    const content = scroller?.parentElement?.parentElement;
+    if (content instanceof HTMLElement) {
+      content.style.width = '1144px';
+    }
+    await expect.poll(() => (scroller?.scrollWidth ?? 0) - (scroller?.clientWidth ?? 0)).toBe(0);
     // Five boxes (four stages and Won) in the card, on one line.
     expect(
       page.getByRole('list', { name: 'Deal progress' }).element().getBoundingClientRect().height,
@@ -736,25 +745,29 @@ describe(DealBoard, () => {
   });
 
   it('keeps the deal’s name in the Lost dialog’s title while it closes', async () => {
-    // Slowed down, so the dialog is still on screen, fading out, when it is looked at.
+    // Slowed down, so the dialog is still on screen, fading out, when it is looked at; the style
+    // goes whatever happens, or it would slow every later test's dialogs.
     const slow = document.createElement('style');
     slow.textContent = '[data-slot="dialog-content"] { animation-duration: 2s !important; }';
     document.head.append(slow);
-    await renderBoard();
-    await drag('D-0101 Mine to move', 3);
-    await expect
-      .element(page.getByRole('dialog', { name: 'Mark Mine to move as lost' }))
-      .toBeVisible();
+    try {
+      await renderBoard();
+      await drag('D-0101 Mine to move', 3);
+      await expect
+        .element(page.getByRole('dialog', { name: 'Mark Mine to move as lost' }))
+        .toBeVisible();
 
-    await page.getByRole('button', { name: 'Cancel' }).click();
+      await page.getByRole('button', { name: 'Cancel' }).click();
 
-    // Closing, with its title as it was: the deal's name, not a blank.
-    const title = document.querySelector(
-      '[data-slot="dialog-content"][data-state="closed"] [data-slot="dialog-title"]',
-    );
+      // Closing, with its title as it was: the deal's name, not a blank.
+      const title = document.querySelector(
+        '[data-slot="dialog-content"][data-state="closed"] [data-slot="dialog-title"]',
+      );
 
-    expect(title?.textContent).toBe('Mark Mine to move as lost');
-    slow.remove();
+      expect(title?.textContent).toBe('Mark Mine to move as lost');
+    } finally {
+      slow.remove();
+    }
   });
 
   it('gives the focus back to the card’s handle when the Lost dialog is cancelled', async () => {
@@ -767,6 +780,57 @@ describe(DealBoard, () => {
     await page.getByRole('button', { name: 'Cancel' }).click();
 
     await expect.element(handle('D-0101 Mine to move')).toHaveFocus();
+  });
+
+  it('gives the focus back to the card’s handle when a drop on Won is refused, as the card is back', async () => {
+    const answer = Promise.withResolvers<Move>();
+    vi.mocked(DealActions.moveDeal).mockReturnValue(answer.promise);
+    await renderBoard();
+    await drag('D-0101 Mine to move', 2);
+    await expect.element(page.getByRole('heading', { name: 'Won', exact: true })).toHaveFocus();
+
+    answer.resolve({ ok: false, message: "Your role doesn't allow this." });
+
+    await expect
+      .element(column('Qualification').getByRole('link', { name: 'Mine to move' }))
+      .toBeVisible();
+    await expect.element(handle('D-0101 Mine to move')).toHaveFocus();
+  });
+
+  it('gives the focus back to the card’s handle when a move to Lost is refused', async () => {
+    const answer = Promise.withResolvers<Move>();
+    vi.mocked(DealActions.moveDeal).mockReturnValue(answer.promise);
+    await renderBoard();
+    await drag('D-0101 Mine to move', 3);
+    await page.getByLabelText('Reason').fill('Went with a rival');
+    await page.getByRole('button', { name: 'Mark as lost' }).click();
+    await expect.element(page.getByRole('heading', { name: 'Lost', exact: true })).toHaveFocus();
+
+    answer.resolve({ ok: false, message: "Your role doesn't allow this." });
+
+    await expect
+      .element(column('Qualification').getByRole('link', { name: 'Mine to move' }))
+      .toBeVisible();
+    await expect.element(handle('D-0101 Mine to move')).toHaveFocus();
+  });
+
+  it('leaves the focus where the user took it meanwhile when a move is refused', async () => {
+    const answer = Promise.withResolvers<Move>();
+    vi.mocked(DealActions.moveDeal).mockReturnValue(answer.promise);
+    await renderBoard();
+    await drag('D-0101 Mine to move', 2);
+    await expect.element(page.getByRole('heading', { name: 'Won', exact: true })).toHaveFocus();
+    const elsewhere = page.getByRole('link', { name: 'View in list: Won' }).element();
+    if (elsewhere instanceof HTMLElement) {
+      elsewhere.focus();
+    }
+
+    answer.resolve({ ok: false, message: "Your role doesn't allow this." });
+
+    await expect
+      .element(column('Qualification').getByRole('link', { name: 'Mine to move' }))
+      .toBeVisible();
+    await expect.element(page.getByRole('link', { name: 'View in list: Won' })).toHaveFocus();
   });
 
   it('puts the focus on the Lost column once the reason is given, as the card has left the screen', async () => {

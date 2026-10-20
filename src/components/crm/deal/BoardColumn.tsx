@@ -15,7 +15,7 @@ import { Link } from '@/libs/I18nNavigation';
  * list when it holds more than the cards shown. It is where a card can be dropped. From 768 px
  * the Won and Lost stages are slim: the name, count and totals (whole amounts without their
  * cents) and a link to the list instead of cards, so the default pipeline fits in one frame.
- * Below 768 px only the chosen column shows, in full.
+ * Below 768 px only the chosen column shows, in full (its totals with their cents).
  * @param props Component props.
  * @param props.column The stage, its count and its totals, as the server counted them.
  * @param props.shown How many cards the server sent for it (at most 50).
@@ -80,14 +80,27 @@ export const BoardColumn = (props: {
         </div>
         {props.column.totals.length > 0 && (
           <ul aria-label={t('totals')} className="flex flex-col">
-            {props.column.totals.map((total) => (
-              <li
-                key={total.currency}
-                className={cn('text-[0.9375rem] font-medium tabular-nums', slim && 'md:text-xs')}
-              >
-                {formatMoney(total.amount, total.currency, locale, { short: slim })}
-              </li>
-            ))}
+            {props.column.totals.map((total) => {
+              const full = formatMoney(total.amount, total.currency, locale);
+              const short = formatMoney(total.amount, total.currency, locale, { short: slim });
+
+              return (
+                <li
+                  key={total.currency}
+                  className={cn('text-[0.9375rem] font-medium tabular-nums', slim && 'md:text-xs')}
+                >
+                  {short === full ? (
+                    full
+                  ) : (
+                    // Slim from 768 px only: below that the column is full, cents and all.
+                    <>
+                      <span className="md:hidden">{full}</span>
+                      <span className="max-md:hidden">{short}</span>
+                    </>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
         {slim && (
