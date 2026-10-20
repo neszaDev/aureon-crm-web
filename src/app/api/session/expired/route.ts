@@ -27,10 +27,11 @@ const isRefused = async (token?: string) => {
  * layouts can't delete cookies, so they redirect here (`/api` is outside the proxy); sending
  * them to sign-in directly would loop, since the proxy still sees the access cookie. Another
  * site's link or form can't sign anyone out with it (logout CSRF): a request the browser marks
- * `Sec-Fetch-Site: cross-site` ends the session only when the backend refuses its access token,
- * and otherwise goes on to the app, signed in as it was. Not a plain refusal: a visitor who
- * followed another site's link to a page whose session the backend rejects arrives here still
- * marked cross-site (the mark holds through redirects), and must still be signed out, or loop.
+ * `Sec-Fetch-Site: cross-site` or `same-site` (a sibling subdomain; the app's own pages send
+ * `same-origin` or `none`) ends the session only when the backend refuses its access token, and
+ * otherwise goes on to the app, signed in as it was. Not a plain refusal: a visitor who followed
+ * another site's link to a page whose session the backend rejects arrives here still marked
+ * cross-site (the mark holds through redirects), and must still be signed out, or loop.
  * @param request The request; `?locale=` picks the language of the sign-in page.
  * @returns A redirect to `/{locale}/sign-in?expired=1` that deletes both session cookies, or to
  *   `/{locale}/app` without touching them.
@@ -38,8 +39,9 @@ const isRefused = async (token?: string) => {
 export async function GET(request: NextRequest) {
   const requested = request.nextUrl.searchParams.get('locale');
   const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
+  const site = request.headers.get('sec-fetch-site');
   if (
-    request.headers.get('sec-fetch-site') === 'cross-site' &&
+    (site === 'cross-site' || site === 'same-site') &&
     !(await isRefused(request.cookies.get(ACCESS_TOKEN_COOKIE)?.value))
   ) {
     return NextResponse.redirect(new URL(`/${locale}/app`, request.url));

@@ -52,7 +52,7 @@ describe(GET, () => {
     });
   });
 
-  it.each(['same-origin', 'same-site', 'none'])(
+  it.each(['same-origin', 'none'])(
     'ends it for a request the browser marks %s, as for one without the header',
     async (site) => {
       const response = await GET(expired('?locale=fr', { 'sec-fetch-site': site }));
@@ -62,21 +62,25 @@ describe(GET, () => {
     },
   );
 
-  describe('for a request another site started (Sec-Fetch-Site: cross-site)', () => {
-    it('keeps a session the backend still accepts, and goes on to the app', async () => {
-      me.mockClear();
+  describe('for a request another site started (Sec-Fetch-Site: cross-site or same-site)', () => {
+    // A sibling subdomain is another site too: the app's own pages send same-origin or none.
+    it.each(['cross-site', 'same-site'])(
+      'keeps a session the backend still accepts, and goes on to the app (%s)',
+      async (site) => {
+        me.mockClear();
 
-      const response = await GET(expired('?locale=th', { 'sec-fetch-site': 'cross-site' }));
+        const response = await GET(expired('?locale=th', { 'sec-fetch-site': site }));
 
-      expect(outcome(response)).toStrictEqual({
-        status: 307,
-        location: 'http://localhost:3000/th/app',
-        cleared: [],
-      });
-      expect(me).toHaveBeenCalledExactlyOnceWith('/api/v1/users/me', {
-        headers: { Authorization: 'Bearer abc' },
-      });
-    });
+        expect(outcome(response)).toStrictEqual({
+          status: 307,
+          location: 'http://localhost:3000/th/app',
+          cleared: [],
+        });
+        expect(me).toHaveBeenCalledExactlyOnceWith('/api/v1/users/me', {
+          headers: { Authorization: 'Bearer abc' },
+        });
+      },
+    );
 
     it('keeps the cookies without an access token, asking the backend nothing', async () => {
       me.mockClear();
