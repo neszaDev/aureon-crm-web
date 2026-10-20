@@ -118,6 +118,10 @@ const WORDS = [
   'SALES_REP',
 ] as const;
 const MONEY_FIELDS = new Set(['amount', 'estimatedValue']);
+// Numbers that are a percentage, as the deal page shows them.
+const PERCENT_FIELDS = new Set(['probability', 'probabilityOverride']);
+// The lists an export names (`list_<name>`).
+const LISTS = ['companies', 'contacts', 'leads', 'deals'] as const;
 // What names a record or a person in the history, in the order to try.
 const NAME_KEYS = ['displayName', 'fullName', 'name', 'email'] as const;
 // The record's own id says nothing in a list of changes.
@@ -157,6 +161,28 @@ const nameOf = (value: object) =>
   );
 
 /**
+ * Whether a change's text is a day or an instant: the API names its days `…Date` and its instants
+ * `…At`, so a text that only looks like one (a name, a subject) stays as it was typed.
+ * @param field The field's name.
+ * @param value Its text.
+ * @returns `date`, `instant`, or `text` for any other.
+ */
+const timeKind = (field: string, value: string) => {
+  if (field.endsWith('Date') && isDate(value)) {
+    return 'date';
+  }
+  if (
+    field.endsWith('At') &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/u.test(value) &&
+    !Number.isNaN(Date.parse(value))
+  ) {
+    return 'instant';
+  }
+
+  return 'text';
+};
+
+/**
  * One side of a change.
  * @param value The change, from the event's `changes`.
  * @param side Which side.
@@ -171,8 +197,10 @@ const sideOf = (value: unknown, side: 'from' | 'to'): unknown =>
  * one. The record is a link to its page (a deleted one and an activity have none). An update
  * lists its changed fields as "Field: from → to": money with its currency when the event names
  * it (never a guess), days and instants as dates in the workspace's zone, a member or a record by
- * name, words from a fixed list translated, an id as "changed". A deletion lists the last state;
- * an export shows its label. Put it in a `ul`.
+ * name, words from a fixed list translated, a probability as a percentage, an id as "changed". A
+ * deletion lists the last state; an export names its list (the API's label for it is English, and
+ * the count is only in that label). A member joining or leaving reads as the workspace's, not as
+ * the email the event is labelled with. Put it in a `ul`.
  * @param props Component props.
  * @param props.event The audit event (the dashboard's `recentChanges`, a record's history).
  * @param props.workspace The workspace: its id, for the links, and its time zone.
@@ -231,7 +259,13 @@ export const AuditEventItem = (props: {
       return t(value ? 'value_yes' : 'value_no');
     }
     if (typeof value === 'number') {
-      return /[a-z]Id$/u.test(field) ? undefined : new Intl.NumberFormat(locale).format(value);
+      if (/[a-z]Id$/u.test(field)) {
+        return undefined;
+      }
+
+      return PERCENT_FIELDS.has(field)
+        ? new Intl.NumberFormat(locale, { style: 'percent' }).format(value / 100)
+        : new Intl.NumberFormat(locale).format(value);
     }
     if (Array.isArray(value)) {
       return value.length === 0
@@ -249,10 +283,11 @@ export const AuditEventItem = (props: {
     if (MONEY_FIELDS.has(field)) {
       return currency ? formatMoney(value, currency, locale) : formatAmount(value, locale);
     }
-    if (isDate(value)) {
+    const time = timeKind(field, value);
+    if (time === 'date') {
       return formatDate(value, locale);
     }
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/u.test(value) && !Number.isNaN(Date.parse(value))) {
+    if (time === 'instant') {
       return formatInstant(value, {
         locale,
         timeZone: props.workspace.timezone,
@@ -279,7 +314,14 @@ export const AuditEventItem = (props: {
         ? []
         : [{ field, text: t('state', { field: label(field), value }) }];
     });
-  } else if (event.action !== 'EXPORT') {
+  } else if (event.action === 'EXPORT') {
+    // The list, in the page's words: the event's label is the API's sentence in English.
+    const list = sideOf(changes.list, 'to');
+    if (typeof list === 'string') {
+      const value = isOneOf(LISTS, list) ? t(`list_${list}`) : cut(list);
+      lines = [{ field: 'list', text: t('state', { field: label('list'), value }) }];
+    }
+  } else {
     lines = fields.map(([field, change]) => {
       const from = show(field, sideOf(change, 'from'), currencyAt('from'));
       const to = show(field, sideOf(change, 'to'), currencyAt('to'));
@@ -294,6 +336,7 @@ export const AuditEventItem = (props: {
     });
   }
   const shown = props.compact ? lines.slice(0, SHORT_LINES) : lines;
+  const actor = actorName === undefined ? t('former_member') : cut(actorName);
   const shownLabel =
     event.entityLabel === undefined ? t(`entity_${event.entityType}`) : cut(event.entityLabel);
   // The whole name, when the cut shortened it.
@@ -315,9 +358,14 @@ export const AuditEventItem = (props: {
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <p className="text-[0.9375rem] break-words">
           {t.rich(`phrase_${event.action}`, {
-            actor: actorName === undefined ? t('former_member') : cut(actorName),
+            actor,
             record: shownLabel,
-            who: (chunks) => <strong className="font-semibold">{chunks}</strong>,
+            who: (chunks) => (
+              // The whole name, when the cut shortened it.
+              <strong title={actor === actorName ? undefined : actorName} className="font-semibold">
+                {chunks}
+              </strong>
+            ),
             what: (chunks) => (
               <>
                 {href ? (
@@ -342,9 +390,6 @@ export const AuditEventItem = (props: {
             ),
           })}
         </p>
-        {event.action === 'EXPORT' && event.entityLabel && (
-          <p className="text-sm break-words text-muted-foreground">{event.entityLabel}</p>
-        )}
         {shown.length > 0 && (
           <ul className="flex flex-col gap-0.5 text-sm text-muted-foreground">
             {shown.map((line) => (

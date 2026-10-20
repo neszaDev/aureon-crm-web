@@ -117,7 +117,8 @@ describe(AuditTrail, () => {
       'Avery Owner exported records',
     ]);
     await expect.element(page.getByText('Role: Sales rep → Manager')).toBeVisible();
-    await expect.element(page.getByText('12 contacts exported')).toBeVisible();
+    // The exported list in the page's words, not the event's English label.
+    await expect.element(page.getByText('List: Contacts')).toBeVisible();
     // Paged like the other lists.
     await expect.element(page.getByText('1–20 of 45')).toBeVisible();
   });

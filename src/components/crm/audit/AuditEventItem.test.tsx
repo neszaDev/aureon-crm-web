@@ -56,6 +56,9 @@ const lines = () =>
     .elements()
     .map((line) => line.textContent);
 
+// The entry's sentence: who did what.
+const sentence = () => page.getByRole('listitem').first().element().querySelector('p')?.textContent;
+
 describe(AuditEventItem, () => {
   it('says who changed what, when in the workspace zone, with the record as a link', async () => {
     await item(
@@ -268,23 +271,113 @@ describe(AuditEventItem, () => {
     ]);
   });
 
-  it('shows an export by its label, with no field list', async () => {
-    await item(
-      event({
-        action: 'EXPORT',
-        entityType: 'WORKSPACE',
-        entityId: 7,
-        entityLabel: '12 contacts exported',
-        changes: { list: { from: null, to: 'contacts' }, filters: { from: null, to: { q: 'a' } } },
-      }),
-    );
+  // An export as the API records it (api.md, Export): its label is a sentence in English.
+  const EXPORTED = event({
+    action: 'EXPORT',
+    entityType: 'WORKSPACE',
+    entityId: 7,
+    entityLabel: '12 contacts exported',
+    changes: { list: { from: null, to: 'contacts' }, filters: { from: null, to: { q: 'a' } } },
+  });
+
+  it("names an export's list in the page language, not by the API's English label", async () => {
+    const english = await item(EXPORTED);
 
     await expect
       .element(page.getByRole('listitem').first())
       .toHaveTextContent('Riley Rep exported records');
-    await expect.element(page.getByText('12 contacts exported')).toBeVisible();
-    expect(page.getByRole('listitem').elements()).toHaveLength(1);
+    expect(lines()).toStrictEqual(['List: Contacts']);
+    expect(page.getByText('12 contacts exported').elements()).toHaveLength(0);
     expect(page.getByRole('link').elements()).toHaveLength(0);
+    await english.unmount();
+
+    await item(EXPORTED, { locale: 'fr' });
+    expect(lines().map((line) => line?.replaceAll(/\s/gu, ' '))).toStrictEqual([
+      'Liste : Contacts',
+    ]);
+  });
+
+  it('holds an export to the compact form as any entry, and keeps a cut name whole in its title', async () => {
+    const long = 'N'.repeat(100);
+    await item(
+      { ...EXPORTED, actor: { userId: 2, email: 'n@acme.test', displayName: long } },
+      { compact: true },
+    );
+
+    expect(
+      page
+        .getByRole('list')
+        .nth(1)
+        .getByRole('listitem')
+        .elements()
+        .map((line) => line.classList.contains('line-clamp-2')),
+    ).toStrictEqual([true]);
+    await expect
+      .element(page.getByText(`${'N'.repeat(79)}…`, { exact: true }))
+      .toHaveAttribute('title', long);
+  });
+
+  // A member joining or leaving, as the API records it: on the member, labelled with their own
+  // email (InvitationService.join, MemberService.remove).
+  it('says a member joined the workspace, not their own email, and the role they joined as', async () => {
+    const english = await item(
+      event({
+        action: 'JOIN',
+        entityType: 'MEMBER',
+        entityId: 2,
+        entityLabel: RILEY.email,
+        changes: { role: { from: null, to: 'SALES_REP' } },
+      }),
+    );
+
+    expect(sentence()).toBe('Riley Rep joined the workspace');
+    expect(lines()).toStrictEqual(['Role: none → Sales rep']);
+    await english.unmount();
+
+    await item(
+      event({ action: 'JOIN', entityType: 'MEMBER', entityId: 2, entityLabel: RILEY.email }),
+      { locale: 'fr' },
+    );
+    expect(sentence()).toBe("Riley Rep a rejoint l'espace de travail");
+  });
+
+  it('says a member left the workspace, named once by email when they have no name', async () => {
+    await item(
+      event({
+        action: 'LEAVE',
+        entityType: 'MEMBER',
+        entityId: 2,
+        actor: { userId: 2, email: RILEY.email },
+        entityLabel: RILEY.email,
+        changes: {},
+      }),
+    );
+
+    expect(sentence()).toBe('riley@acme.test left the workspace');
+  });
+
+  it('writes a date only for a date field, and a probability as a percentage', async () => {
+    await item(
+      event({
+        entityType: 'DEAL',
+        entityId: 9,
+        entityLabel: 'Renewal',
+        changes: {
+          // Text that only looks like a date or an instant stays as it was typed.
+          name: { from: '2026-10-01', to: '2026-10-18T13:00:00Z' },
+          expectedCloseDate: { from: '2026-10-01', to: '2026-10-31' },
+          probability: { from: 50, to: 75 },
+          probabilityOverride: { from: null, to: 60 },
+        },
+      }),
+    );
+
+    expect(lines()).toStrictEqual([
+      'Deal name: 2026-10-01 → 2026-10-18T13:00:00Z',
+      'Expected close: Oct 1, 2026 → Oct 31, 2026',
+      'Probability: 50% → 75%',
+      'Probability override: none → 60%',
+    ]);
   });
 
   it('names a member who left, without a seal, and a person by email when they have no name', async () => {

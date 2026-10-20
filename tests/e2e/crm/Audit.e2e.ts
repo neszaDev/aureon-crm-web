@@ -55,7 +55,9 @@ test.describe('Export and the audit trail', () => {
       .locator(':scope > ul > li')
       .first();
     await expect(latest).toContainText('Avery Owner exported records');
-    await expect(latest).toContainText('2 companies exported');
+    // The list in the page's words, not the API's English label ("2 companies exported").
+    await expect(latest).toContainText('List: Companies');
+    await expect(latest).not.toContainText('companies exported');
   });
 
   test('shows a rep neither the export nor the trail, and the route refuses them in their language', async ({
@@ -117,6 +119,9 @@ test.describe('Export and the audit trail', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Audit' })).toBeVisible();
     const trail = page.getByRole('region', { name: /events$/u });
     await expect(trail).toContainText('Avery Owner invited');
+    // Joining is recorded on the member, labelled with their own email: it reads as the workspace.
+    await expect(trail).toContainText('Morgan Manager joined the workspace');
+    await expect(trail).not.toContainText(`joined ${manager.email}`);
     await expect(trail).toContainText('Morgan Manager created Noa Park');
     await expectNoA11yViolations(page);
 
