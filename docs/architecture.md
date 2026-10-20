@@ -172,10 +172,14 @@ inline scripts need a nonce or `'unsafe-inline'`. No HSTS here: see the deployme
 
 ## Request bodies
 
-The proxy answers a POST over 1 MiB with 413 (and one without a stated length with 411) before
-any server action parses it, on every page path, dotted ones included; only the files page takes
-the 11 MB its upload needs (`next.config.ts`). Next still reads the whole body (keeping up to
-11 MB) before the refusal goes out, so a reverse proxy's body cap is what bounds the upload.
+On every path but the files page, the proxy answers a POST over 1 MiB with 413 (and one without
+a stated length with 411) before any server action parses it, whatever the first segment
+(`[locale]` takes any, so `/api/sign-in` renders sign-in) and dots included. The files page
+parses up to the 11 MB its upload needs (`next.config.ts`) from anyone: an action runs there
+without a session and answers its own 401. On any path, Next reads and keeps up to 11 MB of the
+body before a 413 goes out. The body cap of the reverse proxy in front bounds both, so it is
+required. Follow-up: move uploads to an auth-gated streaming route handler, and server actions
+back to 1 MB.
 
 ## Rendering
 

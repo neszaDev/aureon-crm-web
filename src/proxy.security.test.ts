@@ -58,17 +58,24 @@ describe('proxy security', () => {
     expect(outside.filter((path) => runsOn(path))).toStrictEqual([]);
   });
 
-  it('runs on any page path with a body, dots included: a server action runs there too', () => {
+  it('runs on any path with a body, whatever its first segment: a server action runs there too', () => {
     const length = { 'content-length': '64' };
     const bodies: Record<string, string>[] = [length, { 'transfer-encoding': 'chunked' }];
-    const pages = ['/en/invite/a.b', '/fr/app/7/companies/3.json', '/sign-in'];
+    // `[locale]` takes any first segment, so each of these renders the sign-in page.
+    const paths = [
+      '/en/invite/a.b',
+      '/fr/app/7/companies/3.json',
+      '/sign-in',
+      '/api/sign-in',
+      '/apix/sign-in',
+      '/_vercel/sign-in',
+      '/_next/sign-in',
+    ];
 
-    expect(bodies.flatMap((body) => pages.filter((path) => !runsOn(path, body)))).toStrictEqual([]);
-    // Never the session route or static files, whatever they carry.
+    expect(bodies.flatMap((body) => paths.filter((path) => !runsOn(path, body)))).toStrictEqual([]);
+    // Never the build's assets or the image optimizer, whatever they carry.
     expect(
-      ['/api/session/expired', '/_next/static/chunks/app.js'].filter((path) =>
-        runsOn(path, length),
-      ),
+      ['/_next/static/chunks/app.js', '/_next/image'].filter((path) => runsOn(path, length)),
     ).toStrictEqual([]);
   });
 

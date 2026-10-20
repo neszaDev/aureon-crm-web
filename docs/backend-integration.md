@@ -67,8 +67,11 @@ per-IP limits don't hold; the per-email limit does. Behind more than one proxy, 
 
 Uploads go through a server action (`FileActions.uploadFile`, multipart to `POST /files`).
 `next.config.ts` raises the server-action and proxy body limits to 11 MB to fit the backend's
-10 MB maximum; `src/proxy.ts` keeps every other page to 1 MiB. Downloads stream through `dashboard/files/[id]/content/route.ts`, so the browser
-never calls the backend and the token stays in its httpOnly cookie; the proxy refreshes it first.
+10 MB maximum. `src/proxy.ts` refuses a body over 1 MiB on every other path; the files page
+takes 11 MB from anyone, signed in or not, and the reverse proxy's body cap bounds it
+([request bodies](architecture.md#request-bodies)). Downloads stream through
+`dashboard/files/[id]/content/route.ts`, so the browser never calls the backend and the token
+stays in its httpOnly cookie; the proxy refreshes it first.
 The route always answers with an attachment, `nosniff` and a sandbox CSP.
 - Unexpected and 5xx responses are logged (`src/libs/Logger.ts`).
 

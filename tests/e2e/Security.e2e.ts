@@ -503,6 +503,15 @@ test.describe('Security', () => {
       // Nor through a path with a dot, which renders a page holding the same action.
       const dotted = await post('/en/invite/a.b');
       expect(dotted.status()).toBe(413);
+      // Nor under any first segment: `[locale]` takes it, and sign-in's action runs there too.
+      const segments = ['/api/sign-in', '/apix/sign-in', '/_vercel/sign-in', '/_next/sign-in'];
+      const statuses = [];
+      for (const path of segments) {
+        // oxlint-disable-next-line no-await-in-loop -- one 10 MB body at a time
+        const answer = await post(path);
+        statuses.push(`${path} ${answer.status()}`);
+      }
+      expect(statuses).toStrictEqual(segments.map((path) => `${path} 413`));
     });
   });
 

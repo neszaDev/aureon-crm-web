@@ -191,6 +191,11 @@ describe(proxy, () => {
       '/app/7/companies/new',
       '/dashboard/users/2',
       '/en/invite/a.b',
+      // Any first segment renders `[locale]`: these reach the sign-in page's action too.
+      '/api/sign-in',
+      '/apix/sign-in',
+      '/_vercel/sign-in',
+      '/_next/sign-in',
     ])('refuses one over 1 MiB on %s (413) before anything else runs', async (path) => {
       const response = await proxy(postRequest(path, { 'content-length': String(MIB + 1) }));
 
@@ -229,8 +234,16 @@ describe(proxy, () => {
       expect(routeI18n).toHaveBeenCalledTimes(2);
     });
 
-    it('passes a small body to a path with a dot on as if the proxy had not run', async () => {
-      const response = await proxy(postRequest('/en/invite/a.b', { 'content-length': '64' }));
+    // The matcher takes these only for their body: past the check, they go on as before.
+    it.each([
+      '/en/invite/a.b',
+      '/api/sign-in',
+      '/apix/sign-in',
+      '/_vercel/sign-in',
+      '/_next/sign-in',
+      '/api/session/expired',
+    ])('passes a small body to %s on as if the proxy had not run', async (path) => {
+      const response = await proxy(postRequest(path, { 'content-length': '64' }));
 
       expect(response.headers.get('x-middleware-next')).toBe('1');
       expect(refresh).not.toHaveBeenCalled();

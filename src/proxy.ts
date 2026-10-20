@@ -26,10 +26,16 @@ const INVITE_PATH = new RegExp(`^(?:/(?:${localeGroup}))?/invite/`, 'u');
 // reach 11 MB for it.
 const FILES_PAGE_PATH = new RegExp(`^(?:/(?:${localeGroup}))?/dashboard/files$`, 'u');
 const MAX_BODY_BYTES = 1024 * 1024;
+// What the page matcher leaves out (`config`), and the CRM's API routes it adds back.
+const OUTSIDE_PAGES = /^\/(?:_next|_vercel|api)|\./u;
+const CRM_API_PATH = /^\/api\/crm(?:\/|$)/u;
 
 /**
- * Refuses a POST body over 1 MiB (413), or one that doesn't state its length (411), except on
- * the files page: anyone, signed in or not, could otherwise make a server action parse 11 MB.
+ * Refuses a POST body over 1 MiB (413), or one that doesn't state its length (411), before a
+ * server action parses it, on every path but the files page. The files page parses up to 11 MB
+ * from anyone: an action runs there without a session, and answers its own 401. Next has
+ * already read the body (up to 11 MB) before either answer; the edge's body cap bounds both.
+ * Follow-up: move uploads to an auth-gated streaming route handler, and actions back to 1 MB.
  * @param request The request.
  * @returns The refusal's status, or 0 for a body that may go on.
  */
@@ -198,10 +204,10 @@ export default async function proxy(request: NextRequest) {
   if (refusal) {
     return new NextResponse(null, { status: refusal });
   }
-  // A page path with a dot comes here only for its body (the matcher): past the check, it goes
-  // on as it did before.
+  // A path the page matcher leaves out comes here only for its body (the matcher): past the
+  // check, it goes on as it did before.
   const { pathname } = request.nextUrl;
-  if (pathname.includes('.') && !pathname.startsWith('/api/crm/')) {
+  if (OUTSIDE_PAGES.test(pathname) && !CRM_API_PATH.test(pathname)) {
     return NextResponse.next();
   }
 
@@ -212,13 +218,20 @@ export const config = {
   // Match all pathnames except for
   // - … if they start with `/_next`, `/_vercel` or `api`
   // - … the ones containing a dot (e.g. `favicon.ico`)
-  // and the CRM's API routes, which only get their session refreshed; and every page path with a
-  // body, dots included, since a server action runs on one too (`/en/invite/a.b`) and its body
-  // must meet `bodyRefusal`.
+  // and the CRM's API routes, which only get their session refreshed; and every request with a
+  // body, but to the build's assets and images: `[locale]` takes any first segment, so a server
+  // action runs under `/api/sign-in` or `/en/invite/a.b` too, and its body must meet
+  // `bodyRefusal`.
   matcher: [
     '/((?!_next|_vercel|api|.*\\..*).*)',
     '/api/crm/:path*',
-    { source: '/((?!_next|_vercel|api).*)', has: [{ type: 'header', key: 'content-length' }] },
-    { source: '/((?!_next|_vercel|api).*)', has: [{ type: 'header', key: 'transfer-encoding' }] },
+    {
+      source: '/((?!_next/static|_next/image).*)',
+      has: [{ type: 'header', key: 'content-length' }],
+    },
+    {
+      source: '/((?!_next/static|_next/image).*)',
+      has: [{ type: 'header', key: 'transfer-encoding' }],
+    },
   ],
 };
