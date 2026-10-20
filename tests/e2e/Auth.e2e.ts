@@ -301,8 +301,10 @@ test.describe('Auth', () => {
       const after = await context.cookies();
       expect(sessionOf(after)).toStrictEqual(sessionOf(before));
       expect(sessionOf(after)).toHaveLength(2);
+      // Still signed in (in French now, as the link asked).
       await page.goto('/dashboard');
-      await expect(page.getByText(`Hello ${email}!`)).toBeVisible();
+      await expect(page).toHaveURL(/\/dashboard$/u);
+      await expect(page.getByRole('main').getByText(email, { exact: false })).toBeVisible();
     });
 
     test('still signs out a deleted account that follows a link from another site', async ({
