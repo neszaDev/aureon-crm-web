@@ -591,10 +591,17 @@ export const getContactTags = async (segment: string) => {
  * A company's include those on its contacts and deals.
  * @param segment The `[workspaceId]` route segment.
  * @param link The record, such as `{ companyId: 7 }`.
- * @param page The page, from 0; each holds the default page size.
+ * @param older Which page, from 0 (each holds the default page size), of those that happened
+ *   before `to` (an instant, exclusive), or of all without it.
+ * @param older.page The page.
+ * @param older.to The instant they happened before.
  * @returns The page and the outcome flags.
  */
-export const getActivities = async (segment: string, link: ActivityLink, page: number) => {
+export const getActivities = async (
+  segment: string,
+  link: ActivityLink,
+  older: { page: number; to?: string },
+) => {
   const workspaceId = toWorkspaceId(segment);
   if (workspaceId === undefined) {
     return { activities: undefined, ...NOT_FOUND };
@@ -602,7 +609,10 @@ export const getActivities = async (segment: string, link: ActivityLink, page: n
 
   const api = await authedBackend();
   const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/activities', {
-    params: { path: { workspaceId }, query: { ...link, page, size: PAGE_SIZES[0] } },
+    params: {
+      path: { workspaceId },
+      query: { ...link, to: older.to, page: older.page, size: PAGE_SIZES[0] },
+    },
   });
 
   return { activities: data, ...flags(response.status) };
@@ -842,7 +852,7 @@ export const getRecordWork = async (segment: string, link: ActivityLink) => {
       direction: 'DESC',
       size: PAGE_SIZES[0],
     }),
-    getActivities(segment, link, 0),
+    getActivities(segment, link, { page: 0 }),
     getMembers(segment),
   ]);
 

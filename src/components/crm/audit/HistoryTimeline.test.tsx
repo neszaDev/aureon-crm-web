@@ -173,6 +173,26 @@ describe(HistoryTimeline, () => {
       .toHaveTextContent('History26');
   });
 
+  it('stops asking at the last page there can be, plus one, when none brings anything older', async () => {
+    // A server answering every page with what is shown: the loop must end all the same.
+    vi.mocked(AuditActions.loadHistory)
+      .mockReset()
+      .mockImplementation(async () => {
+        const tick = Promise.withResolvers<undefined>();
+        setTimeout(tick.resolve, 1);
+        await tick.promise;
+        return newestFirst(25, 16);
+      });
+    await renderHistory(newestFirst(25, 16), 25);
+
+    await showOlder().click();
+
+    await expect.element(showOlder()).toHaveAttribute('aria-disabled', 'true');
+    await expect.element(showOlder()).not.toHaveAttribute('aria-disabled');
+    // Pages 1 to 3: page 3 (ceil(25 / 10)) is the last there can be, plus one.
+    expect(pagesAsked()).toStrictEqual([1, 2, 3]);
+  });
+
   describe('while teammates record more than a page meanwhile', () => {
     it('goes on to the next page when one holds nothing older than what is shown', async () => {
       // Twelve events landed after the page was read: page 1 now holds only the shown ones and

@@ -122,24 +122,36 @@ export async function deleteActivity(
 }
 
 /**
- * Loads a later page of a record's timeline, for "Show older". A 401 ends the session.
+ * Loads older activities of a record's timeline, for "Show older": a page of those that happened
+ * before an instant. A 401 ends the session.
  * @param workspaceId The workspace.
  * @param link The record, such as `{ companyId: 7 }`.
- * @param page The page, from 1.
+ * @param older Which page, from 0, of those before `to` (an instant, exclusive; all without it).
+ * @param older.page The page.
+ * @param older.to The instant they happened before.
  * @returns The page's activities, newest first.
- * @throws {Error} When the record or page isn't one, or the backend refuses.
+ * @throws {Error} When the record, page or instant isn't one, or the backend refuses.
  */
 export async function loadActivities(
   workspaceId: number,
   link: ActivityLink,
-  page: number,
+  older: { page: number; to?: string },
 ): Promise<Activity[]> {
   // A server action takes whatever a caller sends.
   const parsed = ActivityLinkValidation.safeParse(link);
-  if (!parsed.success || !Number.isSafeInteger(page) || page < 0) {
+  const to = typeof older.to === 'string' ? Date.parse(older.to) : undefined;
+  if (
+    !parsed.success ||
+    !Number.isSafeInteger(older.page) ||
+    older.page < 0 ||
+    (older.to !== undefined && !Number.isFinite(to))
+  ) {
     throw new Error('Not a timeline page');
   }
-  const result = await getActivities(String(workspaceId), parsed.data, page);
+  const result = await getActivities(String(workspaceId), parsed.data, {
+    page: older.page,
+    to: to === undefined ? undefined : new Date(to).toISOString(),
+  });
   if (result.unauthorized) {
     await redirectIfUnauthorized(401);
   }

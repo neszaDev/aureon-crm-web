@@ -62,10 +62,10 @@ const timelineOf = (shown: Activity[], saved: Activity[], deleted: number[]) => 
  * A record's activity: a "Log activity" button that opens the composer for a call, email,
  * meeting or note on it (it closes once logged, cancelled or on Escape), then what was logged,
  * newest first (a company's includes its contacts' and deals'). The first page comes
- * from the server; "Show older" adds the next ones, each activity once even when the pages moved
- * meanwhile (going on past a page that holds nothing older, and never leaving a gap under a
- * refreshed first page), and the focus goes to the first one it added. Edit and delete show for
- * the author and with `RECORDS_EDIT_ANY`.
+ * from the server; "Show older" adds those before the last one shown, each activity once even
+ * when others changed the timeline meanwhile (asked by time, so a deletion skips none, and never
+ * leaving a gap under a refreshed first page), and the focus goes to the first one it added. Edit
+ * and delete show for the author and with `RECORDS_EDIT_ANY`.
  * @param props Component props.
  * @param props.workspaceId The workspace.
  * @param props.link The record, such as `{ companyId: 7 }`: what the composer logs on.
@@ -127,28 +127,28 @@ export const ActivityTimeline = (props: {
       return;
     }
     startLoading(async () => {
-      // The page holding the first activity not shown yet: those before it come again if the
-      // pages moved since, and are dropped. An activity edited here to a time past the last one
-      // a page gave us is no longer among the server's first ones (its copy may stand for a
-      // page not loaded yet), so it doesn't count: counted, it would skip one.
-      // Only those older than that last one are added (newer ones wait for a refresh), and a
-      // full page with none means a page or more was logged meanwhile: the next one goes on.
+      // What happened before the last activity the server gave (an edit here doesn't count: its
+      // copy may stand for one not loaded yet), asked by time, so one deleted, logged or moved
+      // meanwhile never shifts what comes next. `to` is exclusive: 1 ms past the last one keeps
+      // its ties, and those shown already (or newer, waiting for a refresh) are left out. A full
+      // page of nothing new (more ties than a page) goes on to the next, as far as there can be.
       const last = [...older, ...props.first].toSorted(newestFirst).at(-1);
-      const loaded = last ? items.filter((item) => newestFirst(item, last) <= 0).length : 0;
-      let page = Math.floor(loaded / PAGE_SIZES[0]);
+      const to = last ? new Date(Date.parse(last.occurredAt) + 1).toISOString() : undefined;
+      const pages = Math.ceil(props.total / PAGE_SIZES[0]) + 1;
+      let page = 0;
       let next: Activity[] = [];
       let added: Activity[] = [];
       try {
         do {
           // oxlint-disable-next-line no-await-in-loop -- a page decides if the next is asked
-          next = await loadActivities(props.workspaceId, props.link, page);
+          next = await loadActivities(props.workspaceId, props.link, { page, to });
           added = next.filter(
             (activity) =>
               (!last || newestFirst(activity, last) > 0) &&
               !items.some((item) => item.id === activity.id),
           );
           page += 1;
-        } while (added.length === 0 && next.length === PAGE_SIZES[0]);
+        } while (added.length === 0 && next.length === PAGE_SIZES[0] && page < pages);
       } catch {
         toast.error(t('older_failed'));
         return;

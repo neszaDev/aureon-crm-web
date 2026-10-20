@@ -69,8 +69,10 @@ export const HistoryTimeline = (props: {
     startLoading(async () => {
       // The page holding the first event not shown: those before it come again if the pages
       // moved since, and are left out (newer ones wait for a refresh). A full page with nothing
-      // older means a page or more was recorded meanwhile: the next one goes on from there.
+      // older means a page or more was recorded meanwhile: the next one goes on from there, as
+      // far as there can be pages. (The API has no time bound for the history to ask by.)
       const last = events.at(-1);
+      const pages = Math.ceil(props.total / HISTORY_PAGE_SIZE) + 1;
       let pageNumber = Math.floor(events.length / HISTORY_PAGE_SIZE);
       let next: AuditEvent[] = [];
       let added: AuditEvent[] = [];
@@ -85,7 +87,7 @@ export const HistoryTimeline = (props: {
           );
           added = next.filter((item) => !last || newestFirst(item, last) > 0);
           pageNumber += 1;
-        } while (added.length === 0 && next.length === HISTORY_PAGE_SIZE);
+        } while (added.length === 0 && next.length === HISTORY_PAGE_SIZE && pageNumber < pages);
       } catch {
         toast.error(t('older_failed'));
         return;
