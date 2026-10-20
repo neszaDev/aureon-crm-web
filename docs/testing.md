@@ -62,7 +62,8 @@ E2E_BASE_URL=http://localhost:3105 BACKEND_URL=http://localhost:8081 pnpm exec p
 One worker keeps the dev server, the API and Postgres within a laptop's memory and keeps the
 per-email sign-in limit predictable; don't run it next to a Maven build of the API. The
 `EXPIRED` invitation test ages its own invitation row with `psql` inside the API's Postgres
-container (`aureon-crm-api-postgres-1`; override with `E2E_POSTGRES_CONTAINER`).
+container (`aureon-crm-api-postgres-1`; override with `E2E_POSTGRES_CONTAINER`, which `make e2e`,
+`make e2e-image` and CI set to this repository's own stack).
 
 The containers in `docker/compose.yml` do the same: they create the admin (`admin@e2e.test`, see
 `ADMIN` in `tests/e2e/helpers.ts`) and raise the per-IP rate limits. The per-email limit on failed

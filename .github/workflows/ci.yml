@@ -160,7 +160,8 @@ jobs:
 
       - name: Playwright against the running containers (includes axe accessibility checks)
         if: ${{ !cancelled() && steps.stack.outcome == 'success' }}
-        run: pnpm run test:e2e
+        # The expired-invitation test ages its row in this stack's Postgres, not the API repo's.
+        run: E2E_POSTGRES_CONTAINER="$($COMPOSE ps -q postgres)" pnpm run test:e2e
         env:
           E2E_BASE_URL: http://localhost:3000
 

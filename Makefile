@@ -44,11 +44,12 @@ backend-up: env/.env docker-ready ## Start Postgres + the backend API (for `pnpm
 	@echo "Backend ready at $(BACKEND_URL)"
 
 e2e: backend-up ## End-to-end tests against a local dev server + the backend
-	pnpm run test:e2e
+	E2E_POSTGRES_CONTAINER=$$($(COMPOSE) ps -q postgres) pnpm run test:e2e
 
 e2e-image: env/.env docker-ready ## As CI does: build the frontend image, run everything in containers, test
 	$(COMPOSE) --profile full up -d --build --wait --wait-timeout 300
-	E2E_BASE_URL=http://localhost:$${FRONTEND_PORT:-3000} pnpm run test:e2e
+	E2E_POSTGRES_CONTAINER=$$($(COMPOSE) ps -q postgres) \
+		E2E_BASE_URL=http://localhost:$${FRONTEND_PORT:-3000} pnpm run test:e2e
 
 api-types: backend-up ## Regenerate src/libs/api/schema.d.ts from the backend's OpenAPI spec
 	BACKEND_URL=$(BACKEND_URL) pnpm run api:types
