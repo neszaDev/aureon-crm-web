@@ -63,9 +63,10 @@ up: env/.env docker-ready ## Run the full stack in containers (frontend on :3000
 down: env/.env docker-ready ## Stop all containers (keeps data)
 	$(COMPOSE) --profile full down
 
+# The volume belongs to the compose project: COMPOSE_PROJECT_NAME when set, else the directory name.
 db-reset: env/.env docker-ready ## Stop containers and delete the local backend database
 	$(COMPOSE) --profile full down
-	docker volume rm -f $(notdir $(CURDIR))_postgres-data
+	docker volume rm -f $(or $(COMPOSE_PROJECT_NAME),$(notdir $(CURDIR)))_postgres-data
 
 docker-ready: ## Check Docker is running; on macOS start Docker Desktop and wait
 	@scripts/ensure-docker.sh
