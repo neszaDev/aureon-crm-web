@@ -29,6 +29,13 @@ describe(actionFailure, () => {
     },
   );
 
+  it('offers a reload when CONFLICT says it clashes with data saved meanwhile (a deleted stage)', async () => {
+    const result = await actionFailure(new Response(null, { status: 409 }), refusal('CONFLICT'));
+
+    expect(result).toMatchObject({ ok: false, conflict: true });
+    expect(result.message).toMatch(/Reload and try again/u);
+  });
+
   it('offers none for a refusal a reload does not change', async () => {
     const result = await actionFailure(new Response(null, { status: 409 }), refusal('LAST_OWNER'));
 
