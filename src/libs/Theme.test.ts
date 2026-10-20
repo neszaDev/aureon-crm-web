@@ -69,6 +69,7 @@ const chooseDarkOn = (protocol: string) => {
   const document = {
     cookie: '',
     documentElement: { classList: { add: () => {}, remove: () => {} } },
+    querySelectorAll: () => [],
   };
   vi.stubGlobal('window', { location: { protocol } });
   vi.stubGlobal('document', document);

@@ -5,7 +5,7 @@ import { Anuphan } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { ThemeClass } from '@/components/ThemeClass';
 import { routing } from '@/libs/I18nRouting';
-import { THEME_SCRIPT } from '@/libs/Theme';
+import { THEME_GROUNDS, THEME_SCRIPT } from '@/libs/Theme';
 import { getBaseUrl } from '@/utils/Helpers';
 import '@/styles/global.css';
 
@@ -50,10 +50,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  // The ground of each theme (`--ground`).
+  // The ground of each OS scheme; `applyTheme` follows a theme chosen in the app instead.
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#eff0ec' },
-    { media: '(prefers-color-scheme: dark)', color: '#141212' },
+    { media: '(prefers-color-scheme: light)', color: THEME_GROUNDS.light },
+    { media: '(prefers-color-scheme: dark)', color: THEME_GROUNDS.dark },
   ],
 };
 
