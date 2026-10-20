@@ -17,6 +17,18 @@ git-ignored); in containers and CI, from the environment.
 
 Runtime values are **not** baked into the image, so one image serves every environment.
 
+**Deployment requirement:** run the app behind a reverse proxy that overwrites
+`X-Forwarded-For` with the client's address. In nginx:
+
+```nginx
+proxy_set_header X-Forwarded-For $remote_addr;
+```
+
+The backend's per-IP sign-in and registration limits key on that address
+([client IP](backend-integration.md#client-ip-and-rate-limits)). Exposed directly, a client
+sends any `X-Forwarded-For` it likes, Next.js keeps it, and those limits don't hold; the
+per-email limit on failed sign-ins still does.
+
 ## Local Docker stack (`env/.env`)
 
 `make backend-up`, `make e2e`, `make up` and `make e2e-image` run the API from

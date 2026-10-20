@@ -148,7 +148,11 @@ image to `ghcr.io/neszadev/aureon-crm-web`: `:dev` from `dev`, `:latest` / `:1.2
 and tags after approval. Run it with `BACKEND_URL` (where the server reaches the API) and
 `APP_URL` (its public URL; `https://` makes cookies `Secure`), behind a TLS terminator that
 sends `Strict-Transport-Security` (the app sends its other security headers itself, but not
-HSTS: one image runs under any `APP_URL`). Keep the logs clean of secrets:
+HSTS: one image runs under any `APP_URL`). Never expose it directly: the reverse proxy in front
+must overwrite `X-Forwarded-For` with the client's address (nginx:
+`proxy_set_header X-Forwarded-For $remote_addr;`), or a client picks its own and the per-IP
+sign-in and registration limits don't hold ([configuration](docs/configuration.md)). Keep the
+logs clean of secrets:
 an invitation's path (`/invite/<token>`) is one, which the app keeps out of its own request log
 and a reverse proxy's access log must drop too, and `NEXT_PUBLIC_LOGGING_LEVEL` stays at `info`
 or above (it is inlined at build).
