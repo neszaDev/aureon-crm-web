@@ -158,7 +158,9 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
 
 ## Security headers
 
-`next.config.ts` sends them on every response. `X-Frame-Options: SAMEORIGIN` and the CSP's
+`next.config.ts` sends them on every page and route (the build's own assets under
+`/_next/static/` go without: no one frames them, and the extra bytes cost the home page a
+point of its mobile Lighthouse score). `X-Frame-Options: SAMEORIGIN` and the CSP's
 `frame-ancestors 'self'` keep other sites from framing a page (no clickjacking of its forms);
 the rest of the CSP is `base-uri 'self'; object-src 'none'; form-action 'self'`. Then `nosniff`,
 `Referrer-Policy: strict-origin-when-cross-origin` (`no-referrer` on invitation pages), and a

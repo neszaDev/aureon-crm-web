@@ -51,9 +51,10 @@ const baseConfig: NextConfig = {
     // For the same header, a later rule wins.
     return [
       {
-        // Every path but a file's download, whose route sets its own sandbox CSP: Next would
-        // send this one instead.
-        source: '/:path((?!(?:[a-z]{2}/)?dashboard/files/[^/]+/content$).*)',
+        // Every path but the build's own assets (never framed, typed by Next; ~11 KB less on the
+        // home page's load) and a file's download, whose route sets its own sandbox CSP: Next
+        // would send this one instead.
+        source: '/:path((?!_next/static/|(?:[a-z]{2}/)?dashboard/files/[^/]+/content$).*)',
         headers: SECURITY_HEADERS,
       },
       {
