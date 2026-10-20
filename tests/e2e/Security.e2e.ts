@@ -291,7 +291,8 @@ test.describe('Security', () => {
       ).toStrictEqual([]);
     });
 
-    test('shares a refresh with a stale refresh token for 2 seconds at most', async ({
+    // The 2 s bound itself runs on fake timers in proxy.test.ts.
+    test('gives a just-rotated refresh token the same new pair, and nothing later', async ({
       request,
       baseURL,
     }) => {
@@ -706,21 +707,32 @@ test.describe('Security', () => {
       baseURL,
     }) => {
       const owner = await seedWorkspace(request, { workspace: 'Framed Workspace' });
+      const invitation = await invite(request, uniqueEmail());
       await signIn(page, { email: owner.email, password: PASSWORD });
+      const pages = [
+        '/',
+        '/sign-in',
+        owner.path,
+        `${owner.path}/settings/members`,
+        invitation.path,
+      ];
 
-      for (const path of ['/', '/sign-in', owner.path, `${owner.path}/settings/members`]) {
+      for (const path of pages) {
         // oxlint-disable-next-line no-await-in-loop -- one page after the other
         const response = await page.request.get(path);
         const headers = response.headers();
         const csp = headers['content-security-policy'] ?? '';
 
-        expect
-          .soft(headers['x-frame-options'] ?? /frame-ancestors[^;]*/u.exec(csp)?.[0], path)
-          .toBeDefined();
-        expect.soft(csp, `${path} content-security-policy`).not.toBe('');
+        expect.soft(headers['x-frame-options'], `${path} x-frame-options`).toBe('SAMEORIGIN');
+        expect.soft(csp, `${path} content-security-policy`).toContain("frame-ancestors 'self'");
         expect.soft(headers['x-content-type-options'], `${path} nosniff`).toBe('nosniff');
-        expect.soft(headers['referrer-policy'], `${path} referrer-policy`).toBeDefined();
-        expect.soft(headers['permissions-policy'], `${path} permissions-policy`).toBeDefined();
+        // An invitation's URL holds its token: no Referer at all there.
+        expect
+          .soft(headers['referrer-policy'], `${path} referrer-policy`)
+          .toBe(path === invitation.path ? 'no-referrer' : 'strict-origin-when-cross-origin');
+        expect
+          .soft(headers['permissions-policy'], `${path} permissions-policy`)
+          .toBe('camera=(), microphone=(), geolocation=(), payment=(), usb=()');
       }
 
       // Another site frames the sign-in form, which takes a password inside its page.
