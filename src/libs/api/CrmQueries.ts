@@ -665,6 +665,114 @@ export const getDashboard = async (segment: string, period: PeriodQuery) => {
 };
 
 /**
+ * Loads the pipeline report (`GET /workspaces/{id}/reports/pipeline`): the open deals by stage
+ * and by owner, as of now.
+ * @param segment The `[workspaceId]` route segment.
+ * @returns The report and the outcome flags.
+ */
+export const getPipelineReport = async (segment: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { report: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reports/pipeline', {
+    params: { path: { workspaceId } },
+  });
+
+  return { report: data, ...flags(response.status) };
+};
+
+/**
+ * Loads the follow-ups report (`GET /workspaces/{id}/reports/follow-ups`): the overdue and
+ * upcoming tasks and the due leads of the whole workspace, as of now, each with its count and
+ * first items.
+ * @param segment The `[workspaceId]` route segment.
+ * @returns The report and the outcome flags.
+ */
+export const getFollowUpReport = async (segment: string) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { report: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reports/follow-ups', {
+    params: { path: { workspaceId } },
+  });
+
+  return { report: data, ...flags(response.status) };
+};
+
+/**
+ * Loads the won and lost report (`GET /workspaces/{id}/reports/won-lost`): every month of the
+ * period with its won and lost deals and the won totals per currency. The response names the
+ * `period` it used.
+ * @param segment The `[workspaceId]` route segment.
+ * @param period The period from the URL, read with `parsePeriod`; a day left out is the API's
+ *   default.
+ * @returns The report and the outcome flags (`invalid`: the backend refused the period).
+ */
+export const getWonLostReport = async (segment: string, period: PeriodQuery) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { report: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reports/won-lost', {
+    params: { path: { workspaceId }, query: period },
+  });
+
+  return { report: data, ...flags(response.status) };
+};
+
+/**
+ * Loads the funnel report (`GET /workspaces/{id}/reports/funnel`): the deals created in the
+ * period and, for each stage, how many reached it. The response names the `period` it used and
+ * the day the workspace's stage history starts.
+ * @param segment The `[workspaceId]` route segment.
+ * @param period The period from the URL, read with `parsePeriod`.
+ * @returns The report and the outcome flags (`invalid`: the backend refused the period).
+ */
+export const getFunnelReport = async (segment: string, period: PeriodQuery) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { report: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reports/funnel', {
+    params: { path: { workspaceId }, query: period },
+  });
+
+  return { report: data, ...flags(response.status) };
+};
+
+/**
+ * Loads the activities report (`GET /workspaces/{id}/reports/activities`): per member, the
+ * activities logged in the period by type and the tasks completed. The response names the
+ * `period` it used.
+ * @param segment The `[workspaceId]` route segment.
+ * @param period The period from the URL, read with `parsePeriod`.
+ * @returns The report and the outcome flags (`invalid`: the backend refused the period).
+ */
+export const getActivityReport = async (segment: string, period: PeriodQuery) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { report: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reports/activities', {
+    params: { path: { workspaceId }, query: period },
+  });
+
+  return { report: data, ...flags(response.status) };
+};
+
+/**
  * Loads one task (`GET /workspaces/{id}/tasks/{id}`). Cached for the request, so the page and
  * its metadata share one call.
  * @param segment The `[workspaceId]` route segment.

@@ -3,6 +3,7 @@
 import { cn } from 'cn';
 import {
   Building2Icon,
+  ChartNoAxesColumnIcon,
   HandshakeIcon,
   LayoutDashboardIcon,
   ListTodoIcon,
@@ -15,7 +16,7 @@ import { Link, usePathname } from '@/libs/I18nNavigation';
 
 // The rail's sections, in order. `section` is the first URL segment under the workspace (empty
 // for its home); `href` is where the link lands. Slices add their entries here once their pages
-// exist: F3 reports.
+// exist.
 const crmNavItems = [
   { key: 'dashboard', section: '', href: '', icon: LayoutDashboardIcon },
   { key: 'companies', section: 'companies', href: '/companies', icon: Building2Icon },
@@ -23,6 +24,7 @@ const crmNavItems = [
   { key: 'leads', section: 'leads', href: '/leads', icon: UserPlusIcon },
   { key: 'deals', section: 'deals', href: '/deals', icon: HandshakeIcon },
   { key: 'tasks', section: 'tasks', href: '/tasks', icon: ListTodoIcon },
+  { key: 'reports', section: 'reports', href: '/reports', icon: ChartNoAxesColumnIcon },
   { key: 'settings', section: 'settings', href: '/settings/workspace', icon: SettingsIcon },
 ] as const;
 

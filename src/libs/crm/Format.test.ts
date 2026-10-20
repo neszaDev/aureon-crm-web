@@ -5,6 +5,7 @@ import {
   formatDate,
   formatInstant,
   formatMoney,
+  formatMonth,
   formatPeriod,
   fullName,
   recordNumber,
@@ -65,6 +66,15 @@ describe(formatPeriod, () => {
     expect(formatPeriod({ from: '2025-12-20', to: '2026-01-18' }, 'en')).toBe(
       'Dec 20, 2025 – Jan 18, 2026',
     );
+  });
+});
+
+describe(formatMonth, () => {
+  it('names a report month in the page language, as the same month in every time zone', () => {
+    expect(formatMonth('2026-09', 'en')).toBe('Sep 2026');
+    expect(formatMonth('2026-01', 'fr')).toBe('janv. 2026');
+    // Thai counts years from the Buddhist era, as the other dates do.
+    expect(formatMonth('2026-10', 'th')).toContain('2569');
   });
 });
 

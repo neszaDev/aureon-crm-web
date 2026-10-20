@@ -32,14 +32,15 @@ src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for
                                 ActionFailure.ts, Session.ts, schema.d.ts (GENERATED, see below)
 src/libs/api/CrmQueries.ts      CRM reads for pages (workspaces, members, invitations, stages, sources, records, lists, the
                                 caller's reminders: the workspace layout reads them on every render, the bell again on each navigation;
-                                the dashboard)
+                                the dashboard, the five reports)
 src/libs/api/RecordSearch.ts    the list searches behind the pickers (`searchRecords`) and the ⌘K record search (`searchAll`)
 src/libs/crm/*                  CRM logic: Permissions (`can`), RecordAccess (who may edit a record), WorkspaceId,
                                 Stages, PageMetadata, OpenWorkspace (`getOpenWorkspace`: a page's workspace, 401
                                 and 404 handled), Format (money, dates, record numbers), ZonedTime (workspace-zone
                                 inputs), ListQuery (a list's state from its URL), DealHistory (stamp row signers),
                                 Reminders (the bell's count and its "20+"), PeriodQuery (a dashboard's or report's
-                                `?from&to`, read leniently, and the picker's presets)
+                                `?from&to`, read leniently, and the picker's presets), Reports (the
+                                report tabs: `?tab=`, which take a period)
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
 src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens
 src/validations/                zod schemas mirroring the backend's request rules (CRM: crm/*)
@@ -47,7 +48,8 @@ src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx
 src/components/report/          Marksheet domain UI: marks, totals, results table (demos only)
 src/components/crm/**           the CRM: shell/ (rail, switcher, account menu, record search, reminders bell), settings/, seals, dashboard/
                                 (the home: KPI strip, my deals, follow-ups, pipeline, won and lost, stages, recent activity and changes),
-                                audit/ (`AuditEventItem`), PeriodPicker, and per record:
+                                audit/ (`AuditEventItem`), reports/ (the tabs and a panel per report, `ChartTable`),
+                                PeriodPicker, and per record:
                                 company/ contact/ lead/ deal/ task/ activity/, with the shared list/ (list kit),
                                 record/ (header, facts, archive) and fields/ (pickers, owner, date and time)
 src/components/ src/templates/  UI (MarketingTemplate, AppShell); src/locales/*.json  all user-visible text

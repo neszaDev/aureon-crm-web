@@ -360,6 +360,12 @@ The workspace home, in this order: a header (the page `h1`, a line naming the wo
 - **Charts** use `--chart-2..5` (never the seal's `--chart-1` for a plain series), name each bar with its stage and its count, and always sit above their table, which is the text equivalent: the chart itself is hidden from assistive technology and takes no focus. Animation is off under reduced motion.
 - **History entries** (`AuditEventItem`): the actor's seal (none for a former member), "Riley Rep changed Acme Trading" with the record as a link, the time in the workspace zone, and the changed fields as "Field: from → to". Money carries its currency only when the event names it; ids read "changed".
 
+### Reports
+The reports page opens with its `h1` and a row of tab links (`?tab=pipeline|won-lost|funnel|activities|follow-ups`; the pipeline without one): the current tab is `bg-muted` and semibold with `aria-current="page"`, the one just followed shows a spinner until its report arrives. A line under the tabs says what the figures cover (the pipeline and the follow-ups are as of now; the other three follow a period, with the period picker at its right, which keeps the tab and the range when either changes). Every figure is the API's, as sent: no sum across currencies, owners or months, every amount in its currency, each currency on its own line, the period label from the response's `period`.
+- **Charts** use `--chart-2..5` only. Won and lost are never the seal: Won a solid pine (`--chart-3`) bar and Lost a hatched ink bar (diagonal stripes with an ink outline), so they read apart without their colours; the counts sit on the bars while there is room (up to six months). The chart is hidden from assistive technology and its text equivalent is `ChartTable`: a "Show table" button over the table, open below `md` and closed from `md` up until asked for.
+- **Funnel**: a table, one row per stage, "reached of created" beside a bar (open stages `--chart-2`, Won `--chart-3`); when the stage history starts after the period does, or there is none, a caution with a warning icon says so above it and the counts are never presented as complete.
+- **Activities**: a table per member (seal, calls, emails, meetings, notes, tasks completed, total of the row); the members who left are one row without a seal. On a phone it scrolls inside a focusable region, the member column staying in view.
+
 ### Tables
 - Heads in the label-table style, 40px tall, sentence case; rows divided by rule, 12px cell padding, muted on hover; tabular figures.
 

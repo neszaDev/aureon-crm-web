@@ -201,7 +201,8 @@
     "skip_to_content": "Skip to content",
     "nav_tasks": "Tasks",
     "nav_leads": "Leads",
-    "nav_deals": "Deals"
+    "nav_deals": "Deals",
+    "nav_reports": "Reports"
   },
   "RecordSearch": {
     "open": "Search records",
@@ -3418,5 +3419,82 @@
     "new": "New deal",
     "empty": "No deals yet.",
     "view_all": "{count, plural, one {View # deal in the list} other {View all # deals}}"
+  },
+  "CrmReports": {
+    "title": "Reports",
+    "description": "The pipeline, closed deals, funnel, team activity and follow-ups of {name}.",
+    "intro_pipeline": "The open deals as of now.",
+    "intro_won-lost": "Deals closed in each month of the period, counted by the stage they are in now.",
+    "intro_funnel": "Deals created in the period, and how far they got.",
+    "intro_activities": "What each member logged and completed in the period.",
+    "intro_follow-ups": "Everything waiting on a follow-up across the workspace, as of now."
+  },
+  "ReportTabs": {
+    "label": "Reports",
+    "tab_pipeline": "Pipeline",
+    "tab_won-lost": "Won and lost",
+    "tab_funnel": "Funnel",
+    "tab_activities": "Activities",
+    "tab_follow-ups": "Follow-ups"
+  },
+  "ChartTable": {
+    "show": "Show table",
+    "hide": "Hide table"
+  },
+  "PipelineReport": {
+    "owners_title": "Open deals by owner",
+    "owner": "Owner",
+    "deals": "Deals",
+    "value": "Value",
+    "unassigned": "Unassigned",
+    "no_value": "None",
+    "empty": "No open deals."
+  },
+  "WonLostReport": {
+    "title": "Won and lost by month",
+    "month": "Month",
+    "won": "Won",
+    "lost": "Lost",
+    "won_value": "Won value",
+    "no_value": "None"
+  },
+  "FunnelReport": {
+    "title": "Funnel",
+    "created": "{count, plural, one {# deal} other {# deals}} created in this period.",
+    "hint": "Each stage counts how many of them reached it or a later one.",
+    "stage": "Stage",
+    "reached": "Reached",
+    "reached_of": "{reached, number} of {created, number}",
+    "none": "No deals were created in this period.",
+    "history_from": "Stage history starts on {date}; deals created before it count only the stages recorded since.",
+    "history_none": "No stage changes yet."
+  },
+  "ActivityReport": {
+    "title": "Activity by member",
+    "scope": "Activities count under the member who wrote them, completed tasks under their assignee.",
+    "member": "Member",
+    "col_calls": "Calls",
+    "col_emails": "Emails",
+    "col_meetings": "Meetings",
+    "col_notes": "Notes",
+    "col_tasksCompleted": "Tasks completed",
+    "total": "Total",
+    "former": "Former members",
+    "empty": "No activity in this period.",
+    "table": "Activity table"
+  },
+  "FollowUpReport": {
+    "overdue": "Overdue tasks",
+    "overdue_hint": "Open tasks past their due time, the longest overdue first.",
+    "overdue_none": "No overdue tasks.",
+    "upcoming": "Upcoming tasks",
+    "upcoming_hint": "Open tasks due in the next 7 days, the soonest first.",
+    "upcoming_none": "Nothing due in the next 7 days.",
+    "leads": "Leads to follow up",
+    "leads_hint": "Open leads whose follow-up day is today or earlier, the oldest first.",
+    "leads_none": "No leads to follow up.",
+    "more": "and {count, number} more",
+    "count": "{count, number}",
+    "unassigned": "Unassigned"
   }
 }

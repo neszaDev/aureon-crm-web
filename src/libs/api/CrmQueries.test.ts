@@ -4,9 +4,14 @@ import { authedBackend } from './Backend';
 import {
   COMPANY_LIST,
   getCompanies,
+  getActivityReport,
   getDashboard,
+  getFollowUpReport,
+  getFunnelReport,
   getLeads,
+  getPipelineReport,
   getReminders,
+  getWonLostReport,
   LEAD_LIST,
   taskViewQuery,
 } from './CrmQueries';
@@ -189,6 +194,76 @@ describe(getDashboard, () => {
       dashboard: undefined,
       notFound: true,
     });
+    expect(authedBackend).not.toHaveBeenCalled();
+  });
+});
+
+describe('the reports', () => {
+  const ok = { data: { period: {} }, response: new Response(null, { status: 200 }) };
+  const refused = {
+    error: { status: 400, code: 'VALIDATION_FAILED', message: 'Validation failed' },
+    response: new Response(null, { status: 400 }),
+  };
+
+  it.each([
+    ['won-lost', getWonLostReport],
+    ['funnel', getFunnelReport],
+    ['activities', getActivityReport],
+  ] as const)(
+    'asks %s for the period as it is, and flags a refusal as invalid',
+    async (path, get) => {
+      const GET = vi
+        .fn<() => Promise<unknown>>()
+        .mockResolvedValueOnce(ok)
+        .mockResolvedValueOnce(ok)
+        .mockResolvedValueOnce(refused);
+      // @ts-expect-error -- only the call this query makes
+      vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+      const result = await get('7', { from: '2026-09-01', to: '2026-09-30' });
+
+      expect(result).toMatchObject({ report: { period: {} }, invalid: false });
+      expect(GET).toHaveBeenCalledWith(`/api/v1/workspaces/{workspaceId}/reports/${path}`, {
+        params: { path: { workspaceId: 7 }, query: { from: '2026-09-01', to: '2026-09-30' } },
+      });
+      await get('7', {});
+      expect(GET).toHaveBeenLastCalledWith(`/api/v1/workspaces/{workspaceId}/reports/${path}`, {
+        params: { path: { workspaceId: 7 }, query: {} },
+      });
+      await expect(get('7', { from: '2026-09-01' })).resolves.toStrictEqual({
+        report: undefined,
+        unauthorized: false,
+        forbidden: false,
+        notFound: false,
+        invalid: true,
+      });
+    },
+  );
+
+  it.each([
+    ['pipeline', getPipelineReport],
+    ['follow-ups', getFollowUpReport],
+  ] as const)('asks %s for nothing but the workspace: it is as of now', async (path, get) => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue(ok);
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await expect(get('7')).resolves.toMatchObject({ report: { period: {} }, forbidden: false });
+    expect(GET).toHaveBeenCalledWith(`/api/v1/workspaces/{workspaceId}/reports/${path}`, {
+      params: { path: { workspaceId: 7 } },
+    });
+  });
+
+  it.each([
+    getPipelineReport,
+    getFollowUpReport,
+    getWonLostReport,
+    getFunnelReport,
+    getActivityReport,
+  ])('finds none for a malformed workspace id, without asking the backend', async (get) => {
+    vi.mocked(authedBackend).mockClear();
+
+    await expect(get('seven', {})).resolves.toMatchObject({ report: undefined, notFound: true });
     expect(authedBackend).not.toHaveBeenCalled();
   });
 });

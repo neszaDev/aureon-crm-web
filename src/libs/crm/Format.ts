@@ -94,6 +94,18 @@ export const formatPeriod = (period: { from: string; to: string }, locale: strin
 };
 
 /**
+ * Names a report's month: "Sep 2026" in the page's language. The month is the workspace's
+ * calendar month the API counted in, so it reads the same in every time zone.
+ * @param month The API's `YYYY-MM`.
+ * @param locale The page's locale.
+ * @returns The month and year.
+ */
+export const formatMonth = (month: string, locale: string) =>
+  new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
+    new Date(`${month}-01T00:00:00Z`),
+  );
+
+/**
  * Counts the whole days since an instant, e.g. how long a deal has been in its stage.
  * @param instant An ISO 8601 instant.
  * @param now The current time.

@@ -201,7 +201,8 @@
     "skip_to_content": "Aller au contenu",
     "nav_tasks": "Tâches",
     "nav_leads": "Prospects",
-    "nav_deals": "Affaires"
+    "nav_deals": "Affaires",
+    "nav_reports": "Rapports"
   },
   "RecordSearch": {
     "open": "Rechercher des fiches",
@@ -3418,5 +3419,82 @@
     "new": "Nouvelle affaire",
     "empty": "Aucune affaire pour l'instant.",
     "view_all": "{count, plural, one {Voir # affaire dans la liste} other {Voir les # affaires}}"
+  },
+  "CrmReports": {
+    "title": "Rapports",
+    "description": "Le pipeline, les affaires clôturées, l'entonnoir, l'activité de l'équipe et les relances de {name}.",
+    "intro_pipeline": "Les affaires en cours à ce jour.",
+    "intro_won-lost": "Les affaires clôturées chaque mois de la période, comptées selon leur étape actuelle.",
+    "intro_funnel": "Les affaires créées sur la période et jusqu'où elles sont allées.",
+    "intro_activities": "Ce que chaque membre a consigné et terminé sur la période.",
+    "intro_follow-ups": "Tout ce qui attend une relance dans l'espace de travail, à ce jour."
+  },
+  "ReportTabs": {
+    "label": "Rapports",
+    "tab_pipeline": "Pipeline",
+    "tab_won-lost": "Gagnées et perdues",
+    "tab_funnel": "Entonnoir",
+    "tab_activities": "Activités",
+    "tab_follow-ups": "Relances"
+  },
+  "ChartTable": {
+    "show": "Afficher le tableau",
+    "hide": "Masquer le tableau"
+  },
+  "PipelineReport": {
+    "owners_title": "Affaires en cours par propriétaire",
+    "owner": "Propriétaire",
+    "deals": "Affaires",
+    "value": "Valeur",
+    "unassigned": "Sans propriétaire",
+    "no_value": "Aucune",
+    "empty": "Aucune affaire en cours."
+  },
+  "WonLostReport": {
+    "title": "Gagnées et perdues par mois",
+    "month": "Mois",
+    "won": "Gagnées",
+    "lost": "Perdues",
+    "won_value": "Valeur gagnée",
+    "no_value": "Aucune"
+  },
+  "FunnelReport": {
+    "title": "Entonnoir",
+    "created": "{count, plural, one {# affaire créée} other {# affaires créées}} sur cette période.",
+    "hint": "Chaque étape compte combien d'entre elles l'ont atteinte, ou une étape suivante.",
+    "stage": "Étape",
+    "reached": "Atteinte",
+    "reached_of": "{reached, number} sur {created, number}",
+    "none": "Aucune affaire n'a été créée sur cette période.",
+    "history_from": "L'historique des étapes commence le {date} ; les affaires créées avant ne comptent que les étapes enregistrées depuis.",
+    "history_none": "Aucun changement d'étape pour l'instant."
+  },
+  "ActivityReport": {
+    "title": "Activité par membre",
+    "scope": "Les activités comptent pour leur auteur, les tâches terminées pour la personne à qui elles sont attribuées.",
+    "member": "Membre",
+    "col_calls": "Appels",
+    "col_emails": "E-mails",
+    "col_meetings": "Réunions",
+    "col_notes": "Notes",
+    "col_tasksCompleted": "Tâches terminées",
+    "total": "Total",
+    "former": "Anciens membres",
+    "empty": "Aucune activité sur cette période.",
+    "table": "Tableau de l'activité"
+  },
+  "FollowUpReport": {
+    "overdue": "Tâches en retard",
+    "overdue_hint": "Tâches ouvertes dont l'échéance est passée, les plus en retard d'abord.",
+    "overdue_none": "Aucune tâche en retard.",
+    "upcoming": "Tâches à venir",
+    "upcoming_hint": "Tâches ouvertes à rendre dans les 7 prochains jours, les plus proches d'abord.",
+    "upcoming_none": "Rien à rendre dans les 7 prochains jours.",
+    "leads": "Prospects à relancer",
+    "leads_hint": "Prospects ouverts dont le jour de relance est aujourd'hui ou avant, les plus anciens d'abord.",
+    "leads_none": "Aucun prospect à relancer.",
+    "more": "et {count, number} de plus",
+    "count": "{count, number}",
+    "unassigned": "Sans propriétaire"
   }
 }
