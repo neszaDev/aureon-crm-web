@@ -469,6 +469,41 @@ test.describe('Security', () => {
       expect(text).toMatch(/"digest":"\d+"/u);
       expect(text).not.toMatch(/SyntaxError|JSON|\bat\s|node_modules|\.next\/|\/Users\//u);
     });
+
+    test('refuse a 10 MB body from someone who is not signed in', async ({ page }) => {
+      await page.goto('/sign-in');
+      await page.getByLabel('Email address').fill('nobody@example.com');
+      await page.getByLabel('Password').fill('wrong-password');
+      let action = '';
+      await page.route('**/sign-in', async (route) => {
+        if (route.request().method() !== 'POST') {
+          await route.fallback();
+          return;
+        }
+        action = route.request().headers()['next-action'] ?? '';
+        await route.abort();
+      });
+      await page.getByRole('button', { name: 'Sign in' }).click();
+      await expect.poll(() => action).not.toBe('');
+
+      const password = 'x'.repeat(10 * 1024 * 1024);
+      const post = async (path: string) =>
+        await page.request.post(path, {
+          headers: {
+            'next-action': action,
+            accept: 'text/x-component',
+            'content-type': 'text/plain;charset=UTF-8',
+            origin: new URL(page.url()).origin,
+          },
+          data: JSON.stringify([{ email: 'nobody@example.com', password }, '$undefined']),
+        });
+      const response = await post('/sign-in');
+
+      expect(response.status()).toBe(413);
+      // Nor through a path with a dot, which renders a page holding the same action.
+      const dotted = await post('/en/invite/a.b');
+      expect(dotted.status()).toBe(413);
+    });
   });
 
   test.describe('Another site', () => {

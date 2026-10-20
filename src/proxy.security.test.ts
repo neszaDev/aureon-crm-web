@@ -23,10 +23,11 @@ vi.mock(import('@/libs/Env'), () => ({
 /**
  * Tells whether a request for the path goes through the proxy.
  * @param path The path.
+ * @param headers The request's headers, if any matter.
  * @returns Whether the proxy's matcher takes it.
  */
-const runsOn = (path: string) =>
-  unstable_doesMiddlewareMatch({ config, url: `https://crm.example${path}` });
+const runsOn = (path: string, headers?: Record<string, string>) =>
+  unstable_doesMiddlewareMatch({ config, url: `https://crm.example${path}`, headers });
 
 describe('proxy security', () => {
   it("runs on every locale's CRM and demo pages, their file route and the CRM's API routes", () => {
@@ -55,6 +56,20 @@ describe('proxy security', () => {
     ];
 
     expect(outside.filter((path) => runsOn(path))).toStrictEqual([]);
+  });
+
+  it('runs on any page path with a body, dots included: a server action runs there too', () => {
+    const length = { 'content-length': '64' };
+    const bodies: Record<string, string>[] = [length, { 'transfer-encoding': 'chunked' }];
+    const pages = ['/en/invite/a.b', '/fr/app/7/companies/3.json', '/sign-in'];
+
+    expect(bodies.flatMap((body) => pages.filter((path) => !runsOn(path, body)))).toStrictEqual([]);
+    // Never the session route or static files, whatever they carry.
+    expect(
+      ['/api/session/expired', '/_next/static/chunks/app.js'].filter((path) =>
+        runsOn(path, length),
+      ),
+    ).toStrictEqual([]);
   });
 
   it('stores a refreshed session in Secure, httpOnly, SameSite=Lax cookies over https', async () => {

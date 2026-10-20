@@ -30,7 +30,8 @@ const baseConfig: NextConfig = {
     // Use the Rust version, instead of the OG Babel one
     turbopackRustReactCompiler: process.env.NODE_ENV === 'production',
     // File uploads go through a server action: the backend accepts up to 10MB (FILES_MAX_SIZE),
-    // plus multipart overhead. The proxy buffers bodies too, and truncates past its limit.
+    // plus multipart overhead. The proxy buffers bodies too, and truncates past its limit. Only
+    // the files page gets this much: `src/proxy.ts` refuses a body over 1 MiB anywhere else.
     serverActions: { bodySizeLimit: '11mb' },
     proxyClientMaxBodySize: '11mb',
   },

@@ -167,6 +167,13 @@ the global one in its place). **Known limit:** the CSP has no `script-src`, so i
 against an XSS: a nonce would make every page dynamic (the public pages are static), and Next's
 inline scripts need a nonce or `'unsafe-inline'`. No HSTS here: see the deployment shape.
 
+## Request bodies
+
+The proxy answers a POST over 1 MiB with 413 (and one without a stated length with 411) before
+any server action parses it, on every page path, dotted ones included; only the files page takes
+the 11 MB its upload needs (`next.config.ts`). Next still reads the whole body (keeping up to
+11 MB) before the refusal goes out, so a reverse proxy's body cap is what bounds the upload.
+
 ## Rendering
 
 Public pages are statically generated per locale. Everything under `app` and

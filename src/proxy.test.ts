@@ -36,6 +36,20 @@ const exportRequest = (cookie: string) =>
     headers: { cookie },
   });
 
+/**
+ * A server action's POST from a browser without a session.
+ * @param path The page it posts to.
+ * @param headers What it says of its body (`content-length` or `transfer-encoding`).
+ * @returns The request.
+ */
+const postRequest = (path: string, headers: Record<string, string>) =>
+  new NextRequest(`http://localhost:3000${path}`, {
+    method: 'POST',
+    headers: { 'next-action': '7f00ab', ...headers },
+  });
+
+const MIB = 1024 * 1024;
+
 const TOKENS = {
   accessToken: 'fresh-access',
   refreshToken: 'fresh-refresh',
@@ -162,6 +176,66 @@ describe(proxy, () => {
     expect(refresh).not.toHaveBeenCalled();
     expect(response.headers.get('x-middleware-next')).toBe('1');
     expect(routeI18n).not.toHaveBeenCalled();
+  });
+
+  describe('with a POST body', () => {
+    beforeEach(() => {
+      refresh.mockClear();
+      routeI18n.mockClear();
+      routeI18n.mockImplementation((request) => NextResponse.next({ request }));
+    });
+
+    it.each([
+      '/sign-in',
+      '/fr/sign-up',
+      '/app/7/companies/new',
+      '/dashboard/users/2',
+      '/en/invite/a.b',
+    ])('refuses one over 1 MiB on %s (413) before anything else runs', async (path) => {
+      const response = await proxy(postRequest(path, { 'content-length': String(MIB + 1) }));
+
+      expect(response.status).toBe(413);
+      expect(refresh).not.toHaveBeenCalled();
+      expect(routeI18n).not.toHaveBeenCalled();
+    });
+
+    it('refuses one that states no length outside the files page (411)', async () => {
+      const response = await proxy(postRequest('/sign-in', { 'transfer-encoding': 'chunked' }));
+
+      expect(response.status).toBe(411);
+      expect(routeI18n).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['/dashboard/files', { 'content-length': String(11 * MIB) }],
+      ['/fr/dashboard/files', { 'content-length': String(11 * MIB) }],
+      ['/dashboard/files', { 'transfer-encoding': 'chunked' }],
+    ])('lets the files page take an upload: %s with %o', async (path, headers) => {
+      const response = await proxy(postRequest(path, headers));
+
+      expect(response.headers.get('x-middleware-next')).toBe('1');
+      expect(routeI18n).toHaveBeenCalledOnce();
+    });
+
+    it('passes 1 MiB or less on, and a GET whatever it says', async () => {
+      const exact = await proxy(postRequest('/sign-in', { 'content-length': String(MIB) }));
+      const get = await proxy(
+        new NextRequest('http://localhost:3000/sign-in', {
+          headers: { 'content-length': String(11 * MIB) },
+        }),
+      );
+
+      expect([exact.status, get.status]).toStrictEqual([200, 200]);
+      expect(routeI18n).toHaveBeenCalledTimes(2);
+    });
+
+    it('passes a small body to a path with a dot on as if the proxy had not run', async () => {
+      const response = await proxy(postRequest('/en/invite/a.b', { 'content-length': '64' }));
+
+      expect(response.headers.get('x-middleware-next')).toBe('1');
+      expect(refresh).not.toHaveBeenCalled();
+      expect(routeI18n).not.toHaveBeenCalled();
+    });
   });
 
   describe('with requests that arrive together with one expired session', () => {

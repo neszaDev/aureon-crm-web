@@ -63,7 +63,7 @@ Behind more than one proxy, or with this server exposed directly, adjust `client
 
 Uploads go through a server action (`FileActions.uploadFile`, multipart to `POST /files`).
 `next.config.ts` raises the server-action and proxy body limits to 11 MB to fit the backend's
-10 MB maximum. Downloads stream through `dashboard/files/[id]/content/route.ts`, so the browser
+10 MB maximum; `src/proxy.ts` keeps every other page to 1 MiB. Downloads stream through `dashboard/files/[id]/content/route.ts`, so the browser
 never calls the backend and the token stays in its httpOnly cookie; the proxy refreshes it first.
 The route always answers with an attachment, `nosniff` and a sandbox CSP.
 - Unexpected and 5xx responses are logged (`src/libs/Logger.ts`).
