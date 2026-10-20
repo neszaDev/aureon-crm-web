@@ -10,6 +10,7 @@ import { listHref } from '@/libs/crm/ListQuery';
 import type { Permission } from '@/libs/crm/Permissions';
 import { can } from '@/libs/crm/Permissions';
 import { useRouter } from '@/libs/I18nNavigation';
+import { safeNextPath } from '@/libs/SafeRedirect';
 
 /**
  * Hands a file to the browser's downloads under a name.
@@ -34,20 +35,20 @@ const save = (file: Blob, name: string) => {
  * only once all of it has arrived, so a failure half way leaves no broken file. The file's name is
  * the server's (`Content-Disposition`). A refusal (a file over the cap, a role without the
  * permission) shows in a toast with the route's translated message, and an ended session goes to
- * sign in. Only a role with `EXPORT` sees it (the backend still checks).
+ * sign in, then back to this list. Only a role with `EXPORT` sees it (the backend still checks).
  * @param props Component props.
  * @param props.workspaceId The workspace.
  * @param props.permissions The caller's permissions in it.
  * @param props.list Which list.
- * @param props.query The list's current query: its params are what the export is filtered by (the
- *   route drops the paging and the sort).
+ * @param props.params The list's current URL params: what the export is filtered by (the route
+ *   drops the paging and the sort).
  * @returns The button.
  */
 export const ExportButton = (props: {
   workspaceId: number;
   permissions: Permission[];
   list: 'companies' | 'contacts' | 'leads' | 'deals';
-  query: Pick<ListQuery, 'params'>;
+  params: ListQuery['params'];
 }) => {
   const t = useTranslations('ExportButton');
   const tError = useTranslations('ApiError');
@@ -59,10 +60,18 @@ export const ExportButton = (props: {
   const download = async () => {
     try {
       const response = await fetch(
-        `/api/crm/${props.workspaceId}/export/${props.list}${listHref('', props.query, { locale })}`,
+        `/api/crm/${props.workspaceId}/export/${props.list}${listHref('', props, { locale })}`,
       );
       if (response.status === 401) {
-        router.push('/sign-in?expired=1');
+        // Back to this list (its page too) after signing in, as an action's 401 does.
+        const back = safeNextPath(
+          listHref(`/app/${props.workspaceId}/${props.list}`, props, { page: props.params.page }),
+        );
+        const query = new URLSearchParams({ expired: '1' });
+        if (back) {
+          query.set('next', back);
+        }
+        router.push(`/sign-in?${query.toString()}`);
         return;
       }
       if (!response.ok) {

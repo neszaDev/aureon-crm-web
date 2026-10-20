@@ -124,7 +124,7 @@ export default async function ContactsPage(props: ContactsPageProps) {
               workspaceId={workspace.id}
               permissions={workspace.permissions}
               list="contacts"
-              query={query}
+              params={query.params}
             />
             {newContact}
           </>

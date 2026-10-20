@@ -101,7 +101,7 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
               workspaceId={workspace.id}
               permissions={workspace.permissions}
               list="companies"
-              query={query}
+              params={query.params}
             />
             {newCompany}
           </>

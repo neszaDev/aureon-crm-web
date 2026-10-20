@@ -4,6 +4,9 @@ import { CurrencyCode, MoneyAmount } from './MoneyValidation';
 /** The Deals page's views: the board (default) or the table. */
 export const DEAL_VIEWS = ['board', 'list'] as const;
 
+/** The view without `?view=`: the page shows it, and its export takes what it applies. */
+export const DEFAULT_DEAL_VIEW = 'board' satisfies (typeof DEAL_VIEWS)[number];
+
 /** A deal's status: the kind of its stage. */
 export const DEAL_STATUSES = ['OPEN', 'WON', 'LOST'] as const;
 

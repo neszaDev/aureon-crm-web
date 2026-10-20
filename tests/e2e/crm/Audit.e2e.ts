@@ -179,14 +179,15 @@ test.describe('Export and the audit trail', () => {
     expect(cookies.find((cookie) => cookie.name === 'access_token')?.value).toBeTruthy();
   });
 
-  test('ends a session the backend rejects on export, as an action does', async ({
+  test('ends a session the backend rejects on export, as an action does, then comes back to the list', async ({
     page,
     request,
     baseURL,
   }) => {
     const owner = await seedWorkspace(request);
     await signIn(page, { email: owner.email, password: PASSWORD });
-    await page.goto(`${owner.path}/companies`);
+    const list = `${owner.path}/companies?q=acme&sort=UPDATED_AT`;
+    await page.goto(list);
     const exportButton = page.getByRole('button', { name: 'Export CSV' });
     await waitForHydration(exportButton);
     // The backend no longer accepts the access token.
@@ -194,11 +195,44 @@ test.describe('Export and the audit trail', () => {
 
     await exportButton.click();
 
-    await expect(page).toHaveURL(/\/sign-in\?expired=1$/u);
+    await expect(page).toHaveURL(`/sign-in?expired=1&next=${encodeURIComponent(list)}`);
     await expect(page.getByText('Your session has ended. Sign in again.')).toBeVisible();
     const cookies = await page.context().cookies();
     const names = cookies.map((cookie) => cookie.name);
     expect(names).not.toContain('access_token');
     expect(names).not.toContain('refresh_token');
+
+    await page.getByLabel('Email address').fill(owner.email);
+    await page.getByLabel('Password').fill(PASSWORD);
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await expect(page).toHaveURL(list);
+  });
+
+  test('records no export for a HEAD request or one another site started', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request);
+    await seed(request, owner, 'companies', { name: 'Acme Retail' });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    const route = `/api/crm/${owner.workspaceId}/export/companies?locale=fr`;
+
+    // With the browser's session cookies, as a link on another site would send them.
+    const head = await page.request.head(route);
+    const crossSite = await page.request.get(route, {
+      headers: { 'Sec-Fetch-Site': 'cross-site' },
+    });
+
+    expect(head.status()).toBe(405);
+    expect(crossSite.status()).toBe(403);
+    expect(await crossSite.json()).toStrictEqual({ message: 'Votre rôle ne le permet pas.' });
+    // The workspace's own history: an export would be there.
+    const history = await apiCall<{ content: { action: string }[] }>(
+      request,
+      owner,
+      'GET',
+      `/workspaces/${owner.workspaceId}/audit-events?entityType=WORKSPACE&size=100`,
+    );
+    expect(history.content.filter((event) => event.action === 'EXPORT')).toStrictEqual([]);
   });
 });

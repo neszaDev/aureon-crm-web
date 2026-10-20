@@ -18,7 +18,7 @@ const button = (
   permissions: Permission[] = ['EXPORT'],
 ) => (
   <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-    <ExportButton workspaceId={7} permissions={permissions} list="companies" query={{ params }} />
+    <ExportButton workspaceId={7} permissions={permissions} list="companies" params={params} />
     <Toaster />
   </NextIntlClientProvider>
 );
@@ -111,15 +111,18 @@ describe(ExportButton, () => {
     expect(names()).toStrictEqual([]);
   });
 
-  it('goes to sign in when the session is over, without a toast or a file', async () => {
+  it('goes to sign in when the session is over, then back to this list, without a toast or a file', async () => {
     const names = downloads();
     answer(null, { status: 401 });
-    await render(button());
+    await render(button({ q: 'acme', ownerId: 'unassigned', page: '2' }));
 
     await exportButton().click();
 
+    // Back to the same list, page and filters, as a server action's 401 does.
     await vi.waitFor(() => {
-      expect(router.push).toHaveBeenCalledExactlyOnceWith('/sign-in?expired=1');
+      expect(router.push).toHaveBeenCalledExactlyOnceWith(
+        `/sign-in?expired=1&next=${encodeURIComponent('/app/7/companies?q=acme&ownerId=unassigned&page=2')}`,
+      );
     });
     expect(names()).toStrictEqual([]);
     expect(page.getByRole('status').elements()).toHaveLength(0);

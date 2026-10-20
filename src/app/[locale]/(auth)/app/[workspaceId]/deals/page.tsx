@@ -15,7 +15,7 @@ import { listHref, parseListQuery } from '@/libs/crm/ListQuery';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { Link } from '@/libs/I18nNavigation';
-import { DEAL_VIEWS } from '@/validations/crm/DealValidation';
+import { DEAL_VIEWS, DEFAULT_DEAL_VIEW } from '@/validations/crm/DealValidation';
 
 type DealsPageProps = {
   params: Promise<{ locale: string; workspaceId: string }>;
@@ -34,7 +34,7 @@ export default async function DealsPage(props: DealsPageProps) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'DealsPage' });
   const query = parseListQuery(DEAL_LIST, await props.searchParams);
-  const view = query.filters.view ?? 'board';
+  const view = query.filters.view ?? DEFAULT_DEAL_VIEW;
   const { companyId, contactId } = query.filters;
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
@@ -74,7 +74,7 @@ export default async function DealsPage(props: DealsPageProps) {
               workspaceId={workspace.id}
               permissions={workspace.permissions}
               list="deals"
-              query={query}
+              params={query.params}
             />
             {newDeal}
           </>
@@ -85,7 +85,7 @@ export default async function DealsPage(props: DealsPageProps) {
         {DEAL_VIEWS.map((item) => (
           <Link
             key={item}
-            href={listHref(path, query, { view: item === 'board' ? undefined : item })}
+            href={listHref(path, query, { view: item === DEFAULT_DEAL_VIEW ? undefined : item })}
             aria-current={item === view ? 'page' : undefined}
             scroll={false}
             className={cn(

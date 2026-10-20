@@ -11,6 +11,7 @@ import { parseListQuery } from '@/libs/crm/ListQuery';
 import { toWorkspaceId } from '@/libs/crm/WorkspaceId';
 import { Env } from '@/libs/Env';
 import { routing } from '@/libs/I18nRouting';
+import { DEFAULT_DEAL_VIEW } from '@/validations/crm/DealValidation';
 
 type Api = Awaited<ReturnType<typeof authedBackend>>;
 type Params = Record<string, string[]>;
@@ -64,7 +65,7 @@ const EXPORTS = {
       params: {
         path: { workspaceId },
         query:
-          (view ?? 'board') === 'board'
+          (view ?? DEFAULT_DEAL_VIEW) === 'board'
             ? { q: query.q, ownerId, unassigned: query.unassigned, companyId }
             : { ...table, ownerId, companyId, ...searched(query) },
       },
@@ -81,7 +82,9 @@ const EXPORTS = {
  * the cap, a role without `EXPORT`). A 401 ends the session as an action's does (the cookies go,
  * unless the request sent no access token), but the browser fetches this and a redirect would
  * hand it the sign-in page as the file: it gets a bare 401, which the button turns into the
- * navigation to sign in.
+ * navigation to sign in. Another site can't start one: the session cookies are `SameSite=Lax`, so
+ * its link or form would open this with them, and the export would be recorded in the user's
+ * name. A request the browser marks `Sec-Fetch-Site: cross-site` is refused (403) unasked.
  * @param request The request.
  * @param context The route's params.
  * @param context.params `workspaceId` and `list` (companies, contacts, leads or deals).
@@ -100,6 +103,9 @@ export async function GET(
   const run = Object.entries(EXPORTS).find(([name]) => name === list)?.[1];
   if (!run || workspaceId === undefined) {
     return NextResponse.json({ message: tError('status_404') }, { status: 404 });
+  }
+  if (request.headers.get('sec-fetch-site') === 'cross-site') {
+    return NextResponse.json({ message: tError('status_403') }, { status: 403 });
   }
 
   let result: Awaited<ReturnType<typeof run>>;
@@ -144,3 +150,10 @@ export async function GET(
 
   return new Response(data, { headers });
 }
+
+/**
+ * `HEAD` on the export: refused (405). Without it Next answers `HEAD` by running `GET`, which
+ * exports, and records the export, only to drop the file.
+ * @returns The refusal, naming the method that works.
+ */
+export const HEAD = () => new Response(null, { status: 405, headers: { Allow: 'GET' } });

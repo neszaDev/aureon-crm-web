@@ -106,7 +106,7 @@ export default async function LeadsPage(props: LeadsPageProps) {
               workspaceId={workspace.id}
               permissions={workspace.permissions}
               list="leads"
-              query={query}
+              params={query.params}
             />
             {newLead}
           </>

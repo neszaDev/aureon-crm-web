@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { authedBackend } from '@/libs/api/Backend';
 import en from '@/locales/en.json';
 import fr from '@/locales/fr.json';
-import { GET } from './route';
+import { GET, HEAD } from './route';
 
 vi.mock(import('server-only'), () => ({}));
 vi.mock(import('@/libs/api/Backend'), () => ({ authedBackend: vi.fn<typeof authedBackend>() }));
@@ -32,22 +32,28 @@ const HEADERS = {
  * @param list The `[list]` segment.
  * @param search The request's query string.
  * @param answer What the backend says.
- * @param cookie The request's cookie header.
+ * @param sent What else the request has.
+ * @param sent.cookie Its cookie header.
+ * @param sent.headers Its other headers.
+ * @param sent.workspaceId The `[workspaceId]` segment.
  * @returns The route's response and the backend call.
  */
 const exportList = async (
   list: string,
   search: string,
   answer: { data?: unknown; error?: unknown; response: Response },
-  cookie = 'access_token=abc',
+  sent: { cookie?: string; headers?: Record<string, string>; workspaceId?: string } = {},
 ) => {
   const call = vi.fn<(path: string, init: unknown) => Promise<unknown>>().mockResolvedValue(answer);
+  vi.mocked(authedBackend).mockClear();
   // @ts-expect-error -- only the call this route makes
   vi.mocked(authedBackend).mockResolvedValue({ GET: call });
-  const request = new NextRequest(`http://localhost:3000/api/crm/7/export/${list}${search}`, {
-    headers: { cookie },
-  });
-  const response = await GET(request, { params: Promise.resolve({ workspaceId: '7', list }) });
+  const workspaceId = sent.workspaceId ?? '7';
+  const request = new NextRequest(
+    `http://localhost:3000/api/crm/${workspaceId}/export/${list}${search}`,
+    { headers: { cookie: sent.cookie ?? 'access_token=abc', ...sent.headers } },
+  );
+  const response = await GET(request, { params: Promise.resolve({ workspaceId, list }) });
 
   return { response, call };
 };
@@ -73,6 +79,39 @@ describe(GET, () => {
     expect(call).not.toHaveBeenCalled();
     expect(authedBackend).not.toHaveBeenCalled();
   });
+
+  it('answers 404 for a workspace id that is not one, without asking the backend', async () => {
+    const { response, call } = await exportList('companies', '', ok(), { workspaceId: 'abc' });
+
+    expect(response.status).toBe(404);
+    expect(call).not.toHaveBeenCalled();
+    expect(authedBackend).not.toHaveBeenCalled();
+  });
+
+  it('refuses an export another site started, in the language asked, without asking the backend', async () => {
+    // A link or form on another site opens the route with the victim's (SameSite=Lax) cookies:
+    // it would export, and record the export, in their name.
+    const { response, call } = await exportList('contacts', '?locale=fr', ok(), {
+      headers: { 'sec-fetch-site': 'cross-site' },
+    });
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toStrictEqual({ message: fr.ApiError.status_403 });
+    expect(call).not.toHaveBeenCalled();
+    expect(authedBackend).not.toHaveBeenCalled();
+  });
+
+  it.each([['same-origin'], ['same-site'], ['none'], [undefined]])(
+    'exports for a request from %s (a typed URL or bookmark is none; an older browser sends none)',
+    async (site) => {
+      const { response, call } = await exportList('contacts', '', ok(), {
+        headers: site === undefined ? {} : { 'sec-fetch-site': site },
+      });
+
+      expect(response.status).toBe(200);
+      expect(call).toHaveBeenCalledOnce();
+    },
+  );
 
   it('asks for the list as its page reads its URL, leaving out the paging and the sort', async () => {
     const { call } = await exportList(
@@ -158,6 +197,19 @@ describe(GET, () => {
     expect(new Uint8Array(await response.arrayBuffer())).toStrictEqual(
       new TextEncoder().encode(CSV),
     );
+  });
+
+  it("passes none of the backend's other headers, its cookies least of all", async () => {
+    const { response } = await exportList('companies', '', {
+      data: new Response(CSV).body,
+      response: new Response(null, {
+        status: 200,
+        headers: { ...HEADERS, 'Set-Cookie': 'JSESSIONID=backend; Path=/', 'X-Request-Id': 'r-1' },
+      }),
+    });
+
+    expect(response.headers.getSetCookie()).toStrictEqual([]);
+    expect(response.headers.get('X-Request-Id')).toBeNull();
   });
 
   it('streams the body as it comes: the first rows reach the browser before the last are read', async () => {
@@ -251,7 +303,7 @@ describe(GET, () => {
       'companies',
       '',
       refused(401, { status: 401, message: 'Unauthorized' }),
-      'refresh_token=xyz',
+      { cookie: 'refresh_token=xyz' },
     );
 
     expect(response.status).toBe(401);
@@ -273,5 +325,17 @@ describe(GET, () => {
     await expect(response.json()).resolves.toStrictEqual({
       message: "Couldn't reach the server. Check your connection and try again.",
     });
+  });
+});
+
+describe(HEAD, () => {
+  it("doesn't run the export: Next would answer HEAD with GET, which records it", () => {
+    vi.mocked(authedBackend).mockClear();
+
+    const response = HEAD();
+
+    expect(response.status).toBe(405);
+    expect(response.headers.get('Allow')).toBe('GET');
+    expect(authedBackend).not.toHaveBeenCalled();
   });
 });
