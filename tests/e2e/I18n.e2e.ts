@@ -5,11 +5,10 @@ test.describe('I18n', () => {
     test('switches the homepage from English to French with the dropdown', async ({ page }) => {
       await page.goto('/');
 
-      // By role: the footer copy of the picker (phones only) is hidden on desktop.
       await page.getByRole('combobox', { name: 'Change language' }).selectOption('fr');
 
       await expect(
-        page.getByRole('heading', { name: 'Chaque test, noté sur un seul bulletin.' }),
+        page.getByRole('heading', { level: 1, name: "Chaque étape d'une relation est signée." }),
       ).toBeVisible();
     });
 
@@ -23,7 +22,7 @@ test.describe('I18n', () => {
       await page.goto('/th');
 
       await expect(
-        page.getByRole('heading', { name: 'ทุกการทดสอบ ให้คะแนนในบัตรใบเดียว' }),
+        page.getByRole('heading', { level: 1, name: 'ทุกก้าวของความสัมพันธ์มีตราประทับกำกับ' }),
       ).toBeVisible();
     });
   });

@@ -97,6 +97,47 @@ typography:
     fontWeight: 700
     lineHeight: 1
     fontFeature: "tnum"
+  landing-display:
+    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "5rem"
+    fontWeight: 700
+    lineHeight: 1.02
+    letterSpacing: "-0.035em"
+  landing-close:
+    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "3.75rem"
+    fontWeight: 700
+    lineHeight: 1.05
+    letterSpacing: "-0.035em"
+  landing-headline:
+    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.75rem"
+    fontWeight: 700
+    lineHeight: 1.1
+    letterSpacing: "-0.03em"
+  landing-close-sm:
+    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.5rem"
+    fontWeight: 700
+    lineHeight: 1.05
+    letterSpacing: "-0.035em"
+  landing-headline-sm:
+    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2rem"
+    fontWeight: 700
+    lineHeight: 1.1
+    letterSpacing: "-0.03em"
+  landing-line:
+    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.625rem"
+    fontWeight: 600
+    lineHeight: 1.25
+    letterSpacing: "-0.01em"
+  landing-subhead:
+    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.375rem"
+    fontWeight: 500
+    lineHeight: 1.375
 rounded:
   stamp: "3px"
   sm: "3.6px"
@@ -138,6 +179,17 @@ components:
     rounded: "{rounded.md}"
     padding: "0 16px"
     height: "36px"
+  button-primary-landing:
+    backgroundColor: "{colors.field}"
+    textColor: "{colors.seal-ink}"
+    rounded: "{rounded.md}"
+    padding: "0 20px"
+    height: "44px"
+  button-outline-landing:
+    textColor: "{colors.on-seal}"
+    rounded: "{rounded.md}"
+    padding: "0 20px"
+    height: "44px"
   button-destructive:
     backgroundColor: "{colors.danger}"
     textColor: "#ffffff"
@@ -264,7 +316,7 @@ One loud colour, the seal vermilion, carried by one large field (the rail) and s
 
 **The Lacquer Rule.** Dark mode keeps the same seal fill on the rail and swaps paper, ink and seal-ink for their `lacquer-` values; it adds no new accents.
 
-**Legacy note (scope only).** `src/styles/global.css` still carries the boilerplate's "Marksheet" tokens (`folder*`, `paper-card`, `ply`, `ink-950` to `ink-100`, `pass`, `pen`, `pencil`, `.form-label`, `.paper`, `shadow-paper`, the Kalam hand font, the button `inverse` variants). They exist only so the demo gallery under `/dashboard` keeps rendering. They are not part of this system, and new UI must not use them.
+**Legacy note (scope only).** `src/styles/global.css` still carries the boilerplate's "Marksheet" tokens (`folder*`, `paper-card`, `ply`, `ink-950` to `ink-100`, `pass`, `pen`, `pencil`, `.form-label`, `.paper`, `shadow-paper`, the Kalam hand font, the button `inverse` variants). They exist only so the demo gallery under `/dashboard` (and, until it is redrawn, the not-found page) keeps rendering; the public landing and about pages no longer use them. They are not part of this system, and new UI must not use them.
 
 ## Typography
 
@@ -334,6 +386,7 @@ Firm and compact: one height for every primary action.
 - **Link:** seal-ink text, underlined on hover.
 - **Focus:** a 2px seal ring with a 2px offset. On the vermilion rail and bars the ring is `on-seal`.
 - **Sizes:** 36px is the one height for primary actions. 32px and 28px serve inline tools in rows (reorder, reload, copy).
+- **The landing exception:** on the public landing page only, the two primary actions of the hero and of the closing band are 44px (`lg`, 15px text, 20px sides): a field-filled button with seal-ink text and an on-seal outline button, both on the vermilion band. User decision, 2026-10-18; the app keeps 36px.
 
 ### Cards / Containers (panels)
 - **Corner Style:** 6px.
@@ -389,12 +442,29 @@ The signature of the system. A stamp row is a line of `StampBox`es, 4px apart, o
 
 **The Fixed Box Rule.** Stamp boxes are always 36px, whatever the stage name or language. Stage names live outside the box.
 
+## Landing
+
+The public landing page (`src/app/[locale]/(marketing)/page.tsx`) is composition **Two desks**: one page for the two audiences PRODUCT.md names, the sales team in a wide column and the developer in a hairline margin beside it. It lives in this world unchanged: no new colour, face or component family, only a display scale for headlines.
+
+- **Chrome:** the public header is the vermilion bar (64px, 72px from 1024px): the wordmark, the section links from 1280px, the language picker in its `seal` tone, Sign in (on-seal outline) and Create a workspace (field fill, from 640px), both 32px. A skip link comes first. The footer lies on the ground under a hairline: the wordmark and the sample-product note, About and the boilerplate link in seal-ink.
+- **The band:** the header's vermilion runs on into the hero. A five-box stamp row (three demo members' seals, the open stage's days, a blank) presses one box after another on load (the 220ms stamp-press, 140ms apart; none under reduced motion). The headline is `landing-display` (2.75rem on phones, 3.75rem from 640px, 5rem from 1024px). Under an on-seal hairline at 45% the band splits into two desks: the team's (a 13px label, `landing-subhead`, the two 44px actions) and the developer's (a label, one line, `make setup` and `pnpm dev` in mono on seal-deep, Read the code underlined in on-seal), stacked below 768px.
+- **The sheet across the edge:** the deals board, captured, lies as a paper sheet (sheet shadow) across the band's lower edge; the band ends at 45% of the sheet's block, so the stamp rows of the cards show in the first viewport at 1440 by 900. From 768px it shows the board's columns at a 2:1 crop from the top left, below that the phone's board.
+- **Sections:** a 1216px column on the ground. Each section is an 800px story column (`landing-headline`, 2rem on phones; an 18px lede in ink-2, 56ch) beside a 368px developer note (15px ink-2 on a hairline left rule; the first carries "For developers" in ink); below 1024px the note follows the story. Sections are 88px apart on the one hairline. More space above a headline than below it.
+- **Captures:** only real screenshots of the demo workspace (`scripts/capture-landing.ts`, provenance in `public/landing/README.md`), in paper sheets with the hairline and a 13px caption ending "demo workspace, fictional data". Each has a light and a lacquer capture; the page shows the one its theme matches. The dashboard and the report are two sheets on the desk, the report (82%, sheet shadow) over the dashboard's lower edge from 768px.
+- **The signature:** a developer note about a part of its capture names it in 13px seal-ink beside a small outlined box, and the capture rings that part: a 2px seal-ink ring at 55% at rest, full with a 4px seal halo while the note is hovered (200ms, ease-out-expo; no transition under reduced motion).
+- **Illustrations:** the how-it-works steps draw the product's own rows with `StampBox` (a lead's lifecycle, then converted with ticks and no seals; a deal signed by two members, eight days open), hidden from assistive technology under a caption saying they are samples. The roles panel is a paper panel of the four roles, each beside a demo member's seal. The languages section sets each locale file's own headline (`landing-line`) under its endonym, beside the Thai phone capture.
+- **Developers:** a full-width row: the commands for both repositories in a field-coloured block (mono 13px, comments in ink-2) and a facts panel split by rules.
+- **Close:** a vermilion band with `landing-close` (2.5rem on phones), the two 44px actions and a won deal's stamp row; its Won box carries a 1px on-seal outline so the seal's fill still reads on the seal.
+- **Thai:** display headings open to a 1.35 line height and drop their negative tracking.
+
+The about page uses the same header and footer: one 768px column on the ground, the title at `landing-headline`, and a paper panel of what the template holds.
+
 ## Do's and Don'ts
 
 ### Do:
 - **Do** run the vermilion rail full-bleed down the left edge, on the ground, with hairline paper panels beside it.
 - **Do** write labels in sentence case, 12–13px, weight 500, `ink-2`.
-- **Do** use the 36px button height for every primary action.
+- **Do** use the 36px button height for every primary action (the landing page's hero and closing band take 44px, and nothing else does).
 - **Do** show people only as `Seal`s, signed by the member who actually did the action.
 - **Do** draw pipeline progress as a stamp row of fixed 36px `StampBox`es, with exact days on the open stage and the WON stage filled with the seal.
 - **Do** set record numbers in mono with tabular figures (`D-0042`).

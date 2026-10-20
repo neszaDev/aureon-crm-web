@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
@@ -35,9 +36,12 @@ export default async function DashboardLayout(props: DashboardLayoutProps) {
     return redirect({ href: '/sign-in', locale });
   }
 
+  // Every message, for the demos' client components (the root layout passes the public pages').
   return (
-    <AppShell email={user.email} isAdmin={user.role === 'ADMIN'}>
-      {props.children}
-    </AppShell>
+    <NextIntlClientProvider>
+      <AppShell email={user.email} isAdmin={user.role === 'ADMIN'}>
+        {props.children}
+      </AppShell>
+    </NextIntlClientProvider>
   );
 }

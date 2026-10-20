@@ -22,7 +22,8 @@
     "storybook:test": "vitest run --config .storybook/vitest.config.ts",
     "build-storybook": "storybook build",
     "api:check": "node scripts/api-types.ts --check",
-    "test:visual": "playwright test --project=visual"
+    "test:visual": "playwright test --project=visual",
+    "capture:landing": "node scripts/capture-landing.ts"
   },
   "dependencies": {
     "@codemirror/lang-html": "6.4.12",

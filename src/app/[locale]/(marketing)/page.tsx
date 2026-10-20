@@ -1,14 +1,59 @@
-import { ArrowRightIcon } from 'lucide-react';
+import { ArrowRightIcon, CheckIcon } from 'lucide-react';
 import type { Metadata } from 'next';
-import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server';
-import { Mark } from '@/components/report/Mark';
-import { SampleCard } from '@/components/report/SampleCard';
-import { StatusMark } from '@/components/report/StatusMark';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Seal } from '@/components/crm/Seal';
+import { StampBox } from '@/components/crm/StampBox';
+import { HeroShot } from '@/components/marketing/HeroShot';
+import { Note, Row } from '@/components/marketing/Row';
+import { SEAL_FIELD_BUTTON, SEAL_OUTLINE_BUTTON } from '@/components/marketing/sealButton';
+import { Shot } from '@/components/marketing/Shot';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/libs/I18nNavigation';
+import { routing } from '@/libs/I18nRouting';
+import boardPhoneDark from '@/public/landing/board-390-dark.webp';
+import boardPhoneLight from '@/public/landing/board-390-light.webp';
+import boardThaiDark from '@/public/landing/board-390-th-dark.webp';
+import boardThaiLight from '@/public/landing/board-390-th-light.webp';
+import boardColumnsDark from '@/public/landing/board-columns-dark.webp';
+import boardColumnsLight from '@/public/landing/board-columns-light.webp';
+import boardDark from '@/public/landing/board-dark.webp';
+import boardLight from '@/public/landing/board-light.webp';
+import dashboardDark from '@/public/landing/dashboard-dark.webp';
+import dashboardLight from '@/public/landing/dashboard-light.webp';
+import dealDark from '@/public/landing/deal-dark.webp';
+import dealLight from '@/public/landing/deal-light.webp';
+import reportsDark from '@/public/landing/reports-dark.webp';
+import reportsLight from '@/public/landing/reports-light.webp';
+import tasksDark from '@/public/landing/tasks-dark.webp';
+import tasksLight from '@/public/landing/tasks-light.webp';
+import { AppConfig } from '@/utils/AppConfig';
 
 type IndexPageProps = {
   params: Promise<{ locale: string }>;
+};
+
+// A capture in the main column: 800 px from 1280, the column's share of the page below.
+const MAIN_SIZES = '(min-width: 1280px) 800px, (min-width: 1024px) calc(100vw - 24rem), 100vw';
+
+// The demo workspace's members (fictional, from the API's demo data), as their seals sign.
+const MEMBERS = {
+  owner: { name: 'Avery Owner', email: 'owner@demo.test' },
+  admin: { name: 'Sam Admin', email: 'admin@demo.test' },
+  manager: { name: 'Morgan Manager', email: 'manager@demo.test' },
+  rep: { name: 'Riley Rep', email: 'rep@demo.test' },
+};
+
+// Display headings: tight Latin leading, opened under Thai so stacked marks never clip.
+const DISPLAY = 'font-bold text-balance [:lang(th)_&]:leading-[1.35]';
+const H2 = `${DISPLAY} text-[2rem] leading-[1.1] tracking-[-0.03em] lg:text-[2.75rem]`;
+const LEDE = 'max-w-[56ch] text-lg leading-relaxed text-ink-2';
+const CAPTION = 'text-[0.8125rem] text-ink-2';
+const CODE = 'rounded-[3.6px] bg-muted px-1 py-px font-mono text-[0.8125rem] text-foreground';
+
+// The stamp-press of a hero box starts this late (global.css), so the row signs left to right.
+const pressDelay = (ms: number) => {
+  const style: React.CSSProperties & { '--press-delay': string } = { '--press-delay': `${ms}ms` };
+  return style;
 };
 
 export async function generateMetadata(props: IndexPageProps): Promise<Metadata> {
@@ -18,6 +63,13 @@ export async function generateMetadata(props: IndexPageProps): Promise<Metadata>
   return {
     title: t('meta_title'),
     description: t('meta_description'),
+    openGraph: {
+      title: t('meta_title'),
+      description: t('meta_description'),
+      siteName: AppConfig.name,
+      locale,
+      type: 'website',
+    },
   };
 }
 
@@ -25,174 +77,447 @@ export default async function IndexPage(props: IndexPageProps) {
   const { locale } = await props.params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'Index' });
-  const format = await getFormatter({ locale });
+  const tStamp = await getTranslations({ locale, namespace: 'StampRow' });
+  const tRoles = await getTranslations({ locale, namespace: 'Roles' });
+  const days = tStamp('days_short', { count: 8 });
+  const code = (chunks: React.ReactNode) => <code className={CODE}>{chunks}</code>;
+  const devLabel = t('dev_label');
+  const caption = (screen: string) => t('demo_caption', { screen });
 
-  const marks = [
-    { status: 'PASSED', text: t('key_passed') },
-    { status: 'FAILED', text: t('key_failed') },
-    { status: 'PENDING', text: t('key_pending') },
-  ] as const;
+  // The headline as each language's own file has it.
+  const languages = await Promise.all(
+    routing.locales.map(async (language) => {
+      const tLanguage = await getTranslations({ locale: language, namespace: 'Index' });
+      return { language, name: tLanguage('language_name'), title: tLanguage('title') };
+    }),
+  );
 
-  // The first sample row, taken apart field by field.
-  const fields = [
+  const roles = [
+    { role: tRoles('role_OWNER'), text: t('role_owner'), member: MEMBERS.owner },
+    { role: tRoles('role_ADMIN'), text: t('role_admin'), member: MEMBERS.admin },
+    { role: tRoles('role_MANAGER'), text: t('role_manager'), member: MEMBERS.manager },
+    { role: tRoles('role_SALES_REP'), text: t('role_rep'), member: MEMBERS.rep },
+  ];
+
+  const facts = [
+    { title: t('fact_next_title'), text: t('fact_next') },
+    { title: t('fact_spring_title'), text: t('fact_spring') },
+    { title: t('fact_tenancy_title'), text: t('fact_tenancy') },
+    { title: t('fact_types_title'), text: t('fact_types') },
+    { title: t('fact_e2e_title'), text: t('fact_e2e') },
+    { title: t('fact_docs_title'), text: t('fact_docs') },
+  ];
+
+  const faqs = [
+    { q: t('faq_sample_q'), a: t('faq_sample_a') },
+    { q: t('faq_join_q'), a: t('faq_join_a') },
+    { q: t('faq_email_q'), a: t('faq_email_a') },
+    { q: t('faq_currency_q'), a: t('faq_currency_a') },
+    { q: t('faq_delete_q'), a: t('faq_delete_a') },
+    { q: t('faq_run_q'), a: t.rich('faq_run_a', { code }) },
+  ];
+
+  // Each step as the app draws it: a lead's lifecycle (New current; then converted, its boxes
+  // ticked and never sealed), and a deal signed by two members, eight days in its stage.
+  const tick = <CheckIcon aria-hidden="true" className="size-4 text-foreground" />;
+  const steps = [
     {
-      label: t('row_name'),
-      value: <span className="font-bold">{t('sample_1_name')}</span>,
-      description: t('row_name_desc'),
+      title: t('step_capture_title'),
+      text: t('step_capture_text'),
+      boxes: [
+        <StampBox key="new" open />,
+        <StampBox key="contacted" />,
+        <StampBox key="qualified" />,
+        <StampBox key="converted" />,
+      ],
     },
     {
-      label: t('row_status'),
-      value: <StatusMark status="PASSED" className="[&_svg]:size-7" />,
-      description: t('row_status_desc'),
+      title: t('step_qualify_title'),
+      text: t('step_qualify_text'),
+      boxes: ['new', 'contacted', 'qualified', 'converted'].map((key) => (
+        <StampBox key={key}>{tick}</StampBox>
+      )),
     },
     {
-      label: t('row_score'),
-      value: <span className="text-3xl font-bold tabular-nums">{format.number(94)}</span>,
-      description: t('row_score_desc'),
-    },
-    {
-      label: t('row_tested_at'),
-      value: (
-        <time dateTime="2026-09-28T09:30">
-          {format.dateTime(new Date('2026-09-28T09:30'), {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-          })}
-        </time>
-      ),
-      description: t('row_tested_at_desc'),
-    },
-    {
-      label: t('row_notes'),
-      value: (
-        <span className="font-hand text-xl leading-snug text-ink-700">{t('row_notes_sample')}</span>
-      ),
-      description: t('row_notes_desc'),
+      title: t('step_close_title'),
+      text: t('step_close_text'),
+      boxes: [
+        <StampBox key="qualification" seal="RR" />,
+        <StampBox key="analysis" seal="MM" />,
+        <StampBox key="proposal" days={days} />,
+        <StampBox key="negotiation" />,
+        <StampBox key="won" />,
+      ],
     },
   ];
 
-  const features = [
-    { title: t('feature_totals_title'), text: t('feature_totals') },
-    { title: t('feature_history_title'), text: t('feature_history') },
-    { title: t('feature_private_title'), text: t('feature_private') },
-    { title: t('feature_languages_title'), text: t('feature_languages') },
-  ];
+  const actions = (
+    <div className="flex flex-wrap gap-2.5">
+      <Button asChild size="lg" className={SEAL_FIELD_BUTTON}>
+        <Link href="/sign-up">
+          {t('cta')}
+          <ArrowRightIcon data-icon="inline-end" />
+        </Link>
+      </Button>
+      <Button asChild variant="ghost" size="lg" className={SEAL_OUTLINE_BUTTON}>
+        <Link href="/sign-in">{t('sign_in')}</Link>
+      </Button>
+    </div>
+  );
 
   return (
     <>
-      {/* The folder: copy on the left, the card sliding out of it on the right. */}
-      <section className="bg-folder text-folder-ink">
-        <div className="mx-auto grid max-w-7xl gap-12 px-4 pt-14 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8 lg:pt-20">
-          <div className="flex flex-col gap-7 lg:col-span-5 lg:pt-10 lg:pb-32">
-            <h1 className="text-[2.75rem] leading-[1.02] font-extrabold tracking-[-0.035em] sm:text-6xl lg:text-[4.25rem]">
+      {/* The band: the header's vermilion runs on into the hero, down into the board's sheet. */}
+      <section aria-labelledby="hero-title" className="text-on-seal">
+        <div className="bg-seal">
+          <div className="mx-auto max-w-[76rem] px-4 pt-8 sm:px-7 lg:pt-10">
+            {/* Three members' seals, the open stage's days, the next stage, pressed one by one. */}
+            <div aria-hidden="true" className="flex gap-1">
+              {['RR', 'MM', 'AO'].map((seal, index) => (
+                <span key={seal} style={pressDelay(150 + index * 140)}>
+                  <StampBox seal={seal} press />
+                </span>
+              ))}
+              <span style={pressDelay(570)}>
+                <StampBox days={days} press />
+              </span>
+              <StampBox />
+            </div>
+            <h1
+              id="hero-title"
+              className={`${DISPLAY} mt-6 max-w-[64rem] text-[2.75rem] leading-[1.04] tracking-[-0.035em] sm:text-6xl lg:text-[5rem] lg:leading-[1.02]`}
+            >
               {t('title')}
             </h1>
-            <p className="max-w-[34ch] text-lg leading-relaxed text-folder-ink-soft">
-              {t('intro')}
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button asChild variant="inverse" size="lg">
-                <Link href="/sign-up/">
-                  {t('cta')}
-                  <ArrowRightIcon data-icon="inline-end" />
-                </Link>
-              </Button>
-              <Button asChild variant="inverse-ghost" size="lg">
-                <Link href="/sign-in/">{t('secondary_cta')}</Link>
-              </Button>
-            </div>
-          </div>
 
-          <div className="relative lg:col-span-7 lg:pt-24 lg:pl-6">
-            <div className="-mb-28 sm:-mb-36 lg:mb-[-11rem] lg:rotate-[-1.5deg]">
-              <SampleCard />
+            <div className="mt-8 grid border-t border-on-seal/45 md:grid-cols-2 lg:mt-9">
+              <div className="flex flex-col gap-3.5 pt-5 md:pr-12">
+                <p className="text-[0.8125rem] font-medium">{t('team_label')}</p>
+                <p className="max-w-[30ch] text-lg leading-snug font-medium lg:text-[1.375rem]">
+                  {t('team_text')}
+                </p>
+                <div className="pt-1">{actions}</div>
+              </div>
+              <div className="mt-7 flex flex-col gap-3.5 border-t border-on-seal/45 pt-5 md:mt-0 md:border-t-0 md:border-l md:pl-12">
+                <p className="text-[0.8125rem] font-medium">{devLabel}</p>
+                <p className="max-w-[46ch]">{t('dev_text')}</p>
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+                  <code className="flex w-max rounded-md bg-seal-deep font-mono text-[0.8125rem] leading-normal">
+                    <span className="px-3.5 py-1.5">make setup</span>
+                    <span className="border-l border-on-seal/35 px-3.5 py-1.5">pnpm dev</span>
+                  </code>
+                  <a
+                    href={AppConfig.sourceUrl}
+                    className="inline-flex items-center gap-1.5 rounded-sm text-sm font-semibold text-on-seal underline underline-offset-4 focus-visible:outline-on-seal"
+                  >
+                    {t('code_link')}
+                    <ArrowRightIcon aria-hidden="true" className="size-4" />
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* The band's edge runs through the sheet, wherever the sheet's height puts it. */}
+        <div className="bg-[linear-gradient(var(--seal)_0_45%,var(--ground)_45%)]">
+          <figure className="mx-auto flex max-w-[76rem] flex-col gap-3 px-4 pt-10 pb-8 sm:px-7">
+            <HeroShot
+              light={{ wide: boardColumnsLight, narrow: boardPhoneLight }}
+              dark={{ wide: boardColumnsDark, narrow: boardPhoneDark }}
+              alt={t('hero_alt')}
+            />
+            <figcaption className={CAPTION}>{caption(t('hero_screen'))}</figcaption>
+          </figure>
+        </div>
       </section>
 
-      {/* Key to the marks, printed like the back of a report card. */}
-      <section className="mx-auto max-w-7xl px-4 pt-44 pb-20 sm:px-6 sm:pt-52 lg:px-8 lg:pt-64 lg:pb-28">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
-          <div className="flex flex-col gap-4 lg:col-span-5">
-            <h2 className="text-3xl font-bold tracking-[-0.025em] text-ink-950 sm:text-4xl">
-              {t('key_title')}
-            </h2>
-            <p className="max-w-[40ch] text-lg leading-relaxed text-ink-600">{t('key_intro')}</p>
-          </div>
-          <ul className="divide-y divide-ink-200 border-y-[3px] border-double border-ink-300 lg:col-span-7">
-            {marks.map((mark) => (
-              <li key={mark.status} className="flex items-center gap-6 py-6">
-                <Mark status={mark.status} drawOnView className="size-12 sm:size-14" />
-                <p className="text-lg font-medium text-ink-900 sm:text-xl">{mark.text}</p>
+      <div className="mx-auto max-w-[76rem] px-4 sm:px-7">
+        <Row
+          id="how-it-works"
+          titleId="how-title"
+          className="border-t-0 lg:pt-26"
+          note={
+            <Note
+              label={devLabel}
+              lead={
+                <p className="flex flex-col gap-0.5">
+                  <span className="font-semibold text-foreground">{devLabel}</span>
+                  <span>{t('how_note_lead')}</span>
+                </p>
+              }
+            >
+              {t('how_note')}
+            </Note>
+          }
+        >
+          <h2 id="how-title" className={H2}>
+            {t('how_title')}
+          </h2>
+          <p className={LEDE}>{t('how_text')}</p>
+          <ol className="mt-4 grid gap-8 md:grid-cols-3 md:gap-0">
+            {steps.map((step) => (
+              <li
+                key={step.title}
+                className="flex flex-col gap-2.5 md:border-l md:border-rule md:px-6 md:first:border-l-0 md:first:pl-0"
+              >
+                <div aria-hidden="true" className="flex gap-1">
+                  {step.boxes}
+                </div>
+                <h3 className="mt-2 text-lg font-semibold">{step.title}</h3>
+                <p className="text-[0.9375rem] text-ink-2">{step.text}</p>
               </li>
             ))}
-          </ul>
-        </div>
-      </section>
+          </ol>
+          <p className={CAPTION}>{t('how_caption')}</p>
+        </Row>
 
-      {/* One row of the card, taken apart. */}
-      <section className="border-y border-ink-200 bg-paper-card">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-          <div className="flex max-w-2xl flex-col gap-4">
-            <h2 className="text-3xl font-bold tracking-[-0.025em] text-ink-950 sm:text-4xl">
-              {t('rows_title')}
-            </h2>
-            <p className="text-lg leading-relaxed text-ink-600">{t('rows_intro')}</p>
-          </div>
-          <dl className="mt-12 grid border-t-[3px] border-double border-ink-300 sm:grid-cols-2 lg:grid-cols-5">
-            {fields.map((field) => (
-              <div
-                key={field.label}
-                className="flex flex-col gap-3 border-b border-ink-200 py-6 sm:pr-6 lg:border-r lg:border-b-0 lg:px-5 lg:py-8 lg:first:pl-0 lg:last:border-r-0"
-              >
-                <dt className="form-label">{field.label}</dt>
-                <dd className="flex min-h-12 items-center text-lg text-ink-950">{field.value}</dd>
-                <dd className="text-[0.9375rem] leading-relaxed text-ink-600">
-                  {field.description}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </section>
-
-      {/* What the product does, as a ruled two-column list. */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
-          <h2 className="text-3xl font-bold tracking-[-0.025em] text-ink-950 sm:text-4xl lg:col-span-5">
-            {t('features_title')}
+        <Row
+          id="features"
+          titleId="board-title"
+          note={
+            <Note label={devLabel} spot={t('board_spot')}>
+              {t('board_note')}
+            </Note>
+          }
+        >
+          <h2 id="board-title" className={H2}>
+            {t('board_title')}
           </h2>
-          <dl className="divide-y divide-ink-200 border-y border-ink-300 lg:col-span-7">
-            {features.map((feature) => (
+          <p className={LEDE}>{t('board_text')}</p>
+          <figure className="mt-4 flex flex-col gap-2">
+            {/* shortcut: spots sit on the committed captures; re-place them after recapturing. */}
+            <Shot
+              light={boardLight}
+              dark={boardDark}
+              alt={t('board_alt')}
+              sizes={MAIN_SIZES}
+              spot={{ left: '69.1%', top: '54%', width: '15.9%', height: '23.2%' }}
+            />
+            <figcaption className={CAPTION}>{caption(t('board_screen'))}</figcaption>
+          </figure>
+        </Row>
+
+        <Row
+          titleId="deal-title"
+          note={
+            <Note label={devLabel} spot={t('deal_spot')}>
+              {t.rich('deal_note', { code })}
+            </Note>
+          }
+        >
+          <h2 id="deal-title" className={H2}>
+            {t('deal_title')}
+          </h2>
+          <p className={LEDE}>{t('deal_text')}</p>
+          <figure className="mt-4 flex flex-col gap-2">
+            <Shot
+              light={dealLight}
+              dark={dealDark}
+              alt={t('deal_alt')}
+              sizes={MAIN_SIZES}
+              spot={{ left: '19.2%', top: '19.5%', width: '26.3%', height: '8.5%' }}
+            />
+            <figcaption className={CAPTION}>{caption(t('deal_screen'))}</figcaption>
+          </figure>
+        </Row>
+
+        <Row
+          titleId="tasks-title"
+          note={
+            <Note label={devLabel} spot={t('tasks_spot')}>
+              {t('tasks_note')}
+            </Note>
+          }
+        >
+          <h2 id="tasks-title" className={H2}>
+            {t('tasks_title')}
+          </h2>
+          <p className={LEDE}>{t('tasks_text')}</p>
+          <figure className="mt-4 flex flex-col gap-2">
+            <Shot
+              light={tasksLight}
+              dark={tasksDark}
+              alt={t('tasks_alt')}
+              sizes={MAIN_SIZES}
+              spot={{ left: '70.1%', top: '7.9%', width: '24.9%', height: '33.1%' }}
+            />
+            <figcaption className={CAPTION}>{caption(t('tasks_screen'))}</figcaption>
+          </figure>
+        </Row>
+
+        <Row titleId="insights-title" note={<Note label={devLabel}>{t('insights_note')}</Note>}>
+          <h2 id="insights-title" className={H2}>
+            {t('insights_title')}
+          </h2>
+          <p className={LEDE}>{t('insights_text')}</p>
+          {/* Two sheets on the desk: the report laid over the dashboard's lower edge. */}
+          <figure className="mt-4 flex flex-col gap-4 md:gap-0">
+            <Shot
+              light={dashboardLight}
+              dark={dashboardDark}
+              alt={t('dashboard_alt')}
+              sizes={MAIN_SIZES}
+            />
+            <Shot
+              light={reportsLight}
+              dark={reportsDark}
+              alt={t('reports_alt')}
+              sizes={MAIN_SIZES}
+              className="md:-mt-28 md:ml-auto md:w-[82%] md:shadow-sheet"
+            />
+            <figcaption className={`${CAPTION} md:mt-2`}>
+              {caption(t('insights_screen'))}
+            </figcaption>
+          </figure>
+        </Row>
+
+        <Row
+          id="roles"
+          titleId="roles-title"
+          note={<Note label={devLabel}>{t('roles_note')}</Note>}
+        >
+          <h2 id="roles-title" className={H2}>
+            {t('roles_title')}
+          </h2>
+          <p className={LEDE}>{t('roles_text')}</p>
+          <div className="mt-4 rounded-lg border border-rule bg-paper">
+            <div className="flex items-baseline justify-between gap-4 border-b border-rule px-5 py-4">
+              <h3 className="font-semibold">{t('roles_heading')}</h3>
+              <span className="text-sm text-ink-2">{t('roles_count')}</span>
+            </div>
+            <ul className="divide-y divide-rule">
+              {roles.map((item) => (
+                <li
+                  key={item.role}
+                  className="grid gap-x-5 gap-y-1 px-5 py-3.5 sm:grid-cols-[7.5rem_minmax(0,1fr)] md:grid-cols-[7.5rem_minmax(0,1fr)_11rem] md:items-center"
+                >
+                  <span className="font-semibold">{item.role}</span>
+                  <span className="text-[0.9375rem] text-ink-2">{item.text}</span>
+                  <span className="flex items-center gap-2.5 text-sm max-md:mt-1.5 sm:max-md:col-start-2">
+                    <Seal name={item.member.name} email={item.member.email} size="sm" />
+                    {item.member.name}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className={CAPTION}>{t('roles_caption')}</p>
+        </Row>
+
+        <Row
+          titleId="langs-title"
+          note={<Note label={devLabel}>{t.rich('langs_note', { code })}</Note>}
+        >
+          <h2 id="langs-title" className={H2}>
+            {t('langs_title')}
+          </h2>
+          <p className={LEDE}>{t('langs_text')}</p>
+          <div className="mt-4 grid items-start gap-8 md:grid-cols-[minmax(0,1fr)_15rem]">
+            <ul className="divide-y divide-rule">
+              {languages.map((item) => (
+                <li
+                  key={item.language}
+                  lang={item.language}
+                  className="flex flex-col gap-1 py-4 first:pt-0"
+                >
+                  <span className="text-[0.8125rem] font-medium text-ink-2">{item.name}</span>
+                  <span className="text-[1.625rem] leading-tight font-semibold tracking-[-0.01em] [:lang(th)_&]:leading-normal">
+                    {item.title}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <figure className="flex flex-col gap-2 max-md:max-w-[17.5rem]">
+              <Shot
+                light={boardThaiLight}
+                dark={boardThaiDark}
+                alt={t('langs_alt')}
+                sizes="(min-width: 768px) 240px, 280px"
+                className="shadow-sheet"
+              />
+              <figcaption className={CAPTION}>{caption(t('langs_screen'))}</figcaption>
+            </figure>
+          </div>
+        </Row>
+
+        <section
+          id="developers"
+          aria-labelledby="dev-title"
+          className="grid scroll-mt-6 gap-10 border-t border-rule py-16 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-16 lg:py-22 xl:grid-cols-[32.5rem_minmax(0,1fr)]"
+        >
+          <div className="flex flex-col gap-5">
+            <h2 id="dev-title" className={H2}>
+              {t('dev_title')}
+            </h2>
+            <p className="text-lg leading-relaxed text-ink-2">{t('dev_lead')}</p>
+            <pre className="rounded-lg border border-rule bg-field px-4 py-3 font-mono text-[0.8125rem] leading-7 text-foreground">
+              <code>
+                <span className="text-ink-2"># aureon-crm-api</span>
+                {'\nmake setup\nmake up\n'}
+                <span className="text-ink-2"># aureon-crm-web</span>
+                {'\nmake setup\npnpm dev'}
+              </code>
+            </pre>
+            <p className="text-[0.9375rem] text-ink-2">{t('dev_readme')}</p>
+            <Button asChild variant="outline" className="self-start">
+              <a href={AppConfig.sourceUrl}>
+                {t('code_link')}
+                <ArrowRightIcon data-icon="inline-end" />
+              </a>
+            </Button>
+          </div>
+          <dl className="grid self-start rounded-lg border border-rule bg-paper sm:grid-cols-2">
+            {facts.map((fact) => (
               <div
-                key={feature.title}
-                className="grid gap-2 py-6 sm:grid-cols-[13rem_1fr] sm:gap-6"
+                key={fact.title}
+                className="flex flex-col gap-0.5 border-t border-rule px-5 py-4 first:border-t-0 sm:even:border-l sm:nth-2:border-t-0"
               >
-                <dt className="font-bold text-ink-950">{feature.title}</dt>
-                <dd className="leading-relaxed text-ink-700">{feature.text}</dd>
+                <dt className="font-semibold">{fact.title}</dt>
+                <dd className="text-[0.9375rem] text-ink-2">{fact.text}</dd>
               </div>
             ))}
           </dl>
-        </div>
-      </section>
+        </section>
 
-      {/* Close: back into the folder. */}
-      <section className="bg-folder text-folder-ink">
-        <div className="mx-auto flex max-w-7xl flex-col items-start gap-8 px-4 py-20 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8 lg:py-24">
-          <div className="flex max-w-xl flex-col gap-4">
-            <h2 className="flex items-center gap-4 text-4xl font-extrabold tracking-[-0.03em] sm:text-5xl">
-              <Mark status="PASSED" className="size-12 text-folder-ink-soft sm:size-14" />
+        <section aria-labelledby="faq-title" className="border-t border-rule py-16 lg:py-22">
+          <h2 id="faq-title" className={H2}>
+            {t('faq_title')}
+          </h2>
+          <div className="mt-8 grid gap-x-16 md:grid-cols-2">
+            {faqs.map((faq) => (
+              <div key={faq.q} className="flex flex-col gap-1.5 border-t border-rule py-5">
+                <h3 className="text-lg leading-snug font-semibold">{faq.q}</h3>
+                <p className="max-w-[60ch] text-ink-2">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <section aria-labelledby="close-title" className="bg-seal text-on-seal">
+        <div className="mx-auto grid max-w-[76rem] gap-10 px-4 py-20 sm:px-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-16 lg:py-24">
+          <div className="flex flex-col gap-5">
+            <h2
+              id="close-title"
+              className={`${DISPLAY} max-w-[16ch] text-[2.5rem] leading-[1.05] tracking-[-0.035em] lg:text-[3.75rem]`}
+            >
               {t('close_title')}
             </h2>
-            <p className="text-lg leading-relaxed text-folder-ink-soft">{t('close_text')}</p>
+            <p className="max-w-[44ch] text-lg lg:text-xl">{t('close_text')}</p>
+            <div className="pt-3">{actions}</div>
           </div>
-          <Button asChild variant="inverse" size="lg">
-            <Link href="/sign-up/">
-              {t('cta')}
-              <ArrowRightIcon data-icon="inline-end" />
-            </Link>
-          </Button>
+          {/* A won deal's row: every stage signed, the last box filled with the winner's seal,
+              outlined in on-seal so the seal's own fill still reads on the band. */}
+          <div aria-hidden="true" className="flex gap-1">
+            <StampBox seal="RR" />
+            <StampBox seal="MM" />
+            <StampBox seal="MM" />
+            <StampBox seal="AO" />
+            <span className="rounded-[3px] outline outline-on-seal">
+              <StampBox seal="AO" won />
+            </span>
+          </div>
         </div>
       </section>
     </>

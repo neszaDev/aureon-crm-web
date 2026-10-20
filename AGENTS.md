@@ -48,6 +48,7 @@ src/proxy.ts                    i18n routing + auth: protects /app and /dashboar
 src/validations/                zod schemas mirroring the backend's request rules (CRM: crm/*)
 src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx shadcn add`)
 src/components/report/          Marksheet domain UI: marks, totals, results table (demos only)
+src/components/marketing/       the public landing page: hero capture, section row and developer note, capture sheet
 src/components/crm/**           the CRM: shell/ (rail, switcher, account menu, record search, reminders bell), settings/, seals, dashboard/
                                 (the home: KPI strip, my deals, follow-ups, pipeline, won and lost, stages, recent activity and changes),
                                 audit/ (`AuditEventItem`, `AuditTrail`, `RecordHistory`), reports/ (the tabs and a panel per report, `ChartTable`),
@@ -195,6 +196,10 @@ and the tokens in `src/styles/global.css`; see `DESIGN.md`. Responsive. No unnec
 ### i18n (next-intl)
 - Never hard-code user-visible strings. New page namespaces end with `Page`.
 - Server: `getTranslations`; Client: `useTranslations`. Sentence case. Use `t.rich(...)` for markup.
+- Client messages: the root layout gives the public pages' client components only the `ErrorPage`
+  and `LocaleSwitcher` namespaces (their HTML stays light); the `(center)`, `app` and `dashboard`
+  layouts give theirs every message. A client component on a public page that translates another
+  namespace needs it added in `src/app/[locale]/layout.tsx`.
 - Zod messages are keys in the `Validation` namespace.
 
 ### JSDoc

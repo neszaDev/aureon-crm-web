@@ -54,8 +54,8 @@
   --chart-5: #6d4c8f;
 
   /*
-   * Marksheet, the boilerplate's demo world under /dashboard and the public pages. Kept so those
-   * components still render; `bg-paper` there now resolves to Aureon's paper. New UI must not
+   * Marksheet, the boilerplate's demo world under /dashboard (and the not-found page). Kept so
+   * those components still render; `bg-paper` there now resolves to Aureon's paper. New UI must not
    * use these.
    */
   --folder: #1f5c45;
@@ -382,26 +382,6 @@
   }
 }
 
-/* The remark is written left to right, after the marks. */
-@keyframes write-on {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-.write-on {
-  animation: write-on 0.9s var(--ease-out-expo) 1.6s both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .write-on {
-    animation: none;
-  }
-}
-
 /*
  * The box that becomes current after a move is pressed like a stamp: it lands a little large and
  * the ink settles, in 220 ms. Not at all under reduced motion.
@@ -419,8 +399,9 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* `--press-delay` presses a row one box after another (the landing page's hero). */
   .stamp-press {
-    animation: stamp-press 220ms var(--ease-out-expo) both;
+    animation: stamp-press 220ms var(--ease-out-expo) var(--press-delay, 0ms) both;
   }
 }
 
@@ -455,17 +436,5 @@
     animation: board-fade linear both;
     animation-timeline: scroll(nearest inline);
     animation-range: max(0%, calc(100% - 3rem)) 100%;
-  }
-}
-
-/* The key's marks draw on as they scroll into view (no JS; skipped where unsupported). */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .mark-draw-view path {
-      stroke-dasharray: 1;
-      animation: mark-draw linear both;
-      animation-timeline: view();
-      animation-range: entry 10% cover 35%;
-    }
   }
 }

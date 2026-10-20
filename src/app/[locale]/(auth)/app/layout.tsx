@@ -1,3 +1,4 @@
+import { NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
@@ -22,5 +23,6 @@ export default async function CrmLayout(props: {
     throw new Error('Could not load the signed-in user');
   }
 
-  return await props.children;
+  // Every message, for the CRM's client components (the root layout passes the public pages').
+  return <NextIntlClientProvider>{props.children}</NextIntlClientProvider>;
 }

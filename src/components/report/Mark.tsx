@@ -29,8 +29,6 @@ type MarkProps = {
   animate?: boolean;
   /** Delay before drawing, in milliseconds. */
   delay?: number;
-  /** Draw the stroke on as it scrolls into view. */
-  drawOnView?: boolean;
 };
 
 /**
@@ -40,7 +38,6 @@ type MarkProps = {
  * @param props.className Extra classes, usually a size.
  * @param props.animate Draw the stroke on when it mounts.
  * @param props.delay Delay before drawing, in milliseconds.
- * @param props.drawOnView Draw the stroke on as it scrolls into view.
  * @returns The mark as an inline SVG.
  */
 export const Mark = (props: MarkProps) => {
@@ -58,7 +55,6 @@ export const Mark = (props: MarkProps) => {
         'size-5 shrink-0',
         stroke.className,
         props.animate && 'mark-draw',
-        props.drawOnView && 'mark-draw-view',
         props.className,
       )}
       style={style}
