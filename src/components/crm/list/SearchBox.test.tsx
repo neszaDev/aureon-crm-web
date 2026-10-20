@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { ListSpec } from '@/libs/crm/ListQuery';
@@ -26,13 +26,22 @@ describe(SearchBox, () => {
   it('replaces the URL once typing pauses, keeping the size and dropping the page', async () => {
     router.replace.mockClear();
     await render(box({ page: '3', size: '50' }));
+    // The page's clock stands still while the keys arrive, however slowly a busy machine sends
+    // them: typed without a pause, whatever the wall clock says.
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
 
     await userEvent.type(page.getByLabelText('Search'), 'acme');
+    vi.advanceTimersByTime(299);
+    expect(router.replace).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
 
-    // One call in all: none for "a", "ac" or "acm", typed without a pause.
-    await expect
-      .poll(() => router.replace.mock.calls)
-      .toEqual([[`${PATH}?size=50&q=acme`, { scroll: false }]]);
+    // One call in all: none for "a", "ac" or "acm".
+    expect(router.replace.mock.calls).toStrictEqual([
+      [`${PATH}?size=50&q=acme`, { scroll: false }],
+    ]);
   });
 
   it('clears the search typed away before the first one landed', async () => {
