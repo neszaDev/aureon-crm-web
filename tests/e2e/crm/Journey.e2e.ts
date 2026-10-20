@@ -412,7 +412,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     // A sales rep here reads the owner's records, with no way to change or export them.
     rep = await addMember(request, owner, 'SALES_REP', 'Riley Rep');
     const repDeal = await seed(request, rep, 'deals', { name: 'Riley deal', amount: '300.00' });
-    await seed(request, owner, 'deals', { name: 'Acme renewal', amount: '800.00' });
+    const acme = await seed(request, owner, 'deals', { name: 'Acme renewal', amount: '800.00' });
     await signOut(page);
     await signIn(page, { email: rep.email, password: PASSWORD });
     await expectReadOnly(page, `${owner.path}/companies/${ids.company}`, 'Acme Trading');
@@ -424,6 +424,14 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     const exported = await page.request.get(`/api/crm/${owner.workspaceId}/export/companies`);
     expect(exported.status()).toBe(403);
     expect(await exported.json()).toStrictEqual({ message: "Your role doesn't allow this." });
+    // Nor the workspace's history: the page says so, and the settings don't offer it.
+    await page.goto(`${owner.path}/settings/audit`);
+    await expect(
+      page.getByRole('heading', { level: 1, name: "You don't have access to this" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('navigation', { name: 'Settings' }).getByRole('link', { name: 'Audit' }),
+    ).toHaveCount(0);
 
     // On the board only their own card has a handle and a menu.
     await page.goto(`${owner.path}/deals`);
@@ -433,7 +441,9 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     await expect(page.getByRole('button', { name: /^Drag D-\d+ /u })).toHaveCount(1);
     await expect(page.getByRole('button', { name: /^Actions for /u })).toHaveCount(1);
 
-    // A forged move: the rep drags their own card, and the request names the owner's won deal.
+    // A forged move: the rep drags their own card, and the request names the owner's deal, open
+    // in the same stage at the same version as theirs: only the permission check can refuse it.
+    expect(acme.version).toBe(repDeal.version);
     const named: number[] = [];
     await page.route(/\/deals$/u, async (route) => {
       const sent = route.request();
@@ -444,7 +454,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
       }
       const [workspaceId, dealId, input]: [number, number, unknown] = JSON.parse(body);
       named.push(dealId);
-      await route.continue({ postData: JSON.stringify([workspaceId, ids.deal, input]) });
+      await route.continue({ postData: JSON.stringify([workspaceId, acme.id, input]) });
     });
     await dragAndSave(page, handleOf(page, 'Riley deal'), column(page, 'Needs analysis'));
     await expect(page.getByText("Your role doesn't allow this.")).toBeVisible();
@@ -454,7 +464,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     ).toBeVisible();
     await page.unroute(/\/deals$/u);
     // Nothing moved on the server.
-    expect(await stageOf(request, owner, ids.deal)).toBe('Won');
+    expect(await stageOf(request, owner, acme.id)).toBe('Qualification');
     expect(await stageOf(request, owner, repDeal.id)).toBe('Qualification');
   });
 
