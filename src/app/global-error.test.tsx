@@ -9,6 +9,8 @@ describe(GlobalError, () => {
     // It is a whole document: React says <html> can't be inside the test's <div>, and draws it.
     await render(<GlobalError error={new Error('Boom')} retry={retry} />);
 
+    // Its content loads when it shows.
+    await expect.element(page.getByRole('banner')).toBeVisible();
     const bar = page.getByRole('banner').element();
     expect(getComputedStyle(bar).backgroundColor).toBe('rgb(200, 54, 28)');
     await expect.element(page.getByRole('link', { name: 'Aureon CRM home' })).toBeVisible();
