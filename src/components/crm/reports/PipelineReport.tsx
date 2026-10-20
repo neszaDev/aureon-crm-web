@@ -14,8 +14,8 @@ import type { components } from '@/libs/api/schema';
 import { formatMoney } from '@/libs/crm/Format';
 
 /**
- * The open deals as of now, as the API sent them: by stage (bars and their table behind "Show
- * table", as the dashboard has them) and by owner, in the API's order (the largest single amount
+ * The open deals as of now, as the API sent them: by stage (bars over their table, open under
+ * its "Table" button, as the dashboard has them) and by owner, in the API's order (the largest single amount
  * first, the unassigned deals last among equals). Each currency has its own line; nothing is
  * added across currencies, owners or stages.
  * @param props Component props.

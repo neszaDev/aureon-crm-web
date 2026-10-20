@@ -98,7 +98,8 @@ they create and can't give it to someone else.
 
 A **lead** is someone who may become a customer. **Change status** moves it between **New**,
 **Contacted**, **Qualified** and **Unqualified** (which asks why; the reason stays on the lead). A
-**follow-up date** puts it in your reminders on that day.
+**follow-up date** puts it in its owner's reminders from that day on, for as long as it is New,
+Contacted or Qualified (a lead without an owner is in nobody's).
 
 A qualified lead can be **converted**: the dialog creates a company from the lead's company name,
 links an existing company, or uses none; creates a contact from the lead or links an existing one;
