@@ -27,7 +27,7 @@ const DocLink = (props: { href: string; children: React.ReactNode }) => {
       href={props.href}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-1 font-semibold text-folder underline-offset-4 hover:underline"
+      className="inline-flex items-center gap-1 font-semibold text-folder underline-offset-4 hover:underline dark:text-folder-ink-soft"
     >
       {props.children}
       <ExternalLinkIcon aria-hidden="true" className="size-3.5" />
@@ -68,7 +68,7 @@ export const SignInHelpDialog = (props: {
             <span>{t('contact_text', { phone: signInHelp.phone })}</span>
             <a
               href={`mailto:${signInHelp.email}`}
-              className="w-fit font-semibold text-folder underline-offset-4 hover:underline"
+              className="w-fit font-semibold text-folder underline-offset-4 hover:underline dark:text-folder-ink-soft"
             >
               {signInHelp.email}
             </a>

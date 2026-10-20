@@ -130,6 +130,36 @@ test.describe('Showcase screens', () => {
   }
 });
 
+test.describe('Showcase in the dark theme', () => {
+  test("draws the demos' links legibly on lacquer", async ({ page, context, baseURL }) => {
+    await signUp(page);
+    await context.addCookies([{ name: 'theme', value: 'dark', url: baseURL }]);
+    const unreadable: string[] = [];
+
+    for (const route of [
+      '/dashboard/forms/validation-forms',
+      '/dashboard/base/tooltips',
+      '/dashboard/base/breadcrumbs',
+      '/dashboard/editors/text-editors',
+    ]) {
+      // oxlint-disable-next-line no-await-in-loop -- one page after the other
+      await page.goto(`${route}/`);
+      // oxlint-disable-next-line no-await-in-loop -- see above
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      // oxlint-disable-next-line no-await-in-loop -- see above
+      const { violations } = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
+      unreadable.push(
+        ...violations
+          .flatMap((violation) => violation.nodes)
+          .filter((node) => node.html.startsWith('<a'))
+          .map((node) => `${route}: ${node.html.slice(0, 80)}`),
+      );
+    }
+
+    expect(unreadable).toStrictEqual([]);
+  });
+});
+
 test.describe('Showcase navigation', () => {
   test('opens a sidebar group and navigates to one of its pages', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });

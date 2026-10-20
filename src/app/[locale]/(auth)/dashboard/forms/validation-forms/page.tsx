@@ -9,7 +9,7 @@ const ExternalLink = (props: { href: string; children: React.ReactNode }) => (
     href={props.href}
     target="_blank"
     rel="noreferrer noopener"
-    className="font-semibold text-folder underline-offset-4 hover:underline"
+    className="font-semibold text-folder underline-offset-4 hover:underline dark:text-folder-ink-soft"
   >
     {props.children}
   </a>

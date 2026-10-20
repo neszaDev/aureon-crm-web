@@ -36,7 +36,7 @@ export default async function TooltipsPage(props: { params: Promise<{ locale: st
               <DemoTooltip content={t('link_content')}>
                 <Link
                   href="/dashboard/test-results/"
-                  className="font-semibold text-folder underline"
+                  className="font-semibold text-folder underline dark:text-folder-ink-soft"
                 >
                   {chunks}
                 </Link>

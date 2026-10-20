@@ -92,7 +92,10 @@ export default async function BreadcrumbsPage(props: { params: Promise<{ locale:
                 {custom.map((crumb) => (
                   <Fragment key={crumb.id}>
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="#crumbs-custom" className="text-folder">
+                      <BreadcrumbLink
+                        href="#crumbs-custom"
+                        className="text-folder dark:text-folder-ink-soft"
+                      >
                         {crumb.label}
                       </BreadcrumbLink>
                     </BreadcrumbItem>
