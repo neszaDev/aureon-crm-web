@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { ActionResult } from '@/libs/api/ApiError';
 import messages from '@/locales/en.json';
 import type { ActivityFormValues } from '@/validations/crm/ActivityValidation';
@@ -39,6 +39,30 @@ const clock = (offsetMs: number) => new Date(Date.now() + offsetMs).toISOString(
 const renderComposer = async (result: ActionResult) => {
   await renderForm(result);
   await page.getByRole('button', { name: 'Log' }).click();
+};
+
+/**
+ * Renders a composer that has a Cancel, as the timeline's and an edit's do.
+ * @param save What saving answers.
+ * @returns The cancel callback.
+ */
+const renderCancellable = async (save: Save) => {
+  const cancel = vi.fn<() => void>();
+  await render(
+    <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+      <ActivityComposer
+        defaults={{ type: 'CALL', subject: '', body: '', occurredAt: '2026-10-18T10:00' }}
+        timeZone="UTC"
+        save={save}
+        savedMessage="Activity logged"
+        submitLabel="Log"
+        onCancel={cancel}
+      />
+    </NextIntlClientProvider>,
+  );
+  await page.getByLabelText('Subject').fill('Called Pat');
+
+  return cancel;
 };
 
 describe(ActivityComposer, () => {
@@ -103,5 +127,55 @@ describe(ActivityComposer, () => {
       }),
       false,
     );
+  });
+
+  describe('on Escape, with a Cancel', () => {
+    it('closes the composer', async () => {
+      const cancel = await renderCancellable(vi.fn<Save>());
+
+      await userEvent.keyboard('{Escape}');
+
+      expect(cancel).toHaveBeenCalledOnce();
+    });
+
+    it('keeps the draft when the Escape ends an input method’s composition', async () => {
+      const cancel = await renderCancellable(vi.fn<Save>());
+
+      page
+        .getByLabelText('Subject')
+        .element()
+        .dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'Escape', isComposing: true, bubbles: true }),
+        );
+
+      expect(cancel).not.toHaveBeenCalled();
+    });
+
+    it('stays open while the activity is on its way, so its refusal is seen', async () => {
+      const answer = Promise.withResolvers<ActionResult>();
+      const cancel = await renderCancellable(vi.fn<Save>().mockReturnValue(answer.promise));
+      // Sent with Enter from the Subject, which keeps the focus.
+      await userEvent.keyboard('{Enter}');
+      await expect.element(page.getByRole('button', { name: 'Log' })).toBeDisabled();
+
+      await userEvent.keyboard('{Escape}');
+      answer.resolve({ ok: false, message: 'You can only edit your own activities.' });
+
+      await expect
+        .element(page.getByRole('alert'))
+        .toHaveTextContent('You can only edit your own activities.');
+      expect(cancel).not.toHaveBeenCalled();
+    });
+
+    it('closes the calendar it was pressed in, not the composer', async () => {
+      const cancel = await renderCancellable(vi.fn<Save>());
+      await page.getByRole('button', { name: /^When/u }).click();
+      await expect.element(page.getByRole('dialog', { name: 'When' })).toBeVisible();
+
+      await userEvent.keyboard('{Escape}');
+
+      await expect.element(page.getByRole('dialog', { name: 'When' })).not.toBeInTheDocument();
+      expect(cancel).not.toHaveBeenCalled();
+    });
   });
 });

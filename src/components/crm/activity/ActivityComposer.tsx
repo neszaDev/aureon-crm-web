@@ -49,8 +49,8 @@ export const ActivityTypeIcon = (props: { type: ActivityFormValues['type'] }) =>
  * @param props.savedMessage The toast once saved.
  * @param props.submitLabel The submit button's label.
  * @param props.onSaved Called once saved; without it the form clears for the next activity.
- * @param props.onCancel Called by "Cancel" and by Escape, when the form has one (editing, and the
- *   timeline's, which opens from a button).
+ * @param props.onCancel Called by "Cancel" and by Escape (not while the activity is being saved),
+ *   when the form has one (editing, and the timeline's, which opens from a button).
  * @returns The form.
  */
 export const ActivityComposer = (props: {
@@ -98,7 +98,8 @@ export const ActivityComposer = (props: {
 
   return (
     <form
-      ref={props.onCancel ? onEscape(props.onCancel) : undefined}
+      // Not while it is being saved: closed, it couldn't show a refusal.
+      ref={props.onCancel && !isSubmitting ? onEscape(props.onCancel) : undefined}
       method="post"
       onSubmit={onSubmit}
       className="flex flex-col gap-4"
