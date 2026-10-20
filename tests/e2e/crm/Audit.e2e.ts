@@ -5,16 +5,12 @@ import {
   addMember,
   apiCall,
   BACKEND_URL,
+  COMPANY_COLUMNS,
   expectNoA11yViolations,
   seed,
   seedWorkspace,
   waitForHydration,
 } from './helpers';
-
-// The company export's columns (api.md, Export).
-const COMPANY_COLUMNS =
-  'Reference,Name,Industry,Website,Phone,Address,Employees,Owner,Contacts,Open deals,Created,' +
-  'Updated,Archived';
 
 test.describe('Export and the audit trail', () => {
   test("downloads the filtered companies as the backend's CSV, under its name, and the trail records it", async ({

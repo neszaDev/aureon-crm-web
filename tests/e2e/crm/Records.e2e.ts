@@ -1,10 +1,11 @@
-import type { Locator, Page } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
 import {
   addMember,
   apiCall,
   apiSend,
+  changeStatus,
   createCompany,
   createContact,
   createLead,
@@ -14,18 +15,6 @@ import {
   seedWorkspace,
   waitForHydration,
 } from './helpers';
-
-/**
- * Moves the lead on the page to a status from its menu and waits for the page to show it.
- * @param page Playwright page, on a lead.
- * @param status The status's name.
- */
-const changeStatus = async (page: Page, status: string) => {
-  await page.getByRole('button', { name: 'Change status' }).click();
-  await page.getByRole('menuitem', { name: status, exact: true }).click();
-  await expect(page.getByText(`Status changed to ${status}`)).toBeVisible();
-  await expect(page.getByText(`${status}: current`, { exact: true })).toBeVisible();
-};
 
 test.describe('Records', () => {
   test('creates a company and a contact, and logs a call that shows on both timelines', async ({

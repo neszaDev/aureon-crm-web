@@ -6,8 +6,12 @@ import {
   addMember,
   apiCall,
   apiSend,
+  dayLabel,
   expectNoA11yViolations,
   expectNoSidewaysScroll,
+  money,
+  monthLabel,
+  periodLabel,
   seed,
   seedWorkspace,
   stagesOf,
@@ -48,27 +52,10 @@ type FollowUps = Record<
 >;
 
 const HOUR = 60 * 60 * 1000;
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // The API's own answer, which the page must show as it is.
 const report = async <T>(request: APIRequestContext, as: Member, name: string, query = '') =>
   await apiCall<T>(request, as, 'GET', `/workspaces/${as.workspaceId}/reports/${name}${query}`);
-
-// An amount as the page writes it in English: the currency's symbol, grouped, with its cents.
-const money = (amount: string, currency: string) =>
-  new Intl.NumberFormat('en', { style: 'currency', currency }).format(Number(amount));
-
-// A period as the page writes it in English: "Sep 19 – Oct 18, 2026", the year once when shared.
-const label = (period: Period) => {
-  const day = (value: string) =>
-    `${MONTHS[Number(value.slice(5, 7)) - 1]} ${Number(value.slice(8))}`;
-  const sameYear = period.from.slice(0, 4) === period.to.slice(0, 4);
-
-  return `${day(period.from)}${sameYear ? '' : `, ${period.from.slice(0, 4)}`} – ${day(period.to)}, ${period.to.slice(0, 4)}`;
-};
-
-// A report month as the page writes it: "Oct 2026".
-const month = (value: string) => `${MONTHS[Number(value.slice(5, 7)) - 1]} ${value.slice(0, 4)}`;
 
 // A member as the page names them.
 const named = (member?: MemberRef) => (member ? (member.displayName ?? member.email) : undefined);
@@ -296,7 +283,9 @@ test.describe('Reports', () => {
     await page.goto(reports(owner.path, '?tab=won-lost'));
 
     // The period is the one the API answered with, though the URL named none.
-    await expect(page.getByRole('button', { name: `Period: ${label(api.period)}` })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: `Period: ${periodLabel(api.period)}` }),
+    ).toBeVisible();
     // The months and the won values are on the page without a click.
     const panel = page.getByRole('region', { name: 'Won and lost by month' });
     await expect(panel.getByRole('button', { name: 'Table', exact: true })).toHaveAttribute(
@@ -307,7 +296,7 @@ test.describe('Reports', () => {
     await Promise.all(
       api.months.map(async (item, index) => {
         const row = panel.getByRole('row').nth(index + 1);
-        await expect(row.getByRole('rowheader')).toHaveText(month(item.month));
+        await expect(row.getByRole('rowheader')).toHaveText(monthLabel(item.month));
         await expect(row.getByRole('cell').nth(0)).toHaveText(String(item.won));
         await expect(row.getByRole('cell').nth(1)).toHaveText(String(item.lost));
         await Promise.all(
@@ -348,7 +337,7 @@ test.describe('Reports', () => {
       }),
     );
     // The caution names the day the history starts, in the workspace's zone.
-    const today = `${MONTHS[Number(api.period.to.slice(5, 7)) - 1]} ${Number(api.period.to.slice(8))}, ${api.period.to.slice(0, 4)}`;
+    const today = dayLabel(api.period.to);
     await expect(
       page.getByText(
         `Stage history starts on ${today}; deals created before it count only the stages recorded since.`,
@@ -392,7 +381,9 @@ test.describe('Reports', () => {
 
     await page.goto(reports(owner.path, '?tab=activities'));
 
-    await expect(page.getByRole('button', { name: `Period: ${label(api.period)}` })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: `Period: ${periodLabel(api.period)}` }),
+    ).toBeVisible();
     const table = page.getByRole('region', { name: 'Activity table' });
     await expect(table.getByRole('row')).toHaveCount(api.byUser.length + 1);
     await Promise.all(
@@ -510,7 +501,7 @@ test.describe('Reports', () => {
 
         await expect(page.getByRole('heading', { level: 1, name: 'Reports' })).toBeVisible();
         await expect(
-          page.getByRole('button', { name: `Period: ${label(defaults.period)}` }),
+          page.getByRole('button', { name: `Period: ${periodLabel(defaults.period)}` }),
         ).toBeVisible();
         await expect(page.getByRole('heading', { name: 'Something went wrong' })).toHaveCount(0);
       });
@@ -526,7 +517,7 @@ test.describe('Reports', () => {
     const defaults = await report<WonLost>(request, owner, 'won-lost');
     await page.goto(reports(owner.path, '?tab=won-lost'));
     const trigger = (period: Period) =>
-      page.getByRole('button', { name: `Period: ${label(period)}` });
+      page.getByRole('button', { name: `Period: ${periodLabel(period)}` });
     await expect(trigger(defaults.period)).toBeVisible();
 
     await trigger(defaults.period).click();

@@ -161,7 +161,7 @@ export const apiCall = async <T>(
  * @param name Its display name, which people see on seals and in history.
  * @returns The account, with the password `PASSWORD`.
  */
-const registerUser = async (request: APIRequestContext, name?: string) => {
+export const registerUser = async (request: APIRequestContext, name?: string) => {
   const email = uniqueEmail();
   const registered = await request.post(`${BACKEND_URL}/api/v1/auth/register`, {
     data: { email, password: PASSWORD },
@@ -402,3 +402,149 @@ export const expectNoSidewaysScroll = async (page: Page, url: string) => {
     `${url} is wider than the viewport`,
   ).toBe(true);
 };
+
+/**
+ * Through the API: the stage a deal is in.
+ * @param request Playwright API client.
+ * @param as A member.
+ * @param deal The deal's id.
+ * @returns The stage's name.
+ */
+export const stageOf = async (request: APIRequestContext, as: Member, deal: number) => {
+  const found = await apiCall<{ stage: { name: string } }>(
+    request,
+    as,
+    'GET',
+    `/workspaces/${as.workspaceId}/deals/${deal}`,
+  );
+
+  return found.stage.name;
+};
+
+/**
+ * Moves the lead on the page to a status from its menu and waits for the page to show it.
+ * @param page Playwright page, on a lead.
+ * @param status The status's name.
+ */
+export const changeStatus = async (page: Page, status: string) => {
+  await page.getByRole('button', { name: 'Change status' }).click();
+  await page.getByRole('menuitem', { name: status, exact: true }).click();
+  await expect(page.getByText(`Status changed to ${status}`)).toBeVisible();
+  await expect(page.getByText(`${status}: current`, { exact: true })).toBeVisible();
+};
+
+/**
+ * A stage's column on the deal board, found by its markup so it is still found while a dialog
+ * hides the page from the accessibility tree.
+ * @param page Playwright page, on the board.
+ * @param stage The stage's name.
+ * @returns The column.
+ */
+export const column = (page: Page, stage: string) =>
+  page.locator('section[aria-labelledby^="board-stage-"]', {
+    has: page.locator(`h2:text-is("${stage}")`),
+  });
+
+/**
+ * A pointer drag, in steps: dnd-kit's sensor needs the pointer to travel (a straight
+ * `dragTo` is over before it has measured anything).
+ * @param page Playwright page.
+ * @param handle The card's drag handle.
+ * @param target Where to drop: its middle, a little down, which is over a column's cards.
+ */
+export const drag = async (page: Page, handle: Locator, target: Locator) => {
+  const from = await handle.boundingBox();
+  const to = await target.boundingBox();
+  if (!from || !to) {
+    throw new Error('Nothing to drag, or nowhere to drop it');
+  }
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + 20, from.y + 20, { steps: 5 });
+  await page.mouse.move(to.x + to.width / 2, to.y + 120, { steps: 15 });
+  await page.mouse.up();
+};
+
+/**
+ * Runs something that sends a server action, and waits until the server has answered it (a
+ * reload before then would cancel the request).
+ * @param page Playwright page.
+ * @param send What sends the action.
+ */
+export const untilSaved = async (page: Page, send: () => Promise<void>) => {
+  const answered = page.waitForResponse((response) => {
+    const sent = response.request();
+
+    return sent.method() === 'POST' && sent.headers()['next-action'] !== undefined;
+  });
+  await send();
+  await answered;
+};
+
+/**
+ * A drag that moves the deal, until the server has answered.
+ * @param page Playwright page.
+ * @param handle The card's drag handle.
+ * @param target The column to drop on.
+ */
+export const dragAndSave = async (page: Page, handle: Locator, target: Locator) => {
+  await untilSaved(page, async () => {
+    await drag(page, handle, target);
+  });
+};
+
+/**
+ * The drag handle of a deal's card.
+ * @param page Playwright page, on the board.
+ * @param name The deal's name.
+ * @returns The handle.
+ */
+export const handleOf = (page: Page, name: string) =>
+  page.getByRole('button', { name: new RegExp(`^Drag D-\\d+ ${name}$`, 'u') });
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * An amount as the page writes it in English: the currency's symbol, grouped, with its cents.
+ * @param amount The API's amount, such as "1250.00".
+ * @param currency Its currency.
+ * @returns Such as "€1,250.00".
+ */
+export const money = (amount: string, currency: string) =>
+  new Intl.NumberFormat('en', { style: 'currency', currency }).format(Number(amount));
+
+// A `YYYY-MM-DD` day without its year, as the page writes it in English: "Oct 18".
+const day = (value: string) => `${MONTHS[Number(value.slice(5, 7)) - 1]} ${Number(value.slice(8))}`;
+
+/**
+ * A day as the page writes it in English.
+ * @param value A `YYYY-MM-DD` day.
+ * @returns Such as "Oct 18, 2026".
+ */
+export const dayLabel = (value: string) => `${day(value)}, ${value.slice(0, 4)}`;
+
+/**
+ * A period as the page writes it in English, the year once when both days share it.
+ * @param period The API's period.
+ * @param period.from Its first day.
+ * @param period.to Its last day.
+ * @returns Such as "Sep 19 – Oct 18, 2026".
+ */
+export const periodLabel = (period: { from: string; to: string }) => {
+  const sameYear = period.from.slice(0, 4) === period.to.slice(0, 4);
+
+  return `${sameYear ? day(period.from) : dayLabel(period.from)} – ${dayLabel(period.to)}`;
+};
+
+/**
+ * A report month as the page writes it.
+ * @param value The API's month, `YYYY-MM`.
+ * @returns Such as "Oct 2026".
+ */
+export const monthLabel = (value: string) =>
+  `${MONTHS[Number(value.slice(5, 7)) - 1]} ${value.slice(0, 4)}`;
+
+// The company export's columns (api.md, Export).
+export const COMPANY_COLUMNS =
+  'Reference,Name,Industry,Website,Phone,Address,Employees,Owner,Contacts,Open deals,Created,' +
+  'Updated,Archived';

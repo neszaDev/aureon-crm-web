@@ -1,90 +1,26 @@
-import type { APIRequestContext, Locator, Page } from '@playwright/test';
+import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn, signUp } from '../helpers';
 import type { Member } from './helpers';
 import {
   addMember,
-  apiCall,
+  column,
   createWorkspace,
+  drag,
+  dragAndSave,
   expectNoA11yViolations,
   expectNoSidewaysScroll,
+  handleOf,
   seed,
   seedWorkspace,
+  stageOf,
   stagesOf,
+  untilSaved,
   waitForHydration,
 } from './helpers';
 
 // The default pipeline's six columns fit the content column of a 1440 px screen, in one frame.
 test.use({ viewport: { width: 1440, height: 900 } });
-
-/**
- * A stage's column, found by its markup so it is still found while a dialog hides the page
- * from the accessibility tree.
- * @param page Playwright page, on the board.
- * @param stage The stage's name.
- * @returns The column.
- */
-const column = (page: Page, stage: string) =>
-  page.locator('section[aria-labelledby^="board-stage-"]', {
-    has: page.locator(`h2:text-is("${stage}")`),
-  });
-
-/**
- * A pointer drag, in steps: dnd-kit's sensor needs the pointer to travel (a straight
- * `dragTo` is over before it has measured anything).
- * @param page Playwright page.
- * @param handle The card's drag handle.
- * @param target Where to drop: its middle, a little down, which is over a column's cards.
- */
-const drag = async (page: Page, handle: Locator, target: Locator) => {
-  const from = await handle.boundingBox();
-  const to = await target.boundingBox();
-  if (!from || !to) {
-    throw new Error('Nothing to drag, or nowhere to drop it');
-  }
-  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(from.x + 20, from.y + 20, { steps: 5 });
-  await page.mouse.move(to.x + to.width / 2, to.y + 120, { steps: 15 });
-  await page.mouse.up();
-};
-
-/**
- * Runs something that sends a server action, and waits until the server has answered it (a
- * reload before then would cancel the request).
- * @param page Playwright page.
- * @param send What sends the action.
- */
-const untilSaved = async (page: Page, send: () => Promise<void>) => {
-  const answered = page.waitForResponse((response) => {
-    const sent = response.request();
-
-    return sent.method() === 'POST' && sent.headers()['next-action'] !== undefined;
-  });
-  await send();
-  await answered;
-};
-
-/**
- * A drag that moves the deal, until the server has answered.
- * @param page Playwright page.
- * @param handle The card's drag handle.
- * @param target The column to drop on.
- */
-const dragAndSave = async (page: Page, handle: Locator, target: Locator) => {
-  await untilSaved(page, async () => {
-    await drag(page, handle, target);
-  });
-};
-
-/**
- * The drag handle of a deal's card.
- * @param page Playwright page, on the board.
- * @param name The deal's name.
- * @returns The handle.
- */
-const handleOf = (page: Page, name: string) =>
-  page.getByRole('button', { name: new RegExp(`^Drag D-\\d+ ${name}$`, 'u') });
 
 /**
  * Opens the board, signed in as `member`, once its cards can be dragged.
@@ -97,24 +33,6 @@ const openBoard = async (page: Page, member: Member, deal: string) => {
   await page.goto(`${member.path}/deals`);
   await expect(page.getByRole('link', { name: deal })).toBeVisible();
   await waitForHydration(page.getByRole('main'));
-};
-
-/**
- * Through the API: the stage a deal is in.
- * @param request Playwright API client.
- * @param as A member.
- * @param deal The deal's id.
- * @returns The stage's name.
- */
-const stageOf = async (request: APIRequestContext, as: Member, deal: number) => {
-  const found = await apiCall<{ stage: { name: string } }>(
-    request,
-    as,
-    'GET',
-    `/workspaces/${as.workspaceId}/deals/${deal}`,
-  );
-
-  return found.stage.name;
 };
 
 /**

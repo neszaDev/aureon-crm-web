@@ -8,6 +8,8 @@ import {
   apiSend,
   expectNoA11yViolations,
   expectNoSidewaysScroll,
+  money,
+  periodLabel,
   seed,
   seedWorkspace,
   stagesOf,
@@ -26,24 +28,10 @@ type Dashboard = {
 };
 
 const HOUR = 60 * 60 * 1000;
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // The API's own answer, which the page must show as it is.
 const dashboardOf = async (request: APIRequestContext, as: Member, query = '') =>
   await apiCall<Dashboard>(request, as, 'GET', `/workspaces/${as.workspaceId}/dashboard${query}`);
-
-// An amount as the page writes it in English: the currency's symbol, grouped, with its cents.
-const money = (amount: string, currency: string) =>
-  new Intl.NumberFormat('en', { style: 'currency', currency }).format(Number(amount));
-
-// A period as the page writes it in English: "Sep 19 – Oct 18, 2026", the year once when shared.
-const label = (period: { from: string; to: string }) => {
-  const day = (value: string) =>
-    `${MONTHS[Number(value.slice(5, 7)) - 1]} ${Number(value.slice(8))}`;
-  const sameYear = period.from.slice(0, 4) === period.to.slice(0, 4);
-
-  return `${day(period.from)}${sameYear ? '' : `, ${period.from.slice(0, 4)}`} – ${day(period.to)}, ${period.to.slice(0, 4)}`;
-};
 
 // The create actions that are links; the task one opens a dialog.
 const LINKS = ['New company', 'New contact', 'New lead', 'New deal'];
@@ -202,7 +190,9 @@ test.describe('Dashboard', () => {
       }),
     );
     // The period is the one the API answered with, though the URL named none.
-    await expect(page.getByRole('button', { name: `Period: ${label(api.period)}` })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: `Period: ${periodLabel(api.period)}` }),
+    ).toBeVisible();
     await expect(page.getByRole('region', { name: 'My deals' })).toContainText('Acme seats');
     await expect(page.getByRole('region', { name: 'Follow-ups' })).toContainText(
       'Send the proposal',
@@ -232,7 +222,7 @@ test.describe('Dashboard', () => {
 
       await expect(page.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible();
       await expect(
-        page.getByRole('button', { name: `Period: ${label(defaults.period)}` }),
+        page.getByRole('button', { name: `Period: ${periodLabel(defaults.period)}` }),
       ).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Something went wrong' })).toHaveCount(0);
     });
@@ -248,7 +238,7 @@ test.describe('Dashboard', () => {
     await page.goto(`${owner.path}?from=2026-01-01&to=2026-01-31`);
 
     await expect(
-      page.getByRole('button', { name: `Period: ${label(asked.period)}` }),
+      page.getByRole('button', { name: `Period: ${periodLabel(asked.period)}` }),
     ).toBeVisible();
     await expect(
       totals(page).getByRole('link', { name: `Companies ${asked.counts.companies}` }),
@@ -265,7 +255,7 @@ test.describe('Dashboard', () => {
     const defaults = await dashboardOf(request, owner);
     await page.goto(owner.path);
     const trigger = (period: { from: string; to: string }) =>
-      page.getByRole('button', { name: `Period: ${label(period)}` });
+      page.getByRole('button', { name: `Period: ${periodLabel(period)}` });
     await expect(trigger(defaults.period)).toBeVisible();
     await waitForHydration(trigger(defaults.period));
 
