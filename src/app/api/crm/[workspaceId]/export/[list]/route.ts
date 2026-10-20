@@ -78,13 +78,14 @@ const EXPORTS = {
  * `GET /api/crm/{workspaceId}/export/{list}`: the CSV of a list for the filters of its page's URL
  * (`?locale=` picks the language of a refusal). The browser asks here and never the backend: the
  * session's token stays on the server. The file streams through with the backend's `Content-Type`
- * and `Content-Disposition` (an `attachment` without one), never sniffed; a refusal is JSON `{ message }`, translated by its code (a file over
- * the cap, a role without `EXPORT`). A 401 ends the session as an action's does (the cookies go,
- * unless the request sent no access token), but the browser fetches this and a redirect would
- * hand it the sign-in page as the file: it gets a bare 401, which the button turns into the
- * navigation to sign in. Another site can't start one: the session cookies are `SameSite=Lax`, so
- * its link or form would open this with them, and the export would be recorded in the user's
- * name. A request the browser marks `Sec-Fetch-Site: cross-site` is refused (403) unasked.
+ * and `Content-Disposition` (an `attachment` without one), never sniffed; a refusal is JSON
+ * `{ message }`, translated by its code (a file over the cap, a role without `EXPORT`). A 401 ends
+ * the session as an action's does (the cookies go, unless the request sent no access token), but
+ * the browser fetches this and a redirect would hand it the sign-in page as the file: it gets a
+ * bare 401, which the button turns into the navigation to sign in. Another site can't start one:
+ * the session cookies are `SameSite=Lax`, so its link or form would open this with them, and the
+ * export would be recorded in the user's name. A request the browser marks
+ * `Sec-Fetch-Site: cross-site` is refused (403) unasked.
  * @param request The request.
  * @param context The route's params.
  * @param context.params `workspaceId` and `list` (companies, contacts, leads or deals).

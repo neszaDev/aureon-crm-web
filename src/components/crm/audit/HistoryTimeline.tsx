@@ -76,7 +76,7 @@ export const HistoryTimeline = (props: {
       let added: AuditEvent[] = [];
       try {
         do {
-          // oxlint-disable-next-line no-await-in-loop -- each page decides whether to ask for the next
+          // oxlint-disable-next-line no-await-in-loop -- a page decides if the next is asked
           next = await loadHistory(
             props.workspace.id,
             props.entityType,
