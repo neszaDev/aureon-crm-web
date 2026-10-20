@@ -869,6 +869,10 @@ test.describe('Security', () => {
       });
       expect(file.headers()['content-disposition']).toMatch(/^attachment/u);
       expect(file.headers()['set-cookie'] ?? '').not.toMatch(/_token=/u);
+      // The route answers under any first segment (`[locale]` takes it): the same sandbox there.
+      const elsewhere = await page.request.get(`/api${href}`);
+      expect(elsewhere.status()).toBe(200);
+      expect(elsewhere.headers()['content-security-policy']).toBe("sandbox; default-src 'none'");
     });
 
     test('stay static on the public site: the same for everyone, asking the server for nothing', async ({

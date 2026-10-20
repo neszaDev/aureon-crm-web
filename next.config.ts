@@ -52,9 +52,9 @@ const baseConfig: NextConfig = {
     return [
       {
         // Every path but the build's own assets (never framed, typed by Next; ~11 KB less on the
-        // home page's load) and a file's download, whose route sets its own sandbox CSP: Next
-        // would send this one instead.
-        source: '/:path((?!_next/static/|(?:[a-z]{2}/)?dashboard/files/[^/]+/content$).*)',
+        // home page's load) and a file's download, under any first segment (`[locale]` takes
+        // any), whose route sets its own sandbox CSP: Next would send this one instead.
+        source: '/:path((?!_next/static/|(?:[^/]+/)?dashboard/files/[^/]+/content$).*)',
         headers: SECURITY_HEADERS,
       },
       {
