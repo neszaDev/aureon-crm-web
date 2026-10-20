@@ -12,9 +12,9 @@ const COLUMNS = ['calls', 'emails', 'meetings', 'notes', 'tasksCompleted'] as co
 /**
  * What each member did in the period, as the API counted it: calls, emails, meetings and notes
  * they logged and the tasks they completed, one row each in the API's order (most in total
- * first), the members who left together as "Former members". A row's total is the five counts
- * added, the sum the API orders by; no column is added up, and nothing is left out. On a phone
- * the table scrolls inside its own region, which the keyboard can reach.
+ * first), the members who left together as "Former members", and each row's total as the API
+ * sent it; no column is added up, and nothing is left out. On a phone the table scrolls inside its
+ * own region, which the keyboard can reach.
  * @param props Component props.
  * @param props.report The activities report.
  * @returns The panel.
@@ -67,7 +67,7 @@ export const ActivityReport = (props: { report: components['schemas']['ActivityR
                     </TableCell>
                   ))}
                   <TableCell className="px-4 text-right font-semibold tabular-nums sm:px-5">
-                    {number.format(COLUMNS.reduce((sum, column) => sum + entry[column], 0))}
+                    {number.format(entry.total)}
                   </TableCell>
                 </TableRow>
               ))}

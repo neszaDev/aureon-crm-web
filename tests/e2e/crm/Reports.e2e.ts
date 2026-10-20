@@ -44,6 +44,7 @@ type Activities = {
     meetings: number;
     notes: number;
     tasksCompleted: number;
+    total: number;
   }[];
 };
 type FollowUps = Record<
@@ -404,9 +405,9 @@ test.describe('Reports', () => {
             await expect(row.getByRole('cell').nth(column)).toHaveText(String(count));
           }),
         );
-        await expect(row.getByRole('cell').nth(5)).toHaveText(
-          String(counts.reduce((sum, count) => sum + count, 0)),
-        );
+        // The API's total of the row, which is the five counts together.
+        expect(entry.total).toBe(counts.reduce((sum, count) => sum + count, 0));
+        await expect(row.getByRole('cell').nth(5)).toHaveText(String(entry.total));
       }),
     );
     await expectNoA11yViolations(page);

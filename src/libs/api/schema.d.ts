@@ -2258,6 +2258,8 @@ export interface components {
             notes: number;
             /** Format: int64 */
             tasksCompleted: number;
+            /** Format: int64 */
+            total: number;
             user?: components["schemas"]["MemberRef"];
         };
         UserResponse: {
@@ -3613,6 +3615,7 @@ export interface operations {
                 unassigned?: boolean;
                 companyId?: number;
                 contactId?: number;
+                sourceId?: number;
                 closeFrom?: string;
                 closeTo?: string;
                 archived?: boolean;
@@ -3703,6 +3706,7 @@ export interface operations {
                 unassigned?: boolean;
                 companyId?: number;
                 contactId?: number;
+                sourceId?: number;
                 closeFrom?: string;
                 closeTo?: string;
                 archived?: boolean;

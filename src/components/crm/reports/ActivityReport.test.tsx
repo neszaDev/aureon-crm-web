@@ -20,6 +20,7 @@ const REPORT: Props['report'] = {
       meetings: 3,
       notes: 5,
       tasksCompleted: 9,
+      total: 37,
     },
     {
       user: { userId: 8, email: 'sam@demo.test' },
@@ -28,8 +29,9 @@ const REPORT: Props['report'] = {
       meetings: 0,
       notes: 2,
       tasksCompleted: 0,
+      total: 3,
     },
-    { calls: 0, emails: 4, meetings: 0, notes: 0, tasksCompleted: 1 },
+    { calls: 0, emails: 4, meetings: 0, notes: 0, tasksCompleted: 1, total: 5 },
   ],
 };
 
@@ -104,6 +106,16 @@ describe(ActivityReport, () => {
       ['sam@demo.test', '1', '0', '0', '2', '0', '3'],
       ['Former members', '0', '4', '0', '0', '1', '5'],
     ]);
+  });
+
+  it("shows each row's total as the API sent it, never a sum of its own", async () => {
+    const [riley, ...rest] = REPORT.byUser;
+    if (!riley) {
+      throw new Error('The fixture has rows');
+    }
+    await report({ ...REPORT, byUser: [{ ...riley, total: 40 }, ...rest] });
+
+    expect(rows()[0]?.at(-1)).toBe('40');
   });
 
   it('heads the columns by type', async () => {
