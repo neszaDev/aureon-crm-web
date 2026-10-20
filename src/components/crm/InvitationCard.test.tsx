@@ -113,6 +113,20 @@ describe(InvitationCard, () => {
 
       expect(signOut).toHaveBeenCalledWith(`/invite/${TOKEN}`);
     });
+
+    it('says why, and keeps the card, when signing out fails outright', async () => {
+      const signOut = vi
+        .fn<(next: string) => Promise<void>>()
+        .mockRejectedValue(new TypeError('Failed to fetch'));
+      await renderCard({ invitation: INVITATION, user: { email: 'bob@example.com' }, signOut });
+
+      await page.getByRole('button', { name: 'Sign out' }).click();
+
+      await expect
+        .element(page.getByRole('alert'))
+        .toHaveTextContent("Couldn't reach the server. Check your connection and try again.");
+      await expect.element(page.getByRole('button', { name: 'Sign out' })).toBeEnabled();
+    });
   });
 
   describe('closed', () => {

@@ -24,7 +24,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { Link } from '@/libs/I18nNavigation';
-import { useSettle } from '@/utils/SettleAction';
+import { asResult, useSettle } from '@/utils/SettleAction';
 import type { InvitationRegisterValues } from '@/validations/crm/InvitationValidation';
 import { InvitationRegisterValidation } from '@/validations/crm/InvitationValidation';
 
@@ -274,14 +274,17 @@ export const InvitationCard = (props: {
           {t('wrong_text', { workspace })}
         </Heading>
         <div className={PANEL}>
+          <ActionAlert result={failure} />
           <Person label={t('invited_label')} email={props.invitation.email} />
           <Person label={t('signed_in_label')} email={userEmail} name={props.user?.displayName} />
           <Button
             className="mt-1 w-full"
             disabled={pending}
             onClick={() => {
+              setFailure(undefined);
               startTransition(async () => {
-                await props.signOut(`/invite/${props.token}`);
+                // Signed out, it goes back to the invitation; a result means it failed outright.
+                setFailure(await settle(asResult(props.signOut(`/invite/${props.token}`))));
               });
             }}
           >

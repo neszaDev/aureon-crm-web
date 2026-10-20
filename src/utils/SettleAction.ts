@@ -28,3 +28,14 @@ export const useSettle = () => {
     }
   };
 };
+
+/**
+ * An action that answers only with a redirect (signing out), as the result `settle` takes: it
+ * rejects with the redirect, which `settle` passes through, or with what failed.
+ * @param answer The action's promise.
+ * @returns A success, should it ever settle without redirecting.
+ */
+export const asResult = async (answer: Promise<void>): Promise<ActionResult> => {
+  await answer;
+  return { ok: true };
+};

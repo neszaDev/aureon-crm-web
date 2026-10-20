@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { signOut } from '@/actions/AuthActions';
 import { Seal } from '@/components/crm/Seal';
 import {
@@ -31,6 +32,7 @@ import {
 import { Link, usePathname, useRouter } from '@/libs/I18nNavigation';
 import { routing } from '@/libs/I18nRouting';
 import { chooseTheme, parseTheme, themeFromCookie, THEMES } from '@/libs/Theme';
+import { asResult, useSettle } from '@/utils/SettleAction';
 
 const THEME_ICONS = { light: SunIcon, dark: MoonIcon, system: MonitorIcon };
 
@@ -98,6 +100,7 @@ export const AccountMenu = (props: {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+  const settle = useSettle();
 
   return (
     <DropdownMenu>
@@ -170,7 +173,11 @@ export const AccountMenu = (props: {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={async () => {
-            await signOut();
+            // Signed out, it goes home; a result means it failed outright.
+            const result = await settle(asResult(signOut()));
+            if (!result.ok) {
+              toast.error(result.message);
+            }
           }}
         >
           <LogOutIcon aria-hidden="true" />
