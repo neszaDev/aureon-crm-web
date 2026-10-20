@@ -54,7 +54,7 @@
   --chart-5: #6d4c8f;
 
   /*
-   * Marksheet, the boilerplate's demo world under /dashboard (and the not-found page). Kept so
+   * Marksheet, the boilerplate's demo world under /dashboard. Kept so
    * those components still render; `bg-paper` there now resolves to Aureon's paper. New UI must not
    * use these.
    */
