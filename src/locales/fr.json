@@ -1300,8 +1300,8 @@
   },
   "NotFound": {
     "meta_title": "Page introuvable",
-    "title": "Cette page est absente.",
-    "text": "Le lien est peut-être ancien ou mal saisi. Rien n'a été perdu.",
+    "title": "Page introuvable",
+    "text": "Nous ne trouvons pas cette page. Le lien est peut-être ancien ou mal saisi.",
     "home": "Retour à l'accueil"
   },
   "ErrorPage": {

@@ -316,7 +316,7 @@ One loud colour, the seal vermilion, carried by one large field (the rail) and s
 
 **The Lacquer Rule.** Dark mode keeps the same seal fill on the rail and swaps paper, ink and seal-ink for their `lacquer-` values; it adds no new accents.
 
-**Legacy note (scope only).** `src/styles/global.css` still carries the boilerplate's "Marksheet" tokens (`folder*`, `paper-card`, `ply`, `ink-950` to `ink-100`, `pass`, `pen`, `pencil`, `.form-label`, `.paper`, `shadow-paper`, the Kalam hand font, the button `inverse` variants). They exist only so the demo gallery under `/dashboard` keeps rendering; the public pages (landing, about, not found) no longer use them. They are not part of this system, and new UI must not use them.
+**Legacy note (scope only).** `src/styles/global.css` still carries the boilerplate's "Marksheet" tokens (`folder*`, `paper-card`, `ply`, `ink-950` to `ink-100`, `pass`, `pen`, `pencil`, `.form-label`, `.paper`, `shadow-paper`, the Kalam hand font, the button `inverse` variants). They exist only so the demo gallery under `/dashboard` keeps rendering (Kalam is declared in its layout alone); the public pages (landing, about, not found, the error pages) no longer use them. They are not part of this system, and new UI must not use them.
 
 ## Typography
 

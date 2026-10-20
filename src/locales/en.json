@@ -1300,8 +1300,8 @@
   },
   "NotFound": {
     "meta_title": "Page not found",
-    "title": "This page is absent.",
-    "text": "The link may be old or mistyped. Nothing was lost.",
+    "title": "Page not found",
+    "text": "We can't find that page. The link may be old or mistyped.",
     "home": "Back to home"
   },
   "ErrorPage": {

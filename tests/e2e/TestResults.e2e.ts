@@ -25,6 +25,14 @@ test.describe('Test results', () => {
     await expect(page.getByTestId('summary-PASSED')).toContainText('0');
   });
 
+  test("writes the notes in the demos' hand", async ({ page }) => {
+    await signUp(page);
+    await page.goto('/dashboard/test-results');
+
+    // Kalam, which only the demos' layout loads.
+    await expect(page.getByLabel('Notes')).toHaveCSS('font-family', /Kalam/u);
+  });
+
   test('rejects a score outside 0-100 before calling the backend', async ({ page }) => {
     await signUp(page);
     await page.goto('/dashboard/test-results');
