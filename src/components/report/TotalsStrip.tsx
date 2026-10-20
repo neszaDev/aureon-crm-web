@@ -14,10 +14,17 @@ type Summary = {
  * The totals box at the top of a card: the overall count, then one count per mark.
  * @param props Component props.
  * @param props.summary Totals from the backend's summary endpoint.
+ * @param props.testIds Marks each count `summary-<STATUS>` for the e2e test. Only the page under
+ *   test sets it: a page streamed in, then left by a quick navigation, can stay in the DOM hidden,
+ *   and a second strip with the same ids would make the test's query ambiguous.
  * @param props.className Extra classes.
  * @returns The totals as a description list.
  */
-export const TotalsStrip = (props: { summary?: Summary; className?: string }) => {
+export const TotalsStrip = (props: {
+  summary?: Summary;
+  testIds?: boolean;
+  className?: string;
+}) => {
   const t = useTranslations('Totals');
   const tStatus = useTranslations('TestResultForm');
   const countOf = (status: TestStatus) =>
@@ -40,7 +47,7 @@ export const TotalsStrip = (props: { summary?: Summary; className?: string }) =>
       {ORDER.map((status, index) => (
         <div
           key={status}
-          data-testid={`summary-${status}`}
+          data-testid={props.testIds ? `summary-${status}` : undefined}
           className={cn(
             'flex flex-col gap-1 px-5 py-4 max-sm:odd:border-r',
             index === 0 && 'border-b border-ink-200 sm:border-b-0',

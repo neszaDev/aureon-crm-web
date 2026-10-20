@@ -36,7 +36,7 @@ export default async function TestResultsPage(props: TestResultsPageProps) {
     <>
       <PageHeader title={t('title')} description={t('description')} />
 
-      <TotalsStrip summary={summary} />
+      <TotalsStrip testIds summary={summary} />
 
       <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <Card className="xl:sticky xl:top-12 xl:col-start-2 xl:row-start-1">
