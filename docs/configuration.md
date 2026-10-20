@@ -17,17 +17,22 @@ git-ignored); in containers and CI, from the environment.
 
 Runtime values are **not** baked into the image, so one image serves every environment.
 
-**Deployment requirement:** run the app behind a reverse proxy that overwrites
-`X-Forwarded-For` with the client's address. In nginx:
+**Deployment requirement:** run the app behind a reverse proxy that makes the client's address
+the **last** `X-Forwarded-For` entry (overwriting the header, or appending with
+`$proxy_add_x_forwarded_for`) and passes the browser's `Host` on. In nginx:
 
 ```nginx
 proxy_set_header X-Forwarded-For $remote_addr;
+proxy_set_header Host $host;
 ```
 
-The backend's per-IP sign-in and registration limits key on that address
+The backend's per-IP sign-in and registration limits key on that last entry
 ([client IP](backend-integration.md#client-ip-and-rate-limits)). Exposed directly, a client
 sends any `X-Forwarded-For` it likes, Next.js keeps it, and those limits don't hold; the
-per-email limit on failed sign-ins still does.
+per-email limit on failed sign-ins still does. Without `Host`, nginx sends its upstream's name
+(`$proxy_host`), which Next compares with the browser's `Origin` (after `X-Forwarded-Host`):
+every server action fails with "Invalid Server Actions request". The proxy also caps request
+bodies ([request bodies](architecture.md#request-bodies)).
 
 ## Local Docker stack (`env/.env`)
 

@@ -192,6 +192,7 @@ Public pages are statically generated per locale. Everything under `app` and
 runs in every environment; `BACKEND_URL` and `APP_URL` are read at startup, not baked in. HTTPS
 ends at a TLS terminator in front of it, which sends `Strict-Transport-Security`: the app can't,
 since the one image runs under any `APP_URL`, `http://` ones included. The server is never
-exposed directly: a reverse proxy in front of it overwrites `X-Forwarded-For` with the client's
-address, or a client picks its own and the per-IP sign-in and registration limits don't hold
-([configuration](configuration.md)).
+exposed directly: a reverse proxy in front of it makes the client's address the last
+`X-Forwarded-For` entry, or a client picks its own and the per-IP sign-in and registration
+limits don't hold; it passes the browser's `Host` on, or every server action fails its origin
+check; and it caps request bodies ([configuration](configuration.md)).

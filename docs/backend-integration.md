@@ -58,10 +58,10 @@ server, so `AuthActions` forwards the browser's address as `X-Forwarded-For`
 (`src/libs/api/ClientIp.ts`: the last entry of the incoming header, which Next.js or the proxy in
 front of it wrote). The backend trusts that header only from private and loopback addresses.
 Next.js keeps a header the request already has, so this server runs behind a reverse proxy that
-overwrites it with the client's address (a deployment requirement:
-[configuration](configuration.md)). Exposed directly, a client picks its own address and the
-per-IP limits don't hold; the per-email limit does. Behind more than one proxy, adjust
-`clientIpFrom`.
+makes the client's address its last entry, by overwriting it or appending to it (a deployment
+requirement: [configuration](configuration.md)). Exposed directly, a client picks its own
+address and the per-IP limits don't hold; the per-email limit does. Behind more than one proxy,
+adjust `clientIpFrom`.
 
 ## Files
 
