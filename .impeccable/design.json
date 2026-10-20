@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-17T23:35:32.162Z",
+  "generatedAt": "2026-10-20T20:15:04.000Z",
   "title": "Design System: Aureon CRM",
   "extensions": {
     "colorMeta": {
@@ -450,7 +450,7 @@
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "The one heading of a standalone page (sign in, sign up, invitation)."
+        "purpose": "The one heading of a standalone page (sign in, sign up, invitation) and of the public not-found and error cards."
       },
       "headline": {
         "displayName": "Headline",
@@ -495,6 +495,34 @@
       "stamp": {
         "displayName": "Stamp",
         "purpose": "Exact days inside an open stamp box."
+      },
+      "landing-display": {
+        "displayName": "Landing display",
+        "purpose": "The landing hero's headline: 2.75rem on phones, 3.75rem from 640px, 5rem from 1024px. Under lang=\"th\" it opens to a 1.35 line height and drops its negative tracking."
+      },
+      "landing-close": {
+        "displayName": "Landing close",
+        "purpose": "The closing vermilion band's headline from 1024px."
+      },
+      "landing-close-sm": {
+        "displayName": "Landing close (small)",
+        "purpose": "The closing band's headline below 1024px."
+      },
+      "landing-headline": {
+        "displayName": "Landing headline",
+        "purpose": "A landing section's headline from 1024px, and the about page's title."
+      },
+      "landing-headline-sm": {
+        "displayName": "Landing headline (small)",
+        "purpose": "A landing section's headline below 1024px."
+      },
+      "landing-line": {
+        "displayName": "Landing line",
+        "purpose": "Each locale file's own headline under its endonym, in the languages section."
+      },
+      "landing-subhead": {
+        "displayName": "Landing subhead",
+        "purpose": "The team's line in the hero's desk (1.125rem below 1024px)."
       }
     },
     "shadows": [
@@ -523,13 +551,23 @@
       {
         "name": "ease-out-expo",
         "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "Draw-on marks; with reduced motion, menus and sheets only fade."
+        "purpose": "Draw-on marks, the stamp-press and the landing's capture rings (200ms); with reduced motion, menus and sheets only fade."
+      },
+      {
+        "name": "stamp-press",
+        "value": "220ms, scale(1.06) to scale(1), opacity 0.6 to 1, ease-out-expo",
+        "purpose": "The box that becomes current after a move; the landing hero presses its row one box after another, 140ms apart. None under reduced motion."
       }
     ],
     "breakpoints": [
       {
         "name": "sm",
         "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px",
+        "purpose": "The record search becomes a field in the top bar; the landing's two desks sit side by side and its captures show whole screens instead of phone crops."
       },
       {
         "name": "lg",
@@ -550,7 +588,10 @@
       "openOutline": "2px solid ink",
       "blankOutline": "1px seal-ink at 40%",
       "signedSeal": "28px, 1.5px seal-ink ring, rotated -8deg",
-      "won": "seal fill, impression in on-seal (rule; state to add to StampBox when deals ship)"
+      "reachedUnsigned": "seal-tint fill with a tick, no seal (a seal is only ever someone's)",
+      "won": "seal fill and border, impression (the winner's seal, or a tick) in on-seal",
+      "lost": "solid ink fill, the word \"Lost\" in mono in the page colour; never the seal colour, never a seal",
+      "press": "220ms stamp-press on the box that becomes current; none under reduced motion"
     }
   },
   "components": [
@@ -577,6 +618,14 @@
       "description": "Crimson, never the seal; confirms a destructive action.",
       "html": "<button class=\"ds-btn-danger\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 6h18\"/><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\"/><path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/></svg>Remove member</button>",
       "css": ".ds-btn-danger { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 4.8px; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color 150ms, border-color 150ms, color 150ms, transform 150ms; background: var(--danger, #b4123a); color: #ffffff; box-shadow: 0 1px 2px rgb(17 27 48 / 10%); } .ds-btn-danger:hover { background: color-mix(in oklab, var(--danger, #b4123a) 90%, transparent); } .ds-btn-danger:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--background, #eff0ec), 0 0 0 4px var(--seal, #c8361c); } .ds-btn-danger:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Landing Band Actions",
+      "kind": "button",
+      "refersTo": "button-primary-landing",
+      "description": "The landing hero's and closing band's two 44px actions on the vermilion: on-seal fill with seal-deep text (both themes), and the on-seal outline. The app keeps 36px.",
+      "html": "<div class=\"ds-band\"><a class=\"ds-btn-band-primary\" href=\"#\">Create a workspace</a><a class=\"ds-btn-band-outline\" href=\"#\">Sign in</a></div>",
+      "css": ".ds-band { display: flex; flex-wrap: wrap; gap: 12px; padding: 24px; background: var(--seal, #c8361c); } .ds-btn-band-primary { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 20px; border: 1px solid var(--on-seal, #fff4f0); border-radius: 4.8px; font-size: 15px; font-weight: 600; white-space: nowrap; text-decoration: none; cursor: pointer; transition: background-color 150ms, border-color 150ms, color 150ms, transform 150ms; background: var(--on-seal, #fff4f0); color: #9e2812; box-shadow: 0 1px 2px rgb(17 27 48 / 10%); } .ds-btn-band-primary:hover { background: #ffffff; border-color: #ffffff; } .ds-btn-band-outline { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 20px; border: 1px solid var(--on-seal, #fff4f0); border-radius: 4.8px; font-size: 15px; font-weight: 600; white-space: nowrap; text-decoration: none; cursor: pointer; transition: background-color 150ms, border-color 150ms, color 150ms, transform 150ms; background: transparent; color: var(--on-seal, #fff4f0); } .ds-btn-band-outline:hover { background: rgb(0 0 0 / 10%); } .ds-btn-band-primary:focus-visible, .ds-btn-band-outline:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--seal, #c8361c), 0 0 0 4px var(--on-seal, #fff4f0); } .ds-btn-band-primary:active, .ds-btn-band-outline:active { transform: translateY(1px); }"
     },
     {
       "name": "Labelled Field",
@@ -617,6 +666,13 @@
       "description": "Fixed 36px StampBoxes: signed by the mover, open with exact days in a 2px ink outline, blank.",
       "html": "<div class=\"ds-stamps\" aria-hidden=\"true\"><span class=\"ds-box ds-signed\"><span class=\"ds-imp\">AL</span></span><span class=\"ds-box ds-signed\"><span class=\"ds-imp\">KS</span></span><span class=\"ds-box ds-open\">8d</span><span class=\"ds-box\"></span><span class=\"ds-box\"></span></div>",
       "css": ".ds-stamps { display: flex; gap: 4px; } .ds-box { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; box-sizing: border-box; border: 1px solid color-mix(in oklab, var(--seal-ink, #b8321a) 40%, transparent); border-radius: 3px; background: var(--field, #ffffff); color: var(--seal-ink, #b8321a); } .ds-signed { background: var(--seal-tint, #f6e3dc); } .ds-open { border: 2px solid var(--ink, #1c1d21); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; } .ds-imp { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: grid; place-items: center; width: 28px; height: 28px; box-sizing: border-box; border: 1.5px solid var(--seal-ink, #b8321a); border-radius: 9999px; font-size: 11px; font-weight: 700; line-height: 1; transform: rotate(-8deg); }"
+    },
+    {
+      "name": "Public Error Card",
+      "kind": "card",
+      "description": "The public not-found and error pages: under the vermilion bar with the wordmark, one paper card on the ground with the sheet shadow; an error leads with a crimson icon and words, then retry and the way home.",
+      "html": "<div class=\"ds-errcard\" role=\"alert\"><span class=\"ds-err-icon\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" x2=\"12\" y1=\"8\" y2=\"12\"/><line x1=\"12\" x2=\"12.01\" y1=\"16\" y2=\"16\"/></svg></span><div class=\"ds-err-copy\"><h1>Something went wrong</h1><p>This page didn't load. Try again; if it keeps happening, come back in a little while.</p></div><div class=\"ds-err-actions\"><button class=\"ds-err-retry\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/><path d=\"M3 3v5h5\"/></svg>Try again</button><a class=\"ds-err-home\" href=\"#\">Back to home</a></div></div>",
+      "css": ".ds-errcard { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: flex; flex-direction: column; align-items: flex-start; gap: 24px; max-width: 512px; padding: 32px; border: 1px solid var(--rule, #d9dad4); border-radius: 6px; background: var(--paper, #fbfbf9); color: var(--ink, #1c1d21); box-shadow: 0 1px 0 rgb(17 27 48 / 5%), 0 1px 3px rgb(17 27 48 / 8%); } .ds-err-icon { display: inline-flex; color: var(--danger, #b4123a); } .ds-err-copy { display: flex; flex-direction: column; gap: 12px; } .ds-err-copy h1 { margin: 0; font-size: 30px; font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; } .ds-err-copy p { margin: 0; max-width: 65ch; color: var(--ink-2, #5b5e66); font-size: 16px; line-height: 1.5; } .ds-err-actions { display: flex; flex-wrap: wrap; gap: 12px; } .ds-err-retry { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 4.8px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgb(17 27 48 / 10%); transition: background-color 150ms, border-color 150ms; padding-left: 12px; background: var(--seal, #c8361c); color: #ffffff; } .ds-err-retry:hover { background: var(--seal-deep, #9e2812); } .ds-err-home { font-family: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 4.8px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgb(17 27 48 / 10%); transition: background-color 150ms, border-color 150ms; background: var(--field, #ffffff); color: var(--ink, #1c1d21); border-color: var(--input, #84867f); text-decoration: none; } .ds-err-home:hover { background: var(--muted, #e6e7e2); border-color: var(--ink-2, #5b5e66); } .ds-err-retry:focus-visible, .ds-err-home:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--background, #eff0ec), 0 0 0 4px var(--seal, #c8361c); }"
     }
   ],
   "narrative": {
@@ -685,7 +741,7 @@
     "dos": [
       "**Do** run the vermilion rail full-bleed down the left edge, on the ground, with hairline paper panels beside it.",
       "**Do** write labels in sentence case, 12–13px, weight 500, `ink-2`.",
-      "**Do** use the 36px button height for every primary action.",
+      "**Do** use the 36px button height for every primary action (the landing page's hero and closing band take 44px, and nothing else does).",
       "**Do** show people only as `Seal`s, signed by the member who actually did the action.",
       "**Do** draw pipeline progress as a stamp row of fixed 36px `StampBox`es, with exact days on the open stage and the WON stage filled with the seal.",
       "**Do** set record numbers in mono with tabular figures (`D-0042`).",
