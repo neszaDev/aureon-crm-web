@@ -188,6 +188,9 @@ describe(ConvertDialog, () => {
     await page.getByRole('combobox', { name: 'Company' }).click();
     expect(searchRecords).toHaveBeenLastCalledWith(1, 'company', 'Acme');
     await page.getByRole('option', { name: /Globex/u }).click();
+    // The picked list closes. Clicked before it's gone, a radio fires Radix's dismissal of the
+    // closing list from inside the radio's own update, where React warns it can't flushSync.
+    await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
     await page.getByRole('radio', { name: 'Link an existing contact' }).click();
     await page.getByRole('combobox', { name: 'Contact' }).click();
     expect(searchRecords).toHaveBeenLastCalledWith(1, 'contact', 'mia@acme.test');
