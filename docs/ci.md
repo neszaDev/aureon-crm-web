@@ -22,6 +22,17 @@ feature/* ──PR──▶ dev ──PR (release)──▶ main ──tag v1.2.
 Every image also gets `:sha-<short>`. Nothing is published unless CI (including E2E) passes for
 the same commit.
 
+## The CRM branch (`feat/crm`)
+
+`ci.yml` runs on `pull_request` and `workflow_call` only, and no pull request from `feat/crm`
+exists yet, so **CI has not run on this branch**: its checks were run locally instead (the API
+repo's
+[CRM status](https://github.com/neszaDev/aureon-crm-api/blob/feat/crm/docs/crm/status.md#verification)).
+In both repositories the publishing workflows (`cd-dev.yml`, `cd-main.yml`) are disabled in
+GitHub, because publishing an image needs the owner's approval, so the API image the E2E job below
+runs against doesn't exist: that job can't pass until publishing is enabled. CI runs here once a
+pull request from `feat/crm` is opened.
+
 ## CI jobs
 
 The jobs run in parallel; `make verify` runs the first four in one go.

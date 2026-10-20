@@ -138,22 +138,30 @@ Then run `make verify` and the end-to-end tests, and open a PR into `dev`.
 | [Contributing](.github/CONTRIBUTING.md) | Branches, commits, PR checklist |
 | [AGENTS.md](AGENTS.md) | Rules for AI coding agents (also a good checklist for humans) |
 | [PRODUCT.md](PRODUCT.md) · [DESIGN.md](DESIGN.md) | Who the CRM is for, and its design system |
+| [CRM status](https://github.com/neszaDev/aureon-crm-api/blob/feat/crm/docs/crm/status.md) (API repo) | Feature matrix with the tests behind each row, known limitations, follow-ups |
+| [CRM security](https://github.com/neszaDev/aureon-crm-api/blob/feat/crm/docs/crm/security.md) (API repo) | Security and authorization model, what was verified and what wasn't, Phase 4 findings |
+| [Production checklist](https://github.com/neszaDev/aureon-crm-api/blob/feat/crm/docs/crm/production-checklist.md) (API repo) | Both services, the reverse proxy and TLS, before going live |
 | [CRM plan](docs/plans/0004-crm.md) | How the CRM frontend is built, slice by slice |
 | [Setup plan](docs/plans/0001-frontend-setup.md) | Why the repo is set up this way |
 
 ## Deploying
 
-Nothing is deployed yet: the project runs locally only. When it is, CI/CD publishes the tested
-image to `ghcr.io/neszadev/aureon-crm-web`: `:dev` from `dev`, `:latest` / `:1.2.3` from `main`
-and tags after approval. Run it with `BACKEND_URL` (where the server reaches the API) and
-`APP_URL` (its public URL; `https://` makes cookies `Secure`), behind a TLS terminator that
-sends `Strict-Transport-Security` (the app sends its other security headers itself, but not
-HSTS: one image runs under any `APP_URL`). Never expose it directly: the reverse proxy in front
-must make the client's address the last `X-Forwarded-For` entry (nginx:
-`proxy_set_header X-Forwarded-For $remote_addr;`), or a client picks its own and the per-IP
-sign-in and registration limits don't hold, and must pass the browser's `Host` on
-(`proxy_set_header Host $host;`), or every server action fails
-([configuration](docs/configuration.md)). Keep the logs clean of secrets:
-an invitation's path (`/invite/<token>`) is one, which the app keeps out of its own request log
-and a reverse proxy's access log must drop too, and `NEXT_PUBLIC_LOGGING_LEVEL` stays at `info`
-or above (it is inlined at build).
+Nothing is deployed yet: the project runs locally only, and the CI/CD workflows that would publish
+the image to `ghcr.io/neszadev/aureon-crm-web` (`:dev` from `dev`, `:latest` / `:1.2.3` from `main`
+and tags after approval) are disabled ([CI/CD](docs/ci.md)). Before going live, work through the
+API repo's
+[production checklist](https://github.com/neszaDev/aureon-crm-api/blob/feat/crm/docs/crm/production-checklist.md)
+and read its
+[security notes](https://github.com/neszaDev/aureon-crm-api/blob/feat/crm/docs/crm/security.md).
+
+Run it with `BACKEND_URL` (where the server reaches the API) and `APP_URL` (its public URL;
+`https://` makes cookies `Secure`), behind a TLS terminator that sends `Strict-Transport-Security`
+(the app sends its other security headers itself, but not HSTS: one image runs under any
+`APP_URL`). Never expose it directly: the reverse proxy in front must make the client's address the
+last `X-Forwarded-For` entry (nginx: `proxy_set_header X-Forwarded-For $remote_addr;`), or a client
+picks its own and the per-IP sign-in and registration limits don't hold, and must pass the
+browser's `Host` on (`proxy_set_header Host $host;`, or `$http_host` when the public URL carries a
+port), or every server action fails ([configuration](docs/configuration.md)). Keep the logs clean
+of secrets: an invitation's path (`/invite/<token>`) is one, which the app keeps out of its own
+request log and a reverse proxy's access log must drop too, and `NEXT_PUBLIC_LOGGING_LEVEL` stays
+at `info` or above (it is inlined at build).

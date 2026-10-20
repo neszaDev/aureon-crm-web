@@ -23,7 +23,7 @@ the **last** `X-Forwarded-For` entry (overwriting the header, or appending with
 
 ```nginx
 proxy_set_header X-Forwarded-For $remote_addr;
-proxy_set_header Host $host;
+proxy_set_header Host $host;   # $http_host when the public URL has a port
 ```
 
 The backend's per-IP sign-in and registration limits key on that last entry
@@ -31,8 +31,9 @@ The backend's per-IP sign-in and registration limits key on that last entry
 sends any `X-Forwarded-For` it likes, Next.js keeps it, and those limits don't hold; the
 per-email limit on failed sign-ins still does. Without `Host`, nginx sends its upstream's name
 (`$proxy_host`), which Next compares with the browser's `Origin` (after `X-Forwarded-Host`):
-every server action fails with "Invalid Server Actions request". The proxy also caps request
-bodies ([request bodies](architecture.md#request-bodies)).
+every server action fails with "Invalid Server Actions request". `$host` also drops a port: when
+the public URL carries one (`https://crm.example.com:8443`), pass `$http_host` instead. The proxy
+also caps request bodies ([request bodies](architecture.md#request-bodies)).
 
 ## Local Docker stack (`env/.env`)
 
