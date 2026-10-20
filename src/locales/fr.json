@@ -422,6 +422,7 @@
     "list_contacts": "Contacts",
     "list_leads": "Prospects",
     "list_deals": "Affaires",
+    "list_rows": "{list} ({count, plural, one {# ligne} other {# lignes}})",
     "value_OPEN": "En cours",
     "value_WON": "Gagnée",
     "value_LOST": "Perdue",

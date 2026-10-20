@@ -297,6 +297,25 @@ describe(AuditEventItem, () => {
     ]);
   });
 
+  it('says how many rows an export held when the event counts them, in the page language', async () => {
+    // Exports the API recorded since it began counting them in the changes.
+    const counted = (count: number) =>
+      event({ ...EXPORTED, changes: { ...EXPORTED.changes, count: { from: null, to: count } } });
+    const english = await item(counted(1250));
+
+    expect(lines()).toStrictEqual(['List: Contacts (1,250 rows)']);
+    await english.unmount();
+
+    const one = await item(counted(1));
+    expect(lines()).toStrictEqual(['List: Contacts (1 row)']);
+    await one.unmount();
+
+    await item(counted(12), { locale: 'fr' });
+    expect(lines().map((line) => line?.replaceAll(/\s/gu, ' '))).toStrictEqual([
+      'Liste : Contacts (12 lignes)',
+    ]);
+  });
+
   it('holds an export to the compact form as any entry, and keeps a cut name whole in its title', async () => {
     const long = 'N'.repeat(100);
     await item(

@@ -422,6 +422,7 @@
     "list_contacts": "Contacts",
     "list_leads": "Leads",
     "list_deals": "Deals",
+    "list_rows": "{list} ({count, plural, one {# row} other {# rows}})",
     "value_OPEN": "Open",
     "value_WON": "Won",
     "value_LOST": "Lost",

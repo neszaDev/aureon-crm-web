@@ -55,8 +55,9 @@ test.describe('Export and the audit trail', () => {
       .locator(':scope > ul > li')
       .first();
     await expect(latest).toContainText('Avery Owner exported records');
-    // The list in the page's words, not the API's English label ("2 companies exported").
-    await expect(latest).toContainText('List: Companies');
+    // The list and its rows in the page's words, not the API's English label ("2 companies
+    // exported").
+    await expect(latest).toContainText('List: Companies (2 rows)');
     await expect(latest).not.toContainText('companies exported');
   });
 

@@ -198,9 +198,9 @@ const sideOf = (value: unknown, side: 'from' | 'to'): unknown =>
  * lists its changed fields as "Field: from → to": money with its currency when the event names
  * it (never a guess), days and instants as dates in the workspace's zone, a member or a record by
  * name, words from a fixed list translated, a probability as a percentage, an id as "changed". A
- * deletion lists the last state; an export names its list (the API's label for it is English, and
- * the count is only in that label). A member joining or leaving reads as the workspace's, not as
- * the email the event is labelled with. Put it in a `ul`.
+ * deletion lists the last state; an export names its list and how many rows it held (the API's
+ * label for it is English; an older one without the count names the list). A member joining or
+ * leaving reads as the workspace's, not as the email the event is labelled with. Put it in a `ul`.
  * @param props Component props.
  * @param props.event The audit event (the dashboard's `recentChanges`, a record's history).
  * @param props.workspace The workspace: its id, for the links, and its time zone.
@@ -234,6 +234,7 @@ export const AuditEventItem = (props: {
           .join('')}…`
       : text;
   };
+  const listName = (list: string) => (isOneOf(LISTS, list) ? t(`list_${list}`) : cut(list));
   const label = (field: string) => {
     const typed = `${event.entityType}_${field}`;
     if (isOneOf(TYPED_FIELDS, typed)) {
@@ -315,10 +316,15 @@ export const AuditEventItem = (props: {
         : [{ field, text: t('state', { field: label(field), value }) }];
     });
   } else if (event.action === 'EXPORT') {
-    // The list, in the page's words: the event's label is the API's sentence in English.
+    // The list and its rows, in the page's words: the event's label is the API's sentence in
+    // English. Exports recorded before the API counted them in the changes name the list only.
     const list = sideOf(changes.list, 'to');
+    const count = sideOf(changes.count, 'to');
     if (typeof list === 'string') {
-      const value = isOneOf(LISTS, list) ? t(`list_${list}`) : cut(list);
+      const value =
+        typeof count === 'number'
+          ? t('list_rows', { list: listName(list), count })
+          : listName(list);
       lines = [{ field: 'list', text: t('state', { field: label('list'), value }) }];
     }
   } else {

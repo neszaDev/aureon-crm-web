@@ -422,6 +422,7 @@
     "list_contacts": "ผู้ติดต่อ",
     "list_leads": "ลีด",
     "list_deals": "ดีล",
+    "list_rows": "{list} ({count, plural, other {# แถว}})",
     "value_OPEN": "เปิดอยู่",
     "value_WON": "ชนะ",
     "value_LOST": "แพ้",
