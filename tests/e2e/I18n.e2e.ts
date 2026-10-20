@@ -22,7 +22,10 @@ test.describe('I18n', () => {
       await page.goto('/th');
 
       await expect(
-        page.getByRole('heading', { level: 1, name: 'ทุกก้าวของความสัมพันธ์มีตราประทับกำกับ' }),
+        page.getByRole('heading', {
+          level: 1,
+          name: 'ทุกก้าวของความ\u2060สัมพันธ์มีตรา\u2060ประทับกำ\u2060กับ',
+        }),
       ).toBeVisible();
     });
   });

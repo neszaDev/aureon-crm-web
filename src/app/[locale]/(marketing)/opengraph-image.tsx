@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { getTranslations } from 'next-intl/server';
 import { ImageResponse } from 'next/og';
 import { routing } from '@/libs/I18nRouting';
@@ -17,26 +19,32 @@ const SEAL_INK = '#b8321a';
 const SEAL_TINT = '#f6e3dc';
 const INK = '#1c1d21';
 
-/**
- * Anuphan, the app's face for Latin and Thai, bold, cut to the glyphs the image draws. Google
- * Fonts serves it as TTF to a plain fetch; the image renderer reads no WOFF2.
- * shortcut: fetched while the image is built (at `next build`), as next/font/google is; bundle a
- * TTF instead if builds must run offline.
- * @param text Every character the image draws.
- * @returns The font file.
- */
-const anuphanBold = async (text: string) => {
-  const query = `family=Anuphan:wght@700&text=${encodeURIComponent(text)}`;
-  const stylesheet = await fetch(`https://fonts.googleapis.com/css2?${query}`);
-  const url = /src: url\((.+?)\) format\('(?:opentype|truetype)'\)/u.exec(
-    await stylesheet.text(),
-  )?.[1];
-  if (!url) {
-    throw new Error('Anuphan was not found for the Open Graph image');
-  }
-  const font = await fetch(url);
+// Anuphan Bold, the app's face for Latin and Thai, as a static TTF (the renderer reads no WOFF2),
+// beside this file with its licence (Anuphan-OFL.txt): the image is drawn without the network.
+// The bundler emits the file for this URL; its `href` (not the URL object, which may come from
+// another realm in Next's workers) gives the path.
+// oxlint-disable-next-line unicorn/relative-url-style -- the bundler's asset pattern is './'
+const ANUPHAN_BOLD = new URL('./Anuphan-Bold.ttf', import.meta.url).href;
 
-  return await font.arrayBuffer();
+/**
+ * The words of a Thai line, where it may break: the renderer breaks only at spaces, and Thai has
+ * none between words. A word joiner (U+2060) in the copy keeps its two sides on one line.
+ * @param text The line.
+ * @returns Its words.
+ */
+const thaiWords = (text: string) => {
+  const words: string[] = [];
+  for (const { segment } of new Intl.Segmenter('th', { granularity: 'word' }).segment(text)) {
+    const last = words.at(-1);
+    if (last !== undefined && (last.endsWith('\u2060') || segment.startsWith('\u2060'))) {
+      words[words.length - 1] = last + segment;
+    } else {
+      words.push(segment);
+    }
+  }
+
+  // The joiner has no glyph in the font: it has done its work.
+  return words.map((word) => word.replaceAll('\u2060', ''));
 };
 
 const box = {
@@ -148,9 +156,7 @@ export default async function OpenGraphImage(props: { params: Promise<{ locale: 
           {/* The renderer breaks lines only at spaces, and Thai has none between words: lay
               out its words as the boxes of a wrapping row instead. */}
           {locale === 'th'
-            ? [...new Intl.Segmenter('th', { granularity: 'word' }).segment(title)].map((word) => (
-                <span key={word.index}>{word.segment}</span>
-              ))
+            ? thaiWords(title).map((word, index) => <span key={index}>{word}</span>)
             : title}
         </div>
       </div>
@@ -160,7 +166,7 @@ export default async function OpenGraphImage(props: { params: Promise<{ locale: 
       fonts: [
         {
           name: 'Anuphan',
-          data: await anuphanBold(`${AppConfig.name}${title}${days}${seals.join('')}`),
+          data: await readFile(fileURLToPath(ANUPHAN_BOLD)),
           weight: 700,
           style: 'normal',
         },

@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
-import { SEAL_FIELD_BUTTON, SEAL_OUTLINE_BUTTON } from '@/components/marketing/sealButton';
+import { SEAL_PRIMARY_BUTTON, SEAL_OUTLINE_BUTTON } from '@/components/marketing/sealButton';
 import { Button } from '@/components/ui/button';
 import { Wordmark } from '@/components/Wordmark';
 import { Link } from '@/libs/I18nNavigation';
@@ -61,7 +61,7 @@ export const MarketingTemplate = (props: { children: React.ReactNode }) => {
               <Button asChild variant="ghost" size="sm" className={SEAL_OUTLINE_BUTTON}>
                 <Link href="/sign-in">{t('sign_in_link')}</Link>
               </Button>
-              <Button asChild size="sm" className={`${SEAL_FIELD_BUTTON} max-sm:hidden`}>
+              <Button asChild size="sm" className={`${SEAL_PRIMARY_BUTTON} max-sm:hidden`}>
                 <Link href="/sign-up">{t('sign_up_link')}</Link>
               </Button>
             </div>

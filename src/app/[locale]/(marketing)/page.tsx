@@ -5,27 +5,39 @@ import { Seal } from '@/components/crm/Seal';
 import { StampBox } from '@/components/crm/StampBox';
 import { HeroShot } from '@/components/marketing/HeroShot';
 import { Note, Row } from '@/components/marketing/Row';
-import { SEAL_FIELD_BUTTON, SEAL_OUTLINE_BUTTON } from '@/components/marketing/sealButton';
+import { SEAL_PRIMARY_BUTTON, SEAL_OUTLINE_BUTTON } from '@/components/marketing/sealButton';
 import { Shot } from '@/components/marketing/Shot';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/libs/I18nNavigation';
 import { routing } from '@/libs/I18nRouting';
-import boardPhoneDark from '@/public/landing/board-390-dark.webp';
-import boardPhoneLight from '@/public/landing/board-390-light.webp';
 import boardThaiDark from '@/public/landing/board-390-th-dark.webp';
 import boardThaiLight from '@/public/landing/board-390-th-light.webp';
+import boardCardPhoneDark from '@/public/landing/board-card-390-dark.webp';
+import boardCardPhoneLight from '@/public/landing/board-card-390-light.webp';
+import boardCardThaiDark from '@/public/landing/board-card-390-th-dark.webp';
+import boardCardThaiLight from '@/public/landing/board-card-390-th-light.webp';
+import boardCardDark from '@/public/landing/board-card-dark.webp';
+import boardCardLight from '@/public/landing/board-card-light.webp';
 import boardColumnsDark from '@/public/landing/board-columns-dark.webp';
 import boardColumnsLight from '@/public/landing/board-columns-light.webp';
 import boardDark from '@/public/landing/board-dark.webp';
 import boardLight from '@/public/landing/board-light.webp';
+import dashboardPhoneDark from '@/public/landing/dashboard-390-dark.webp';
+import dashboardPhoneLight from '@/public/landing/dashboard-390-light.webp';
 import dashboardDark from '@/public/landing/dashboard-dark.webp';
 import dashboardLight from '@/public/landing/dashboard-light.webp';
+import dealPhoneDark from '@/public/landing/deal-390-dark.webp';
+import dealPhoneLight from '@/public/landing/deal-390-light.webp';
 import dealDark from '@/public/landing/deal-dark.webp';
 import dealLight from '@/public/landing/deal-light.webp';
+import reportsPhoneDark from '@/public/landing/reports-390-dark.webp';
+import reportsPhoneLight from '@/public/landing/reports-390-light.webp';
 import reportsDark from '@/public/landing/reports-dark.webp';
 import reportsLight from '@/public/landing/reports-light.webp';
 import tasksDark from '@/public/landing/tasks-dark.webp';
 import tasksLight from '@/public/landing/tasks-light.webp';
+import remindersDark from '@/public/landing/tasks-reminders-dark.webp';
+import remindersLight from '@/public/landing/tasks-reminders-light.webp';
 import { AppConfig } from '@/utils/AppConfig';
 
 type IndexPageProps = {
@@ -48,7 +60,8 @@ const DISPLAY = 'font-bold text-balance [:lang(th)_&]:leading-[1.35]';
 const H2 = `${DISPLAY} text-[2rem] leading-[1.1] tracking-[-0.03em] lg:text-[2.75rem]`;
 const LEDE = 'max-w-[56ch] text-lg leading-relaxed text-ink-2';
 const CAPTION = 'text-[0.8125rem] text-ink-2';
-const CODE = 'rounded-[3.6px] bg-muted px-1 py-px font-mono text-[0.8125rem] text-foreground';
+const CODE =
+  'rounded-[3.6px] bg-muted px-1 py-px font-mono text-[0.8125rem] whitespace-nowrap text-foreground';
 
 // The stamp-press of a hero box starts this late (global.css), so the row signs left to right.
 const pressDelay = (ms: number) => {
@@ -153,7 +166,7 @@ export default async function IndexPage(props: IndexPageProps) {
 
   const actions = (
     <div className="flex flex-wrap gap-2.5">
-      <Button asChild size="lg" className={SEAL_FIELD_BUTTON}>
+      <Button asChild size="lg" className={SEAL_PRIMARY_BUTTON}>
         <Link href="/sign-up">
           {t('cta')}
           <ArrowRightIcon data-icon="inline-end" />
@@ -192,7 +205,8 @@ export default async function IndexPage(props: IndexPageProps) {
 
             <div className="mt-8 grid border-t border-on-seal/45 md:grid-cols-2 lg:mt-9">
               <div className="flex flex-col gap-3.5 pt-5 md:pr-12">
-                <p className="text-[0.8125rem] font-medium">{t('team_label')}</p>
+                {/* On a phone the desks stack under the headline: the team's needs no label. */}
+                <p className="text-[0.8125rem] font-medium max-md:hidden">{t('team_label')}</p>
                 <p className="max-w-[30ch] text-lg leading-snug font-medium lg:text-[1.375rem]">
                   {t('team_text')}
                 </p>
@@ -200,7 +214,8 @@ export default async function IndexPage(props: IndexPageProps) {
               </div>
               <div className="mt-7 flex flex-col gap-3.5 border-t border-on-seal/45 pt-5 md:mt-0 md:border-t-0 md:border-l md:pl-12">
                 <p className="text-[0.8125rem] font-medium">{devLabel}</p>
-                <p className="max-w-[46ch]">{t('dev_text')}</p>
+                {/* On a phone the desk keeps its commands; the developers' section says the rest. */}
+                <p className="max-w-[46ch] max-md:hidden">{t('dev_text')}</p>
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
                   <code className="flex w-max rounded-md bg-seal-deep font-mono text-[0.8125rem] leading-normal">
                     <span className="px-3.5 py-1.5">make setup</span>
@@ -221,10 +236,16 @@ export default async function IndexPage(props: IndexPageProps) {
 
         {/* The band's edge runs through the sheet, wherever the sheet's height puts it. */}
         <div className="bg-[linear-gradient(var(--seal)_0_45%,var(--ground)_45%)]">
-          <figure className="mx-auto flex max-w-[76rem] flex-col gap-3 px-4 pt-10 pb-8 sm:px-7">
+          <figure className="mx-auto flex max-w-[76rem] flex-col gap-3 px-4 pt-8 pb-8 sm:px-7 md:pt-10">
             <HeroShot
-              light={{ wide: boardColumnsLight, narrow: boardPhoneLight }}
-              dark={{ wide: boardColumnsDark, narrow: boardPhoneDark }}
+              light={{
+                wide: boardColumnsLight,
+                narrow: locale === 'th' ? boardCardThaiLight : boardCardPhoneLight,
+              }}
+              dark={{
+                wide: boardColumnsDark,
+                narrow: locale === 'th' ? boardCardThaiDark : boardCardPhoneDark,
+              }}
               alt={t('hero_alt')}
             />
             <figcaption className={CAPTION}>{caption(t('hero_screen'))}</figcaption>
@@ -286,13 +307,15 @@ export default async function IndexPage(props: IndexPageProps) {
           </h2>
           <p className={LEDE}>{t('board_text')}</p>
           <figure className="mt-4 flex flex-col gap-2">
-            {/* shortcut: spots sit on the committed captures; re-place them after recapturing. */}
+            {/* shortcut: spots sit on the committed captures, as scripts/capture-landing.ts prints
+                them; re-place them after recapturing. */}
             <Shot
               light={boardLight}
               dark={boardDark}
+              narrow={{ light: boardCardLight, dark: boardCardDark }}
               alt={t('board_alt')}
               sizes={MAIN_SIZES}
-              spot={{ left: '69.1%', top: '54%', width: '15.9%', height: '23.2%' }}
+              spot={{ left: '69.1%', top: '53.8%', width: '16%', height: '23.6%' }}
             />
             <figcaption className={CAPTION}>{caption(t('board_screen'))}</figcaption>
           </figure>
@@ -314,9 +337,10 @@ export default async function IndexPage(props: IndexPageProps) {
             <Shot
               light={dealLight}
               dark={dealDark}
+              narrow={{ light: dealPhoneLight, dark: dealPhoneDark }}
               alt={t('deal_alt')}
               sizes={MAIN_SIZES}
-              spot={{ left: '19.2%', top: '19.5%', width: '26.3%', height: '8.5%' }}
+              spot={{ left: '2.1%', top: '20.2%', width: '33.3%', height: '8.4%' }}
             />
             <figcaption className={CAPTION}>{caption(t('deal_screen'))}</figcaption>
           </figure>
@@ -338,9 +362,10 @@ export default async function IndexPage(props: IndexPageProps) {
             <Shot
               light={tasksLight}
               dark={tasksDark}
+              narrow={{ light: remindersLight, dark: remindersDark }}
               alt={t('tasks_alt')}
               sizes={MAIN_SIZES}
-              spot={{ left: '70.1%', top: '7.9%', width: '24.9%', height: '33.1%' }}
+              spot={{ left: '70%', top: '7.6%', width: '25%', height: '33.5%' }}
             />
             <figcaption className={CAPTION}>{caption(t('tasks_screen'))}</figcaption>
           </figure>
@@ -351,20 +376,25 @@ export default async function IndexPage(props: IndexPageProps) {
             {t('insights_title')}
           </h2>
           <p className={LEDE}>{t('insights_text')}</p>
-          {/* Two sheets on the desk: the report laid over the dashboard's lower edge. */}
+          {/* Two sheets on the desk: the report laid over the dashboard's last whole row (its
+              height in percent of the width; a margin's percent is of the width too), leaving
+              only the page's margin beside it. shortcut: measured on the committed captures by
+              scripts/capture-landing.ts ("report overlap"); update it after recapturing. */}
           <figure className="mt-4 flex flex-col gap-4 md:gap-0">
             <Shot
               light={dashboardLight}
               dark={dashboardDark}
+              narrow={{ light: dashboardPhoneLight, dark: dashboardPhoneDark }}
               alt={t('dashboard_alt')}
               sizes={MAIN_SIZES}
             />
             <Shot
               light={reportsLight}
               dark={reportsDark}
+              narrow={{ light: reportsPhoneLight, dark: reportsPhoneDark }}
               alt={t('reports_alt')}
               sizes={MAIN_SIZES}
-              className="md:-mt-28 md:ml-auto md:w-[82%] md:shadow-sheet"
+              className="md:-mt-[13.1%] md:ml-[3%] md:w-[97%] md:shadow-sheet"
             />
             <figcaption className={`${CAPTION} md:mt-2`}>
               {caption(t('insights_screen'))}

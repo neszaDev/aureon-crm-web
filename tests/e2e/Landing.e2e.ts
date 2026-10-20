@@ -21,7 +21,10 @@ test.describe('Landing', () => {
 
     await expect(page).toHaveURL(`${baseURL}/th`);
     await expect(
-      page.getByRole('heading', { level: 1, name: 'ทุกก้าวของความสัมพันธ์มีตราประทับกำกับ' }),
+      page.getByRole('heading', {
+        level: 1,
+        name: 'ทุกก้าวของความ\u2060สัมพันธ์มีตรา\u2060ประทับกำ\u2060กับ',
+      }),
     ).toBeVisible();
     await expect(
       page.getByRole('main').getByRole('link', { name: 'สร้างพื้นที่ทำงาน' }).first(),
@@ -47,7 +50,7 @@ test.describe('Landing', () => {
     ]);
     // Real captures of the demo workspace, said so under each.
     await expect(
-      page.getByRole('img', { name: /^The deals board of the demo workspace/u }),
+      page.getByRole('img', { name: /^The deals board of the demo workspace: deal cards/u }),
     ).toBeVisible();
     await expect(
       page.getByText('The deals board · demo workspace, fictional data').first(),
@@ -74,6 +77,39 @@ test.describe('Landing', () => {
       'content',
       /\/fr\/opengraph-image/u,
     );
+  });
+
+  test('keeps the developer notes inside the page column at 1440 px', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+
+    // The column's right edge is the header's: its last action ends there.
+    const column = await page
+      .getByRole('banner')
+      .getByRole('link', { name: 'Create a workspace' })
+      .boundingBox();
+    const note = await page.getByText('How each part is built, beside the part.').boundingBox();
+    expect(note && column && note.x + note.width).toBeLessThanOrEqual(
+      (column?.x ?? 0) + (column?.width ?? 0),
+    );
+  });
+
+  test('shows the hero capture in the theme chosen in the app, not the system one', async ({
+    baseURL,
+    context,
+    page,
+  }) => {
+    await context.addCookies([{ name: 'theme', value: 'light', url: baseURL ?? '' }]);
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/');
+
+    const hero = page.getByRole('img', {
+      name: /^The deals board of the demo workspace: deal cards/u,
+    });
+    await expect(hero).toBeVisible();
+    await expect
+      .poll(async () => await hero.evaluate((img: HTMLImageElement) => img.currentSrc))
+      .toMatch(/-light\./u);
   });
 
   for (const width of [390, 1440]) {

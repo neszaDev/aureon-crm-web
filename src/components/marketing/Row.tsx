@@ -22,7 +22,7 @@ export const Row = (props: {
     id={props.id}
     aria-labelledby={props.titleId}
     className={cn(
-      'group/row grid scroll-mt-6 gap-8 border-t border-rule py-16 lg:grid-cols-[minmax(0,1fr)_17.5rem] lg:gap-12 lg:py-22 xl:grid-cols-[50rem_23rem]',
+      'group/row grid scroll-mt-6 gap-8 border-t border-rule py-16 lg:grid-cols-[minmax(0,1fr)_17.5rem] lg:gap-12 lg:py-22 xl:grid-cols-[50rem_minmax(0,1fr)]',
       props.className,
     )}
   >
