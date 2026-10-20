@@ -11,7 +11,7 @@ vi.mock(import('@/libs/api/Backend'), () => ({ authedBackend: vi.fn<typeof authe
 // The real one needs Next's request context; the messages are the app's own.
 // @ts-expect-error -- only what this route reads
 vi.mock(import('next-intl/server'), () => ({
-  getTranslations: async (options: { locale: string; namespace: 'ApiError' | 'ActionError' }) =>
+  getTranslations: async (options: { locale: string; namespace: 'ApiError' }) =>
     await Promise.resolve(
       createTranslator({
         locale: options.locale,
@@ -343,7 +343,7 @@ describe(GET, () => {
     expect(response.headers.getSetCookie()).toStrictEqual([]);
   });
 
-  it('answers a translated 502 when the backend cannot be reached', async () => {
+  it('answers the generic refusal (502) when the backend cannot be reached, as an action does', async () => {
     // @ts-expect-error -- only the call this route makes
     vi.mocked(authedBackend).mockResolvedValue({
       GET: vi.fn<() => Promise<never>>().mockRejectedValue(new TypeError('fetch failed')),
@@ -354,9 +354,10 @@ describe(GET, () => {
       params: Promise.resolve({ workspaceId: '7', list: 'companies' }),
     });
 
+    // The browser reached this server: the network message would blame its connection.
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toStrictEqual({
-      message: "Couldn't reach the server. Check your connection and try again.",
+      message: "That didn't work. Try again.",
     });
   });
 });

@@ -116,9 +116,9 @@ export async function GET(
     );
     result = await run(await authedBackend(), workspaceId, params);
   } catch {
-    const tAction = await getTranslations({ locale, namespace: 'ActionError' });
-
-    return NextResponse.json({ message: tAction('network') }, { status: 502 });
+    // The backend can't be reached from here: the browser reached this server, so it isn't told
+    // to check its connection.
+    return NextResponse.json({ message: tError('generic') }, { status: 502 });
   }
   const { data, error, response } = result;
 
