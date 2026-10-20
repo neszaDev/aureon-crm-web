@@ -37,6 +37,30 @@ const deleteAccount = async (request: APIRequestContext, accessToken: string) =>
   expect(deleted.status()).toBe(204);
 };
 
+/**
+ * Opens a page of another site with a link to `href`, and follows it, as a visitor would.
+ * @param page Playwright page.
+ * @param href Where the link goes, on this site.
+ */
+const followLinkFromElsewhere = async (page: Page, href: string) => {
+  await page.route('http://elsewhere.example/', async (route) => {
+    await route.fulfill({ contentType: 'text/html', body: `<a href="${href}">Go</a>` });
+  });
+  await page.goto('http://elsewhere.example/');
+  await page.getByRole('link', { name: 'Go' }).click();
+};
+
+/**
+ * The session cookies a browser holds.
+ * @param cookies Its cookies.
+ * @returns The access and refresh cookies, as `name=value`.
+ */
+const sessionOf = (cookies: { name: string; value: string }[]) =>
+  cookies
+    .filter((c) => c.name === 'access_token' || c.name === 'refresh_token')
+    .map((c) => `${c.name}=${c.value}`)
+    .toSorted();
+
 test.describe('Auth', () => {
   test.describe('Protected pages', () => {
     test('redirects signed-out visitors to sign-in', async ({ page }) => {
@@ -254,6 +278,46 @@ test.describe('Auth', () => {
 
       await expect(page).toHaveURL(`${baseURL}/sign-in?expired=1`);
       await expect(page.getByRole('status')).toHaveText('Your session has ended. Sign in again.');
+      const after = await context.cookies();
+      expect(after.filter((c) => c.name === 'access_token' || c.name === 'refresh_token')).toEqual(
+        [],
+      );
+    });
+  });
+
+  test.describe('Another site', () => {
+    test('cannot sign anyone out with a link to the route that ends a session', async ({
+      page,
+      context,
+      baseURL,
+    }) => {
+      const email = await signUp(page);
+      const before = await context.cookies();
+
+      await followLinkFromElsewhere(page, `${baseURL}/api/session/expired?locale=fr`);
+
+      // On to the app, signed in as before: the cookies are the same.
+      await expect(page).toHaveURL(`${baseURL}/fr/app`);
+      const after = await context.cookies();
+      expect(sessionOf(after)).toStrictEqual(sessionOf(before));
+      expect(sessionOf(after)).toHaveLength(2);
+      await page.goto('/dashboard');
+      await expect(page.getByText(`Hello ${email}!`)).toBeVisible();
+    });
+
+    test('still signs out a deleted account that follows a link from another site', async ({
+      page,
+      context,
+      request,
+      baseURL,
+    }) => {
+      await signUp(page);
+      const cookies = await context.cookies();
+      await deleteAccount(request, cookies.find((c) => c.name === 'access_token')?.value ?? '');
+
+      await followLinkFromElsewhere(page, `${baseURL}/app`);
+
+      await expect(page).toHaveURL(`${baseURL}/sign-in?expired=1`);
       const after = await context.cookies();
       expect(after.filter((c) => c.name === 'access_token' || c.name === 'refresh_token')).toEqual(
         [],

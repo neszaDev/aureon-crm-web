@@ -102,7 +102,7 @@ a test gets 25 companies or a second rep without clicking), the UI creators (`cr
 | `tests/e2e/crm/Audit.e2e.ts` | The filtered companies downloaded byte for byte as the backend's CSV, under its name, and recorded in the trail; a rep without the export or the trail, and the route refusing them; a record's History and the trail's filters; an expired access token refreshed before the export, a rejected session sent to sign in and back; no export for `HEAD` or a cross-site request |
 | `tests/e2e/crm/Journey.e2e.ts` | The brief's 10-step journey in one test (below) |
 | `tests/e2e/Landing.e2e.ts` | The public landing and About pages: sign-up and sign-in links, Thai and French, the captures and the sample-product note, the hero in the app's theme, accessibility at 390 and 1440 px in both themes |
-| `tests/e2e/Auth.e2e.ts` | Also the CRM's redirects: `/app` deep links keep `?next=`, sign-in and sign-up keep it between them |
+| `tests/e2e/Auth.e2e.ts` | Also the CRM's redirects: `/app` deep links keep `?next=`, sign-in and sign-up keep it between them; five requests refreshing one expired session at once, none sent to sign in; another site's link to `/api/session/expired` signing nobody out, while a deleted account arriving from another site is still signed out |
 
 ### The end-to-end journey
 

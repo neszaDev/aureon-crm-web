@@ -63,7 +63,11 @@ Next.js server, which holds the session in two **httpOnly** cookies.
   redirect to `/api/session/expired` (outside the proxy), which deletes both cookies and goes to
   `/sign-in?expired=1` with a notice; server actions delete them themselves. Sending the user
   straight to `/sign-in` would loop, since the proxy still sees the access cookie. This is not
-  the refresh race above: the backend's 401 is final.
+  the refresh race above: the backend's 401 is final. Another site can't sign anyone out by
+  linking there: a request the browser marks `Sec-Fetch-Site: cross-site` ends the session only
+  when the backend refuses its access token (`/users/me`), and otherwise goes on to `/app` with the
+  cookies untouched. It still ends a refused one, since a visitor who followed another site's link
+  to a page keeps that mark through the redirects here.
 - Cookies are `Secure` when `APP_URL` is `https://`.
 
 ## Where code goes
