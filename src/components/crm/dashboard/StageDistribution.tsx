@@ -27,7 +27,7 @@ const BAR_HEIGHT = 36;
  * listed too. The bars are the table's picture: assistive technology has the table.
  * @param props Component props.
  * @param props.stages The `byStage` of the dashboard or of the pipeline report.
- * @param props.collapsible Puts the table behind `ChartTable`'s "Show table" button (the reports'),
+ * @param props.collapsible Gives the table `ChartTable`'s button to hide it (the reports'),
  *   instead of always showing it (the dashboard's).
  * @returns The panel.
  */

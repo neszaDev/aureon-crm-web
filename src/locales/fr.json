@@ -3438,8 +3438,7 @@
     "tab_follow-ups": "Relances"
   },
   "ChartTable": {
-    "show": "Afficher le tableau",
-    "hide": "Masquer le tableau"
+    "label": "Tableau"
   },
   "PipelineReport": {
     "owners_title": "Affaires en cours par propriétaire",

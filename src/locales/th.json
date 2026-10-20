@@ -3438,8 +3438,7 @@
     "tab_follow-ups": "การติดตาม"
   },
   "ChartTable": {
-    "show": "แสดงตาราง",
-    "hide": "ซ่อนตาราง"
+    "label": "ตาราง"
   },
   "PipelineReport": {
     "owners_title": "ดีลที่เปิดอยู่ตามผู้รับผิดชอบ",

@@ -3438,8 +3438,7 @@
     "tab_follow-ups": "Follow-ups"
   },
   "ChartTable": {
-    "show": "Show table",
-    "hide": "Hide table"
+    "label": "Table"
   },
   "PipelineReport": {
     "owners_title": "Open deals by owner",

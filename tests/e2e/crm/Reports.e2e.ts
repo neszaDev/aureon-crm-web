@@ -1,4 +1,4 @@
-import type { APIRequestContext, Locator, Page } from '@playwright/test';
+import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
 import type { Member } from './helpers';
@@ -74,14 +74,6 @@ const month = (value: string) => `${MONTHS[Number(value.slice(5, 7)) - 1]} ${val
 const named = (member?: MemberRef) => (member ? (member.displayName ?? member.email) : undefined);
 
 const reports = (path: string, query = '') => `${path}/reports${query}`;
-
-// Under every chart, "Show table" is closed on a wide screen until it is asked for.
-const showTable = async (panel: Locator) => {
-  const button = panel.getByRole('button', { name: 'Show table' });
-  await expect(button).toBeVisible();
-  await button.click();
-  await expect(panel.getByRole('button', { name: 'Hide table' })).toBeVisible();
-};
 
 const move = async (
   request: APIRequestContext,
@@ -251,8 +243,10 @@ test.describe('Reports', () => {
 
     await page.goto(reports(owner.path, '?tab=pipeline'));
 
+    // The table under the bars is open at once; "Table" hides it and shows it again.
     const stages = page.getByRole('region', { name: 'Open deals by stage' });
-    await showTable(stages);
+    const toggle = stages.getByRole('button', { name: 'Table', exact: true });
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
     await Promise.all(
       api.byStage.map(async (bucket, index) => {
         const row = stages.getByRole('row').nth(index + 1);
@@ -265,6 +259,11 @@ test.describe('Reports', () => {
         );
       }),
     );
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(stages.getByRole('table')).toHaveCount(0);
+    await toggle.click();
+    await expect(stages.getByRole('table')).toBeVisible();
     // The owners in the API's order, the unassigned deals named as such.
     const owners = page.getByRole('table', { name: 'Open deals by owner' });
     await expect(owners.getByRole('row')).toHaveCount(api.byOwner.length + 1);
@@ -298,8 +297,12 @@ test.describe('Reports', () => {
 
     // The period is the one the API answered with, though the URL named none.
     await expect(page.getByRole('button', { name: `Period: ${label(api.period)}` })).toBeVisible();
+    // The months and the won values are on the page without a click.
     const panel = page.getByRole('region', { name: 'Won and lost by month' });
-    await showTable(panel);
+    await expect(panel.getByRole('button', { name: 'Table', exact: true })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
     await expect(panel.getByRole('row')).toHaveCount(api.months.length + 1);
     await Promise.all(
       api.months.map(async (item, index) => {
@@ -423,20 +426,31 @@ test.describe('Reports', () => {
     request,
   }) => {
     const { owner, riley } = await seedReports(request);
-    // More than the 20 the API lists.
-    await Promise.all(
-      Array.from({ length: 21 }, async (_, index) => {
+    // More than the 20 the API lists, of tasks and of leads (Noa Park, from January 5, is the
+    // oldest).
+    await Promise.all([
+      ...Array.from({ length: 21 }, async (_, index) => {
         await seed(request, riley, 'tasks', {
           title: `Late ${index}`,
           dueAt: new Date(Date.now() - (3 + index) * HOUR).toISOString(),
           assigneeId: riley.userId,
         });
       }),
-    );
+      ...Array.from({ length: 21 }, async (_, index) => {
+        await seed(request, owner, 'leads', {
+          firstName: `Due${index}`,
+          lastName: 'Lead',
+          followUpDate: `2026-02-${String(index + 1).padStart(2, '0')}`,
+        });
+      }),
+    ]);
     await signIn(page, { email: owner.email, password: PASSWORD });
     const api = await report<FollowUps>(request, owner, 'follow-ups');
     expect(api.overdueTasks.count).toBe(22);
     expect(api.overdueTasks.first).toHaveLength(20);
+    expect(api.dueLeads.count).toBe(22);
+    // Today in the workspace's zone, which is where the API ends its default period.
+    const { period } = await report<Funnel>(request, owner, 'funnel');
 
     await page.goto(reports(owner.path, '?tab=follow-ups'));
 
@@ -464,6 +478,15 @@ test.describe('Reports', () => {
     await overdue.getByRole('link', { name: 'and 2 more' }).click();
     await expect(page).toHaveURL(`${owner.path}/tasks?view=overdue`);
     await expect(page.getByRole('heading', { name: '22 tasks' })).toBeVisible();
+
+    // The leads' rest: the open leads due up to today, the oldest first.
+    await page.goto(reports(owner.path, '?tab=follow-ups'));
+    await leads.getByRole('link', { name: 'and 2 more' }).click();
+    await expect(page).toHaveURL(
+      `${owner.path}/leads?status=NEW&status=CONTACTED&status=QUALIFIED&followUpBefore=${period.to}&sort=FOLLOW_UP_DATE&direction=ASC`,
+    );
+    await expect(page.getByRole('heading', { name: '22 leads' })).toBeVisible();
+    await expect(page.getByRole('row').nth(1)).toContainText('Noa Park');
   });
 
   // Not a date, a month 13, from after to, more than 366 days, a from in the future: the default
@@ -568,14 +591,24 @@ test.describe('Reports', () => {
       await signIn(page, { email: owner.email, password: PASSWORD });
       const path = reports(owner.path.replace('/app/', '/th/app/'));
 
-      // Below `md` a chart's table is open already.
+      // A chart's table is open already, on a phone too.
       await page.goto(`${path}?tab=won-lost`);
-      await expect(page.getByRole('button', { name: 'ซ่อนตาราง' })).toBeVisible();
-      // The seven columns do not fit; the region takes the focus so the keyboard can scroll it.
+      await expect(page.getByRole('button', { name: 'ตาราง', exact: true })).toHaveAttribute(
+        'aria-expanded',
+        'true',
+      );
+      // The seven columns do not fit: Tab reaches the region after the period button, and the
+      // arrow key scrolls it.
       await page.goto(`${path}?tab=activities`);
       const table = page.getByRole('region', { name: 'ตารางกิจกรรม' });
-      await table.focus();
+      await page.getByRole('button', { name: /^ช่วงเวลา/u }).focus();
+      await page.keyboard.press('Tab');
       await expect(table).toBeFocused();
+      expect(await table.evaluate((node) => node.scrollLeft)).toBe(0);
+      await page.keyboard.press('ArrowRight');
+      await expect
+        .poll(async () => await table.evaluate((node) => node.scrollLeft))
+        .toBeGreaterThan(0);
     });
   });
 });

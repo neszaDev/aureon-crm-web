@@ -117,8 +117,10 @@ describe(PipelineReport, () => {
     expect(
       document.querySelector('[data-slot="chart"]')?.closest('[aria-hidden="true"]'),
     ).not.toBeNull();
-    // Behind the "Show table" disclosure, as under every chart.
-    await expect.element(page.getByRole('button', { name: 'Hide table' })).toBeVisible();
+    // The table has a button to hide it, as under every chart, and starts open.
+    await expect
+      .element(page.getByRole('button', { name: 'Table', exact: true }))
+      .toHaveAttribute('aria-expanded', 'true');
   });
 
   it('says so when no deal is open', async () => {

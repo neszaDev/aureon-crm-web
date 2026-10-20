@@ -33,50 +33,59 @@ describe(ChartTable, () => {
     await page.viewport(PHONE.width, PHONE.height);
   });
 
-  it('is open below md, and the button closes it', async () => {
+  it('is open at every width', async () => {
     await table();
-
-    const button = page.getByRole('button', { name: 'Hide table' });
-    await expect.element(button).toHaveAttribute('aria-expanded', 'true');
     await expect.element(stageTable()).toBeVisible();
-
-    await button.click();
-
     await expect
-      .element(page.getByRole('button', { name: 'Show table' }))
-      .toHaveAttribute('aria-expanded', 'false');
-    await expect.element(stageTable()).not.toBeVisible();
+      .element(page.getByRole('button', { name: 'Table', exact: true }))
+      .toHaveAttribute('aria-expanded', 'true');
+    await page.viewport(1024, 768);
+    await expect.element(stageTable()).toBeVisible();
+    await page.viewport(1440, 900);
+    await expect.element(stageTable()).toBeVisible();
   });
 
-  it('is closed from md up, and the button opens it', async () => {
+  it('is open at once on a wide screen, with no click', async () => {
     await page.viewport(1024, 768);
     await table();
 
-    const button = page.getByRole('button', { name: 'Show table' });
-    await expect.element(button).toHaveAttribute('aria-expanded', 'false');
-    await expect.element(stageTable()).not.toBeVisible();
+    await expect.element(stageTable()).toBeVisible();
+    await expect
+      .element(page.getByRole('button', { name: 'Table', exact: true }))
+      .toHaveAttribute('aria-expanded', 'true');
+    // Nothing in it is hidden by a class that waits for the screen's width.
+    expect(stageTable().element().closest('[hidden]')).toBeNull();
+    expect(stageTable().element().parentElement?.className ?? '').not.toContain('hidden');
+  });
+
+  it('is hidden by the button and shown again by it, the button keeping its name', async () => {
+    await table();
+    const button = page.getByRole('button', { name: 'Table', exact: true });
 
     await button.click();
 
+    await expect.element(button).toHaveAttribute('aria-expanded', 'false');
+    await expect.element(stageTable()).not.toBeVisible();
+    await button.click();
+    await expect.element(button).toHaveAttribute('aria-expanded', 'true');
     await expect.element(stageTable()).toBeVisible();
-    await expect
-      .element(page.getByRole('button', { name: 'Hide table' }))
-      .toHaveAttribute('aria-expanded', 'true');
   });
 
   it('keeps what the reader chose when the window is resized', async () => {
     await table();
-    await page.getByRole('button', { name: 'Hide table' }).click();
+    await page.getByRole('button', { name: 'Table', exact: true }).click();
 
     await page.viewport(1024, 768);
 
-    await expect.element(page.getByRole('button', { name: 'Show table' })).toBeVisible();
+    await expect
+      .element(page.getByRole('button', { name: 'Table', exact: true }))
+      .toHaveAttribute('aria-expanded', 'false');
     await expect.element(stageTable()).not.toBeVisible();
   });
 
   it('labels the button in the page language', async () => {
     await table('fr');
 
-    await expect.element(page.getByRole('button', { name: 'Masquer le tableau' })).toBeVisible();
+    await expect.element(page.getByRole('button', { name: 'Tableau', exact: true })).toBeVisible();
   });
 });
