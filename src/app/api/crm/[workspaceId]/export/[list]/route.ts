@@ -2,7 +2,7 @@ import { hasLocale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { toActionError } from '@/libs/api/ApiError';
+import { isApiError, toActionError } from '@/libs/api/ApiError';
 import { authedBackend } from '@/libs/api/Backend';
 import { COMPANY_LIST, CONTACT_LIST, DEAL_LIST, LEAD_LIST } from '@/libs/api/CrmQueries';
 import { ACCESS_TOKEN_COOKIE, clearedSessionCookies, isSecureAppUrl } from '@/libs/Auth';
@@ -78,7 +78,7 @@ const EXPORTS = {
  * `GET /api/crm/{workspaceId}/export/{list}`: the CSV of a list for the filters of its page's URL
  * (`?locale=` picks the language of a refusal). The browser asks here and never the backend: the
  * session's token stays on the server. The file streams through with the backend's `Content-Type`
- * and `Content-Disposition`; a refusal is JSON `{ message }`, translated by its code (a file over
+ * and `Content-Disposition` (an `attachment` without one), never sniffed; a refusal is JSON `{ message }`, translated by its code (a file over
  * the cap, a role without `EXPORT`). A 401 ends the session as an action's does (the cookies go,
  * unless the request sent no access token), but the browser fetches this and a redirect would
  * hand it the sign-in page as the file: it gets a bare 401, which the button turns into the
@@ -134,13 +134,24 @@ export async function GET(
     return ended;
   }
   if (!response.ok) {
+    // No field is on screen to highlight (a refused filter shows on the list page itself): the
+    // refusal reads as a request that isn't valid, not "check the highlighted fields".
+    const body: unknown = error;
+    const refusal = isApiError(body) ? { ...body, fieldErrors: undefined } : body;
+
     return NextResponse.json(
-      { message: toActionError(error, tError).message },
+      { message: toActionError(refusal, tError).message },
       { status: response.status },
     );
   }
 
-  const headers = new Headers({ 'Cache-Control': 'no-store' });
+  // The file holds what users typed: the browser never sniffs it into a page, and saves it even
+  // when a proxy in front of the backend dropped its name.
+  const headers = new Headers({
+    'Cache-Control': 'no-store',
+    'Content-Disposition': 'attachment',
+    'X-Content-Type-Options': 'nosniff',
+  });
   for (const name of ['Content-Type', 'Content-Disposition']) {
     const value = response.headers.get(name);
     if (value) {

@@ -199,6 +199,19 @@ describe(GET, () => {
     );
   });
 
+  it('never lets the browser read the file as anything but what it says, and always saves it', async () => {
+    const sent = await exportList('companies', '', ok());
+    expect(sent.response.headers.get('X-Content-Type-Options')).toBe('nosniff');
+
+    // A proxy in front of the backend may drop its headers: the CSV still downloads, never renders.
+    const bare = await exportList('companies', '', {
+      data: new Response(CSV).body,
+      response: new Response(null, { status: 200 }),
+    });
+    expect(bare.response.headers.get('X-Content-Type-Options')).toBe('nosniff');
+    expect(bare.response.headers.get('Content-Disposition')).toBe('attachment');
+  });
+
   it("passes none of the backend's other headers, its cookies least of all", async () => {
     const { response } = await exportList('companies', '', {
       data: new Response(CSV).body,
@@ -267,6 +280,25 @@ describe(GET, () => {
     const { message } = await response.json();
     expect(message).not.toBe('Too many rows to export. Narrow the filters and try again.');
     expect(message).toMatch(/export/iu);
+  });
+
+  it('names no fields to check when the backend refuses the filters: the export has none on screen', async () => {
+    // A deals export with closeFrom after closeTo: the list itself shows its invalid-filter notice.
+    const { response } = await exportList(
+      'deals',
+      '?view=table&closeFrom=2026-12-01&closeTo=2026-01-01',
+      refused(400, {
+        status: 400,
+        code: 'VALIDATION_FAILED',
+        message: 'Validation failed',
+        fieldErrors: { closeFrom: 'must not be after closeTo' },
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toStrictEqual({
+      message: "Something in the request isn't valid. Check it and try again.",
+    });
   });
 
   it("answers 403 with the role's refusal, not the file", async () => {
