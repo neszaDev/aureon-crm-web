@@ -63,6 +63,24 @@ const names = () =>
 
 const showOlder = () => page.getByRole('button', { name: 'Show older' });
 
+/**
+ * Answers "Show older" from a server whose history is `server()` (newest first), by page.
+ * @param server What the server holds when it is asked.
+ */
+const serve = (server: () => Event[]) => {
+  vi.mocked(AuditActions.loadHistory)
+    .mockReset()
+    .mockImplementation(
+      async (_workspaceId, _type, _id, pageNumber) =>
+        await Promise.resolve(server().slice(pageNumber * 10, pageNumber * 10 + 10)),
+    );
+};
+const pagesAsked = () => vi.mocked(AuditActions.loadHistory).mock.calls.map((call) => call[3]);
+const renamedTo = () => names().map((line) => Number(line?.split('Name ').at(-1)));
+// Ids from the top down to the bottom.
+const ids = (top: number, bottom: number) =>
+  Array.from({ length: top - bottom + 1 }, (_, index) => top - index);
+
 describe(HistoryTimeline, () => {
   it("shows the record's events newest first, under a heading with their count", async () => {
     await renderHistory(newestFirst(3, 1), 3);
@@ -153,5 +171,40 @@ describe(HistoryTimeline, () => {
     await expect
       .element(page.getByRole('heading', { name: /History/u }))
       .toHaveTextContent('History26');
+  });
+
+  describe('while teammates record more than a page meanwhile', () => {
+    it('goes on to the next page when one holds nothing older than what is shown', async () => {
+      // Twelve events landed after the page was read: page 1 now holds only the shown ones and
+      // two newer ones, which wait for a refresh.
+      serve(() => newestFirst(37, 1));
+      await renderHistory(newestFirst(25, 16), 25);
+
+      await showOlder().click();
+
+      // Page 2 holds 17 to 8 now.
+      await expect.element(page.getByText('Deal name: Name 7 → Name 8')).toBeVisible();
+      expect(pagesAsked()).toStrictEqual([1, 2]);
+      expect(renamedTo()).toStrictEqual(ids(25, 8));
+      await expect.element(showOlder()).toBeVisible();
+    });
+
+    it('leaves no gap when a refreshed first page is all new events, older pages loaded', async () => {
+      let server = newestFirst(25, 1);
+      serve(() => server);
+      const view = await renderHistory(newestFirst(25, 16), 25);
+      await showOlder().click();
+      await expect.element(page.getByText('Deal name: Name 5 → Name 6')).toBeVisible();
+
+      // Twelve events landed, then an edit here refreshed the page: its first page is all new.
+      server = newestFirst(37, 1);
+      await view.rerender(history(newestFirst(37, 28), 37));
+      await showOlder().click();
+
+      await expect.element(page.getByText('Deal name: Name 17 → Name 18')).toBeVisible();
+      // Each event once, none missing between the new page and the older ones.
+      expect(renamedTo()).toStrictEqual(ids(37, 18));
+      expect(pagesAsked()).toStrictEqual([1, 1]);
+    });
   });
 });

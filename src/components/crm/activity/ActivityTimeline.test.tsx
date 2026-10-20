@@ -77,6 +77,30 @@ const item = (subject: string) => page.getByRole('listitem').filter({ hasText: s
 const logButton = () => page.getByRole('button', { name: 'Log activity' });
 const subject = () => page.getByLabelText('Subject');
 
+/**
+ * Activities by id, newest first: the lower the id, the newer (ids under 1 came later).
+ * @param from The newest id.
+ * @param to The oldest id.
+ * @returns The activities, each named A and its id.
+ */
+const range = (from: number, to: number) =>
+  Array.from({ length: to - from + 1 }, (_, index) => activity(from + index, `A${from + index}`));
+
+/**
+ * Answers "Show older" from a server whose activities are `server()` (newest first), by page.
+ * @param server What the server holds when it is asked.
+ */
+const serve = (server: () => Activity[]) => {
+  vi.mocked(ActivityActions.loadActivities)
+    .mockReset()
+    .mockImplementation(
+      async (_workspaceId, _link, pageNumber) =>
+        await Promise.resolve(server().slice(pageNumber * 20, pageNumber * 20 + 20)),
+    );
+};
+const pagesAsked = () =>
+  vi.mocked(ActivityActions.loadActivities).mock.calls.map((call) => call[2]);
+
 describe(ActivityTimeline, () => {
   it('keeps the composer behind a "Log activity" button, which opens it on the Subject', async () => {
     await renderTimeline([activity(1, 'Mia called')], 1);
@@ -245,5 +269,39 @@ describe(ActivityTimeline, () => {
       vi.mocked(ActivityActions.loadActivities).mock.calls.map((call) => call[2]),
     ).toStrictEqual([1, 1, 2]);
     await expect.element(page.getByRole('button', { name: 'Show older' })).not.toBeInTheDocument();
+  });
+
+  describe('while teammates log more than a page meanwhile', () => {
+    it('goes on to the next page when one holds nothing older than what is shown', async () => {
+      // 22 activities logged after the page was read (A-21 to A0): page 1 now holds A-1, A0 and
+      // the 18 shown, so nothing older; the newer ones wait for a refresh.
+      serve(() => range(-21, 45));
+      await renderTimeline(range(1, 20), 45);
+
+      await page.getByRole('button', { name: 'Show older' }).click();
+
+      await expect.element(item('A38')).toBeVisible();
+      expect(pagesAsked()).toStrictEqual([1, 2]);
+      expect(subjects()).toStrictEqual(range(1, 38).map((each) => each.subject));
+      await expect.element(page.getByRole('heading', { name: 'A21', exact: true })).toHaveFocus();
+    });
+
+    it('leaves no gap when a refreshed first page is all new activities, older pages loaded', async () => {
+      let server = range(1, 45);
+      serve(() => server);
+      const screen = await renderTimeline(range(1, 20), 45);
+      await page.getByRole('button', { name: 'Show older' }).click();
+      await expect.element(item('A40')).toBeVisible();
+
+      // 22 logged meanwhile, then a refresh: the first page is all new (A-21 to A-2).
+      server = range(-21, 45);
+      await screen.rerender(timeline(range(-21, -2), 67));
+      await page.getByRole('button', { name: 'Show older' }).click();
+
+      await expect.element(item('A18')).toBeVisible();
+      // Each once, and A-1 and A0, between the new page and the older ones, not skipped.
+      expect(subjects()).toStrictEqual(range(-21, 18).map((each) => each.subject));
+      expect(pagesAsked()).toStrictEqual([1, 1]);
+    });
   });
 });

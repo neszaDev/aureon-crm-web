@@ -21,9 +21,12 @@ const newestFirst = (a: AuditEvent, b: AuditEvent) =>
 /**
  * A record's history: its first events (from the server, so the page opens with them) and, under
  * "Show older", the ones before. Events never change, so each shows once: a page that overlaps
- * what is shown (an event recorded meanwhile pushed the others down) adds only what is new, and a
- * refreshed first page puts the latest on top of everything loaded. When the last page is in and
- * the button goes, the focus goes to the heading.
+ * what is shown (events recorded meanwhile pushed the others down) adds only those older than the
+ * last one shown, and one that adds none (a page or more recorded meanwhile) makes it ask for the
+ * next. A refreshed first page puts the latest on top of everything loaded, unless it reaches none
+ * of the events shown (a page or more recorded first): the older ones then go, so no gap opens
+ * under it, and "Show older" brings them back in order. When the last page is in and the button
+ * goes, the focus goes to the heading.
  * @param props Component props.
  * @param props.workspace The workspace: its id, for "Show older" and the links, and its time zone.
  * @param props.entityType The kind of record.
@@ -45,11 +48,13 @@ export const HistoryTimeline = (props: {
   const [isLoading, startLoading] = useTransition();
   const [firstShown, setFirstShown] = useState(props.first);
   // A refreshed first page (an edit here) pushes its last events onto the next page: once older
-  // ones show, the first page they followed stays too, so the list has no gap.
+  // ones show, the first page they followed stays too, so the list has no gap; unless the new one
+  // shares no event with them, when what came between is unknown.
   if (props.first !== firstShown) {
     setFirstShown(props.first);
     if (older.length > 0) {
-      setOlder([...firstShown, ...older]);
+      const shown = new Set([...firstShown, ...older].map((item) => item.id));
+      setOlder(props.first.some((item) => shown.has(item.id)) ? [...firstShown, ...older] : []);
     }
   }
   const events = [
@@ -62,19 +67,30 @@ export const HistoryTimeline = (props: {
       return;
     }
     startLoading(async () => {
+      // The page holding the first event not shown: those before it come again if the pages
+      // moved since, and are left out (newer ones wait for a refresh). A full page with nothing
+      // older means a page or more was recorded meanwhile: the next one goes on from there.
+      const last = events.at(-1);
+      let pageNumber = Math.floor(events.length / HISTORY_PAGE_SIZE);
+      let next: AuditEvent[] = [];
+      let added: AuditEvent[] = [];
       try {
-        // The page holding the first event not shown: those before it come again if the pages
-        // moved since, and are left out.
-        const next = await loadHistory(
-          props.workspace.id,
-          props.entityType,
-          props.entityId,
-          Math.floor(events.length / HISTORY_PAGE_SIZE),
-        );
-        setOlder((current) => [...current, ...next]);
+        do {
+          // oxlint-disable-next-line no-await-in-loop -- each page decides whether to ask for the next
+          next = await loadHistory(
+            props.workspace.id,
+            props.entityType,
+            props.entityId,
+            pageNumber,
+          );
+          added = next.filter((item) => !last || newestFirst(item, last) > 0);
+          pageNumber += 1;
+        } while (added.length === 0 && next.length === HISTORY_PAGE_SIZE);
       } catch {
         toast.error(t('older_failed'));
+        return;
       }
+      setOlder((current) => [...current, ...added]);
     });
   };
 
