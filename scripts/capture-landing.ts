@@ -5,11 +5,13 @@
 //   BACKEND_URL=http://localhost:8081 APP_URL=http://localhost:3105 pnpm exec next start -p 3105
 //   APP_URL=http://localhost:3105 pnpm capture:landing
 //
-// PNGs go to a scratch directory (CAPTURE_DIR), WebP files (cwebp) to public/landing/. Every
-// file's provenance is in public/landing/README.md: update its date when you capture again.
+// PNGs go to a scratch directory (CAPTURE_DIR), WebP files (cwebp) to public/landing/, and where
+// each section's ring sits (and the report's overlap of the dashboard) to public/landing/spots.json,
+// which the page imports. Every file's provenance is in public/landing/README.md: update its date
+// when you capture again.
 /* oxlint-disable no-await-in-loop -- one browser page takes one shot after another */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import type { Page } from '@playwright/test';
@@ -21,6 +23,22 @@ const PASSWORD = process.env.DEMO_PASSWORD ?? 'demo-password';
 const WORKSPACE = 'Northwind Supply (demo)';
 const RAW = process.env.CAPTURE_DIR ?? path.join(tmpdir(), 'aureon-landing');
 const OUT = 'public/landing';
+
+// The app's own words for what the shots look for, in each language they are taken in.
+type Locale = 'en' | 'th';
+const MESSAGES: Record<Locale, Record<string, Record<string, string>>> = {
+  en: JSON.parse(readFileSync('src/locales/en.json', 'utf-8')),
+  th: JSON.parse(readFileSync('src/locales/th.json', 'utf-8')),
+};
+const say = (locale: Locale, key: string) => {
+  const [namespace = '', name = ''] = key.split('.');
+  const text = MESSAGES[locale][namespace]?.[name];
+  if (!text) {
+    throw new Error(`No ${key} in ${locale}`);
+  }
+
+  return text;
+};
 
 type Clip = { x: number; y: number; width: number; height: number };
 type Shot = {
@@ -62,6 +80,17 @@ const boxOf = async (page: Page, selector: string, nth = 0) => {
   return { ...box, bottom: box.y + box.height, right: box.x + box.width };
 };
 
+// A box's whole pixels only: a clip on a fraction takes a sliver of what lies beside it.
+const inside = (box: Clip) => {
+  const x = Math.ceil(box.x);
+  const y = Math.ceil(box.y);
+  return {
+    x,
+    y,
+    width: Math.floor(box.x + box.width) - x,
+    height: Math.floor(box.y + box.height) - y,
+  };
+};
 // The panel (the section) a heading names, in page coordinates, and the bottoms of its rows.
 const panelOf = async (page: Page, heading: string) =>
   await page
@@ -113,13 +142,15 @@ const toBoard = async (page: Page) => {
   });
 };
 
-const openReminders = async (page: Page) => {
-  await page.getByRole('button', { name: /^Reminders/u }).click();
-  await page.getByRole('dialog', { name: 'Reminders' }).waitFor();
+const openReminders = async (page: Page, locale: Locale = 'en') => {
+  const title = say(locale, 'RemindersBell.title');
+  await page.getByRole('button', { name: new RegExp(`^${title}`, 'u') }).click();
+  await page.getByRole('dialog', { name: title }).waitFor();
 };
 
 // The "Table" toggle under a report's chart: clips end above it, on the chart's edge.
-const tableToggle = 'button[aria-expanded]:text-is("Table")';
+const tableToggle = (locale: Locale) =>
+  `button[aria-expanded]:text-is("${say(locale, 'ChartTable.label')}")`;
 
 const SHOTS: Shot[] = [
   {
@@ -164,11 +195,19 @@ const SHOTS: Shot[] = [
     width: 1000,
     height: 900,
     clip: async (page) => {
-      const toggle = await boxOf(page, tableToggle);
+      const toggle = await boxOf(page, tableToggle('en'));
       return { x: 0, y: 0, width: 1000, height: toggle.y - 8 };
     },
   },
-  { name: 'tasks', path: '/en{ws}/tasks', width: 1440, height: 680, prepare: openReminders },
+  {
+    name: 'tasks',
+    path: '/en{ws}/tasks',
+    width: 1440,
+    height: 680,
+    prepare: async (page) => {
+      await openReminders(page);
+    },
+  },
   { name: 'board-390-th', path: '/th{ws}/deals', width: 390, height: 844, prepare: toBoard },
 ];
 
@@ -187,63 +226,74 @@ const NARROW: Shot[] = [
       return { x: 0, y: card.y - 12, width: 390, height: 470 };
     },
   })),
-  {
-    name: 'board-card',
-    path: '/en{ws}/deals',
-    width: 1440,
-    height: 1200,
-    clip: async (page) => {
-      const card = await boxOf(page, CARD, await signedCard(page));
-      return { x: card.x - 12, y: card.y - 12, width: card.width + 24, height: card.height + 24 };
-    },
-  },
-  {
-    // The won deal on a phone: its stamp row down to the end of its stage history.
-    name: 'deal-390',
-    path: '/en{ws}/deals/{deal}',
-    width: 390,
-    height: 844,
-    clip: async (page) => {
-      const row = await boxOf(page, 'section:has(ol[aria-label="Deal progress"])');
-      const history = await panelOf(page, 'Stage history');
-      return { x: 0, y: row.y - 16, width: 390, height: history.bottom + 16 - (row.y - 16) };
-    },
-  },
-  {
-    name: 'tasks-reminders',
-    path: '/en{ws}/tasks',
-    width: 1440,
-    height: 680,
-    prepare: openReminders,
-    clip: async (page) => {
-      // The popover alone: around it lie pieces of the page it covers.
-      const sheet = await boxOf(page, '[role="dialog"]');
-      return { x: sheet.x - 1, y: sheet.y - 1, width: sheet.width + 2, height: sheet.height + 2 };
-    },
-  },
-  {
-    // "My deals" on a phone, down to the end of its second row.
-    name: 'dashboard-390',
-    path: '/en{ws}',
-    width: 390,
-    height: 844,
-    clip: async (page) => {
-      const panel = await panelOf(page, 'My deals');
-      const second = panel.rows[1] ?? panel.bottom;
-      return { x: 0, y: panel.y - 16, width: 390, height: second - (panel.y - 16) };
-    },
-  },
-  {
-    name: 'reports-390',
-    path: '/en{ws}/reports?tab=won-lost',
-    width: 390,
-    height: 844,
-    clip: async (page) => {
-      const panel = await panelOf(page, 'Won and lost by month');
-      const toggle = await boxOf(page, tableToggle);
-      return { x: 0, y: panel.y - 16, width: 390, height: toggle.y - 8 - (panel.y - 16) };
-    },
-  },
+  // Each section's crop, in English and in Thai (`-th`, for the Thai page).
+  ...(['en', 'th'] as const).flatMap((locale): Shot[] => {
+    const suffix = locale === 'en' ? '' : '-th';
+    return [
+      {
+        name: `board-card${suffix}`,
+        path: `/${locale}{ws}/deals`,
+        width: 1440,
+        height: 1200,
+        clip: async (page) => {
+          const card = await boxOf(page, CARD, await signedCard(page));
+          return {
+            x: card.x - 12,
+            y: card.y - 12,
+            width: card.width + 24,
+            height: card.height + 24,
+          };
+        },
+      },
+      {
+        // The won deal on a phone: its stamp row down to the end of its stage history.
+        name: `deal-390${suffix}`,
+        path: `/${locale}{ws}/deals/{deal}`,
+        width: 390,
+        height: 844,
+        clip: async (page) => {
+          const label = say(locale, 'StampRow.label');
+          const row = await boxOf(page, `section:has(ol[aria-label="${label}"])`);
+          const history = await panelOf(page, say(locale, 'StageHistory.title'));
+          return { x: 0, y: row.y - 16, width: 390, height: history.bottom + 16 - (row.y - 16) };
+        },
+      },
+      {
+        name: `tasks-reminders${suffix}`,
+        path: `/${locale}{ws}/tasks`,
+        width: 1440,
+        height: 680,
+        prepare: async (page) => {
+          await openReminders(page, locale);
+        },
+        // The popover alone, inside its edge: around it lie pieces of the page it covers.
+        clip: async (page) => inside(await boxOf(page, '[role="dialog"]')),
+      },
+      {
+        // "My deals" on a phone, down to the end of its second row.
+        name: `dashboard-390${suffix}`,
+        path: `/${locale}{ws}`,
+        width: 390,
+        height: 844,
+        clip: async (page) => {
+          const panel = await panelOf(page, say(locale, 'MyDeals.title'));
+          const second = panel.rows[1] ?? panel.bottom;
+          return { x: 0, y: panel.y - 16, width: 390, height: second - (panel.y - 16) };
+        },
+      },
+      {
+        name: `reports-390${suffix}`,
+        path: `/${locale}{ws}/reports?tab=won-lost`,
+        width: 390,
+        height: 844,
+        clip: async (page) => {
+          const panel = await panelOf(page, say(locale, 'WonLostReport.title'));
+          const toggle = await boxOf(page, tableToggle(locale));
+          return { x: 0, y: panel.y - 16, width: 390, height: toggle.y - 8 - (panel.y - 16) };
+        },
+      },
+    ];
+  }),
 ];
 
 // Waits for the page's data, fonts, and the end of every time-based animation.
@@ -313,13 +363,14 @@ const pad = (box: Clip, by: number) => ({
   height: box.height + 2 * by,
 });
 
-// Where each section's ring sits on its capture, in percent, for the `spot` props in page.tsx.
+// Where each section's ring sits on its capture, in percent, and how far the report covers the
+// dashboard (in percent of the width): public/landing/spots.json, which page.tsx imports.
 const spots = async (page: Page, workspace: string, deal: string) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(`/en${workspace}/deals`);
   await settle(page);
   const card = await boxOf(page, CARD, await signedCard(page));
-  console.log('board spot', percent(pad(card, 4), { x: 0, y: 0, width: 1440, height: 900 }));
+  const board = percent(pad(card, 4), { x: 0, y: 0, width: 1440, height: 900 });
 
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.goto(`/en${workspace}/deals/${deal}`);
@@ -338,14 +389,14 @@ const spots = async (page: Page, workspace: string, deal: string) => {
   };
   const history = await panelOf(page, 'Stage history');
   const frame = { x: RAIL + 16, y: 0, width: 1440 - RAIL - 32, height: history.bottom + 20 };
-  console.log('deal spot', percent(pad(row, 8), frame));
+  const dealSpot = percent(pad(row, 8), frame);
 
   await page.setViewportSize({ width: 1440, height: 680 });
   await page.goto(`/en${workspace}/tasks`);
   await settle(page);
   await openReminders(page);
   const sheet = await boxOf(page, '[role="dialog"]');
-  console.log('tasks spot', percent(pad(sheet, 4), { x: 0, y: 0, width: 1440, height: 680 }));
+  const tasks = percent(pad(sheet, 4), { x: 0, y: 0, width: 1440, height: 680 });
 
   // The report covers the dashboard's last whole row: its height, in percent of the width.
   await page.setViewportSize({ width: 1000, height: 900 });
@@ -354,7 +405,14 @@ const spots = async (page: Page, workspace: string, deal: string) => {
   const { rows } = await panelOf(page, 'My deals');
   const kept = rows.filter((bottom) => bottom <= 760);
   const height = (kept.at(-1) ?? 0) - (kept.at(-2) ?? 0);
-  console.log('report overlap', `${((height / 1000) * 100).toFixed(1)}%`);
+  const reportOverlap = `${((height / 1000) * 100).toFixed(1)}%`;
+
+  const file = path.join(OUT, 'spots.json');
+  writeFileSync(
+    file,
+    `${JSON.stringify({ board, deal: dealSpot, tasks, reportOverlap }, null, 2)}\n`,
+  );
+  console.log(`wrote ${file}`);
 };
 
 const signIn = async (page: Page) => {
@@ -391,6 +449,7 @@ try {
     if (!deal) {
       deal = await chooseDeal(page, workspace);
       console.log(`workspace ${workspace}, deal ${deal}`);
+      mkdirSync(OUT, { recursive: true });
       await spots(page, workspace, deal);
     }
 

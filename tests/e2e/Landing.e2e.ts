@@ -79,6 +79,26 @@ test.describe('Landing', () => {
     );
   });
 
+  test("shows each section's phone crop in the page's language", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    // The narrow crops, by their file names (the image optimiser's URLs carry them).
+    const crops = async (path: string) => {
+      await page.goto(path);
+      return await page
+        .locator('main picture source[media="(max-width: 767px)"]')
+        .evaluateAll((sources) => sources.map((source) => source.getAttribute('srcset') ?? ''));
+    };
+
+    // English first: the app then remembers Thai, and would open / in it.
+    const english = await crops('/');
+    // Those of the board, the deal, the tasks, the dashboard and the reports, light and dark.
+    expect(english).toHaveLength(10);
+    expect(english.filter((srcset) => srcset.includes('-th-'))).toStrictEqual([]);
+    const thai = await crops('/th');
+    expect(thai).toHaveLength(10);
+    expect(thai.filter((srcset) => !srcset.includes('-th-'))).toStrictEqual([]);
+  });
+
   test('keeps the developer notes inside the page column at 1440 px', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
