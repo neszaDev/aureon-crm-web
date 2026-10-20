@@ -102,6 +102,7 @@ export const DEAL_LIST = {
     ownerId: 'id',
     companyId: 'id',
     contactId: 'id',
+    sourceId: 'id',
     closeFrom: 'date',
     closeTo: 'date',
   },
@@ -396,7 +397,8 @@ export const getDeals = async (segment: string, query: ListQuery<typeof DEAL_LIS
   }
 
   // Not `view`, which only the page reads.
-  const { stageId, status, ownerId, companyId, contactId, closeFrom, closeTo } = query.filters;
+  const { stageId, status, ownerId, companyId, contactId, sourceId, closeFrom, closeTo } =
+    query.filters;
   const api = await authedBackend();
   const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/deals', {
     params: {
@@ -407,6 +409,7 @@ export const getDeals = async (segment: string, query: ListQuery<typeof DEAL_LIS
         ownerId,
         companyId,
         contactId,
+        sourceId,
         closeFrom,
         closeTo,
         q: query.q,

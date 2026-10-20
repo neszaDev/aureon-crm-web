@@ -8,7 +8,14 @@ import { DealsListSection } from '@/components/crm/deal/DealsListSection';
 import { ExportButton } from '@/components/crm/list/ExportButton';
 import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { Button } from '@/components/ui/button';
-import { DEAL_LIST, getCompany, getContact, getMembers, getStages } from '@/libs/api/CrmQueries';
+import {
+  DEAL_LIST,
+  getCompany,
+  getContact,
+  getLeadSources,
+  getMembers,
+  getStages,
+} from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
 import { listHref, parseListQuery } from '@/libs/crm/ListQuery';
@@ -38,19 +45,20 @@ export default async function DealsPage(props: DealsPageProps) {
   const { companyId, contactId } = query.filters;
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
-  const [{ workspace }, { user }, members, stages, company, contact] = await Promise.all([
+  const [{ workspace }, { user }, members, stages, sources, company, contact] = await Promise.all([
     getOpenWorkspace(locale, workspaceId),
     getCurrentUser(),
     getMembers(workspaceId),
     getStages(workspaceId),
+    getLeadSources(workspaceId),
     // The filters' names, which the pickers show without a search.
     companyId === undefined ? undefined : getCompany(workspaceId, String(companyId)),
     contactId === undefined ? undefined : getContact(workspaceId, String(contactId)),
   ]);
-  if ([members, stages, company, contact].some((result) => result?.unauthorized)) {
+  if ([members, stages, sources, company, contact].some((result) => result?.unauthorized)) {
     return endRejectedSession(locale);
   }
-  if (!workspace || !user || !members.members || !stages.stages) {
+  if (!workspace || !user || !members.members || !stages.stages || !sources.sources) {
     throw new Error('Could not load the deals');
   }
   const path = `/app/${workspace.id}/deals`;
@@ -108,6 +116,7 @@ export default async function DealsPage(props: DealsPageProps) {
         me={user}
         members={members.members}
         stages={stages.stages}
+        sources={sources.sources}
         companyName={company?.company?.name}
         contactName={contact?.contact?.fullName}
         timeZone={workspace.timezone}

@@ -139,7 +139,7 @@ describe(GET, () => {
   it("exports the deals table's filters, without the page's own view", async () => {
     const { call } = await exportList(
       'deals',
-      '?view=list&status=OPEN&stageId=4&contactId=5&closeFrom=2026-11-01&archived=true',
+      '?view=list&status=OPEN&stageId=4&contactId=5&sourceId=6&closeFrom=2026-11-01&archived=true',
       ok(),
     );
 
@@ -150,6 +150,7 @@ describe(GET, () => {
           status: 'OPEN',
           stageId: 4,
           contactId: 5,
+          sourceId: 6,
           closeFrom: '2026-11-01',
           archived: true,
         },
@@ -162,7 +163,7 @@ describe(GET, () => {
     // The view tabs keep the table's filters in the URL; the board doesn't apply them.
     const { call } = await exportList(
       'deals',
-      '?q=acme&ownerId=3&companyId=9&status=WON&stageId=4&closeTo=2026-12-31&archived=true',
+      '?q=acme&ownerId=3&companyId=9&status=WON&stageId=4&sourceId=6&closeTo=2026-12-31&archived=true',
       ok(),
     );
 

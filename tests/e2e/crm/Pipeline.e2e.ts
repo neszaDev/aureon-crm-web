@@ -4,6 +4,7 @@ import { PASSWORD, signIn, signUp } from '../helpers';
 import type { Member } from './helpers';
 import {
   addMember,
+  apiCall,
   column,
   createWorkspace,
   drag,
@@ -309,6 +310,30 @@ test.describe('Pipeline', () => {
     await expect(column(page, 'Needs analysis')).toContainText('No deals');
     expect(await stageOf(request, owner, theirs.id)).toBe('Qualification');
     expect(await stageOf(request, owner, mine.id)).toBe('Qualification');
+  });
+
+  test('filters the deal list by its lead source', async ({ page, request }) => {
+    const { owner, mia } = await seedBoard(request);
+    const source = await apiCall<{ id: number }>(
+      request,
+      owner,
+      'POST',
+      `/workspaces/${owner.workspaceId}/lead-sources`,
+      { name: 'Trade show' },
+    );
+    await seed(request, mia, 'deals', { name: 'Show deal', amount: '500.00', sourceId: source.id });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(`${owner.path}/deals?view=list`);
+    await expect(page.getByRole('heading', { name: '2 deals' })).toBeVisible();
+    await waitForHydration(page.getByRole('main'));
+
+    await page.getByRole('combobox', { name: 'Source' }).click();
+    await page.getByRole('option', { name: 'Trade show' }).click();
+
+    await expect(page.getByRole('heading', { name: '1 deal', exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Show deal' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Acme seats' })).toHaveCount(0);
+    await expect(page).toHaveURL(new RegExp(`sourceId=${source.id}`, 'u'));
   });
 
   test('shows a member of another workspace "Workspace not found" for a deal’s URL', async ({

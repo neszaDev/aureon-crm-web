@@ -3,10 +3,12 @@ import { parseListQuery } from '@/libs/crm/ListQuery';
 import { authedBackend } from './Backend';
 import {
   COMPANY_LIST,
+  DEAL_LIST,
   getAuditEvents,
   getCompanies,
   getActivityReport,
   getDashboard,
+  getDeals,
   getFollowUpReport,
   getFunnelReport,
   getLeads,
@@ -77,6 +79,29 @@ describe(getLeads, () => {
           followUpBefore: '2026-10-20',
           sort: 'FOLLOW_UP_DATE',
         }),
+      },
+    });
+  });
+});
+
+describe(getDeals, () => {
+  it("asks for the table's filters, the lead source among them, as the backend names them", async () => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue({
+      data: { content: [] },
+      response: new Response(null, { status: 200 }),
+    });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await getDeals(
+      '7',
+      parseListQuery(DEAL_LIST, { view: 'list', sourceId: '6', stageId: '4', status: 'OPEN' }),
+    );
+
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/deals', {
+      params: {
+        path: { workspaceId: 7 },
+        query: expect.objectContaining({ sourceId: 6, stageId: 4, status: 'OPEN' }),
       },
     });
   });

@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { ArchivedToggle } from '@/components/crm/list/ArchivedToggle';
 import { DateFilter } from '@/components/crm/list/DateFilter';
+import type { FilterOption } from '@/components/crm/list/FilterSelect';
 import { FilterSelect } from '@/components/crm/list/FilterSelect';
 import { ListToolbar } from '@/components/crm/list/ListToolbar';
 import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
@@ -15,7 +16,8 @@ import { DEAL_STATUSES } from '@/validations/crm/DealValidation';
 /**
  * The deals page's search and filters. The board takes the text search, the owner (Anyone, Me,
  * Unassigned, each member) and the company; the table adds the stage, the status, the contact,
- * the expected close dates (from and until, inclusive), the sort and the archived view.
+ * the lead source, the expected close dates (from and until, inclusive), the sort and the
+ * archived view.
  * @param props Component props.
  * @param props.workspaceId The workspace, whose companies and contacts the pickers search.
  * @param props.view The page's view.
@@ -24,6 +26,7 @@ import { DEAL_STATUSES } from '@/validations/crm/DealValidation';
  * @param props.me The caller.
  * @param props.members The workspace's members.
  * @param props.stages The pipeline's stages, for the stage filter.
+ * @param props.sources Every lead source, archived ones included.
  * @param props.companyName The name of the company filtered by, when it was found.
  * @param props.contactName The name of the contact filtered by, when it was found.
  * @param props.timeZone The workspace's time zone, for the calendars.
@@ -37,12 +40,18 @@ export const DealFilters = (props: {
   me: components['schemas']['UserResponse'];
   members: components['schemas']['MemberResponse'][];
   stages: components['schemas']['StageResponse'][];
+  sources: components['schemas']['LeadSourceResponse'][];
   companyName?: string;
   contactName?: string;
   timeZone: string;
 }) => {
   const t = useTranslations('DealsPage');
   const tStatus = useTranslations('DealStatus');
+  const tSource = useTranslations('SourceField');
+  const sourceOptions: FilterOption[] = props.sources.map((source) => ({
+    value: String(source.id),
+    label: source.archived ? tSource('archived', { name: source.name }) : source.name,
+  }));
 
   return (
     <ListToolbar label={t('toolbar_label')}>
@@ -122,6 +131,16 @@ export const DealFilters = (props: {
               value: status,
               label: tStatus(`status_${status}`),
             }))}
+            path={props.path}
+            query={props.query}
+          />
+          <FilterSelect
+            id="deals-source"
+            label={t('source_label')}
+            anyLabel={t('source_any')}
+            missingLabel={t('source_unknown')}
+            param="sourceId"
+            options={sourceOptions}
             path={props.path}
             query={props.query}
           />
