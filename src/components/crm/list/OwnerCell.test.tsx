@@ -38,7 +38,8 @@ const lines = (element: Element) => {
 };
 
 describe(OwnerCell, () => {
-  it('keeps the name on one line, even in a narrow cell', async () => {
+  it('keeps the name on one line from 640 px, even in a narrow cell', async () => {
+    await page.viewport(1024, 768);
     await renderCell(OWNER, 60);
 
     const name = page.getByText('Olivia Owner').element();
@@ -47,7 +48,8 @@ describe(OwnerCell, () => {
     expect(lines(name)).toBe(1);
   });
 
-  it('gives the full name as the title of one cut short', async () => {
+  it('gives the full name as the title of one cut short from 640 px', async () => {
+    await page.viewport(1024, 768);
     const long = { ...OWNER, displayName: 'Olivia Owner-Of-A-Very-Long-Double-Barrelled-Name' };
     await renderCell(long, 600);
 
@@ -55,5 +57,17 @@ describe(OwnerCell, () => {
 
     expect(name).toHaveAttribute('title', long.displayName);
     expect(name.getBoundingClientRect().width).toBeLessThanOrEqual(160);
+  });
+
+  it('wraps a long name on a phone, where a cut tail could not be read by hovering', async () => {
+    await page.viewport(390, 844);
+    const long = { ...OWNER, displayName: 'Olivia Owner-Of-A-Very-Long Double-Barrelled Name' };
+    await renderCell(long, 600);
+
+    const name = page.getByText(long.displayName).element();
+
+    expect(getComputedStyle(name).textOverflow).not.toBe('ellipsis');
+    expect(lines(name)).toBeGreaterThan(1);
+    expect(name.scrollWidth).toBeLessThanOrEqual(name.clientWidth);
   });
 });

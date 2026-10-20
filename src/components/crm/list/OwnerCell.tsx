@@ -1,11 +1,13 @@
+import { cn } from 'cn';
 import { useTranslations } from 'next-intl';
 import { Seal } from '@/components/crm/Seal';
 import { TableCell } from '@/components/ui/table';
 import type { components } from '@/libs/api/schema';
 
 /**
- * A list row's owner: their seal and name on one line, or "Unassigned". A name too long for the
- * cell is cut short, in full as the cell's title.
+ * A list row's owner: their seal and name, or "Unassigned". From 640 px the name keeps to one
+ * line, and one too long for the cell is cut short, in full as its title; below that it wraps,
+ * since a phone can't hover a title.
  * @param props Component props.
  * @param props.owner The record's owner, if any.
  * @param props.className Extra classes for the cell, such as hiding it on small screens.
@@ -18,13 +20,13 @@ export const OwnerCell = (props: {
   const t = useTranslations('RecordList');
 
   return (
-    <TableCell className={props.className}>
+    <TableCell className={cn('max-sm:whitespace-normal', props.className)}>
       {props.owner ? (
         <span className="flex items-center gap-2">
           <Seal name={props.owner.displayName} email={props.owner.email} size="sm" />
           <span
             title={props.owner.displayName ?? props.owner.email}
-            className="max-w-40 min-w-0 truncate"
+            className="max-w-40 min-w-0 break-words sm:truncate"
           >
             {props.owner.displayName ?? props.owner.email}
           </span>
