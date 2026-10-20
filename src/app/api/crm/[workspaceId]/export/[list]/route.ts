@@ -85,7 +85,8 @@ const EXPORTS = {
  * bare 401, which the button turns into the navigation to sign in. Another site can't start one:
  * the session cookies are `SameSite=Lax`, so its link or form would open this with them, and the
  * export would be recorded in the user's name. A request the browser marks
- * `Sec-Fetch-Site: cross-site` is refused (403) unasked.
+ * `Sec-Fetch-Site: cross-site` or `same-site` (a sibling subdomain; the app's own pages send
+ * `same-origin`, a typed URL `none`) is refused (403) unasked.
  * @param request The request.
  * @param context The route's params.
  * @param context.params `workspaceId` and `list` (companies, contacts, leads or deals).
@@ -105,7 +106,8 @@ export async function GET(
   if (!run || workspaceId === undefined) {
     return NextResponse.json({ message: tError('status_404') }, { status: 404 });
   }
-  if (request.headers.get('sec-fetch-site') === 'cross-site') {
+  const site = request.headers.get('sec-fetch-site');
+  if (site === 'cross-site' || site === 'same-site') {
     return NextResponse.json({ message: tError('status_403') }, { status: 403 });
   }
 

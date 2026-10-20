@@ -150,8 +150,9 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
   Reminders are in-app only.
 - **The CSV export** is the one route handler that talks to the backend: the list's Export button
   fetches it with the page's filters and saves the file once all of it has arrived, under the
-  backend's name. It refuses `HEAD` and a request the browser marks cross-site (a link on another
-  site would otherwise export, and audit, in the user's name). Only roles with `EXPORT` see it.
+  backend's name. It refuses `HEAD` and a request the browser marks cross-site or same-site (a
+  link on another site, a sibling subdomain included, would otherwise export, and audit, in the
+  user's name). Only roles with `EXPORT` see it.
 - **The audit trail** is a settings page for `AUDIT_READ`; every record's page has its own
   History (`RecordHistory`), readable by every member.
 

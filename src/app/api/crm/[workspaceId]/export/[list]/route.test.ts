@@ -88,20 +88,23 @@ describe(GET, () => {
     expect(authedBackend).not.toHaveBeenCalled();
   });
 
-  it('refuses an export another site started, in the language asked, without asking the backend', async () => {
-    // A link or form on another site opens the route with the victim's (SameSite=Lax) cookies:
-    // it would export, and record the export, in their name.
-    const { response, call } = await exportList('contacts', '?locale=fr', ok(), {
-      headers: { 'sec-fetch-site': 'cross-site' },
-    });
+  // A link or form on another site opens the route with the victim's (SameSite=Lax) cookies: it
+  // would export, and record the export, in their name. A sibling subdomain is another site too.
+  it.each(['cross-site', 'same-site'])(
+    'refuses an export a %s request started, in the language asked, without asking the backend',
+    async (site) => {
+      const { response, call } = await exportList('contacts', '?locale=fr', ok(), {
+        headers: { 'sec-fetch-site': site },
+      });
 
-    expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toStrictEqual({ message: fr.ApiError.status_403 });
-    expect(call).not.toHaveBeenCalled();
-    expect(authedBackend).not.toHaveBeenCalled();
-  });
+      expect(response.status).toBe(403);
+      await expect(response.json()).resolves.toStrictEqual({ message: fr.ApiError.status_403 });
+      expect(call).not.toHaveBeenCalled();
+      expect(authedBackend).not.toHaveBeenCalled();
+    },
+  );
 
-  it.each([['same-origin'], ['same-site'], ['none'], [undefined]])(
+  it.each([['same-origin'], ['none'], [undefined]])(
     'exports for a request from %s (a typed URL or bookmark is none; an older browser sends none)',
     async (site) => {
       const { response, call } = await exportList('contacts', '', ok(), {
