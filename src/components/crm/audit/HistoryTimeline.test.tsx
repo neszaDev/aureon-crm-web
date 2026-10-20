@@ -187,7 +187,8 @@ describe(HistoryTimeline, () => {
 
     await showOlder().click();
 
-    await expect.element(showOlder()).toHaveAttribute('aria-disabled', 'true');
+    await expect.poll(() => pagesAsked().length).toBe(3);
+    // Done asking: the button is free again, and no further page was asked for.
     await expect.element(showOlder()).not.toHaveAttribute('aria-disabled');
     // Pages 1 to 3: page 3 (ceil(25 / 10)) is the last there can be, plus one.
     expect(pagesAsked()).toStrictEqual([1, 2, 3]);

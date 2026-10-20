@@ -314,7 +314,10 @@ describe(ActivityTimeline, () => {
 
     await showOlder.click();
 
-    await expect.element(showOlder).toHaveAttribute('aria-disabled', 'true');
+    await expect
+      .poll(() => vi.mocked(ActivityActions.loadActivities).mock.calls.length)
+      .toBe(Math.ceil(22 / 20) + 1);
+    // Done asking: the button is free again, and no further page was asked for.
     await expect.element(showOlder).not.toHaveAttribute('aria-disabled');
     expect(ActivityActions.loadActivities).toHaveBeenCalledTimes(Math.ceil(22 / 20) + 1);
   });
