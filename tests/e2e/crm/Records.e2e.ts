@@ -438,7 +438,8 @@ test.describe('Records', () => {
       await page.getByLabel('Reason').fill('Budget gone');
       await page.getByRole('button', { name: 'Mark as unqualified' }).click();
       await expect(page.getByText('Lead marked as unqualified')).toBeVisible();
-      await expect(page.getByText('Budget gone')).toBeVisible();
+      // The fact itself: the History section below repeats it as a change.
+      await expect(page.getByText('Budget gone', { exact: true })).toBeVisible();
 
       await page.setViewportSize({ width: 390, height: 640 });
       await page.goto(`${owner.path}/leads/${convert.id}`);

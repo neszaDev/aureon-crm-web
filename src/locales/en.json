@@ -454,6 +454,32 @@
     "field_ACTIVITY_occurredAt": "When",
     "field_DEAL_name": "Deal name"
   },
+  "AuditPage": {
+    "title": "Audit",
+    "description": "Who changed what in this workspace, and every export, newest first. Only owners and admins can read it."
+  },
+  "AuditTrail": {
+    "toolbar_label": "Filter the audit trail",
+    "entity_label": "Record type",
+    "entity_any": "Any type",
+    "actor_label": "Done by",
+    "actor_any": "Anyone",
+    "actor_former": "Former member",
+    "heading": "{count, plural, =0 {Events} one {# event} other {# events}}",
+    "empty_title": "Nothing recorded yet",
+    "empty_text": "Changes, invitations and exports in this workspace appear here as they happen.",
+    "entity_WORKSPACE": "Workspace",
+    "entity_MEMBER": "Members",
+    "entity_INVITATION": "Invitations",
+    "entity_PIPELINE_STAGE": "Pipeline stages",
+    "entity_LEAD_SOURCE": "Lead sources",
+    "entity_COMPANY": "Companies",
+    "entity_CONTACT": "Contacts",
+    "entity_LEAD": "Leads",
+    "entity_DEAL": "Deals",
+    "entity_TASK": "Tasks",
+    "entity_ACTIVITY": "Activities"
+  },
   "CrmNotFound": {
     "meta_title": "Workspace not found",
     "title": "Workspace not found or you're not a member",
@@ -510,6 +536,7 @@
     "nav_roles": "Roles",
     "nav_pipeline": "Pipeline",
     "nav_sources": "Lead sources",
+    "nav_audit": "Audit",
     "nav_profile": "Your profile"
   },
   "WorkspaceSettingsPage": {
@@ -752,6 +779,10 @@
     "view_active_link": "Back to the active list",
     "unassigned": "Unassigned",
     "sort_label": "Sort by"
+  },
+  "ExportButton": {
+    "label": "Export CSV",
+    "saved": "Saved {name}"
   },
   "OwnerFilter": {
     "label": "Owner",
@@ -1006,6 +1037,13 @@
     "empty": "Nothing logged yet. Calls, emails, meetings and notes show here, newest first.",
     "show_older": "Show older",
     "older_failed": "Older activities couldn't be loaded. Try again."
+  },
+  "RecordHistory": {
+    "title": "History",
+    "count": "{count, number}",
+    "empty": "No changes recorded for this record yet.",
+    "show_older": "Show older",
+    "older_failed": "Older history couldn't be loaded. Try again."
   },
   "TaskRow": {
     "complete": "Complete {title}",

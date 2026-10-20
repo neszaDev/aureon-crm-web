@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { DealFilters } from '@/components/crm/deal/DealFilters';
 import { DealsBoardSection } from '@/components/crm/deal/DealsBoardSection';
 import { DealsListSection } from '@/components/crm/deal/DealsListSection';
+import { ExportButton } from '@/components/crm/list/ExportButton';
 import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { Button } from '@/components/ui/button';
 import { DEAL_LIST, getCompany, getContact, getMembers, getStages } from '@/libs/api/CrmQueries';
@@ -64,7 +65,21 @@ export default async function DealsPage(props: DealsPageProps) {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title')} description={t('description')} action={newDeal} />
+      <SettingsHeader
+        title={t('title')}
+        description={t('description')}
+        action={
+          <>
+            <ExportButton
+              workspaceId={workspace.id}
+              permissions={workspace.permissions}
+              list="deals"
+              query={query}
+            />
+            {newDeal}
+          </>
+        }
+      />
 
       <nav aria-label={t('views_label')} className="flex flex-wrap gap-1 border-b border-rule">
         {DEAL_VIEWS.map((item) => (

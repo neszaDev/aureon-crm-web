@@ -177,17 +177,20 @@ const sideOf = (value: unknown, side: 'from' | 'to'): unknown =>
  * @param props.event The audit event (the dashboard's `recentChanges`, a record's history).
  * @param props.workspace The workspace: its id, for the links, and its time zone.
  * @param props.compact Two changed fields at most, the rest counted (the dashboard's).
+ * @param props.ownPage It shows on the record's own page (its history): the record is neither a
+ *   link to that page nor numbered again under the page's header.
  * @returns The list item.
  */
 export const AuditEventItem = (props: {
   event: Event;
   workspace: Workspace;
   compact?: boolean;
+  ownPage?: boolean;
 }) => {
   const t = useTranslations('AuditEventItem');
   const locale = useLocale();
   const { event } = props;
-  const record = RECORD_PAGES[event.entityType];
+  const record = props.ownPage ? undefined : RECORD_PAGES[event.entityType];
   const actorName = event.actor?.displayName ?? event.actor?.email;
   const changes: Record<string, unknown> = event.changes;
 

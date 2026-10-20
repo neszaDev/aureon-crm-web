@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CompanyTable } from '@/components/crm/company/CompanyTable';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { ArchivedToggle } from '@/components/crm/list/ArchivedToggle';
+import { ExportButton } from '@/components/crm/list/ExportButton';
 import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
 import { ListEmpty } from '@/components/crm/list/ListEmpty';
 import { ListPager } from '@/components/crm/list/ListPager';
@@ -91,7 +92,21 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title')} description={t('description')} action={newCompany} />
+      <SettingsHeader
+        title={t('title')}
+        description={t('description')}
+        action={
+          <>
+            <ExportButton
+              workspaceId={workspace.id}
+              permissions={workspace.permissions}
+              list="companies"
+              query={query}
+            />
+            {newCompany}
+          </>
+        }
+      />
 
       <ListToolbar label={t('toolbar_label')}>
         <SearchBox

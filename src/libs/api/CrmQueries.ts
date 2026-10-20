@@ -15,6 +15,11 @@ export type TaskQuery = NonNullable<
   paths['/api/v1/workspaces/{workspaceId}/tasks']['get']['parameters']['query']
 >;
 
+/** What the audit trail takes (api.md, Audit): the backend's own query params. */
+export type AuditQuery = NonNullable<
+  paths['/api/v1/workspaces/{workspaceId}/audit-events']['get']['parameters']['query']
+>;
+
 // Read-side CRM calls for server components, like `Queries.ts`. Each returns the data plus
 // `unauthorized` (401: the session is gone), `forbidden` (403), `notFound` (404: unknown,
 // or not a member: the backend answers both alike) and `invalid` (400: a list's query it
@@ -598,6 +603,28 @@ export const getActivities = async (segment: string, link: ActivityLink, page: n
   });
 
   return { activities: data, ...flags(response.status) };
+};
+
+/**
+ * Loads a page of the workspace's audit events, newest first (`GET /workspaces/{id}/audit-events`).
+ * Any member may read one record's (`entityType` and `entityId` together); the rest needs
+ * `AUDIT_READ`.
+ * @param segment The `[workspaceId]` route segment.
+ * @param query The filters and paging, as the backend names them.
+ * @returns The page and the outcome flags (`forbidden`: no `AUDIT_READ`).
+ */
+export const getAuditEvents = async (segment: string, query: AuditQuery) => {
+  const workspaceId = toWorkspaceId(segment);
+  if (workspaceId === undefined) {
+    return { events: undefined, ...NOT_FOUND };
+  }
+
+  const api = await authedBackend();
+  const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/audit-events', {
+    params: { path: { workspaceId }, query },
+  });
+
+  return { events: data, ...flags(response.status) };
 };
 
 /**

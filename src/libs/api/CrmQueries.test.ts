@@ -3,6 +3,7 @@ import { parseListQuery } from '@/libs/crm/ListQuery';
 import { authedBackend } from './Backend';
 import {
   COMPANY_LIST,
+  getAuditEvents,
   getCompanies,
   getActivityReport,
   getDashboard,
@@ -264,6 +265,54 @@ describe('the reports', () => {
     vi.mocked(authedBackend).mockClear();
 
     await expect(get('seven', {})).resolves.toMatchObject({ report: undefined, notFound: true });
+    expect(authedBackend).not.toHaveBeenCalled();
+  });
+});
+
+describe(getAuditEvents, () => {
+  it("asks for a page of the workspace's history by the filters the backend names", async () => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue({
+      data: { content: [] },
+      response: new Response(null, { status: 200 }),
+    });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await expect(
+      getAuditEvents('7', { entityType: 'DEAL', entityId: 12, page: 2, size: 10 }),
+    ).resolves.toStrictEqual({
+      events: { content: [] },
+      unauthorized: false,
+      forbidden: false,
+      notFound: false,
+      invalid: false,
+    });
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/audit-events', {
+      params: {
+        path: { workspaceId: 7 },
+        query: { entityType: 'DEAL', entityId: 12, page: 2, size: 10 },
+      },
+    });
+  });
+
+  it('flags a member without AUDIT_READ asking for everything', async () => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue({
+      error: { status: 403, code: 'FORBIDDEN', message: 'Forbidden' },
+      response: new Response(null, { status: 403 }),
+    });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await expect(getAuditEvents('7', { page: 0, size: 20 })).resolves.toMatchObject({
+      events: undefined,
+      forbidden: true,
+    });
+  });
+
+  it('finds nothing for a malformed workspace without asking', async () => {
+    vi.mocked(authedBackend).mockClear();
+
+    await expect(getAuditEvents('abc', {})).resolves.toMatchObject({ notFound: true });
     expect(authedBackend).not.toHaveBeenCalled();
   });
 });

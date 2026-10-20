@@ -2,6 +2,7 @@ import { PencilIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { archiveContact, restoreContact } from '@/actions/crm/ContactActions';
+import { RecordHistory } from '@/components/crm/audit/RecordHistory';
 import { TagBadge } from '@/components/crm/contact/TagBadge';
 import { RecordDeals } from '@/components/crm/deal/RecordDeals';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
@@ -169,6 +170,7 @@ export default async function ContactPage(props: ContactPageProps) {
         link={{ contactId: contact.id }}
         label={contact.fullName}
       />
+      <RecordHistory workspace={workspace} entityType="CONTACT" entityId={contact.id} />
     </div>
   );
 }

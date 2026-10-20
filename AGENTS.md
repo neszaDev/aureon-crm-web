@@ -26,6 +26,8 @@ src/app/[locale]/(marketing)/   public pages (home, about)
 src/app/[locale]/(auth)/        (center)/ sign-in, sign-up, invite/[token]; app/** (the CRM);
                                 dashboard/** (the boilerplate's demos)
 src/actions/                    server actions: the only place that mutates via the backend
+src/app/api/                    route handlers: session/expired (ends a rejected session), crm/[workspaceId]/export/[list]
+                                (a list's CSV, streamed from the backend)
 src/actions/crm/*               CRM writes: workspaces, members, invitations (create, accept), pipeline, sources,
                                 companies, contacts, leads (status, convert), deals (move), tasks, activities
 src/libs/api/                   Backend.ts (typed client), Queries.ts (reads for pages), ApiError.ts,
@@ -40,15 +42,15 @@ src/libs/crm/*                  CRM logic: Permissions (`can`), RecordAccess (wh
                                 inputs), ListQuery (a list's state from its URL), DealHistory (stamp row signers),
                                 Reminders (the bell's count and its "20+"), PeriodQuery (a dashboard's or report's
                                 `?from&to`, read leniently, and the picker's presets), Reports (the
-                                report tabs: `?tab=`, which take a period)
+                                report tabs: `?tab=`, which take a period), Audit (the trail's record types and URL state)
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
-src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens
+src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens (for /api/crm too)
 src/validations/                zod schemas mirroring the backend's request rules (CRM: crm/*)
 src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx shadcn add`)
 src/components/report/          Marksheet domain UI: marks, totals, results table (demos only)
 src/components/crm/**           the CRM: shell/ (rail, switcher, account menu, record search, reminders bell), settings/, seals, dashboard/
                                 (the home: KPI strip, my deals, follow-ups, pipeline, won and lost, stages, recent activity and changes),
-                                audit/ (`AuditEventItem`), reports/ (the tabs and a panel per report, `ChartTable`),
+                                audit/ (`AuditEventItem`, `AuditTrail`, `RecordHistory`), reports/ (the tabs and a panel per report, `ChartTable`),
                                 PeriodPicker, and per record:
                                 company/ contact/ lead/ deal/ task/ activity/, with the shared list/ (list kit),
                                 record/ (header, facts, archive) and fields/ (pickers, owner, date and time)
@@ -86,9 +88,9 @@ Use `pnpm` (version pinned in `package.json` → `packageManager`), never npm or
 
 ## Backend integration rules
 
-- Talk to the backend only from the server: `src/actions/*` (writes) and `src/libs/api/Queries.ts`
-  (reads for server components). Never call the backend from client components or `fetch` it
-  by hand; use the typed client from `Backend.ts`.
+- Talk to the backend only from the server: `src/actions/*` (writes), `src/libs/api/Queries.ts`
+  (reads for server components) and the CSV export route (`src/app/api/crm/`). Never call the
+  backend from client components or `fetch` it by hand; use the typed client from `Backend.ts`.
 - `schema.d.ts` is **generated**: after a backend API change run `make api-types` and commit it.
   Type errors that follow are the point: fix the callers.
 - The backend's error body is `ApiError` (`components.schemas.ApiError`, re-exported by
@@ -110,6 +112,7 @@ Use `pnpm` (version pinned in `package.json` → `packageManager`), never npm or
   (the proxy still sees the cookie: a loop). Server actions end it through `actionFailure`
   (`redirectIfUnauthorized`), which clears the cookies and goes to `/sign-in?expired=1`, but keeps
   them when the request sent no access token (a parallel request may have just refreshed them).
+  The export route does the same and answers a bare 401, which its button turns into sign-in.
   A 5xx throws to the error boundary; a 404 on the workspace is `notFound()`.
 - **Record forms always send the `version` they read and the current owner** (`ownerId` /
   `assigneeId`; `null` unassigns). A stale version is `VERSION_CONFLICT`: `actionFailure` turns

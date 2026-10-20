@@ -2,6 +2,7 @@ import { PencilIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { archiveLead, restoreLead } from '@/actions/crm/LeadActions';
+import { RecordHistory } from '@/components/crm/audit/RecordHistory';
 import { currencyOptions } from '@/components/crm/CreateWorkspaceForm';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { ConversionSummary } from '@/components/crm/lead/ConversionSummary';
@@ -137,6 +138,7 @@ export default async function LeadPage(props: LeadPageProps) {
       <LeadDetails lead={lead} timeZone={workspace.timezone} />
       {/* Its tasks and activity; on a converted lead they show on its contact too. */}
       <RecordWork workspace={workspace} me={user.id} link={{ leadId: lead.id }} label={name} />
+      <RecordHistory workspace={workspace} entityType="LEAD" entityId={lead.id} />
     </div>
   );
 }

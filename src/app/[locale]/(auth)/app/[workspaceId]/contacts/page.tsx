@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ContactFilters } from '@/components/crm/contact/ContactFilters';
 import { ContactTable } from '@/components/crm/contact/ContactTable';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
+import { ExportButton } from '@/components/crm/list/ExportButton';
 import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
 import { ListEmpty } from '@/components/crm/list/ListEmpty';
 import { ListPager } from '@/components/crm/list/ListPager';
@@ -114,7 +115,21 @@ export default async function ContactsPage(props: ContactsPageProps) {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title')} description={t('description')} action={newContact} />
+      <SettingsHeader
+        title={t('title')}
+        description={t('description')}
+        action={
+          <>
+            <ExportButton
+              workspaceId={workspace.id}
+              permissions={workspace.permissions}
+              list="contacts"
+              query={query}
+            />
+            {newContact}
+          </>
+        }
+      />
 
       <ContactFilters
         workspaceId={workspace.id}

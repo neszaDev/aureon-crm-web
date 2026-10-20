@@ -4,6 +4,7 @@ import { cn } from 'cn';
 import {
   Building2Icon,
   ListOrderedIcon,
+  ScrollTextIcon,
   ShieldCheckIcon,
   SignpostIcon,
   UserRoundIcon,
@@ -12,14 +13,14 @@ import {
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/libs/I18nNavigation';
 
-// The settings pages, in order; the last one is about you, not the workspace. F3 adds Audit
-// (for `AUDIT_READ`) before it once its page exists.
+// The settings pages, in order; the last one is about you, not the workspace.
 const settingsNavItems = [
   { key: 'workspace', icon: Building2Icon },
   { key: 'members', icon: UsersRoundIcon },
   { key: 'roles', icon: ShieldCheckIcon },
   { key: 'pipeline', icon: ListOrderedIcon },
   { key: 'sources', icon: SignpostIcon },
+  { key: 'audit', icon: ScrollTextIcon },
   { key: 'profile', icon: UserRoundIcon },
 ] as const;
 
@@ -28,9 +29,10 @@ const settingsNavItems = [
  * it on smaller ones. The current page is filled with the seal tint.
  * @param props Component props.
  * @param props.workspaceId The `[workspaceId]` route segment.
+ * @param props.audit Whether the caller may read the audit trail (`AUDIT_READ`): its link shows.
  * @returns The navigation.
  */
-export const SettingsNav = (props: { workspaceId: string }) => {
+export const SettingsNav = (props: { workspaceId: string; audit: boolean }) => {
   const t = useTranslations('SettingsNav');
   const base = `/app/${props.workspaceId}/settings`;
   const page = usePathname().slice(base.length).split('/')[1] ?? '';
@@ -39,6 +41,9 @@ export const SettingsNav = (props: { workspaceId: string }) => {
     <nav aria-label={t('label')} className="xl:sticky xl:top-6">
       <ul className="flex flex-wrap gap-1.5 xl:flex-col xl:gap-0.5">
         {settingsNavItems.map((item) => {
+          if (item.key === 'audit' && !props.audit) {
+            return null;
+          }
           const current = item.key === page;
 
           return (

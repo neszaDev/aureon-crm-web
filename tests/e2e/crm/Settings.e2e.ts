@@ -459,6 +459,7 @@ test.describe('Settings', () => {
       await expectFits(page, `${thai}/settings/roles`);
       await expectFits(page, `${thai}/settings/pipeline`);
       await expectFits(page, `${thai}/settings/sources`);
+      await expectFits(page, `${thai}/settings/audit`);
       await expectFits(page, `${thai}/settings/profile`);
     });
   });

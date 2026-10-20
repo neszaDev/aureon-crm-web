@@ -33,6 +33,11 @@ Next.js server, which holds the session in two **httpOnly** cookies.
   With no access cookie but a refresh cookie, it calls `/auth/refresh`, sets the new cookies on
   the request (so this render already uses them) and on the response (so the browser keeps
   them). With neither, it redirects to `/sign-in`, with `?next=` back to the page for `/app/**`.
+- **The CSV export** (`/api/crm/<workspace>/export/<list>`, a route handler the list's Export
+  button fetches) goes through the proxy too, which refreshes the session the same way but never
+  redirects: the route streams the backend's file through, or answers JSON `{ message }`
+  (translated by code), or a bare 401 with the cookies cleared, as an action would, which the
+  button turns into the sign-in page.
 - **Invitation pages** (`/invite/<token>`) are public. The proxy refreshes the session there too,
   but never redirects, so a signed-in visitor is still recognised. The token is a secret: the
   page sends no `Referer` (meta and header), and nothing logs it (`redactPath` in `ApiError.ts`;

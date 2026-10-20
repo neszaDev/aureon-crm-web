@@ -68,19 +68,28 @@ export default async function proxy(request: NextRequest) {
   const hasAccessToken = Boolean(request.cookies.get(ACCESS_TOKEN_COOKIE)?.value);
 
   const protectedMatch = PROTECTED_PATH.exec(pathname);
+  // The CRM's own routes the browser fetches (the CSV export): no locale, but a session as fresh
+  // as the page's.
+  const crmApi = pathname.startsWith('/api/crm/');
+  // An API route takes the request as it is; a page goes through i18n routing.
+  const pass = () =>
+    crmApi
+      ? NextResponse.next({ request: { headers: request.headers } })
+      : handleI18nRouting(request);
   // Invitation pages are public, but they tell a signed-in visitor apart: refresh their session
   // too, without sending anyone to sign in.
-  if ((protectedMatch || INVITE_PATH.test(pathname)) && !hasAccessToken) {
+  if ((protectedMatch || crmApi || INVITE_PATH.test(pathname)) && !hasAccessToken) {
     const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
     const tokens = refreshToken ? await refreshSession(refreshToken) : undefined;
 
     if (!tokens) {
       // Don't delete cookies here: a parallel request may have just rotated them successfully.
       // A server action runs anyway: its own 401 handling sends the browser to sign in, while a
-      // redirect here makes the client re-post the action to sign-in and throw.
+      // redirect here makes the client re-post the action to sign-in and throw. A CRM API route
+      // answers its own 401 too: the browser fetched it, and would take a redirect for the file.
       return protectedMatch && !isServerAction(request)
         ? redirectToSignIn(request, protectedMatch[1])
-        : handleI18nRouting(request);
+        : pass();
     }
 
     const cookies = sessionCookies(tokens, isSecureAppUrl(Env.APP_URL));
@@ -89,11 +98,15 @@ export default async function proxy(request: NextRequest) {
     for (const cookie of cookies) {
       request.cookies.set(cookie.name, cookie.value);
     }
-    const response = handleI18nRouting(request);
+    const response = pass();
     for (const cookie of cookies) {
       response.cookies.set(cookie);
     }
     return response;
+  }
+
+  if (crmApi) {
+    return pass();
   }
 
   const authPageMatch = AUTH_PAGE_PATH.exec(pathname);
@@ -109,5 +122,6 @@ export const config = {
   // Match all pathnames except for
   // - … if they start with `/_next`, `/_vercel` or `api`
   // - … the ones containing a dot (e.g. `favicon.ico`)
-  matcher: '/((?!_next|_vercel|api|.*\\..*).*)',
+  // and the CRM's API routes, which only get their session refreshed.
+  matcher: ['/((?!_next|_vercel|api|.*\\..*).*)', '/api/crm/:path*'],
 };

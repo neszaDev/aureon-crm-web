@@ -26,7 +26,10 @@ const event = (extra: Partial<Event>): Event => ({
   ...extra,
 });
 
-const item = async (value: Event, options: { compact?: boolean; locale?: 'en' | 'fr' } = {}) =>
+const item = async (
+  value: Event,
+  options: { compact?: boolean; ownPage?: boolean; locale?: 'en' | 'fr' } = {},
+) =>
   await render(
     <NextIntlClientProvider
       locale={options.locale ?? 'en'}
@@ -34,7 +37,12 @@ const item = async (value: Event, options: { compact?: boolean; locale?: 'en' | 
       timeZone="UTC"
     >
       <ul>
-        <AuditEventItem event={value} workspace={WORKSPACE} compact={options.compact} />
+        <AuditEventItem
+          event={value}
+          workspace={WORKSPACE}
+          compact={options.compact}
+          ownPage={options.ownPage}
+        />
       </ul>
     </NextIntlClientProvider>,
   );
@@ -189,6 +197,17 @@ describe(AuditEventItem, () => {
 
     const [line] = lines();
     expect(line).toBe(`Notes: ${'ก็'.repeat(79)}… → short`);
+  });
+
+  it("names the record without a link or its number on the record's own page", async () => {
+    await item(event({ entityLabel: 'Acme Trading Co' }), { ownPage: true });
+
+    await expect
+      .element(page.getByRole('listitem').first())
+      .toHaveTextContent('Riley Rep changed Acme Trading Co');
+    // The page's header already numbers it, and a link would lead to this very page.
+    expect(page.getByRole('link').elements()).toHaveLength(0);
+    expect(page.getByText('C-0042').elements()).toHaveLength(0);
   });
 
   it('cuts a long name of a member, a record or the history entry itself, as it cuts a text', async () => {

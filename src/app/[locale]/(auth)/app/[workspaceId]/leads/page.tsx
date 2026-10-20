@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { LeadFilters } from '@/components/crm/lead/LeadFilters';
 import { LeadTable } from '@/components/crm/lead/LeadTable';
+import { ExportButton } from '@/components/crm/list/ExportButton';
 import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
 import { ListEmpty } from '@/components/crm/list/ListEmpty';
 import { ListPager } from '@/components/crm/list/ListPager';
@@ -96,7 +97,21 @@ export default async function LeadsPage(props: LeadsPageProps) {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title')} description={t('description')} action={newLead} />
+      <SettingsHeader
+        title={t('title')}
+        description={t('description')}
+        action={
+          <>
+            <ExportButton
+              workspaceId={workspace.id}
+              permissions={workspace.permissions}
+              list="leads"
+              query={query}
+            />
+            {newLead}
+          </>
+        }
+      />
 
       <LeadFilters
         path={path}

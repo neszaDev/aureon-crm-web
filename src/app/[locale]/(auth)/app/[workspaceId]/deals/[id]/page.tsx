@@ -2,6 +2,7 @@ import { ArrowRightLeftIcon, PencilIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { archiveDeal, restoreDeal } from '@/actions/crm/DealActions';
+import { RecordHistory } from '@/components/crm/audit/RecordHistory';
 import { DealFacts } from '@/components/crm/deal/DealFacts';
 import { DealStatusBadge } from '@/components/crm/deal/DealStatusBadge';
 import { MoveDealDialog } from '@/components/crm/deal/MoveDealDialog';
@@ -140,6 +141,7 @@ export default async function DealPage(props: DealPageProps) {
       <StageHistory history={history.history} timeZone={workspace.timezone} />
       {/* Its tasks and activity; they show on its company's page too. */}
       <RecordWork workspace={workspace} me={user.id} link={{ dealId: deal.id }} label={deal.name} />
+      <RecordHistory workspace={workspace} entityType="DEAL" entityId={deal.id} />
     </div>
   );
 }

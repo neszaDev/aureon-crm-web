@@ -3,7 +3,7 @@
  * @param props Component props.
  * @param props.title The title.
  * @param props.description One or two sentences under it.
- * @param props.action A button beside the title, such as "Invite member".
+ * @param props.action Buttons beside the title, such as "Invite member" (side by side).
  * @returns The header.
  */
 export const SettingsHeader = (props: {
@@ -16,6 +16,6 @@ export const SettingsHeader = (props: {
       <h1 className="text-2xl font-bold tracking-[-0.01em] break-words">{props.title}</h1>
       <p className="max-w-[65ch] text-muted-foreground">{props.description}</p>
     </div>
-    {props.action && <div className="shrink-0">{props.action}</div>}
+    {props.action && <div className="flex shrink-0 flex-wrap gap-2">{props.action}</div>}
   </header>
 );

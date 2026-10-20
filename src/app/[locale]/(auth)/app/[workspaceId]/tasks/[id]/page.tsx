@@ -1,6 +1,7 @@
 import { PencilIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { RecordHistory } from '@/components/crm/audit/RecordHistory';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { RecordHeader } from '@/components/crm/record/RecordHeader';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
@@ -100,6 +101,7 @@ export default async function TaskPage(props: TaskPageProps) {
         actions={actions}
       />
       <TaskFacts task={task} workspaceId={workspace.id} timeZone={workspace.timezone} />
+      <RecordHistory workspace={workspace} entityType="TASK" entityId={task.id} />
     </div>
   );
 }

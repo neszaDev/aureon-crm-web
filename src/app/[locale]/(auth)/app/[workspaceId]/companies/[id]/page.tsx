@@ -2,6 +2,7 @@ import { ExternalLinkIcon, PencilIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { archiveCompany, restoreCompany } from '@/actions/crm/CompanyActions';
+import { RecordHistory } from '@/components/crm/audit/RecordHistory';
 import { CompanyContacts } from '@/components/crm/company/CompanyContacts';
 import { RecordDeals } from '@/components/crm/deal/RecordDeals';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
@@ -169,6 +170,7 @@ export default async function CompanyPage(props: CompanyPageProps) {
         link={{ companyId: company.id }}
         label={company.name}
       />
+      <RecordHistory workspace={workspace} entityType="COMPANY" entityId={company.id} />
     </div>
   );
 }

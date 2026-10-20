@@ -288,7 +288,8 @@ test.describe('Pipeline', () => {
     await page.getByRole('link', { name: 'Acme seats' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Acme seats' })).toBeVisible();
     await expect(page.getByText('Why it was lost')).toBeVisible();
-    await expect(page.getByText('Went with a competitor')).toBeVisible();
+    // The fact itself: the History section below repeats it as a change.
+    await expect(page.getByText('Went with a competitor', { exact: true })).toBeVisible();
     await expect(page.getByText('Lost: closed as lost')).toBeVisible();
 
     // The Move dialog on a deal's page asks the same.
@@ -304,7 +305,7 @@ test.describe('Pipeline', () => {
     await move.getByLabel('Reason').fill('Budget frozen');
     await move.getByRole('button', { name: 'Move deal' }).click();
     await expect(page.getByText('Beta rollout moved to Lost')).toBeVisible();
-    await expect(page.getByText('Budget frozen')).toBeVisible();
+    await expect(page.getByText('Budget frozen', { exact: true })).toBeVisible();
   });
 
   test('cancels a drop outside every column', async ({ page, request }) => {
