@@ -120,6 +120,21 @@ test.describe('Settings', () => {
     await expect(page.getByRole('heading', { name: '1 member' })).toBeVisible();
   });
 
+  test('keeps Invite member clear of the description at 640 px', async ({ page }) => {
+    await page.setViewportSize({ width: 640, height: 800 });
+    const { workspace } = await startAcme(page);
+    await page.goto(`${workspace}/settings/members`);
+
+    const invite = page.getByRole('button', { name: 'Invite member' });
+    const description = page.getByText('Who works in this workspace', { exact: false });
+    await expect(invite).toBeVisible();
+    const button = await invite.boundingBox();
+    const text = await description.boundingBox();
+    // Side by side, the button whole: never squeezed over the text.
+    expect(button && text && button.x >= text.x + text.width).toBe(true);
+    expect(await invite.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+  });
+
   test('creates an invitation link in the inviter language, then revokes it', async ({
     page,
     baseURL,

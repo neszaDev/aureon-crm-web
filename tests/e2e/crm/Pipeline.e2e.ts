@@ -312,6 +312,26 @@ test.describe('Pipeline', () => {
     expect(await stageOf(request, owner, mine.id)).toBe('Qualification');
   });
 
+  test('keeps the two actions side by side beside the title at 1024 px', async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize({ width: 1024, height: 800 });
+    const { owner } = await seedBoard(request);
+    await openBoard(page, owner, 'Acme seats');
+
+    const exportCsv = await page.getByRole('button', { name: 'Export CSV' }).boundingBox();
+    const newDeal = await page.getByRole('link', { name: 'New deal' }).first().boundingBox();
+
+    expect(exportCsv?.y).toBe(newDeal?.y);
+    const title = page.getByRole('heading', { level: 1, name: 'Deals' });
+    const { height, lineHeight } = await title.evaluate((h1) => ({
+      height: h1.getBoundingClientRect().height,
+      lineHeight: Number(getComputedStyle(h1).lineHeight.replace(/px$/u, '')),
+    }));
+    expect(height).toBeLessThanOrEqual(lineHeight + 1);
+  });
+
   test('filters the deal list by its lead source', async ({ page, request }) => {
     const { owner, mia } = await seedBoard(request);
     const source = await apiCall<{ id: number }>(
