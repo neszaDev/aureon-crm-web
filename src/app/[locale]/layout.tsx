@@ -47,14 +47,11 @@ export const metadata: Metadata = {
   ],
 };
 
+// The browser's bar colour (`theme-color`) is in the layout's <head>, not here: Next draws the
+// viewport's tags again on every navigation, which would undo a theme chosen in the app.
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  // The ground of each OS scheme; `applyTheme` follows a theme chosen in the app instead.
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: THEME_GROUNDS.light },
-    { media: '(prefers-color-scheme: dark)', color: THEME_GROUNDS.dark },
-  ],
 };
 
 export function generateStaticParams() {
@@ -82,6 +79,17 @@ export default async function RootLayout(props: {
   return (
     <html lang={locale} className={anuphan.variable} suppressHydrationWarning>
       <head>
+        {/* The ground of each OS scheme; `applyTheme` sets both to a theme chosen in the app. */}
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: light)"
+          content={THEME_GROUNDS.light}
+        />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: dark)"
+          content={THEME_GROUNDS.dark}
+        />
         <script
           // A constant script with no user input; Theme.test.ts proves it applies only light|dark.
           // oxlint-disable-next-line react/no-danger

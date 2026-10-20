@@ -40,6 +40,16 @@ const expectFits = async (page: Page, url: string) => {
   await expect(page.locator('form:not([method="post"])'), url).toHaveCount(0);
 };
 
+/**
+ * The colours the page gives the browser's bar (`theme-color`), one per OS scheme.
+ * @param page Playwright page.
+ * @returns The tags' colours.
+ */
+const barColours = async (page: Page) =>
+  await page
+    .locator('meta[name="theme-color"]')
+    .evaluateAll((tags) => tags.map((tag) => tag.getAttribute('content')));
+
 test.describe('Settings', () => {
   test('renames the workspace and changes its currency', async ({ page }) => {
     const { workspace } = await startAcme(page);
@@ -421,15 +431,20 @@ test.describe('Settings', () => {
     await page.getByRole('menuitem', { name: 'Theme' }).click();
     await page.getByRole('menuitemradio', { name: 'Dark' }).click();
     await expect(page.locator('html')).toHaveClass(/\bdark\b/u);
+    // The browser's bar takes the lacquer ground too, though the OS is light.
+    await expect.poll(async () => await barColours(page)).toStrictEqual(['#141212', '#141212']);
     await page.keyboard.press('Escape');
     await page.reload();
     await expect(page.locator('html')).toHaveClass(/\bdark\b/u);
+    await expect.poll(async () => await barColours(page)).toStrictEqual(['#141212', '#141212']);
 
     await account.click();
     await page.getByRole('menuitem', { name: 'Language' }).click();
     await page.getByRole('menuitemradio', { name: 'ไทย' }).click();
     await expect(page).toHaveURL(/\/th\/app\/\d+\/settings\/pipeline$/u);
     await expect(page).toHaveTitle('ไปป์ไลน์');
+    // A navigation in the app keeps it.
+    expect(await barColours(page)).toStrictEqual(['#141212', '#141212']);
     await expect(
       page.getByRole('navigation', { name: 'เมนูพื้นที่ทำงาน' }).getByRole('link', { name: 'การตั้งค่า' }),
     ).toHaveAttribute('aria-current', 'page');
