@@ -76,8 +76,9 @@ page that must be signed out.
 What's covered: public pages, i18n switching, protected-route redirects (with locale), the full
 session lifecycle, **token refresh through the proxy** (access cookie removed → page still loads,
 refresh token rotated), auth errors, the failed-sign-in limit, form validation, test-results CRUD
-with the summary, file upload/download/delete with type and size errors, and admin user
-management (hidden from regular users, search, role change, delete, no self-edit).
+with the summary, file upload/download/delete with type and size errors, admin user
+management (hidden from regular users, search, role change, delete, no self-edit), and dated pages
+hydrating without a mismatch in a browser at UTC+14 (`I18n.e2e.ts`).
 
 The CRM specs. Their helpers are in `tests/e2e/crm/helpers.ts`: `expectNoA11yViolations` (axe on
 a page or an open dialog, once it has its title and has stopped animating), `createWorkspace`,
@@ -141,7 +142,8 @@ rep's deal: the backend's 403 must show as the translated toast, and nothing may
 `Showcase.e2e.ts` opens every app route and runs axe-core (WCAG 2.1 A + AA) with reduced motion.
 Known violations are listed per route in `tests/e2e/a11y-baseline.json`; anything else fails.
 When a listed rule no longer occurs, the test adds an `a11y-baseline` annotation: remove the entry,
-so the list only shrinks. Don't add entries to get green; fix the violation.
+so the list only shrinks. Don't add entries to get green; fix the violation. The demos' links are
+also checked for contrast in the dark theme.
 
 ## Visual regression
 
