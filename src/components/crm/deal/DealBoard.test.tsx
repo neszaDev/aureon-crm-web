@@ -291,7 +291,6 @@ describe(DealBoard, () => {
     expect(scroller?.scrollWidth).toBe(scroller?.clientWidth);
     expect(fadeOpacity()).toBe('0');
     // With room to spare: a content column a few pixels narrower doesn't scroll by one.
-    expect((scroller?.clientWidth ?? 0) - (scroller?.scrollWidth ?? 0)).toBe(0);
     const content = scroller?.parentElement?.parentElement;
     if (content instanceof HTMLElement) {
       content.style.width = '1144px';
