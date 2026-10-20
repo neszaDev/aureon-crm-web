@@ -161,7 +161,9 @@ Run it with `BACKEND_URL` (where the server reaches the API) and `APP_URL` (its 
 last `X-Forwarded-For` entry (nginx: `proxy_set_header X-Forwarded-For $remote_addr;`), or a client
 picks its own and the per-IP sign-in and registration limits don't hold, and must pass the
 browser's `Host` on (`proxy_set_header Host $host;`, or `$http_host` when the public URL carries a
-port), or every server action fails ([configuration](docs/configuration.md)). Keep the logs clean
-of secrets: an invitation's path (`/invite/<token>`) is one, which the app keeps out of its own
-request log and a reverse proxy's access log must drop too, and `NEXT_PUBLIC_LOGGING_LEVEL` stays
-at `info` or above (it is inlined at build).
+port), or every server action fails ([configuration](docs/configuration.md)). It must also cap
+request bodies at 11 MB on the files page (`/dashboard/files`) and 1 MB everywhere else: Next reads
+up to 11 MB of a POST before its own 413 ([request bodies](docs/architecture.md#request-bodies)).
+Keep the logs clean of secrets: an invitation's path (`/invite/<token>`) is one, which the app keeps
+out of its own request log and a reverse proxy's access log must drop too, and
+`NEXT_PUBLIC_LOGGING_LEVEL` stays at `info` or above (it is inlined at build).
