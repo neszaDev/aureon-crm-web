@@ -88,7 +88,7 @@ test.describe('Pipeline', () => {
       .locator('..')
       .evaluate((node) => ({
         fits: node.scrollWidth <= node.clientWidth,
-        fade: getComputedStyle(node.querySelector('.board-fade') ?? node).opacity,
+        fade: getComputedStyle(node.querySelector('.scroll-fade') ?? node).opacity,
         page: document.documentElement.scrollWidth <= window.innerWidth,
       }));
     expect(board).toStrictEqual({ fits: true, fade: '0', page: true });
