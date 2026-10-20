@@ -3,7 +3,8 @@
  * @param props Component props.
  * @param props.title The title.
  * @param props.description One or two sentences under it.
- * @param props.action Buttons beside the title, such as "Invite member" (side by side).
+ * @param props.action Buttons beside the title, such as "Invite member" (side by side, wrapping
+ *   to the right when the title needs the room).
  * @returns The header.
  */
 export const SettingsHeader = (props: {
@@ -16,6 +17,9 @@ export const SettingsHeader = (props: {
       <h1 className="text-2xl font-bold tracking-[-0.01em] break-words">{props.title}</h1>
       <p className="max-w-[65ch] text-muted-foreground">{props.description}</p>
     </div>
-    {props.action && <div className="flex shrink-0 flex-wrap gap-2">{props.action}</div>}
+    {/* The actions wrap before they squeeze the title apart ("Dash / board" at 1024 px). */}
+    {props.action && (
+      <div className="flex min-w-0 flex-wrap gap-2 sm:justify-end">{props.action}</div>
+    )}
   </header>
 );

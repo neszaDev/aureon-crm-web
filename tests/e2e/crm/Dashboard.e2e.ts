@@ -375,6 +375,23 @@ test.describe('Dashboard', () => {
     await expectNoA11yViolations(page);
   });
 
+  test('keeps its title whole beside the create actions at 1024 px', async ({ page, request }) => {
+    await page.setViewportSize({ width: 1024, height: 800 });
+    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
+    await seed(request, owner, 'companies', { name: 'Initech' });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(owner.path);
+
+    const title = page.getByRole('heading', { level: 1, name: 'Dashboard' });
+    await expect(page.getByRole('group', { name: 'Create a record' })).toBeVisible();
+    // One line: the actions wrap rather than squeeze the word apart.
+    const { height, lineHeight } = await title.evaluate((h1) => ({
+      height: h1.getBoundingClientRect().height,
+      lineHeight: Number(getComputedStyle(h1).lineHeight.replace(/px$/u, '')),
+    }));
+    expect(height).toBeLessThanOrEqual(lineHeight + 1);
+  });
+
   test.describe('on a phone, in Thai', () => {
     test.use({ viewport: { width: 390, height: 844 } });
 
