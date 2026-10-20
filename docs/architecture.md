@@ -155,6 +155,18 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
 - **The audit trail** is a settings page for `AUDIT_READ`; every record's page has its own
   History (`RecordHistory`), readable by every member.
 
+## Security headers
+
+`next.config.ts` sends them on every response. `X-Frame-Options: SAMEORIGIN` and the CSP's
+`frame-ancestors 'self'` keep other sites from framing a page (no clickjacking of its forms);
+the rest of the CSP is `base-uri 'self'; object-src 'none'; form-action 'self'`. Then `nosniff`,
+`Referrer-Policy: strict-origin-when-cross-origin` (`no-referrer` on invitation pages), and a
+`Permissions-Policy` that denies the camera, microphone, geolocation, payment and USB, none of
+which the app uses. A file's download keeps its route's own sandbox CSP instead (Next would send
+the global one in its place). **Known limit:** the CSP has no `script-src`, so it is no backstop
+against an XSS: a nonce would make every page dynamic (the public pages are static), and Next's
+inline scripts need a nonce or `'unsafe-inline'`. No HSTS here: see the deployment shape.
+
 ## Rendering
 
 Public pages are statically generated per locale. Everything under `app` and
@@ -163,4 +175,6 @@ Public pages are statically generated per locale. Everything under `app` and
 ## Deployment shape
 
 `docker/Dockerfile` builds Next's standalone server (non-root, `node server.js`). The same image
-runs in every environment; `BACKEND_URL` and `APP_URL` are read at startup, not baked in.
+runs in every environment; `BACKEND_URL` and `APP_URL` are read at startup, not baked in. HTTPS
+ends at a TLS terminator in front of it, which sends `Strict-Transport-Security`: the app can't,
+since the one image runs under any `APP_URL`, `http://` ones included.

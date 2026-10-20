@@ -504,21 +504,28 @@ test.describe('Security', () => {
       expect(await file.text()).toContain(`"'=HYPERLINK(""http://evil.example"",""x"")"`);
     });
 
-    test('frames only the sign-in page: the session cookies stay out of its frames', async ({
+    test("can't frame a page: its frame shows nothing of the app, and gets no session", async ({
       page,
       request,
       baseURL,
     }) => {
       const owner = await seedWorkspace(request, { workspace: 'Framed Workspace' });
       await signIn(page, { email: owner.email, password: PASSWORD });
+      const answered = page.waitForResponse(`${originOf(baseURL)}${owner.path}`);
 
       await openElsewhere(
         page,
         `<iframe title="App" src="${originOf(baseURL)}${owner.path}"></iframe>`,
       );
 
+      // The frame asked without the session cookies: the app sent it to sign in.
+      const answer = await answered;
+      expect(answer.status()).toBe(307);
+      expect(answer.headers().location).toMatch(/\/sign-in\?/u);
+      // The browser refused to show the app's answer: its own error page stands in.
+      await expect.poll(() => page.frames()[1]?.url()).toBe('chrome-error://chromewebdata/');
       const frame = page.frameLocator('iframe');
-      await expect(frame.getByRole('button', { name: 'Sign in' })).toBeVisible();
+      await expect(frame.getByRole('button', { name: 'Sign in' })).toHaveCount(0);
       await expect(frame.getByText('Framed Workspace')).toHaveCount(0);
       // The tab itself is still signed in.
       await page.goto(owner.path);
@@ -649,6 +656,35 @@ test.describe('Security', () => {
   });
 
   test.describe('Pages', () => {
+    test('tell browsers not to frame them, and send the usual security headers', async ({
+      page,
+      request,
+      baseURL,
+    }) => {
+      const owner = await seedWorkspace(request, { workspace: 'Framed Workspace' });
+      await signIn(page, { email: owner.email, password: PASSWORD });
+
+      for (const path of ['/', '/sign-in', owner.path, `${owner.path}/settings/members`]) {
+        // oxlint-disable-next-line no-await-in-loop -- one page after the other
+        const response = await page.request.get(path);
+        const headers = response.headers();
+        const csp = headers['content-security-policy'] ?? '';
+
+        expect
+          .soft(headers['x-frame-options'] ?? /frame-ancestors[^;]*/u.exec(csp)?.[0], path)
+          .toBeDefined();
+        expect.soft(csp, `${path} content-security-policy`).not.toBe('');
+        expect.soft(headers['x-content-type-options'], `${path} nosniff`).toBe('nosniff');
+        expect.soft(headers['referrer-policy'], `${path} referrer-policy`).toBeDefined();
+        expect.soft(headers['permissions-policy'], `${path} permissions-policy`).toBeDefined();
+      }
+
+      // Another site frames the sign-in form, which takes a password inside its page.
+      await openElsewhere(page, `<iframe title="App" src="${originOf(baseURL)}/sign-in"></iframe>`);
+      await expect.poll(() => page.frames()[1]?.url()).toBe('chrome-error://chromewebdata/');
+      await expect(page.frameLocator('iframe').getByLabel('Password')).toHaveCount(0);
+    });
+
     test('send a sales rep none of what their role hides, such as pending invitations', async ({
       page,
       request,
