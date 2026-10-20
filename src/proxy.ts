@@ -39,19 +39,20 @@ const refreshSession = async (refreshToken: string) => {
   return toSessionTokens(result?.data);
 };
 
-// How long a refresh's result is shared after it settles, and how many are shared at once.
-const REFRESH_SHARE_MS = 5000;
+// How long a successful refresh's tokens are shared after it settles, and how many refreshes are
+// shared at once.
+const REFRESH_SHARE_MS = 2000;
 const MAX_SHARED_REFRESHES = 1000;
 // Refreshes on their way or just settled, by the hash of the refresh token they used.
 const sharedRefreshes = new Map<string, Promise<SessionTokens | undefined>>();
 
 /**
  * Refreshes a session once for every request holding its refresh token: those that arrive
- * together (two tabs, the bell, a prefetch, an export) or within a few seconds after share one
+ * together (two tabs, the bell, a prefetch, an export), and for 2 s after a success, share one
  * call and its new tokens, where each on its own would lose the rotation to the first and be sent
- * to sign in. Per server process: other instances rely on the API's reuse grace. The map keeps
- * a hash of the token, never the token, drops each entry a few seconds after it settles, and
- * holds a bounded number; past it a request refreshes on its own.
+ * to sign in. A failure is shared only by those already waiting: the next request asks again.
+ * Per server process: other instances rely on the API's reuse grace. The map keeps a hash of the
+ * token, never the token, and holds a bounded number; past it a request refreshes on its own.
  * @param refreshToken Current refresh token.
  * @returns New tokens, or `undefined` if the backend rejected the token or is unreachable.
  */
@@ -68,12 +69,18 @@ const sharedRefresh = async (refreshToken: string) => {
     return await refresh;
   }
   sharedRefreshes.set(key, refresh);
+  let tokens: SessionTokens | undefined;
   try {
-    return await refresh;
+    tokens = await refresh;
+    return tokens;
   } finally {
-    setTimeout(() => {
+    if (tokens) {
+      setTimeout(() => {
+        sharedRefreshes.delete(key);
+      }, REFRESH_SHARE_MS);
+    } else {
       sharedRefreshes.delete(key);
-    }, REFRESH_SHARE_MS);
+    }
   }
 };
 

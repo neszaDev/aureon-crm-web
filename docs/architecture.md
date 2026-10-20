@@ -50,12 +50,15 @@ Next.js server, which holds the session in two **httpOnly** cookies.
   needed: no JWT decoding in the frontend.
 - **Requests that refresh together share one refresh.** Two tabs, the bell, a prefetch and an
   export can arrive at once with the same expired session: the proxy calls `/auth/refresh` once
-  and gives every one of them (and any arriving within 5 s after) the same new cookies, instead
-  of each but the first losing the rotation and bouncing through `/sign-in?expired=1`. The map
-  behind it lives in the server process (keyed by the token's hash, each entry dropped 5 s after
-  its refresh settles, at most 1,000 at once), so this holds per process: with several instances,
-  a request on another one still loses, and relies on the API's 30 s reuse grace, which refuses
-  it without revoking the session (the browser keeps the winner's cookies).
+  and gives every one of them the same new cookies, instead of each but the first losing the
+  rotation and bouncing through `/sign-in?expired=1`. A failed refresh is shared only by the
+  requests already waiting on it; the next one asks the backend again. A successful one is kept
+  for 2 s, so for 2 s after a rotation, a request carrying the old refresh token to the same
+  server process receives the new pair (the API's own reuse grace would answer 401); this narrow
+  window is the price of not bouncing concurrent tabs. The map behind it lives in the server
+  process (keyed by the token's hash, at most 1,000 at once), so this holds per process: with
+  several instances, a request on another one still loses, and relies on the API's 30 s reuse
+  grace, which refuses it without revoking the session (the browser keeps the winner's cookies).
 - **A failed refresh does not delete cookies.** Two tabs can refresh at once and, with rotation,
   the second one loses; deleting would sign out the tab that just succeeded.
 - **Sign-out** revokes the refresh token on the backend (best effort) and clears both cookies.

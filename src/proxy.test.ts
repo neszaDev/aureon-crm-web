@@ -216,22 +216,34 @@ describe(proxy, () => {
       );
     });
 
-    it('gives a request just after it the same result, and refreshes again after a few seconds', async () => {
+    it('gives a request within 2 s after it the same new tokens, and refreshes again after', async () => {
       refresh.mockClear();
       routeI18n.mockImplementation((request) => NextResponse.next({ request }));
       refresh.mockResolvedValue({ data: TOKENS, response: new Response(null, { status: 200 }) });
 
       const first = outcome(await proxy(pageRequest('late')));
+      vi.advanceTimersByTime(1999);
       const late = outcome(await proxy(pageRequest('late')));
 
       expect(refresh).toHaveBeenCalledOnce();
       expect(late).toStrictEqual(first);
 
-      vi.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(1);
       await proxy(pageRequest('late'));
 
       expect(refresh).toHaveBeenCalledTimes(2);
       refresh.mockResolvedValue({ response: new Response(null, { status: 401 }) });
+    });
+
+    it('keeps no failed refresh: a request just after it asks the backend again', async () => {
+      refresh.mockClear();
+      routeI18n.mockImplementation((request) => NextResponse.next({ request }));
+      refresh.mockResolvedValue({ response: new Response(null, { status: 401 }) });
+
+      await proxy(pageRequest('failed'));
+      await proxy(pageRequest('failed'));
+
+      expect(refresh).toHaveBeenCalledTimes(2);
     });
 
     it('refreshes each refresh token on its own', async () => {
