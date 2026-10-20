@@ -125,7 +125,15 @@ export default async function DashboardPage(props: DashboardPageProps) {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      {header(<QuickActions workspace={workspace} members={members.members} me={user.id} />)}
+      {header(
+        // Beside the title, its rows wrap to the right edge.
+        <QuickActions
+          workspace={workspace}
+          members={members.members}
+          me={user.id}
+          className="sm:justify-end"
+        />,
+      )}
 
       <KpiStrip counts={data.counts} workspaceId={workspace.id} />
 

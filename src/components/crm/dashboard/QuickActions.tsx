@@ -1,3 +1,4 @@
+import { cn } from 'cn';
 import { PlusIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { TaskDialog } from '@/components/crm/task/TaskDialog';
@@ -18,17 +19,19 @@ const PATHS = { company: 'companies', contact: 'contacts', lead: 'leads', deal: 
  * @param props.workspace The workspace: its id, time zone and the caller's permissions.
  * @param props.members The workspace's members, for the task's assignee.
  * @param props.me The caller's user id.
+ * @param props.className Extra classes for the group (how its rows align).
  * @returns The group of buttons.
  */
 export const QuickActions = (props: {
   workspace: Pick<components['schemas']['WorkspaceResponse'], 'id' | 'timezone' | 'permissions'>;
   members: components['schemas']['MemberRef'][];
   me: number;
+  className?: string;
 }) => {
   const t = useTranslations('QuickActions');
 
   return (
-    <fieldset className="flex min-w-0 flex-wrap gap-2">
+    <fieldset className={cn('flex min-w-0 flex-wrap gap-2', props.className)}>
       <legend className="sr-only">{t('label')}</legend>
       {RECORDS.map((record) => (
         <Button key={record} asChild variant="outline">
