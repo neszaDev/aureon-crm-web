@@ -24,7 +24,19 @@ test.describe('Sanity', () => {
       const response = await page.goto('/no-such-page');
 
       expect(response?.status()).toBe(404);
-      await expect(page.getByRole('heading', { name: 'This page is absent.' })).toBeVisible();
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'This page is absent.' }),
+      ).toBeVisible();
+      // Aureon's public page: the vermilion bar with the wordmark, one card, no stamp on it.
+      const bar = page.getByRole('banner');
+      await expect(bar).toHaveCSS('background-color', 'rgb(200, 54, 28)');
+      await expect(bar.getByRole('link', { name: 'Aureon CRM home' })).toBeVisible();
+      await expect(page.getByText('Absent', { exact: true })).toHaveCount(0);
+      const home = page.getByRole('link', { name: 'Back to home' });
+      await expect(home).toHaveCSS('height', '36px');
+
+      await home.click();
+      await expect(page).toHaveURL(/\/$/u);
     });
   });
 });

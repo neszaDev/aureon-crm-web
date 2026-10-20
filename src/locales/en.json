@@ -1299,7 +1299,6 @@
   },
   "NotFound": {
     "meta_title": "Page not found",
-    "mark": "Absent",
     "title": "This page is absent.",
     "text": "The link may be old or mistyped. Nothing was lost.",
     "home": "Back to home"

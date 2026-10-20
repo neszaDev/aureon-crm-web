@@ -1299,7 +1299,6 @@
   },
   "NotFound": {
     "meta_title": "Page introuvable",
-    "mark": "Absent",
     "title": "Cette page est absente.",
     "text": "Le lien est peut-être ancien ou mal saisi. Rien n'a été perdu.",
     "home": "Retour à l'accueil"
