@@ -1,6 +1,7 @@
 import type { Locator } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
+import { COMPANIES, CONTACTS, DEALS, MORE_COMPANIES, PEOPLE } from '../mockData';
 import {
   addMember,
   apiCall,
@@ -16,40 +17,46 @@ import {
   waitForHydration,
 } from './helpers';
 
+// The contact and the lead, as their pages name them.
+const BUYER = `${CONTACTS.buyer.firstName} ${CONTACTS.buyer.lastName}`;
+const LEAD = `${CONTACTS.lead.firstName} ${CONTACTS.lead.lastName}`;
+
 test.describe('Records', () => {
   test('creates a company and a contact, and logs a call that shows on both timelines', async ({
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { owner: 'Olivia Owner' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     await signIn(page, { email: owner.email, password: PASSWORD });
 
-    const acme = await createCompany(page, owner.path, { name: 'Acme Trading' });
-    await expect(page).toHaveTitle('Acme Trading');
+    const brightwater = await createCompany(page, owner.path, { name: COMPANIES.brightwater.name });
+    await expect(page).toHaveTitle(COMPANIES.brightwater.name);
     await expect(page.getByText(/^C-\d{4}$/u)).toBeVisible();
 
-    // A second "acme trading" warns about the first, and links to it in a new tab.
+    // The same name in lower case warns about the first, and links to it in a new tab.
     await page.goto(`${owner.path}/companies/new`);
     await waitForHydration(page.locator('form'));
-    await page.getByLabel('Company name').fill('acme trading');
+    await page.getByLabel('Company name').fill(COMPANIES.brightwater.name.toLowerCase());
     await page.getByLabel('Website').focus();
-    const lookAlike = page.getByRole('link', { name: 'Acme Trading (opens in a new tab)' });
+    const lookAlike = page.getByRole('link', {
+      name: `${COMPANIES.brightwater.name} (opens in a new tab)`,
+    });
     await expect(lookAlike).toBeVisible();
-    await expect(lookAlike).toHaveAttribute('href', `${owner.path}/companies/${acme}`);
+    await expect(lookAlike).toHaveAttribute('href', `${owner.path}/companies/${brightwater}`);
     await expect(page.getByText('Saving stays possible.')).toBeVisible();
     await expectNoA11yViolations(page);
 
-    const ada = await createContact(page, owner.path, {
-      firstName: 'Ada',
-      lastName: 'Lovelace',
-      company: 'Acme Trading',
+    const buyer = await createContact(page, owner.path, {
+      firstName: CONTACTS.buyer.firstName,
+      lastName: CONTACTS.buyer.lastName,
+      company: COMPANIES.brightwater.name,
     });
-    await expect(page.getByRole('link', { name: 'Acme Trading' })).toBeVisible();
-    await page.goto(`${owner.path}/companies/${acme}`);
-    await expect(page.getByRole('link', { name: 'Ada Lovelace' })).toBeVisible();
+    await expect(page.getByRole('link', { name: COMPANIES.brightwater.name })).toBeVisible();
+    await page.goto(`${owner.path}/companies/${brightwater}`);
+    await expect(page.getByRole('link', { name: BUYER })).toBeVisible();
 
-    // A call logged on Ada.
-    await page.goto(`${owner.path}/contacts/${ada}`);
+    // A call logged on the buyer.
+    await page.goto(`${owner.path}/contacts/${buyer}`);
     // The composer is behind a button, which opens it on the Subject.
     await expect(page.getByLabel('Subject')).toBeHidden();
     await waitForHydration(page.getByRole('button', { name: 'Log activity' }));
@@ -79,10 +86,10 @@ test.describe('Records', () => {
     await expect(page.getByLabel('Subject')).toBeHidden();
 
     // The company's timeline holds its contacts' activities.
-    await page.goto(`${owner.path}/companies/${acme}`);
+    await page.goto(`${owner.path}/companies/${brightwater}`);
     await expect(page.getByText('Intro call')).toBeVisible();
     await expect(page.getByRole('listitem').filter({ hasText: 'Intro call' })).toContainText(
-      'Logged by Olivia Owner',
+      `Logged by ${PEOPLE.owner}`,
     );
     await expectNoA11yViolations(page);
   });
@@ -91,13 +98,13 @@ test.describe('Records', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { owner: 'Olivia Owner' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     await signIn(page, { email: owner.email, password: PASSWORD });
-    await createCompany(page, owner.path, { name: 'Acme Trading' });
+    await createCompany(page, owner.path, { name: COMPANIES.brightwater.name });
     await createLead(page, owner.path, {
-      firstName: 'Grace',
-      lastName: 'Hopper',
-      companyName: 'Acme Trading',
+      firstName: CONTACTS.lead.firstName,
+      lastName: CONTACTS.lead.lastName,
+      companyName: COMPANIES.brightwater.name,
     });
     await expect(page.getByText(/^L-\d{4}$/u)).toBeVisible();
 
@@ -107,32 +114,32 @@ test.describe('Records', () => {
 
     await page.getByRole('button', { name: 'Convert lead' }).click();
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByRole('heading', { name: 'Convert Grace Hopper' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: `Convert ${LEAD}` })).toBeVisible();
     // It links the company that exists rather than making a second one.
     await dialog.getByRole('radio', { name: 'Link an existing company' }).click();
     await dialog.getByRole('combobox', { name: 'Company' }).click();
-    await page.getByRole('option', { name: 'Acme Trading' }).click();
-    await dialog.getByLabel('Deal name').fill('Acme seats');
+    await page.getByRole('option', { name: COMPANIES.brightwater.name }).click();
+    await dialog.getByLabel('Deal name').fill(DEALS.tablets);
     await dialog.getByLabel('Amount').fill('1250.00');
     await expect(dialog.getByLabel('Currency')).toHaveValue('EUR');
     await expectNoA11yViolations(page);
 
     await dialog.getByRole('button', { name: 'Convert', exact: true }).dblclick();
     await expect(dialog.getByRole('heading', { name: 'Lead converted' })).toBeVisible();
-    await expect(dialog.getByRole('link', { name: 'Acme Trading' })).toBeVisible();
-    await expect(dialog.getByRole('link', { name: 'Grace Hopper' })).toBeVisible();
-    await expect(dialog.getByRole('link', { name: 'Acme seats' })).toBeVisible();
+    await expect(dialog.getByRole('link', { name: COMPANIES.brightwater.name })).toBeVisible();
+    await expect(dialog.getByRole('link', { name: LEAD })).toBeVisible();
+    await expect(dialog.getByRole('link', { name: DEALS.tablets })).toBeVisible();
     await dialog.getByRole('button', { name: 'Done' }).click();
 
     // The lead now reads as converted and links what it became.
     await expect(page.getByText('Converted: reached', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Convert lead' })).toHaveCount(0);
-    await expect(page.getByRole('heading', { level: 1, name: 'Grace Hopper' })).toBeFocused();
+    await expect(page.getByRole('heading', { level: 1, name: LEAD })).toBeFocused();
 
     // One deal, of 1,250.00 euros, on the company that was there.
     await page.goto(`${owner.path}/deals?view=list`);
     await expect(page.getByRole('heading', { name: '1 deal' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Acme seats' })).toBeVisible();
+    await expect(page.getByRole('link', { name: DEALS.tablets })).toBeVisible();
     await expect(page.getByText('€1,250.00')).toBeVisible();
     await page.goto(`${owner.path}/companies`);
     await expect(page.getByRole('heading', { name: '1 company' })).toBeVisible();
@@ -142,10 +149,10 @@ test.describe('Records', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { owner: 'Olivia Owner' });
-    const company = await seed(request, owner, 'companies', { name: 'Acme Trading' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const company = await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
     const deal = await seed(request, owner, 'deals', {
-      name: 'Acme seats',
+      name: DEALS.tablets,
       amount: '1250.00',
       companyId: company.id,
     });
@@ -159,7 +166,7 @@ test.describe('Records', () => {
     await page.goto(`${owner.path}/deals/${deal.id}`);
     await page.getByRole('button', { name: 'Add task' }).click();
     const dialog = page.getByRole('dialog', { name: 'New task' });
-    await expect(dialog.getByText('On Acme seats.')).toBeVisible();
+    await expect(dialog.getByText(`On ${DEALS.tablets}.`)).toBeVisible();
     await dialog.getByLabel('Title').fill('Send proposal');
     await dialog.getByRole('button', { name: 'Due Pick a date' }).click();
     const calendar = page.getByRole('dialog', { name: 'Due' });
@@ -177,7 +184,7 @@ test.describe('Records', () => {
     await page.goto(`${owner.path}/tasks`);
     const row = page.getByRole('row', { name: /Send proposal/u });
     await expect(row).toContainText(`${inParis({ dateStyle: 'medium' })}, 9:00 AM`);
-    await expect(row).toContainText('Acme seats');
+    await expect(row).toContainText(DEALS.tablets);
     await expectNoA11yViolations(page);
 
     await page.getByRole('checkbox', { name: 'Complete Send proposal' }).click();
@@ -195,20 +202,24 @@ test.describe('Records', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { owner: 'Olivia Owner' });
-    const mia = await addMember(request, owner, 'MANAGER', 'Mia Manager');
-    // 25 companies: 24 "Seed Co" (Retail for four, Mia's for two) and "Zeta Logistics" (Mia's).
-    const retail = new Set([3, 7, 11, 15]);
-    const seeded = Array.from({ length: 24 }, (_, index) => index + 1).map(
-      async (number) =>
-        await seed(request, number === 5 || number === 6 ? mia : owner, 'companies', {
-          name: `Seed Co ${String(number).padStart(2, '0')}`,
-          industry: retail.has(number) ? 'Retail' : 'Services',
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const mia = await addMember(request, owner, 'MANAGER', PEOPLE.manager);
+    // 25 companies: the 24 of MORE_COMPANIES, A to Z (Retail for four, Mia's for two), and Zephyr
+    // Couriers after them (Mia's).
+    const retail = new Set([2, 6, 10, 14]);
+    const seeded = MORE_COMPANIES.map(
+      async (name, index) =>
+        await seed(request, index === 4 || index === 5 ? mia : owner, 'companies', {
+          name,
+          industry: retail.has(index) ? 'Retail' : 'Services',
         }),
     );
     await Promise.all([
       ...seeded,
-      seed(request, mia, 'companies', { name: 'Zeta Logistics', industry: 'Logistics' }),
+      seed(request, mia, 'companies', {
+        name: COMPANIES.zephyr.name,
+        industry: COMPANIES.zephyr.industry,
+      }),
     ]);
     await signIn(page, { email: owner.email, password: PASSWORD });
 
@@ -217,32 +228,32 @@ test.describe('Records', () => {
     const rows = page.getByRole('row');
     // The header row, then a page of 20.
     await expect(rows).toHaveCount(21);
-    await expect(rows.nth(1)).toContainText('Seed Co 01');
+    await expect(rows.nth(1)).toContainText(MORE_COMPANIES[0]);
     await expect(page.getByText('1–20 of 25')).toBeVisible();
 
     await page.getByRole('link', { name: 'Next' }).click();
     await expect(page).toHaveURL(/[?&]page=1(?:&|$)/u);
     await expect(page.getByText('21–25 of 25')).toBeVisible();
     await expect(rows).toHaveCount(6);
-    await expect(rows.last()).toContainText('Zeta Logistics');
+    await expect(rows.last()).toContainText(COMPANIES.zephyr.name);
     await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled();
 
-    // Name, descending: Zeta first, and back on page one.
+    // Name, descending: Zephyr first, and back on page one.
     await page.getByRole('link', { name: 'Name', exact: true }).click();
     await expect(page).toHaveURL(/sort=NAME&direction=DESC/u);
     await expect(page.getByRole('columnheader', { name: 'Name' })).toHaveAttribute(
       'aria-sort',
       'descending',
     );
-    await expect(rows.nth(1)).toContainText('Zeta Logistics');
+    await expect(rows.nth(1)).toContainText(COMPANIES.zephyr.name);
     await expect(page.getByText('1–20 of 25')).toBeVisible();
 
     // Search narrows it and keeps the sort.
     await waitForHydration(page.getByRole('searchbox', { name: 'Search' }));
-    await page.getByRole('searchbox', { name: 'Search' }).fill('zeta');
+    await page.getByRole('searchbox', { name: 'Search' }).fill('zephyr');
     await expect(page.getByRole('heading', { name: '1 company' })).toBeVisible();
     await expect(rows).toHaveCount(2);
-    await expect(page).toHaveURL(/q=zeta/u);
+    await expect(page).toHaveURL(/q=zephyr/u);
     // NAME is the default sort, so the URL keeps only the direction.
     await expect(page).toHaveURL(/direction=DESC/u);
     await expect(page.getByRole('columnheader', { name: 'Name' })).toHaveAttribute(
@@ -262,7 +273,7 @@ test.describe('Records', () => {
 
     // Mia's three, then none once she has left, and the three show as unassigned.
     await page.getByRole('combobox', { name: 'Owner' }).click();
-    await page.getByRole('option', { name: 'Mia Manager' }).click();
+    await page.getByRole('option', { name: PEOPLE.manager }).click();
     await expect(page.getByRole('heading', { name: '3 companies' })).toBeVisible();
     await apiSend(
       request,
@@ -276,14 +287,16 @@ test.describe('Records', () => {
     await page.getByRole('combobox', { name: 'Owner' }).click();
     await page.getByRole('option', { name: 'Unassigned' }).click();
     await expect(page.getByRole('heading', { name: '3 companies' })).toBeVisible();
-    await expect(page.getByRole('row', { name: /Zeta Logistics/u })).toContainText('Unassigned');
+    await expect(page.getByRole('row', { name: COMPANIES.zephyr.name })).toContainText(
+      'Unassigned',
+    );
     await expectNoA11yViolations(page);
   });
 
   test('renders the defaults for a hand-edited URL', async ({ page, request }) => {
     const owner = await seedWorkspace(request);
     await Promise.all(
-      ['Bravo', 'Alpha', 'Charlie'].map(
+      [MORE_COMPANIES[1], MORE_COMPANIES[0], MORE_COMPANIES[2]].map(
         async (name) => await seed(request, owner, 'companies', { name }),
       ),
     );
@@ -299,7 +312,7 @@ test.describe('Records', () => {
       'ascending',
     );
     // A to Z, the first page, 20 to a page.
-    await expect(page.getByRole('row').nth(1)).toContainText('Alpha');
+    await expect(page.getByRole('row').nth(1)).toContainText(MORE_COMPANIES[0]);
     await expect(page.getByText('1–3 of 3')).toBeVisible();
     await expect(page.getByLabel('Per page')).toHaveValue('20');
   });
@@ -309,7 +322,7 @@ test.describe('Records', () => {
     request,
   }) => {
     const owner = await seedWorkspace(request);
-    await seed(request, owner, 'companies', { name: 'Alpha' });
+    await seed(request, owner, 'companies', { name: MORE_COMPANIES[0] });
     await signIn(page, { email: owner.email, password: PASSWORD });
 
     // The API takes at most 200 characters of search.
@@ -330,34 +343,36 @@ test.describe('Records', () => {
     request,
   }) => {
     const owner = await seedWorkspace(request);
-    const acme = await seed(request, owner, 'companies', { name: 'Acme Trading' });
+    const company = await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
     await signIn(page, { email: owner.email, password: PASSWORD });
-    const edit = `${owner.path}/companies/${acme.id}/edit`;
+    const edit = `${owner.path}/companies/${company.id}/edit`;
     await page.goto(edit);
     const other = await page.context().newPage();
     await other.goto(edit);
 
     // The other tab saves first; its fields show what was saved (the website with its scheme).
     await waitForHydration(other.locator('form'));
-    await other.getByLabel('Company name').fill('Acme Trading Ltd');
-    await other.getByLabel('Website').fill('acme.example');
+    await other.getByLabel('Company name').fill(`${COMPANIES.brightwater.name} Ltd`);
+    await other.getByLabel('Website').fill(new URL(COMPANIES.brightwater.website).host);
     await other.getByRole('button', { name: 'Save changes' }).click();
     await expect(other.getByText('Saved', { exact: true })).toBeVisible();
-    await expect(other.getByLabel('Website')).toHaveValue('https://acme.example');
+    await expect(other.getByLabel('Website')).toHaveValue(COMPANIES.brightwater.website);
 
     await waitForHydration(page.locator('form'));
-    await page.getByLabel('Company name').fill('Acme Trading GmbH');
+    await page.getByLabel('Company name').fill(`${COMPANIES.brightwater.name} GmbH`);
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(
       page.getByText('Someone else changed this. Reload to see their version.'),
     ).toBeVisible();
     await expectNoA11yViolations(page);
     await page.getByRole('button', { name: 'Reload' }).click();
-    await expect(page.getByLabel('Company name')).toHaveValue('Acme Trading Ltd');
+    await expect(page.getByLabel('Company name')).toHaveValue(`${COMPANIES.brightwater.name} Ltd`);
 
     // Nothing was overwritten: the company is the other tab's.
-    await page.goto(`${owner.path}/companies/${acme.id}`);
-    await expect(page.getByRole('heading', { level: 1, name: 'Acme Trading Ltd' })).toBeVisible();
+    await page.goto(`${owner.path}/companies/${company.id}`);
+    await expect(
+      page.getByRole('heading', { level: 1, name: `${COMPANIES.brightwater.name} Ltd` }),
+    ).toBeVisible();
   });
 
   test.describe('on a phone', () => {
@@ -376,7 +391,7 @@ test.describe('Records', () => {
           `/workspaces/${owner.workspaceId}/leads/${id}/status`,
           { version, ...body },
         );
-      const fields = { firstName: 'Grace', lastName: 'Hopper', companyName: 'Acme Trading' };
+      const fields = { ...CONTACTS.lead, companyName: COMPANIES.brightwater.name };
       const unqualify = await seed(request, owner, 'leads', fields);
       const convert = await seed(request, owner, 'leads', fields);
       await status(convert.id, convert.version, { status: 'QUALIFIED' });

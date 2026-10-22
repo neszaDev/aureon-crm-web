@@ -1,8 +1,8 @@
-import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn, signOut } from '../helpers';
+import { COMPANIES, CONTACTS, DEALS, MORE_COMPANIES, PEOPLE, TEAMS } from '../mockData';
 import type { Member } from './helpers';
 import {
   addMember,
@@ -69,14 +69,19 @@ const reportTab = (page: Page, name: string) =>
 
 const heading = (page: Page, name: string) => page.getByRole('heading', { name, exact: true });
 
+// The contact and the lead, as their pages name them.
+const BUYER = `${CONTACTS.buyer.firstName} ${CONTACTS.buyer.lastName}`;
+const LEAD = `${CONTACTS.lead.firstName} ${CONTACTS.lead.lastName}`;
+
 /**
- * Drags "Acme seats" on the board into a stage, then reloads: the server's board has it there.
+ * Drags the fleet tablets deal on the board into a stage, then reloads: the server's board has it
+ * there.
  * @param page Playwright page, on the board.
  * @param stage The stage's name.
  */
 const moveOnBoard = async (page: Page, stage: string) => {
   await waitForHydration(page.getByRole('main'));
-  await dragAndSave(page, handleOf(page, 'Acme seats'), column(page, stage));
+  await dragAndSave(page, handleOf(page, DEALS.tablets), column(page, stage));
   await page.reload();
   await expect(column(page, stage)).toContainText('1 deal');
 };
@@ -92,7 +97,14 @@ const expectNotFound = async (page: Page, url: string) => {
   await expect(
     page.getByRole('heading', { name: "Workspace not found or you're not a member" }),
   ).toBeVisible();
-  await expect(page.getByText(/Acme|Grace Hopper|Ada Lovelace|Journey/u)).toHaveCount(0);
+  await expect(
+    page.getByText(
+      new RegExp(
+        [COMPANIES.brightwater.name, DEALS.tablets, LEAD, BUYER, TEAMS.default.name].join('|'),
+        'u',
+      ),
+    ),
+  ).toHaveCount(0);
 };
 
 /**
@@ -128,8 +140,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
   request,
 }) => {
   test.setTimeout(120_000);
-  const user = await registerUser(request, 'Olivia Owner');
-  const workspaceName = `Journey ${randomUUID().slice(0, 8)}`;
+  const user = await registerUser(request, PEOPLE.owner);
   let owner: Member = { ...user, workspaceId: 0, path: '' };
   let rep: Member = owner;
   const ids = { company: 0, contact: 0, lead: 0, convertedContact: 0, deal: 0, task: 0 };
@@ -140,33 +151,30 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
   });
 
   await test.step('2. Create a workspace', async () => {
-    const url = await createWorkspace(page, workspaceName);
+    const url = await createWorkspace(page, TEAMS.default.name);
     const workspaceId = Number(new URL(url).pathname.split('/').at(-1));
     owner = { ...user, workspaceId, path: `/app/${workspaceId}` };
-    await expectDashboard(page, workspaceName);
+    await expectDashboard(page, TEAMS.default.name);
   });
 
   await test.step('3. Create a company and a contact at it', async () => {
     ids.company = await createCompany(page, owner.path, {
-      name: 'Acme Trading',
-      industry: 'Retail',
+      name: COMPANIES.brightwater.name,
+      industry: COMPANIES.brightwater.industry,
     });
     ids.contact = await createContact(page, owner.path, {
-      firstName: 'Ada',
-      lastName: 'Lovelace',
-      email: 'ada@acme.example',
-      company: 'Acme Trading',
+      ...CONTACTS.buyer,
+      company: COMPANIES.brightwater.name,
     });
-    await expect(page.getByRole('link', { name: 'Acme Trading' })).toBeVisible();
+    await expect(page.getByRole('link', { name: COMPANIES.brightwater.name })).toBeVisible();
     await page.goto(`${owner.path}/companies/${ids.company}`);
-    await expect(page.getByRole('link', { name: 'Ada Lovelace' })).toBeVisible();
+    await expect(page.getByRole('link', { name: BUYER })).toBeVisible();
   });
 
   await test.step('4. Create a lead, mark it contacted, qualify it', async () => {
     ids.lead = await createLead(page, owner.path, {
-      firstName: 'Grace',
-      lastName: 'Hopper',
-      companyName: 'Acme Trading',
+      ...CONTACTS.lead,
+      companyName: COMPANIES.brightwater.name,
     });
     await expect(page.getByText('New: current', { exact: true })).toBeVisible();
     await changeStatus(page, 'Contacted');
@@ -176,45 +184,47 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
   await test.step('5. Convert it: the company linked, a contact and a 1,250.00 deal', async () => {
     await page.getByRole('button', { name: 'Convert lead' }).click();
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByRole('heading', { name: 'Convert Grace Hopper' })).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: `Convert ${LEAD}` })).toBeVisible();
     await dialog.getByRole('radio', { name: 'Link an existing company' }).click();
     await dialog.getByRole('combobox', { name: 'Company' }).click();
-    await page.getByRole('option', { name: 'Acme Trading' }).click();
-    await dialog.getByLabel('Deal name').fill('Acme seats');
+    await page.getByRole('option', { name: COMPANIES.brightwater.name }).click();
+    await dialog.getByLabel('Deal name').fill(DEALS.tablets);
     await dialog.getByLabel('Amount').fill('1250.00');
     await expect(dialog.getByLabel('Currency')).toHaveValue('EUR');
     await dialog.getByRole('button', { name: 'Convert', exact: true }).click();
 
     // The company that was there, a new contact and the deal.
     await expect(dialog.getByRole('heading', { name: 'Lead converted' })).toBeVisible();
-    await expect(dialog.getByRole('link', { name: 'Acme Trading' })).toHaveAttribute(
+    await expect(dialog.getByRole('link', { name: COMPANIES.brightwater.name })).toHaveAttribute(
       'href',
       `${owner.path}/companies/${ids.company}`,
     );
-    ids.convertedContact = await linkedId(dialog, 'Grace Hopper');
-    ids.deal = await linkedId(dialog, 'Acme seats');
+    ids.convertedContact = await linkedId(dialog, LEAD);
+    ids.deal = await linkedId(dialog, DEALS.tablets);
     expect(ids.convertedContact).not.toBe(ids.contact);
     await dialog.getByRole('button', { name: 'Done' }).click();
     await expect(page.getByText('Converted: reached', { exact: true })).toBeVisible();
 
     await page.goto(`${owner.path}/deals/${ids.deal}`);
-    await expect(page.getByRole('heading', { level: 1, name: 'Acme seats' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: DEALS.tablets })).toBeVisible();
     await expect(page.getByText('€1,250.00').first()).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Acme Trading' }).first()).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Grace Hopper' }).first()).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: COMPANIES.brightwater.name }).first(),
+    ).toBeVisible();
+    await expect(page.getByRole('link', { name: LEAD }).first()).toBeVisible();
   });
 
   await test.step('6. Move the deal through every open stage on the board to Won', async () => {
     await page.goto(`${owner.path}/deals`);
     await expect(
-      column(page, 'Qualification').getByRole('link', { name: 'Acme seats' }),
+      column(page, 'Qualification').getByRole('link', { name: DEALS.tablets }),
     ).toBeVisible();
     await moveOnBoard(page, 'Needs analysis');
     await moveOnBoard(page, 'Proposal');
     await moveOnBoard(page, 'Negotiation');
     await moveOnBoard(page, 'Won');
     // Won closes it: the card leaves the board, and the slim column counts it.
-    await expect(page.getByRole('link', { name: 'Acme seats', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: DEALS.tablets, exact: true })).toHaveCount(0);
     await expect(column(page, 'Won')).toContainText('€1,250.00');
 
     // Each step is in the history, newest first, and signed on the stamp row.
@@ -230,7 +240,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
         ['Created in Qualification'],
       ].map(async (names, index) => {
         await Promise.all(
-          [...names, 'Olivia Owner'].map(async (text) => {
+          [...names, PEOPLE.owner].map(async (text) => {
             await expect(steps.nth(index)).toContainText(text);
           }),
         );
@@ -239,7 +249,9 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     const row = page.getByRole('list', { name: 'Deal progress' });
     await Promise.all(
       ['Qualification', 'Needs analysis', 'Proposal', 'Negotiation', 'Won'].map(async (stage) => {
-        await expect(row.getByText(`${stage}: reached, moved here by Olivia Owner`)).toBeVisible();
+        await expect(
+          row.getByText(`${stage}: reached, moved here by ${PEOPLE.owner}`),
+        ).toBeVisible();
       }),
     );
   });
@@ -258,7 +270,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     await waitForHydration(page.getByRole('button', { name: 'Add task' }));
     await page.getByRole('button', { name: 'Add task' }).click();
     const dialog = page.getByRole('dialog', { name: 'New task' });
-    await expect(dialog.getByText('On Acme seats.')).toBeVisible();
+    await expect(dialog.getByText(`On ${DEALS.tablets}.`)).toBeVisible();
     await dialog.getByLabel('Title').fill('Send the contract');
     // A time without a day is today's in the workspace's zone: 9:00 there is overdue or due
     // within the next 24 hours, a reminder either way.
@@ -280,7 +292,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
 
     // The bell has dropped on the next page, and the API agrees.
     await rail(page).getByRole('link', { name: 'Dashboard' }).click();
-    await expectDashboard(page, workspaceName);
+    await expectDashboard(page, TEAMS.default.name);
     await expect(bell(page, 0)).toBeVisible();
     expect(await remindersOf()).toBe(0);
   });
@@ -292,7 +304,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
       'GET',
       `/workspaces/${owner.workspaceId}/dashboard`,
     );
-    // What the journey made: one company, two contacts (Ada, and Grace from the lead), no open
+    // What the journey made: one company, two contacts (the buyer, and the lead's), no open
     // lead or deal, nothing overdue, and the won deal in the default period.
     expect(api.counts).toStrictEqual({
       companies: 1,
@@ -387,7 +399,10 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
   await test.step('9. Nobody outside the workspace gets in, and a rep changes nothing of the owner', async () => {
     // A member of another workspace: every page of the journey is "not found", and the API
     // answers 404 to a read and to a change alike.
-    const outsider = await seedWorkspace(request, { workspace: 'Elsewhere', owner: 'Oscar Out' });
+    const outsider = await seedWorkspace(request, {
+      workspace: TEAMS.other.name,
+      owner: PEOPLE.outsider,
+    });
     await signOut(page);
     await signIn(page, { email: outsider.email, password: PASSWORD });
     await expectNotFound(page, owner.path);
@@ -410,14 +425,18 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     expect(archive.status()).toBe(404);
 
     // A sales rep here reads the owner's records, with no way to change or export them.
-    rep = await addMember(request, owner, 'SALES_REP', 'Riley Rep');
+    rep = await addMember(request, owner, 'SALES_REP', PEOPLE.rep);
     const repDeal = await seed(request, rep, 'deals', { name: 'Riley deal', amount: '300.00' });
-    const acme = await seed(request, owner, 'deals', { name: 'Acme renewal', amount: '800.00' });
+    const renewal = await seed(request, owner, 'deals', { name: DEALS.renewal, amount: '800.00' });
     await signOut(page);
     await signIn(page, { email: rep.email, password: PASSWORD });
-    await expectReadOnly(page, `${owner.path}/companies/${ids.company}`, 'Acme Trading');
-    await expectReadOnly(page, `${owner.path}/contacts/${ids.contact}`, 'Ada Lovelace');
-    await expectReadOnly(page, `${owner.path}/deals/${ids.deal}`, 'Acme seats');
+    await expectReadOnly(
+      page,
+      `${owner.path}/companies/${ids.company}`,
+      COMPANIES.brightwater.name,
+    );
+    await expectReadOnly(page, `${owner.path}/contacts/${ids.contact}`, BUYER);
+    await expectReadOnly(page, `${owner.path}/deals/${ids.deal}`, DEALS.tablets);
     await expectNoExport(page, `${owner.path}/companies`, '1 company');
     await expectNoExport(page, `${owner.path}/deals?view=list`, '3 deals');
     // The export route refuses them too, in their language.
@@ -435,7 +454,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
 
     // On the board only their own card has a handle and a menu.
     await page.goto(`${owner.path}/deals`);
-    await expect(page.getByRole('link', { name: 'Acme renewal' })).toBeVisible();
+    await expect(page.getByRole('link', { name: DEALS.renewal })).toBeVisible();
     await waitForHydration(page.getByRole('main'));
     await expect(handleOf(page, 'Riley deal')).toBeVisible();
     await expect(page.getByRole('button', { name: /^Drag D-\d+ /u })).toHaveCount(1);
@@ -443,7 +462,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
 
     // A forged move: the rep drags their own card, and the request names the owner's deal, open
     // in the same stage at the same version as theirs: only the permission check can refuse it.
-    expect(acme.version).toBe(repDeal.version);
+    expect(renewal.version).toBe(repDeal.version);
     const named: number[] = [];
     await page.route(/\/deals$/u, async (route) => {
       const sent = route.request();
@@ -454,7 +473,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
       }
       const [workspaceId, dealId, input]: [number, number, unknown] = JSON.parse(body);
       named.push(dealId);
-      await route.continue({ postData: JSON.stringify([workspaceId, acme.id, input]) });
+      await route.continue({ postData: JSON.stringify([workspaceId, renewal.id, input]) });
     });
     await dragAndSave(page, handleOf(page, 'Riley deal'), column(page, 'Needs analysis'));
     await expect(page.getByText("Your role doesn't allow this.")).toBeVisible();
@@ -464,18 +483,16 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     ).toBeVisible();
     await page.unroute(/\/deals$/u);
     // Nothing moved on the server.
-    expect(await stageOf(request, owner, acme.id)).toBe('Qualification');
+    expect(await stageOf(request, owner, renewal.id)).toBe('Qualification');
     expect(await stageOf(request, owner, repDeal.id)).toBe('Qualification');
   });
 
   await test.step('10. Search, sort, filter and page API-seeded companies, and export them', async () => {
-    // 24 more: "Seed Co 01" to "24", the rep's 05 to 08, with 06 and 20 archived.
+    // 24 more, A to Z: the rep's 5th to 8th, with the 6th and the 20th archived.
     const seeded = await Promise.all(
-      Array.from({ length: 24 }, (_, index) => index + 1).map(
-        async (number) =>
-          await seed(request, number >= 5 && number <= 8 ? rep : owner, 'companies', {
-            name: `Seed Co ${String(number).padStart(2, '0')}`,
-          }),
+      MORE_COMPANIES.map(
+        async (name, index) =>
+          await seed(request, index >= 4 && index <= 7 ? rep : owner, 'companies', { name }),
       ),
     );
     await Promise.all(
@@ -492,41 +509,42 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     await signOut(page);
     await signIn(page, { email: owner.email, password: PASSWORD });
 
-    // Acme Trading and the 22 active ones, A to Z, 20 to a page.
+    // Brightwater Logistics and the 22 active ones, A to Z, 20 to a page.
     await page.goto(`${owner.path}/companies`);
     const rows = page.getByRole('row');
     await expect(heading(page, '23 companies')).toBeVisible();
     await expect(rows).toHaveCount(21);
-    await expect(rows.nth(1)).toContainText('Acme Trading');
+    await expect(rows.nth(1)).toContainText(COMPANIES.brightwater.name);
     await expect(page.getByText('1–20 of 23')).toBeVisible();
     await page.getByRole('link', { name: 'Next' }).click();
     await expect(page.getByText('21–23 of 23')).toBeVisible();
     await expect(rows).toHaveCount(4);
-    await expect(rows.last()).toContainText('Seed Co 24');
+    await expect(rows.last()).toContainText(MORE_COMPANIES[23]);
 
     // Name, descending, from the first page again.
     await page.getByRole('link', { name: 'Name', exact: true }).click();
     await expect(page).toHaveURL(/sort=NAME&direction=DESC/u);
     await expect(page.getByText('1–20 of 23')).toBeVisible();
-    await expect(rows.nth(1)).toContainText('Seed Co 24');
+    await expect(rows.nth(1)).toContainText(MORE_COMPANIES[23]);
 
     // A search narrows it and keeps the sort.
     const search = page.getByRole('searchbox', { name: 'Search' });
     await waitForHydration(search);
-    await search.fill('seed co 1');
+    // The 10th to the 19th are the ones with "Foods" in their name.
+    await search.fill('foods');
     await expect(heading(page, '10 companies')).toBeVisible();
-    await expect(rows.nth(1)).toContainText('Seed Co 19');
+    await expect(rows.nth(1)).toContainText(MORE_COMPANIES[18]);
     await search.fill('');
     await expect(heading(page, '23 companies')).toBeVisible();
 
     // The rep's: three active, and one archived.
     await page.getByRole('combobox', { name: 'Owner' }).click();
-    await page.getByRole('option', { name: 'Riley Rep' }).click();
+    await page.getByRole('option', { name: PEOPLE.rep }).click();
     await expect(heading(page, '3 companies')).toBeVisible();
     const show = page.getByRole('navigation', { name: 'Show' });
     await show.getByRole('link', { name: 'Archived' }).click();
     await expect(heading(page, '1 archived company')).toBeVisible();
-    await expect(rows.nth(1)).toContainText('Seed Co 06');
+    await expect(rows.nth(1)).toContainText(MORE_COMPANIES[5]);
     await show.getByRole('link', { name: 'Active' }).click();
     await expect(heading(page, '3 companies')).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`ownerId=${rep.userId}`, 'u'));
@@ -548,7 +566,11 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     const [header, ...lines] = file.toString('utf-8').replace(/^﻿/u, '').trimEnd().split('\r\n');
     expect(header).toBe(COMPANY_COLUMNS);
     const cells = lines.map((line) => line.split(','));
-    expect(cells.map((cell) => cell[1])).toStrictEqual(['Seed Co 05', 'Seed Co 07', 'Seed Co 08']);
-    expect(cells.map((cell) => cell[7])).toStrictEqual(['Riley Rep', 'Riley Rep', 'Riley Rep']);
+    expect(cells.map((cell) => cell[1])).toStrictEqual([
+      MORE_COMPANIES[4],
+      MORE_COMPANIES[6],
+      MORE_COMPANIES[7],
+    ]);
+    expect(cells.map((cell) => cell[7])).toStrictEqual([PEOPLE.rep, PEOPLE.rep, PEOPLE.rep]);
   });
 });

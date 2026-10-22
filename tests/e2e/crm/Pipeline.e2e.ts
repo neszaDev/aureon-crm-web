@@ -1,6 +1,7 @@
 import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn, signUp } from '../helpers';
+import { COMPANIES, DEALS, PEOPLE, TEAMS } from '../mockData';
 import type { Member } from './helpers';
 import {
   addMember,
@@ -37,19 +38,19 @@ const openBoard = async (page: Page, member: Member, deal: string) => {
 };
 
 /**
- * Seeds a workspace with an owner, a manager who owns "Acme seats" (1,250.00 euros, in the
- * first stage unless told otherwise), and Acme Trading.
+ * Seeds a workspace with an owner, a manager who owns the fleet tablets deal (1,250.00 euros, in
+ * the first stage unless told otherwise), and Brightwater Logistics.
  * @param request Playwright API client.
  * @param stage The stage the deal starts in.
  * @returns The people, the deal and the stages.
  */
 const seedBoard = async (request: APIRequestContext, stage = 'Qualification') => {
-  const owner = await seedWorkspace(request, { owner: 'Olivia Owner' });
-  const mia = await addMember(request, owner, 'MANAGER', 'Mia Manager');
-  const company = await seed(request, owner, 'companies', { name: 'Acme Trading' });
+  const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+  const mia = await addMember(request, owner, 'MANAGER', PEOPLE.manager);
+  const company = await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
   const stages = await stagesOf(request, owner);
   const deal = await seed(request, mia, 'deals', {
-    name: 'Acme seats',
+    name: DEALS.tablets,
     amount: '1250.00',
     companyId: company.id,
     stageId: stages.find((item) => item.name === stage)?.id,
@@ -64,7 +65,7 @@ test.describe('Pipeline', () => {
     request,
   }) => {
     const { owner } = await seedBoard(request);
-    await openBoard(page, owner, 'Acme seats');
+    await openBoard(page, owner, DEALS.tablets);
 
     await expect(page.getByRole('heading', { level: 2 })).toHaveText([
       'Qualification',
@@ -95,9 +96,9 @@ test.describe('Pipeline', () => {
     expect(board).toStrictEqual({ fits: true, fade: '0', page: true });
     await expectNoA11yViolations(page);
 
-    await dragAndSave(page, handleOf(page, 'Acme seats'), column(page, 'Needs analysis'));
+    await dragAndSave(page, handleOf(page, DEALS.tablets), column(page, 'Needs analysis'));
     await expect(
-      column(page, 'Needs analysis').getByRole('link', { name: 'Acme seats' }),
+      column(page, 'Needs analysis').getByRole('link', { name: DEALS.tablets }),
     ).toBeVisible();
     await expect(column(page, 'Qualification')).toContainText('No deals');
 
@@ -107,28 +108,30 @@ test.describe('Pipeline', () => {
     await expect(column(page, 'Needs analysis')).toContainText('€1,250.00');
     await expect(column(page, 'Qualification')).toContainText('No deals');
     await waitForHydration(page.getByRole('main'));
-    await dragAndSave(page, handleOf(page, 'Acme seats'), column(page, 'Proposal'));
-    await expect(column(page, 'Proposal').getByRole('link', { name: 'Acme seats' })).toBeVisible();
+    await dragAndSave(page, handleOf(page, DEALS.tablets), column(page, 'Proposal'));
+    await expect(column(page, 'Proposal').getByRole('link', { name: DEALS.tablets })).toBeVisible();
 
     // The history holds both moves, each by Olivia, and the creation by Mia; the row is signed
     // by whoever moved the deal into each stage, the open one by nobody yet.
     await page.reload();
-    await page.getByRole('link', { name: 'Acme seats' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Acme seats' })).toBeVisible();
+    await page.getByRole('link', { name: DEALS.tablets }).click();
+    await expect(page.getByRole('heading', { level: 1, name: DEALS.tablets })).toBeVisible();
     const history = page.getByRole('region', { name: 'Stage history' });
     await expect(history.getByRole('listitem')).toHaveCount(3);
     await expect(history.getByRole('listitem').nth(0)).toContainText('Needs analysis');
     await expect(history.getByRole('listitem').nth(0)).toContainText('Proposal');
-    await expect(history.getByRole('listitem').nth(0)).toContainText('Olivia Owner');
+    await expect(history.getByRole('listitem').nth(0)).toContainText(PEOPLE.owner);
     await expect(history.getByRole('listitem').nth(1)).toContainText('Qualification');
     await expect(history.getByRole('listitem').nth(1)).toContainText('Needs analysis');
-    await expect(history.getByRole('listitem').nth(1)).toContainText('Olivia Owner');
+    await expect(history.getByRole('listitem').nth(1)).toContainText(PEOPLE.owner);
     await expect(history.getByRole('listitem').nth(2)).toContainText('Created in Qualification');
-    await expect(history.getByRole('listitem').nth(2)).toContainText('Mia Manager');
+    await expect(history.getByRole('listitem').nth(2)).toContainText(PEOPLE.manager);
     const row = page.getByRole('list', { name: 'Deal progress' });
-    await expect(row.getByText('Qualification: reached, moved here by Mia Manager')).toBeVisible();
     await expect(
-      row.getByText('Needs analysis: reached, moved here by Olivia Owner'),
+      row.getByText(`Qualification: reached, moved here by ${PEOPLE.manager}`),
+    ).toBeVisible();
+    await expect(
+      row.getByText(`Needs analysis: reached, moved here by ${PEOPLE.owner}`),
     ).toBeVisible();
     await expect(row.getByText('Proposal: current, 0 days')).toBeVisible();
     await expectNoA11yViolations(page);
@@ -136,50 +139,52 @@ test.describe('Pipeline', () => {
 
   test('moves a deal from the keyboard and from its menu', async ({ page, request }) => {
     const { owner } = await seedBoard(request);
-    await openBoard(page, owner, 'Acme seats');
+    await openBoard(page, owner, DEALS.tablets);
     const announced = page.locator('[id^="DndLiveRegion"]');
 
     // Space picks it up, the arrow crosses to the next stage, Space drops it; each step is
     // announced, and the focus stays on the card's handle.
-    const handle = handleOf(page, 'Acme seats');
+    const handle = handleOf(page, DEALS.tablets);
     await handle.focus();
     await page.keyboard.press('Space');
-    await expect(announced).toHaveText('Acme seats is over Qualification.');
+    await expect(announced).toHaveText(`${DEALS.tablets} is over Qualification.`);
     // dnd-kit starts listening for the arrow keys a moment after it announces the pick-up, and an
     // arrow pressed before moves nothing: press again until the card is over the next stage.
     await expect(async () => {
       await page.keyboard.press('ArrowRight');
-      await expect(announced).toHaveText('Acme seats is over Needs analysis.', { timeout: 1000 });
+      await expect(announced).toHaveText(`${DEALS.tablets} is over Needs analysis.`, {
+        timeout: 1000,
+      });
     }).toPass({ timeout: 10_000 });
     await page.keyboard.press('Space');
-    await expect(announced).toHaveText('Acme seats dropped on Needs analysis.');
+    await expect(announced).toHaveText(`${DEALS.tablets} dropped on Needs analysis.`);
     await expect(
-      column(page, 'Needs analysis').getByRole('link', { name: 'Acme seats' }),
+      column(page, 'Needs analysis').getByRole('link', { name: DEALS.tablets }),
     ).toBeVisible();
     await expect(handle).toBeFocused();
 
     // "Move to…" does the same for anyone who can't drag, and says what Won means.
-    await page.getByRole('button', { name: 'Actions for Acme seats' }).click();
+    await page.getByRole('button', { name: `Actions for ${DEALS.tablets}` }).click();
     await page.getByRole('menuitem', { name: 'Move to…' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Move Acme seats' });
+    const dialog = page.getByRole('dialog', { name: `Move ${DEALS.tablets}` });
     await dialog.getByLabel('Stage').selectOption('Won');
     await expect(dialog.getByText('Moving it here closes the deal as won.')).toBeVisible();
     await dialog.getByRole('button', { name: 'Move deal' }).click();
-    await expect(page.getByText('Acme seats moved to Won')).toBeVisible();
+    await expect(page.getByText(`${DEALS.tablets} moved to Won`)).toBeVisible();
     // Won is slim: it counts the deal, and the card is no longer on the board.
     await expect(column(page, 'Won')).toContainText('1 deal');
-    await expect(page.getByRole('link', { name: 'Acme seats', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: DEALS.tablets, exact: true })).toHaveCount(0);
   });
 
   test('moves a deal to Lost only with a reason', async ({ page, request }) => {
     const { owner, mia, deal } = await seedBoard(request, 'Negotiation');
-    const second = await seed(request, mia, 'deals', { name: 'Beta rollout', amount: '800.00' });
-    await openBoard(page, owner, 'Acme seats');
-    const stays = column(page, 'Negotiation').locator('a', { hasText: 'Acme seats' });
+    const second = await seed(request, mia, 'deals', { name: DEALS.retrofit, amount: '800.00' });
+    await openBoard(page, owner, DEALS.tablets);
+    const stays = column(page, 'Negotiation').locator('a', { hasText: DEALS.tablets });
 
     // Dropped on Lost, the card asks why and waits; cancelling moves nothing.
-    await drag(page, handleOf(page, 'Acme seats'), column(page, 'Lost'));
-    const dialog = page.getByRole('dialog', { name: 'Mark Acme seats as lost' });
+    await drag(page, handleOf(page, DEALS.tablets), column(page, 'Lost'));
+    const dialog = page.getByRole('dialog', { name: `Mark ${DEALS.tablets} as lost` });
     await expect(dialog).toBeVisible();
     await expect(stays).toBeVisible();
     await dialog.getByRole('button', { name: 'Mark as lost' }).click();
@@ -191,7 +196,7 @@ test.describe('Pipeline', () => {
     expect(await stageOf(request, owner, deal.id)).toBe('Negotiation');
 
     // With a reason it moves, and the reason stays on the deal.
-    await drag(page, handleOf(page, 'Acme seats'), column(page, 'Lost'));
+    await drag(page, handleOf(page, DEALS.tablets), column(page, 'Lost'));
     await dialog.getByLabel('Reason').fill('Went with a competitor');
     await untilSaved(page, async () => {
       await dialog.getByRole('button', { name: 'Mark as lost' }).click();
@@ -204,8 +209,8 @@ test.describe('Pipeline', () => {
     await expect(column(page, 'Lost')).toContainText('€1,250');
     await column(page, 'Lost').getByRole('link', { name: 'View in list: Lost' }).click();
     await expect(page).toHaveURL(/view=list&stageId=\d+/u);
-    await page.getByRole('link', { name: 'Acme seats' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Acme seats' })).toBeVisible();
+    await page.getByRole('link', { name: DEALS.tablets }).click();
+    await expect(page.getByRole('heading', { level: 1, name: DEALS.tablets })).toBeVisible();
     await expect(page.getByText('Why it was lost')).toBeVisible();
     // The fact itself: the History section below repeats it as a change.
     await expect(page.getByText('Went with a competitor', { exact: true })).toBeVisible();
@@ -215,7 +220,7 @@ test.describe('Pipeline', () => {
     await page.goto(`${owner.path}/deals/${second.id}`);
     await waitForHydration(page.getByRole('main'));
     await page.getByRole('button', { name: 'Move', exact: true }).click();
-    const move = page.getByRole('dialog', { name: 'Move Beta rollout' });
+    const move = page.getByRole('dialog', { name: `Move ${DEALS.retrofit}` });
     await move.getByLabel('Stage').selectOption('Lost');
     await expect(move.getByText('Moving it here closes the deal as lost.')).toBeVisible();
     await move.getByRole('button', { name: 'Move deal' }).click();
@@ -223,28 +228,28 @@ test.describe('Pipeline', () => {
     expect(await stageOf(request, owner, second.id)).toBe('Qualification');
     await move.getByLabel('Reason').fill('Budget frozen');
     await move.getByRole('button', { name: 'Move deal' }).click();
-    await expect(page.getByText('Beta rollout moved to Lost')).toBeVisible();
+    await expect(page.getByText(`${DEALS.retrofit} moved to Lost`)).toBeVisible();
     await expect(page.getByText('Budget frozen', { exact: true })).toBeVisible();
   });
 
   test('cancels a drop outside every column', async ({ page, request }) => {
     const { owner, deal } = await seedBoard(request);
-    await openBoard(page, owner, 'Acme seats');
+    await openBoard(page, owner, DEALS.tablets);
 
     // Released over the page's heading: no column, so no move, no dialog and no message.
-    await drag(page, handleOf(page, 'Acme seats'), page.getByRole('heading', { level: 1 }));
+    await drag(page, handleOf(page, DEALS.tablets), page.getByRole('heading', { level: 1 }));
     // The drag did start, and ended over nothing.
     await expect(page.locator('[id^="DndLiveRegion"]')).toHaveText(
-      'Moving Acme seats was cancelled.',
+      `Moving ${DEALS.tablets} was cancelled.`,
     );
     await expect(
-      column(page, 'Qualification').getByRole('link', { name: 'Acme seats' }),
+      column(page, 'Qualification').getByRole('link', { name: DEALS.tablets }),
     ).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.locator('[data-sonner-toast]')).toHaveCount(0);
     await page.reload();
     await expect(
-      column(page, 'Qualification').getByRole('link', { name: 'Acme seats' }),
+      column(page, 'Qualification').getByRole('link', { name: DEALS.tablets }),
     ).toBeVisible();
     expect(await stageOf(request, owner, deal.id)).toBe('Qualification');
   });
@@ -253,9 +258,9 @@ test.describe('Pipeline', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { owner: 'Olivia Owner' });
-    const riley = await addMember(request, owner, 'SALES_REP', 'Riley Rep');
-    const ravi = await addMember(request, owner, 'SALES_REP', 'Ravi Rep');
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const riley = await addMember(request, owner, 'SALES_REP', PEOPLE.rep);
+    const ravi = await addMember(request, owner, 'SALES_REP', PEOPLE.otherRep);
     const mine = await seed(request, riley, 'deals', { name: 'Riley deal', amount: '300.00' });
     const theirs = await seed(request, ravi, 'deals', { name: 'Ravi deal', amount: '900.00' });
     await openBoard(page, riley, 'Ravi deal');
@@ -318,7 +323,7 @@ test.describe('Pipeline', () => {
   }) => {
     await page.setViewportSize({ width: 1024, height: 800 });
     const { owner } = await seedBoard(request);
-    await openBoard(page, owner, 'Acme seats');
+    await openBoard(page, owner, DEALS.tablets);
 
     const exportCsv = await page.getByRole('button', { name: 'Export CSV' }).boundingBox();
     const newDeal = await page.getByRole('link', { name: 'New deal' }).first().boundingBox();
@@ -341,7 +346,11 @@ test.describe('Pipeline', () => {
       `/workspaces/${owner.workspaceId}/lead-sources`,
       { name: 'Trade show' },
     );
-    await seed(request, mia, 'deals', { name: 'Show deal', amount: '500.00', sourceId: source.id });
+    await seed(request, mia, 'deals', {
+      name: DEALS.starterKit,
+      amount: '500.00',
+      sourceId: source.id,
+    });
     await signIn(page, { email: owner.email, password: PASSWORD });
     await page.goto(`${owner.path}/deals?view=list`);
     await expect(page.getByRole('heading', { name: '2 deals' })).toBeVisible();
@@ -351,8 +360,8 @@ test.describe('Pipeline', () => {
     await page.getByRole('option', { name: 'Trade show' }).click();
 
     await expect(page.getByRole('heading', { name: '1 deal', exact: true })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Show deal' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Acme seats' })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: DEALS.starterKit })).toBeVisible();
+    await expect(page.getByRole('link', { name: DEALS.tablets })).toHaveCount(0);
     await expect(page).toHaveURL(new RegExp(`sourceId=${source.id}`, 'u'));
   });
 
@@ -362,14 +371,14 @@ test.describe('Pipeline', () => {
   }) => {
     const { owner, deal } = await seedBoard(request);
     await signUp(page);
-    await createWorkspace(page, 'Elsewhere');
+    await createWorkspace(page, TEAMS.other.name);
 
     await page.goto(`${owner.path}/deals/${deal.id}`);
 
     await expect(
       page.getByRole('heading', { name: "Workspace not found or you're not a member" }),
     ).toBeVisible();
-    await expect(page.getByText('Acme seats')).toHaveCount(0);
+    await expect(page.getByText(DEALS.tablets)).toHaveCount(0);
   });
 
   test.describe('on a phone', () => {
@@ -377,19 +386,19 @@ test.describe('Pipeline', () => {
 
     test('moves a deal from its menu, one stage at a time', async ({ page, request }) => {
       const { owner } = await seedBoard(request);
-      await openBoard(page, owner, 'Acme seats');
+      await openBoard(page, owner, DEALS.tablets);
 
       // One column shows, chosen with a select; there is no handle, the menu moves the card.
       await expect(page.getByLabel('Stage shown')).toHaveValue(/\d+/u);
       await expect(page.getByRole('button', { name: /^Drag D-/u })).toBeHidden();
-      await page.getByRole('button', { name: 'Actions for Acme seats' }).click();
+      await page.getByRole('button', { name: `Actions for ${DEALS.tablets}` }).click();
       await page.getByRole('menuitem', { name: 'Move to…' }).click();
-      const dialog = page.getByRole('dialog', { name: 'Move Acme seats' });
+      const dialog = page.getByRole('dialog', { name: `Move ${DEALS.tablets}` });
       await dialog.getByLabel('Stage').selectOption('Needs analysis');
       await dialog.getByRole('button', { name: 'Move deal' }).click();
-      await expect(page.getByText('Acme seats moved to Needs analysis')).toBeVisible();
+      await expect(page.getByText(`${DEALS.tablets} moved to Needs analysis`)).toBeVisible();
       await page.getByLabel('Stage shown').selectOption({ label: 'Needs analysis (1)' });
-      await expect(page.getByRole('link', { name: 'Acme seats' })).toBeVisible();
+      await expect(page.getByRole('link', { name: DEALS.tablets })).toBeVisible();
     });
 
     test('fits the board and the deal list without sideways scrolling, in Thai', async ({

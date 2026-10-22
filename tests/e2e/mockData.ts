@@ -82,6 +82,38 @@ export const COMPANIES = {
   },
 };
 
+/**
+ * 24 more company names for the list tests, A to Z (as the API sorts them, by lower case): after
+ * Brightwater Logistics and before Zephyr Couriers. The 10th to the 19th, and only they, have
+ * "Foods" in their name.
+ */
+export const MORE_COMPANIES = [
+  'Cobalt Print Works',
+  'Copperleaf Studio',
+  'Dunford Hardware',
+  'Elmwood Pharmacy',
+  'Fairview Garden Centre',
+  'Glenrock Outdoor',
+  'Greyfield Books',
+  'Hollis Tailoring',
+  'Ivybridge Opticians',
+  'Juniper Foods',
+  'Kilnworth Foods',
+  'Larkspur Foods',
+  'Merrow Foods',
+  'Nettlebed Foods',
+  'Oakhurst Foods',
+  'Pennant Foods',
+  'Quillon Foods',
+  'Redbank Foods',
+  'Saltmarsh Foods',
+  'Thornbury Joinery',
+  'Underhill Cycles',
+  'Vale Street Dairy',
+  'Westbrook Plumbing',
+  'Yarrow Florists',
+] as const;
+
 /** People the tests create as contacts and leads. */
 export const CONTACTS = {
   // A buyer at Brightwater Logistics.
@@ -100,6 +132,11 @@ export const DEALS = {
   starterKit: 'Fernhill starter kit',
   won: 'Maple Street shelving',
   lost: 'Fernhill cold room',
+};
+
+/** Tasks the tests create by title. */
+export const TASKS = {
+  call: `Call ${COMPANIES.solano.name}`,
 };
 
 /**

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
+import { COMPANIES, CONTACTS, DEALS, PEOPLE, TASKS } from '../mockData';
 import {
   apiCall,
   expectNoA11yViolations,
@@ -16,25 +17,27 @@ test.describe('Top bar', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { owner: 'Olivia Owner' });
-    const company = await seed(request, owner, 'companies', { name: 'Acme Trading' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const company = await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
     await seed(request, owner, 'contacts', {
-      firstName: 'Ada',
-      lastName: 'Lovelace',
+      firstName: CONTACTS.buyer.firstName,
+      lastName: CONTACTS.buyer.lastName,
       companyId: company.id,
     });
     await seed(request, owner, 'leads', {
       firstName: 'Noa',
       lastName: 'Park',
-      companyName: 'Acme',
+      companyName: COMPANIES.brightwater.name,
     });
     const deal = await seed(request, owner, 'deals', {
-      name: 'Acme seats',
+      name: DEALS.tablets,
       amount: '1250.00',
       companyId: company.id,
     });
     // Archived records are not searched.
-    const archived = await seed(request, owner, 'companies', { name: 'Acme Archive' });
+    const archived = await seed(request, owner, 'companies', {
+      name: COMPANIES.brightwaterFreight.name,
+    });
     await apiCall(
       request,
       owner,
@@ -50,35 +53,42 @@ test.describe('Top bar', () => {
 
     await page.keyboard.press('Control+K');
     const field = page.getByRole('combobox', { name: 'Search records' });
+    const companyOption = new RegExp(`^C-\\d{4} ${COMPANIES.brightwater.name}`, 'u');
     await expect(field).toBeFocused();
     await field.fill('a');
     await expect(page.getByText('Type at least 2 characters.')).toBeVisible();
 
-    await field.fill('acme');
+    await field.fill('brightwater');
     const palette = page.getByRole('dialog', { name: 'Search records' });
     await expect(palette.getByRole('group', { name: 'Companies' })).toBeVisible();
     await expect(palette.getByRole('group', { name: 'Leads' })).toBeVisible();
     await expect(palette.getByRole('group', { name: 'Deals' })).toBeVisible();
-    await expect(palette.getByRole('option', { name: /^C-\d{4} Acme Trading/u })).toBeVisible();
-    await expect(palette.getByRole('option', { name: /^D-\d{4} Acme seats/u })).toBeVisible();
-    await expect(palette.getByRole('option', { name: /Acme Archive/u })).toHaveCount(0);
+    await expect(palette.getByRole('option', { name: companyOption })).toBeVisible();
+    await expect(
+      palette.getByRole('option', { name: new RegExp(`^D-\\d{4} ${DEALS.tablets}`, 'u') }),
+    ).toBeVisible();
+    await expect(
+      palette.getByRole('option', { name: COMPANIES.brightwaterFreight.name }),
+    ).toHaveCount(0);
     await expectNoA11yViolations(page);
 
     await field.fill('zzzzzz');
     await expect(palette.getByText('No records match')).toBeVisible();
 
     // The company, first of the groups, is highlighted.
-    await field.fill('acme tra');
-    await expect(palette.getByRole('option', { name: /^C-\d{4} Acme Trading/u })).toBeVisible();
+    await field.fill('brightwater log');
+    await expect(palette.getByRole('option', { name: companyOption })).toBeVisible();
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(new RegExp(`${owner.path}/companies/${company.id}$`, 'u'));
-    await expect(page.getByRole('heading', { level: 1, name: 'Acme Trading' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: COMPANIES.brightwater.name }),
+    ).toBeVisible();
     await expect(palette).toHaveCount(0);
 
     // Anywhere in the CRM, and by clicking: the deal opens.
     await page.getByRole('button', { name: 'Search records' }).click();
-    await page.getByRole('combobox', { name: 'Search records' }).fill('seats');
-    await page.getByRole('option', { name: /Acme seats/u }).click();
+    await page.getByRole('combobox', { name: 'Search records' }).fill('tablets');
+    await page.getByRole('option', { name: DEALS.tablets }).click();
     await expect(page).toHaveURL(new RegExp(`${owner.path}/deals/${deal.id}$`, 'u'));
   });
 
@@ -86,7 +96,7 @@ test.describe('Top bar', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { owner: 'Olivia Owner' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     const now = Date.now();
     const task = async (title: string, dueAt: number) =>
       await seed(request, owner, 'tasks', {
@@ -95,13 +105,13 @@ test.describe('Top bar', () => {
         assigneeId: owner.userId,
       });
     await task('Send the proposal', now - 48 * HOUR);
-    await task('Call Globex', now + 2 * HOUR);
+    await task(TASKS.call, now + 2 * HOUR);
     // Due in three days: not a reminder yet.
     await task('Plan the quarter', now + 72 * HOUR);
     await seed(request, owner, 'leads', {
       firstName: 'Noa',
       lastName: 'Park',
-      companyName: 'Initech',
+      companyName: COMPANIES.kestrel.name,
       followUpDate: new Date(now - 24 * HOUR).toISOString().slice(0, 10),
     });
     const remindersOf = async () =>
@@ -134,7 +144,7 @@ test.describe('Top bar', () => {
     );
     await expect(popover.getByRole('region', { name: /Overdue tasks/u })).toContainText('Overdue');
     await expect(popover.getByRole('region', { name: /Due in the next 24 hours/u })).toContainText(
-      'Call Globex',
+      TASKS.call,
     );
     await expect(popover.getByRole('region', { name: /Leads to follow up/u })).toContainText(
       'Noa Park',
@@ -154,7 +164,7 @@ test.describe('Top bar', () => {
     await expect(page).toHaveURL(/\/tasks\?view=mine$/u);
     await expect(popover).toHaveCount(0);
     await expect(bell(2)).toBeVisible();
-    await page.getByRole('checkbox', { name: 'Complete Call Globex' }).click();
+    await page.getByRole('checkbox', { name: `Complete ${TASKS.call}` }).click();
     await expect(bell(1)).toBeVisible();
     await page.getByRole('link', { name: 'Companies' }).first().click();
     await expect(page).toHaveURL(/\/companies$/u);
@@ -171,7 +181,7 @@ test.describe('Top bar', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { owner: 'Olivia Owner' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     const overdue = async (title: string) =>
       await seed(request, owner, 'tasks', {
         title,
@@ -185,13 +195,13 @@ test.describe('Top bar', () => {
     await waitForHydration(page.getByRole('button', { name: 'Reminders: 1' }));
 
     // Someone assigns a second task: the layout isn't rendered again by a click on a link.
-    await overdue('Call Globex');
+    await overdue(TASKS.call);
     await page.getByRole('link', { name: 'Companies' }).first().click();
     await expect(page).toHaveURL(/\/companies$/u);
 
     await expect(page.getByRole('button', { name: 'Reminders: 2' })).toBeVisible();
     await page.getByRole('button', { name: 'Reminders: 2' }).click();
-    await expect(page.getByRole('dialog', { name: 'Reminders' })).toContainText('Call Globex');
+    await expect(page.getByRole('dialog', { name: 'Reminders' })).toContainText(TASKS.call);
   });
 
   test('says there is nothing to do, with no badge, when there are no reminders', async ({
