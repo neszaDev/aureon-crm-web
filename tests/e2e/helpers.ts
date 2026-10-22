@@ -1,6 +1,7 @@
-import { randomUUID } from 'node:crypto';
+import { randomInt } from 'node:crypto';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { emailFor, PEOPLE } from './mockData';
 
 export const PASSWORD = 'a-secure-password';
 
@@ -10,11 +11,13 @@ export const ADMIN = {
   password: process.env.E2E_ADMIN_PASSWORD ?? 'e2e-admin-password',
 };
 
+const people = Object.values(PEOPLE);
+
 /**
  * Every test registers its own user so tests never depend on each other or on order.
- * @returns A new, unused email address.
+ * @returns A new, unused email address, of someone from `PEOPLE`.
  */
-export const uniqueEmail = () => `e2e-${randomUUID()}@example.com`;
+export const uniqueEmail = () => emailFor(people[randomInt(people.length)] ?? PEOPLE.owner);
 
 /**
  * Registers a new account through the UI and waits for the CRM home (`/app`).

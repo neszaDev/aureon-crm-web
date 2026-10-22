@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import type { APIRequestContext, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { PASSWORD, uniqueEmail } from '../helpers';
+import { emailFor, TEAMS } from '../mockData';
 
 export const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8080';
 
@@ -64,7 +65,8 @@ export const createWorkspace = async (page: Page, name: string) => {
 };
 
 /**
- * Through the API: registers an owner, creates "Acme" and invites `email` as a manager.
+ * Through the API: registers an owner, creates the default team's workspace and invites `email` as
+ * a manager.
  * @param request Playwright API client.
  * @param email The invited email.
  * @returns The link's path and token, the workspace, the invitation, and the owner's email and
@@ -80,7 +82,7 @@ export const invite = async (request: APIRequestContext, email: string) => {
   const headers = { Authorization: `Bearer ${accessToken}` };
   const workspace = await request.post(`${BACKEND_URL}/api/v1/workspaces`, {
     headers,
-    data: { name: 'Acme', defaultCurrency: 'EUR', timezone: 'Europe/Paris' },
+    data: { name: TEAMS.default.name, defaultCurrency: 'EUR', timezone: 'Europe/Paris' },
   });
   expect(workspace.status()).toBe(201);
   const { id: workspaceId }: { id: number } = await workspace.json();
@@ -158,11 +160,11 @@ export const apiCall = async <T>(
 /**
  * Registers an account through the API.
  * @param request Playwright API client.
- * @param name Its display name, which people see on seals and in history.
+ * @param name Its display name, which people see on seals and in history, and its email's.
  * @returns The account, with the password `PASSWORD`.
  */
 export const registerUser = async (request: APIRequestContext, name?: string) => {
-  const email = uniqueEmail();
+  const email = name ? emailFor(name) : uniqueEmail();
   const registered = await request.post(`${BACKEND_URL}/api/v1/auth/register`, {
     data: { email, password: PASSWORD },
   });
@@ -186,7 +188,7 @@ export const registerUser = async (request: APIRequestContext, name?: string) =>
  * Through the API: registers an owner and creates a workspace (EUR, Europe/Paris) for them.
  * @param request Playwright API client.
  * @param options What to call them.
- * @param options.workspace The workspace's name.
+ * @param options.workspace The workspace's name, the default team's unless given.
  * @param options.owner The owner's display name.
  * @returns The owner, signed in as far as the API goes, and the workspace's id and path.
  */
@@ -196,7 +198,7 @@ export const seedWorkspace = async (
 ): Promise<Member> => {
   const owner = await registerUser(request, options.owner);
   const workspace = await apiCall<{ id: number }>(request, owner, 'POST', '/workspaces', {
-    name: options.workspace ?? 'Acme',
+    name: options.workspace ?? TEAMS.default.name,
     defaultCurrency: 'EUR',
     timezone: 'Europe/Paris',
   });

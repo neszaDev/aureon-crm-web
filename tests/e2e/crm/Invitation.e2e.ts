@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process';
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signOut, signUp, uniqueEmail } from '../helpers';
+import { PEOPLE, TEAMS } from '../mockData';
 import { BACKEND_URL, expectDashboard, expectNoA11yViolations, invite } from './helpers';
 
 // The backend's database, for the one state the API can't produce: an expired link. Defaults to
@@ -34,7 +35,7 @@ const expireInvitation = (id: number) => {
  */
 const expectRole = async (page: Page, role: string) => {
   await page.getByRole('button', { name: /^Switch workspace/u }).click();
-  await expect(page.getByRole('menuitem', { name: /Acme/u })).toContainText(role);
+  await expect(page.getByRole('menuitem', { name: TEAMS.default.name })).toContainText(role);
   await page.keyboard.press('Escape');
 };
 
@@ -61,18 +62,20 @@ test.describe('Invitation links', () => {
 
     const response = await page.goto(path);
     expect(response?.headers()['referrer-policy']).toBe('no-referrer');
-    await expect(page.getByRole('heading', { level: 1, name: 'Join Acme' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: `Join ${TEAMS.default.name}` }),
+    ).toBeVisible();
     await expect(page).toHaveTitle('Invitation');
     await expect(page.locator('meta[name="referrer"]')).toHaveAttribute('content', 'no-referrer');
     await expect(page.getByText(email)).toBeVisible();
     await expectNoA11yViolations(page);
 
-    await page.getByLabel('Display name').fill('Ana Lima');
+    await page.getByLabel('Display name').fill(PEOPLE.invitee);
     await page.getByLabel('Password').fill(PASSWORD);
     await page.getByRole('button', { name: 'Create account and join' }).click();
 
     await expect(page).toHaveURL(`${baseURL}/app/${workspaceId}`);
-    await expectDashboard(page, 'Acme');
+    await expectDashboard(page, TEAMS.default.name);
     await expectRole(page, 'Manager');
     const cookies = await context.cookies();
     expect(cookies.find((cookie) => cookie.name === 'access_token')?.httpOnly).toBe(true);
@@ -98,7 +101,7 @@ test.describe('Invitation links', () => {
     await page.goto(path);
     await expect(page.getByText(email)).toBeVisible();
     await expectNoA11yViolations(page);
-    await page.getByRole('button', { name: 'Join Acme' }).click();
+    await page.getByRole('button', { name: `Join ${TEAMS.default.name}` }).click();
 
     await expect(page).toHaveURL(`${baseURL}/app/${workspaceId}`);
     await expectRole(page, 'Manager');
@@ -113,18 +116,18 @@ test.describe('Invitation links', () => {
     const email = await signUp(page);
     const { path, workspaceId } = await invite(request, email);
     await page.goto(path);
-    await expect(page.getByRole('button', { name: 'Join Acme' })).toBeVisible();
+    await expect(page.getByRole('button', { name: `Join ${TEAMS.default.name}` })).toBeVisible();
     // The backend no longer accepts the access token.
     await context.addCookies([{ name: 'access_token', value: 'expired', url: baseURL }]);
 
-    await page.getByRole('button', { name: 'Join Acme' }).click();
+    await page.getByRole('button', { name: `Join ${TEAMS.default.name}` }).click();
     await expect(page).toHaveURL(`${baseURL}/sign-in?expired=1&next=${encodeURIComponent(path)}`);
     await page.getByLabel('Email address').fill(email);
     await page.getByLabel('Password').fill(PASSWORD);
     await page.getByRole('button', { name: 'Sign in' }).click();
 
     await expect(page).toHaveURL(`${baseURL}${path}`);
-    await page.getByRole('button', { name: 'Join Acme' }).click();
+    await page.getByRole('button', { name: `Join ${TEAMS.default.name}` }).click();
     await expect(page).toHaveURL(`${baseURL}/app/${workspaceId}`);
     await expectRole(page, 'Manager');
   });
@@ -145,7 +148,7 @@ test.describe('Invitation links', () => {
     ).toBeVisible();
     await expect(page.getByText(invited)).toBeVisible();
     await expect(page.getByText(other)).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Join Acme' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: `Join ${TEAMS.default.name}` })).toHaveCount(0);
     await expectNoA11yViolations(page);
     await page.getByRole('button', { name: 'Sign out' }).click();
 
@@ -180,7 +183,7 @@ test.describe('Invitation links', () => {
     await page.getByRole('button', { name: 'Sign in' }).click();
 
     await expect(page).toHaveURL(`${baseURL}${path}`);
-    await page.getByRole('button', { name: 'Join Acme' }).click();
+    await page.getByRole('button', { name: `Join ${TEAMS.default.name}` }).click();
     await expect(page).toHaveURL(`${baseURL}/app/${workspaceId}`);
     await expectRole(page, 'Manager');
   });
@@ -204,7 +207,9 @@ test.describe('Invitation links', () => {
     await expectClosed(page, accepted.path, 'This invitation has already been used');
     await expectClosed(page, revoked.path, 'This invitation was cancelled');
     await expectClosed(page, expired.path, 'This invitation has expired');
-    await expect(page.getByText('Ask the person who invited you to Acme')).toBeVisible();
+    await expect(
+      page.getByText(`Ask the person who invited you to ${TEAMS.default.name}`),
+    ).toBeVisible();
     await expectNoA11yViolations(page);
     await expectClosed(page, '/invite/not-a-real-token', "This invitation link doesn't work");
 
@@ -219,7 +224,9 @@ test.describe('Invitation links', () => {
     const response = await page.goto(`/th${path}`);
     expect(response?.headers()['referrer-policy']).toBe('no-referrer');
 
-    await expect(page.getByRole('heading', { level: 1, name: 'เข้าร่วม Acme' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: `เข้าร่วม ${TEAMS.default.name}` }),
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: 'สร้างบัญชีและเข้าร่วม' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       390,

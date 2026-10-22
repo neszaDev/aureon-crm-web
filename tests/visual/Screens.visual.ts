@@ -21,7 +21,7 @@ const screenshot = async (page: Page, name: string) => {
   await expect(page).toHaveScreenshot(name, {
     fullPage: true,
     // The signed-in user is a new random address on every run.
-    mask: [page.getByTitle(/@example\.com$/u)],
+    mask: [page.getByTitle(/@[a-z]+\.example$/u)],
     maxDiffPixelRatio: 0.001,
   });
 };
