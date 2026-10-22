@@ -1,6 +1,9 @@
+import { TEAMS } from './mockData';
+import { seedAdminProject } from './seedAdminProject';
+
 /**
  * Fails fast with a clear message when the backend isn't running, instead of every test
- * timing out on its first API call.
+ * timing out on its first API call; then gives the e2e admin its project, once.
  */
 export default async function globalSetup() {
   const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:8080';
@@ -18,4 +21,11 @@ export default async function globalSetup() {
       { cause: error },
     );
   }
+
+  const started = performance.now();
+  const seeded = await seedAdminProject(backendUrl);
+  const took = Math.round(performance.now() - started);
+  console.log(
+    `The e2e admin's ${TEAMS.default.name}: ${seeded ? 'seeded' : 'already there'} (${took} ms)`,
+  );
 }

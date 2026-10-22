@@ -109,6 +109,18 @@ a test gets 25 companies or a second rep without clicking), the UI creators (`cr
 | `tests/e2e/Auth.e2e.ts` | Also the CRM's redirects: `/app` deep links keep `?next=`, sign-in and sign-up keep it between them; five requests refreshing one expired session at once, none sent to sign in; another site's link to `/api/session/expired` signing nobody out, while a deleted account arriving from another site is still signed out |
 | `tests/e2e/Security.e2e.ts` | The app attacked as a browser, another site or a curious member could: tokens only in httpOnly cookies, never in a page, payload or script; a just-rotated refresh token getting the same new pair, then nothing; server actions refusing another origin, another workspace's id, a role the caller lacks and a 10 MB body under any first segment (413), and failing without the server's error; another site unable to export a list or frame a page; no redirect to another site, no password in a URL, lists surviving hostile URLs, the CRM behind sign-in whatever the request claims; a rep's pages without what the role hides, typed text never markup, files only as sandboxed downloads, each security header's value, the public site static. Its unit side is `src/proxy.security.test.ts`: the proxy's matcher (every request with a body included) and `Secure` cookies over https |
 
+### The e2e admin's project
+
+Before the tests, the global setup (`tests/e2e/seedAdminProject.ts`) gives the e2e admin (`ADMIN`
+in `tests/e2e/helpers.ts`) a workspace named after the default team, Northwind Supply, where the
+whole CRM flow is already done through the API: four members (an admin, a manager and two sales
+reps, `first.last@northwind.example`, password `PASSWORD`), 7 companies, 13 contacts, 10 leads in
+every status (one converted), 9 deals in two currencies moved stage by stage (one won, one lost),
+9 tasks (open, overdue, completed, cancelled) and 11 activities of every type, dated around the
+day it ran. It is idempotent: when the admin already has a workspace of that name, it does nothing
+(the run's log says which, and how long it took). To see it, sign in as the e2e admin after a run.
+If it ever fails half-way, rename that workspace in its settings and the next run makes a new one.
+
 ### The end-to-end journey
 
 `Journey.e2e.ts` walks the CRM brief's end-to-end list (§8) in its order, as one test with a step
