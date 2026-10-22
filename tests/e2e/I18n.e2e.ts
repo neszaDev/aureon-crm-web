@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { seed, seedWorkspace, waitForHydration } from './crm/helpers';
 import { PASSWORD, signIn } from './helpers';
+import { COMPANIES } from './mockData';
 
 test.describe('I18n', () => {
   test.describe('Language switching', () => {
@@ -48,7 +49,7 @@ test.describe('I18n', () => {
         errors.push(error.message);
       });
       const owner = await seedWorkspace(request);
-      const company = await seed(request, owner, 'companies', { name: 'Acme Trading' });
+      const company = await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
       await seed(request, owner, 'activities', {
         type: 'CALL',
         subject: 'Intro call',

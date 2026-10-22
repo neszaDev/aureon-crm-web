@@ -15,6 +15,7 @@ import {
   waitForHydration,
 } from './crm/helpers';
 import { ADMIN, PASSWORD, signIn, signUp, uniqueEmail } from './helpers';
+import { COMPANIES, CONTACTS, DEALS, PEOPLE, TEAMS } from './mockData';
 
 // Security probes: each one attacks the app as a browser, another site or a curious member could,
 // against the running app and the real backend. The unit tests of the same rules sit beside their
@@ -216,12 +217,14 @@ test.describe('Security', () => {
       // Sign-up (an action sets the cookies), pages, an action, client navigation, and the proxy's
       // refresh (a second pair).
       await signUp(page);
-      const workspace = await createWorkspace(page, 'Acme');
-      await createCompany(page, workspace, { name: 'Initech' });
+      const workspace = await createWorkspace(page, TEAMS.default.name);
+      await createCompany(page, workspace, { name: COMPANIES.kestrel.name });
       await context.clearCookies({ name: 'access_token' });
       await page.goto(`${workspace}/companies`);
-      await page.getByRole('link', { name: 'Initech' }).click();
-      await expect(page.getByRole('heading', { level: 1, name: 'Initech' })).toBeVisible();
+      await page.getByRole('link', { name: COMPANIES.kestrel.name }).click();
+      await expect(
+        page.getByRole('heading', { level: 1, name: COMPANIES.kestrel.name }),
+      ).toBeVisible();
 
       const all = await Promise.all(responses);
       expect(all.length).toBeGreaterThan(20);
@@ -325,7 +328,7 @@ test.describe('Security', () => {
   test.describe('Server actions', () => {
     test("refuse a call from another origin, even with the session's cookies", async ({ page }) => {
       await signUp(page);
-      const workspace = await createWorkspace(page, 'Acme');
+      const workspace = await createWorkspace(page, TEAMS.default.name);
       const name = `Forged ${randomUUID()}`;
       const call = await captureCreateCompany(page, workspace, name);
       const auth = await backendAuth(page);
@@ -358,7 +361,7 @@ test.describe('Security', () => {
     }) => {
       const other = await seedWorkspace(request);
       await signUp(page);
-      const workspace = await createWorkspace(page, 'Acme');
+      const workspace = await createWorkspace(page, TEAMS.default.name);
       const name = `Planted ${randomUUID()}`;
       const call = await captureCreateCompany(page, workspace, name);
       const ownId = workspaceIdOf(workspace);
@@ -457,7 +460,7 @@ test.describe('Security', () => {
 
     test("answer a call that fails on the server without the server's error", async ({ page }) => {
       await signUp(page);
-      const workspace = await createWorkspace(page, 'Acme');
+      const workspace = await createWorkspace(page, TEAMS.default.name);
       const call = await captureCreateCompany(page, workspace, 'Broken');
 
       const response = await replay(page, call, {
@@ -554,7 +557,7 @@ test.describe('Security', () => {
       request,
       baseURL,
     }) => {
-      const owner = await seedWorkspace(request, { workspace: 'Framed Workspace' });
+      const owner = await seedWorkspace(request, { workspace: TEAMS.framed.name });
       await signIn(page, { email: owner.email, password: PASSWORD });
       const answered = page.waitForResponse(`${originOf(baseURL)}${owner.path}`);
 
@@ -571,10 +574,10 @@ test.describe('Security', () => {
       await expect.poll(() => page.frames()[1]?.url()).toBe('chrome-error://chromewebdata/');
       const frame = page.frameLocator('iframe');
       await expect(frame.getByRole('button', { name: 'Sign in' })).toHaveCount(0);
-      await expect(frame.getByText('Framed Workspace')).toHaveCount(0);
+      await expect(frame.getByText(TEAMS.framed.name)).toHaveCount(0);
       // The tab itself is still signed in.
       await page.goto(owner.path);
-      await expect(page.getByText('what changed in Framed Workspace.')).toBeVisible();
+      await expect(page.getByText(`what changed in ${TEAMS.framed.name}.`)).toBeVisible();
     });
   });
 
@@ -648,7 +651,7 @@ test.describe('Security', () => {
       request,
     }) => {
       const owner = await seedWorkspace(request);
-      await seed(request, owner, 'companies', { name: 'Acme Trading' });
+      await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
       await signIn(page, { email: owner.email, password: PASSWORD });
       const query =
         "?sort=name;DROP TABLE companies&direction=sideways&page=-1&size=100000&q=' OR 1=1 --&archived=maybe&ownerId=1 OR 1=1";
@@ -706,7 +709,7 @@ test.describe('Security', () => {
       request,
       baseURL,
     }) => {
-      const owner = await seedWorkspace(request, { workspace: 'Framed Workspace' });
+      const owner = await seedWorkspace(request, { workspace: TEAMS.framed.name });
       const invitation = await invite(request, uniqueEmail());
       await signIn(page, { email: owner.email, password: PASSWORD });
       const pages = [
@@ -774,17 +777,17 @@ test.describe('Security', () => {
     test('show what users typed as text, never as markup', async ({ page, request }) => {
       test.slow();
       const owner = await seedWorkspace(request, {
-        workspace: `Acme ${XSS}`,
-        owner: `Olivia ${XSS}`,
+        workspace: `${TEAMS.default.name} ${XSS}`,
+        owner: `${PEOPLE.owner} ${XSS}`,
       });
       const company = await seed(request, owner, 'companies', {
-        name: `Initech ${XSS}`,
+        name: `${COMPANIES.kestrel.name} ${XSS}`,
         industry: XSS,
         notes: XSS,
         website: `https://example.com/${encodeURIComponent(XSS)}`,
       });
       const contact = await seed(request, owner, 'contacts', {
-        firstName: `Ada ${XSS}`,
+        firstName: `${CONTACTS.buyer.firstName} ${XSS}`,
         lastName: XSS,
         jobTitle: XSS,
         companyId: company.id,
@@ -795,7 +798,7 @@ test.describe('Security', () => {
         companyName: XSS,
       });
       const deal = await seed(request, owner, 'deals', {
-        name: `Seats ${XSS}`,
+        name: `${DEALS.tablets} ${XSS}`,
         amount: '10.00',
         companyId: company.id,
       });
@@ -843,13 +846,15 @@ test.describe('Security', () => {
         await expect(page.locator('img[src="x"]'), url).toHaveCount(0);
       }
       await page.goto(`${owner.path}/companies/${company.id}`);
-      await expect(page).toHaveTitle(`Initech ${XSS}`);
+      await expect(page).toHaveTitle(`${COMPANIES.kestrel.name} ${XSS}`);
 
       await page.goto(owner.path);
       await waitForHydration(page.getByRole('button', { name: 'Search records' }));
       await page.keyboard.press('Control+K');
-      await page.getByRole('combobox', { name: 'Search records' }).fill('Initech');
-      await expect(page.getByRole('option', { name: /^C-\d{4} Initech/u })).toBeVisible();
+      await page.getByRole('combobox', { name: 'Search records' }).fill(COMPANIES.kestrel.name);
+      await expect(
+        page.getByRole('option', { name: new RegExp(`^C-\\d{4} ${COMPANIES.kestrel.name}`, 'u') }),
+      ).toBeVisible();
       await expect(page.locator('img[src="x"]')).toHaveCount(0);
       expect(await page.evaluate(() => '__xss' in globalThis)).toBe(false);
     });

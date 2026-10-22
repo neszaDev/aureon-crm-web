@@ -33,6 +33,75 @@ export const PEOPLE = {
   invitee: 'Ana Lima',
 };
 
+/** Companies the tests create by name. */
+export const COMPANIES = {
+  // The customer most tests work with.
+  brightwater: {
+    name: 'Brightwater Logistics',
+    industry: 'Logistics',
+    website: 'https://brightwater.example',
+    phone: '+33 1 84 88 12 40',
+  },
+  // Its name before a rebrand: an archived record, or one an edit renames.
+  brightwaterFreight: {
+    name: 'Brightwater Freight',
+    industry: 'Logistics',
+    website: 'https://brightwaterfreight.example',
+    phone: '+33 1 84 88 12 41',
+  },
+  kestrel: {
+    name: 'Kestrel Analytics',
+    industry: 'Software',
+    website: 'https://kestrel.example',
+    phone: '+44 20 7946 0321',
+  },
+  solano: {
+    name: 'Solano Energy',
+    industry: 'Energy',
+    website: 'https://solano.example',
+    phone: '+34 910 555 218',
+  },
+  fernhill: {
+    name: 'Fernhill Grocers',
+    industry: 'Retail',
+    website: 'https://fernhill.example',
+    phone: '+44 161 496 0754',
+  },
+  maple: {
+    name: 'Maple Street Market',
+    industry: 'Retail',
+    website: 'https://maplestreet.example',
+    phone: '+1 415 555 0142',
+  },
+  // After every name in MORE_COMPANIES.
+  zephyr: {
+    name: 'Zephyr Couriers',
+    industry: 'Logistics',
+    website: 'https://zephyr.example',
+    phone: '+49 30 555 0193',
+  },
+};
+
+/** People the tests create as contacts and leads. */
+export const CONTACTS = {
+  // A buyer at Brightwater Logistics.
+  buyer: { firstName: 'Sofia', lastName: 'Martins', email: 'sofia.martins@brightwater.example' },
+  // A lead who is converted into a contact.
+  lead: { firstName: 'Daniel', lastName: 'Okafor' },
+};
+
+/** Deals the tests create by name. */
+export const DEALS = {
+  tablets: 'Brightwater fleet tablets',
+  rollout: 'Brightwater depot rollout',
+  usExpansion: 'Brightwater US expansion',
+  renewal: 'Brightwater support renewal',
+  retrofit: 'Solano panel retrofit',
+  starterKit: 'Fernhill starter kit',
+  won: 'Maple Street shelving',
+  lost: 'Fernhill cold room',
+};
+
 /**
  * A new email address for a person, as their workplace would give it.
  * @param name Their full name.

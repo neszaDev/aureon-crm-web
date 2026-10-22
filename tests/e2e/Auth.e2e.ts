@@ -2,6 +2,7 @@ import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { createWorkspace } from './crm/helpers';
 import { ADMIN, PASSWORD, signOut, signUp, uniqueEmail } from './helpers';
+import { TEAMS } from './mockData';
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8080';
 
@@ -79,7 +80,7 @@ test.describe('Auth', () => {
 
       // A deep link survives signing in, in its language.
       const email = await signUp(page);
-      const workspace = await createWorkspace(page, 'Acme');
+      const workspace = await createWorkspace(page, TEAMS.default.name);
       await signOut(page);
       const deepLink = `${workspace.replace(`${baseURL}/app/`, '/fr/app/')}?tab=x`;
       await page.goto(deepLink);

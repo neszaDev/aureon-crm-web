@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { createWorkspace, expectDashboard, expectNoA11yViolations, invite } from './crm/helpers';
 import { PASSWORD, signUp, uniqueEmail } from './helpers';
+import { TEAMS } from './mockData';
 
 /**
  * Registers through an invitation link and waits for the workspace it opens.
@@ -25,10 +26,10 @@ test.describe('Workspaces', () => {
     await expect(page).toHaveTitle('Your workspaces');
     await expectNoA11yViolations(page);
 
-    await createWorkspace(page, 'Acme');
+    await createWorkspace(page, TEAMS.default.name);
 
     // The home is the dashboard; a workspace with nothing in it starts with its first records.
-    await expectDashboard(page, 'Acme');
+    await expectDashboard(page, TEAMS.default.name);
     await expect(
       page.getByRole('heading', { name: 'Start with your first records' }),
     ).toBeVisible();
@@ -73,21 +74,25 @@ test.describe('Workspaces', () => {
 
   test('switches between workspaces from the rail', async ({ page }) => {
     await signUp(page);
-    await createWorkspace(page, 'Acme');
+    await createWorkspace(page, TEAMS.default.name);
 
     await page.getByRole('button', { name: /^Switch workspace/u }).click();
     await page.getByRole('menuitem', { name: 'Create workspace' }).click();
     await expect(page.getByRole('heading', { name: 'Create a workspace' })).toBeVisible();
-    await createWorkspace(page, 'Beta');
-    await expectDashboard(page, 'Beta');
+    await createWorkspace(page, TEAMS.other.name);
+    await expectDashboard(page, TEAMS.other.name);
 
-    await page.getByRole('button', { name: 'Switch workspace. Current: Beta' }).click();
-    await page.getByRole('menuitem', { name: /Acme/u }).click();
-    await expectDashboard(page, 'Acme');
+    await page
+      .getByRole('button', {
+        name: `Switch workspace. Current: ${TEAMS.other.name}`,
+      })
+      .click();
+    await page.getByRole('menuitem', { name: TEAMS.default.name }).click();
+    await expectDashboard(page, TEAMS.default.name);
 
     await page.goto('/app');
     await expect(page.getByRole('heading', { name: 'Your workspaces' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Beta/u })).toBeVisible();
+    await expect(page.getByRole('link', { name: TEAMS.other.name })).toBeVisible();
     await expect(page).toHaveTitle('Your workspaces');
     await expectNoA11yViolations(page);
   });
