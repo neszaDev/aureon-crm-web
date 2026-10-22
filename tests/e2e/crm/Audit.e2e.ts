@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
+import { COMPANIES, PEOPLE } from '../mockData';
 import {
   addMember,
   apiCall,
@@ -17,10 +18,12 @@ test.describe('Export and the audit trail', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { owner: 'Avery Owner' });
-    await seed(request, owner, 'companies', { name: 'Beta Retail', industry: 'Retail' });
-    await seed(request, owner, 'companies', { name: 'Acme Retail', industry: 'Retail' });
-    await seed(request, owner, 'companies', { name: 'Gamma Energy', industry: 'Energy' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.otherOwner });
+    // One after the other: the second retailer comes first by name.
+    for (const company of [COMPANIES.maple, COMPANIES.fernhill, COMPANIES.solano]) {
+      // oxlint-disable-next-line no-await-in-loop -- created in this order
+      await seed(request, owner, 'companies', { name: company.name, industry: company.industry });
+    }
     // What the backend itself answers for these filters: the file must reach the browser as it is.
     const direct = await request.get(
       `${BACKEND_URL}/api/v1/workspaces/${owner.workspaceId}/companies/export?industry=Retail`,
@@ -45,7 +48,10 @@ test.describe('Export and the audit trail', () => {
     // The header row, then only the Retail companies, by name (the export's own order).
     const [header, ...rows] = file.toString('utf-8').replace(/^﻿/u, '').trimEnd().split('\r\n');
     expect(header).toBe(COMPANY_COLUMNS);
-    expect(rows.map((row) => row.split(',')[1])).toStrictEqual(['Acme Retail', 'Beta Retail']);
+    expect(rows.map((row) => row.split(',')[1])).toStrictEqual([
+      COMPANIES.fernhill.name,
+      COMPANIES.maple.name,
+    ]);
     await expect(page.getByText(`Saved ${name}`)).toBeVisible();
 
     // Every export is in the workspace's history: the UI's is the latest.
@@ -54,7 +60,7 @@ test.describe('Export and the audit trail', () => {
       .getByRole('region', { name: /events$/u })
       .locator(':scope > ul > li')
       .first();
-    await expect(latest).toContainText('Avery Owner exported records');
+    await expect(latest).toContainText(`${PEOPLE.otherOwner} exported records`);
     // The list and its rows in the page's words, not the API's English label ("2 companies
     // exported").
     await expect(latest).toContainText('List: Companies (2 rows)');
@@ -66,7 +72,7 @@ test.describe('Export and the audit trail', () => {
     request,
   }) => {
     const owner = await seedWorkspace(request);
-    const rep = await addMember(request, owner, 'SALES_REP', 'Riley Rep');
+    const rep = await addMember(request, owner, 'SALES_REP', PEOPLE.rep);
     await signIn(page, { email: rep.email, password: PASSWORD });
 
     await page.goto(`${owner.path}/companies`);
@@ -92,25 +98,34 @@ test.describe('Export and the audit trail', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { owner: 'Avery Owner' });
-    const manager = await addMember(request, owner, 'MANAGER', 'Morgan Manager');
-    const acme = await seed(request, owner, 'companies', { name: 'Acme' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.otherOwner });
+    const manager = await addMember(request, owner, 'MANAGER', PEOPLE.otherManager);
+    // Renamed below, after a rebrand.
+    const company = await seed(request, owner, 'companies', {
+      name: COMPANIES.brightwaterFreight.name,
+    });
     await seed(request, manager, 'leads', { firstName: 'Noa', lastName: 'Park' });
     await signIn(page, { email: owner.email, password: PASSWORD });
 
-    await page.goto(`${owner.path}/companies/${acme.id}/edit`);
+    await page.goto(`${owner.path}/companies/${company.id}/edit`);
     await waitForHydration(page.locator('form'));
-    await page.getByLabel('Company name').fill('Acme Trading');
+    await page.getByLabel('Company name').fill(COMPANIES.brightwater.name);
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText('Saved', { exact: true })).toBeVisible();
 
-    await page.goto(`${owner.path}/companies/${acme.id}`);
+    await page.goto(`${owner.path}/companies/${company.id}`);
     const history = page.getByRole('region', { name: /^History/u });
     const events = history.locator(':scope > ul > li');
     await expect(events).toHaveCount(2);
-    await expect(events.first()).toContainText('Avery Owner changed Acme Trading');
-    await expect(events.first()).toContainText('Name: Acme → Acme Trading');
-    await expect(events.nth(1)).toContainText('Avery Owner created Acme');
+    await expect(events.first()).toContainText(
+      `${PEOPLE.otherOwner} changed ${COMPANIES.brightwater.name}`,
+    );
+    await expect(events.first()).toContainText(
+      `Name: ${COMPANIES.brightwaterFreight.name} → ${COMPANIES.brightwater.name}`,
+    );
+    await expect(events.nth(1)).toContainText(
+      `${PEOPLE.otherOwner} created ${COMPANIES.brightwaterFreight.name}`,
+    );
 
     await page.goto(`${owner.path}/settings/workspace`);
     await page
@@ -119,11 +134,11 @@ test.describe('Export and the audit trail', () => {
       .click();
     await expect(page.getByRole('heading', { level: 1, name: 'Audit' })).toBeVisible();
     const trail = page.getByRole('region', { name: /events$/u });
-    await expect(trail).toContainText('Avery Owner invited');
+    await expect(trail).toContainText(`${PEOPLE.otherOwner} invited`);
     // Joining is recorded on the member, labelled with their own email: it reads as the workspace.
-    await expect(trail).toContainText('Morgan Manager joined the workspace');
+    await expect(trail).toContainText(`${PEOPLE.otherManager} joined the workspace`);
     await expect(trail).not.toContainText(`joined ${manager.email}`);
-    await expect(trail).toContainText('Morgan Manager created Noa Park');
+    await expect(trail).toContainText(`${PEOPLE.otherManager} created Noa Park`);
     await expectNoA11yViolations(page);
 
     await page.getByRole('combobox', { name: 'Record type' }).click();
@@ -132,7 +147,7 @@ test.describe('Export and the audit trail', () => {
     await expect(page.getByRole('heading', { name: '2 events' })).toBeVisible();
 
     await page.getByRole('combobox', { name: 'Done by' }).click();
-    await page.getByRole('option', { name: 'Morgan Manager' }).click();
+    await page.getByRole('option', { name: PEOPLE.otherManager }).click();
     await expect(page).toHaveURL(
       new RegExp(`\\?entityType=COMPANY&actorId=${manager.userId}$`, 'u'),
     );
@@ -152,7 +167,7 @@ test.describe('Export and the audit trail', () => {
       page.getByRole('heading', { name: `${theirs.totalElements} events` }),
     ).toBeVisible();
     await expect(page.getByRole('region', { name: /events$/u })).toContainText(
-      'Morgan Manager created Noa Park',
+      `${PEOPLE.otherManager} created Noa Park`,
     );
   });
 
@@ -161,7 +176,7 @@ test.describe('Export and the audit trail', () => {
     request,
   }) => {
     const owner = await seedWorkspace(request);
-    await seed(request, owner, 'companies', { name: 'Acme Retail' });
+    await seed(request, owner, 'companies', { name: COMPANIES.fernhill.name });
     await signIn(page, { email: owner.email, password: PASSWORD });
     await page.goto(`${owner.path}/companies`);
     const exportButton = page.getByRole('button', { name: 'Export CSV' });
@@ -215,7 +230,7 @@ test.describe('Export and the audit trail', () => {
     request,
   }) => {
     const owner = await seedWorkspace(request);
-    await seed(request, owner, 'companies', { name: 'Acme Retail' });
+    await seed(request, owner, 'companies', { name: COMPANIES.fernhill.name });
     await signIn(page, { email: owner.email, password: PASSWORD });
     const route = `/api/crm/${owner.workspaceId}/export/companies?locale=fr`;
 

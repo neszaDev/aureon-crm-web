@@ -1,6 +1,7 @@
 import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
+import { COMPANIES, DEALS, MORE_LEADS, PEOPLE } from '../mockData';
 import type { Member } from './helpers';
 import {
   addMember,
@@ -88,17 +89,21 @@ const move = async (
  * @returns The owner, the rep and the company's id.
  */
 const seedReports = async (request: APIRequestContext) => {
-  const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
-  const riley = await addMember(request, owner, 'SALES_REP', 'Riley Rep');
-  const leaver = await addMember(request, owner, 'MANAGER', 'Lee Leaver');
-  const company = await seed(request, owner, 'companies', { name: 'Acme Trading' });
-  await seed(request, owner, 'deals', { name: 'Acme seats', amount: '1000.00' });
-  const ahead = await seed(request, owner, 'deals', { name: 'Acme rollout', amount: '2500.50' });
+  const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+  const riley = await addMember(request, owner, 'SALES_REP', PEOPLE.rep);
+  const leaver = await addMember(request, owner, 'MANAGER', PEOPLE.leaver);
+  const company = await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
+  await seed(request, owner, 'deals', { name: DEALS.tablets, amount: '1000.00' });
+  const ahead = await seed(request, owner, 'deals', { name: DEALS.rollout, amount: '2500.50' });
   await move(request, owner, ahead, 'Proposal');
-  const won = await seed(request, owner, 'deals', { name: 'Won deal', amount: '1234.56' });
+  const won = await seed(request, owner, 'deals', { name: DEALS.won, amount: '1234.56' });
   await move(request, owner, won, 'Won');
-  await seed(request, riley, 'deals', { name: 'Riley US', amount: '400.00', currency: 'USD' });
-  const lost = await seed(request, riley, 'deals', { name: 'Lost deal', amount: '99.00' });
+  await seed(request, riley, 'deals', {
+    name: DEALS.usExpansion,
+    amount: '400.00',
+    currency: 'USD',
+  });
+  const lost = await seed(request, riley, 'deals', { name: DEALS.lost, amount: '99.00' });
   await move(request, owner, lost, 'Lost', 'Chose another supplier');
   await seed(request, leaver, 'deals', { name: 'Lee deal', amount: '750.00' });
   const link = { companyId: company.id };
@@ -154,7 +159,7 @@ test.describe('Reports', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     await signIn(page, { email: owner.email, password: PASSWORD });
 
     await page.goto(owner.path);
@@ -187,7 +192,7 @@ test.describe('Reports', () => {
     ['follow-ups', 'Follow-ups', 'Overdue tasks'],
   ]) {
     test(`opens ${tab} from its URL`, async ({ page, request }) => {
-      const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
+      const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
       await signIn(page, { email: owner.email, password: PASSWORD });
 
       await page.goto(reports(owner.path, `?tab=${tab}`));
@@ -201,7 +206,7 @@ test.describe('Reports', () => {
   }
 
   test('moves between the reports by keyboard', async ({ page, request }) => {
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     await signIn(page, { email: owner.email, password: PASSWORD });
     await page.goto(reports(owner.path));
 
@@ -359,7 +364,7 @@ test.describe('Reports', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     await signIn(page, { email: owner.email, password: PASSWORD });
     const api = await report<Funnel>(request, owner, 'funnel');
     expect(api.historyFrom).toBeUndefined();
@@ -418,20 +423,19 @@ test.describe('Reports', () => {
     request,
   }) => {
     const { owner, riley } = await seedReports(request);
-    // More than the 20 the API lists, of tasks and of leads (Noa Park, from January 5, is the
-    // oldest).
+    // More than the 20 the API lists, of tasks and of leads: a lead and a late call for each of
+    // MORE_LEADS (Noa Park, from January 5, is the oldest lead).
     await Promise.all([
-      ...Array.from({ length: 21 }, async (_, index) => {
+      ...MORE_LEADS.map(async (lead, index) => {
         await seed(request, riley, 'tasks', {
-          title: `Late ${index}`,
+          title: `Call ${lead.firstName} ${lead.lastName}`,
           dueAt: new Date(Date.now() - (3 + index) * HOUR).toISOString(),
           assigneeId: riley.userId,
         });
       }),
-      ...Array.from({ length: 21 }, async (_, index) => {
+      ...MORE_LEADS.map(async (lead, index) => {
         await seed(request, owner, 'leads', {
-          firstName: `Due${index}`,
-          lastName: 'Lead',
+          ...lead,
           followUpDate: `2026-02-${String(index + 1).padStart(2, '0')}`,
         });
       }),
@@ -493,8 +497,8 @@ test.describe('Reports', () => {
         page,
         request,
       }) => {
-        const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
-        await seed(request, owner, 'companies', { name: 'Acme Trading' });
+        const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+        await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
         await signIn(page, { email: owner.email, password: PASSWORD });
         const defaults = await report<WonLost>(request, owner, tab);
 
@@ -555,8 +559,8 @@ test.describe('Reports', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Reports' })).toBeVisible();
     const owners = page.getByRole('table', { name: 'Open deals by owner' });
     await expect(owners.getByRole('row')).toHaveCount(api.byOwner.length + 1);
-    await expect(owners).toContainText('Olivia Owner');
-    await expect(owners).toContainText('Riley Rep');
+    await expect(owners).toContainText(PEOPLE.owner);
+    await expect(owners).toContainText(PEOPLE.rep);
   });
 
   test.describe('on a phone, in Thai', () => {

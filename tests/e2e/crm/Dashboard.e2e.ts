@@ -1,6 +1,7 @@
 import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
+import { COMPANIES, CONTACTS, DEALS, PEOPLE, TASKS } from '../mockData';
 import type { Member } from './helpers';
 import {
   addMember,
@@ -64,7 +65,7 @@ const closeDeal = async (
 
 test.describe('Dashboard', () => {
   test('starts an empty workspace with its first records', async ({ page, request }) => {
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     await signIn(page, { email: owner.email, password: PASSWORD });
     await page.goto(owner.path);
 
@@ -91,28 +92,35 @@ test.describe('Dashboard', () => {
   });
 
   test('shows the numbers and the period the API answered with', async ({ page, request }) => {
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
-    const company = await seed(request, owner, 'companies', { name: 'Acme Trading' });
-    await seed(request, owner, 'contacts', { firstName: 'Ada', lastName: 'Lovelace' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const company = await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
+    await seed(request, owner, 'contacts', {
+      firstName: CONTACTS.buyer.firstName,
+      lastName: CONTACTS.buyer.lastName,
+    });
     await seed(request, owner, 'leads', { firstName: 'Noa', lastName: 'Park' });
     await seed(request, owner, 'leads', { firstName: 'Kit', lastName: 'Lee' });
     await seed(request, owner, 'deals', {
-      name: 'Acme seats',
+      name: DEALS.tablets,
       amount: '1000.00',
       companyId: company.id,
     });
-    await seed(request, owner, 'deals', { name: 'Acme rollout', amount: '2500.50' });
-    await seed(request, owner, 'deals', { name: 'Acme US', amount: '400.00', currency: 'USD' });
+    await seed(request, owner, 'deals', { name: DEALS.rollout, amount: '2500.50' });
+    await seed(request, owner, 'deals', {
+      name: DEALS.usExpansion,
+      amount: '400.00',
+      currency: 'USD',
+    });
     await closeDeal(
       request,
       owner,
-      await seed(request, owner, 'deals', { name: 'Won deal', amount: '1234.56' }),
+      await seed(request, owner, 'deals', { name: DEALS.won, amount: '1234.56' }),
       'WON',
     );
     await closeDeal(
       request,
       owner,
-      await seed(request, owner, 'deals', { name: 'Lost deal', amount: '99.00' }),
+      await seed(request, owner, 'deals', { name: DEALS.lost, amount: '99.00' }),
       'LOST',
     );
     await seed(request, owner, 'tasks', {
@@ -193,12 +201,12 @@ test.describe('Dashboard', () => {
     await expect(
       page.getByRole('button', { name: `Period: ${periodLabel(api.period)}` }),
     ).toBeVisible();
-    await expect(page.getByRole('region', { name: 'My deals' })).toContainText('Acme seats');
+    await expect(page.getByRole('region', { name: 'My deals' })).toContainText(DEALS.tablets);
     await expect(page.getByRole('region', { name: 'Follow-ups' })).toContainText(
       'Send the proposal',
     );
     await expect(page.getByRole('region', { name: 'Recent changes' })).toContainText(
-      'Olivia Owner created',
+      `${PEOPLE.owner} created`,
     );
     await expectNoA11yViolations(page);
   });
@@ -213,8 +221,8 @@ test.describe('Dashboard', () => {
     '?from=2999-01-01',
   ]) {
     test(`shows the default period for ${query}, not an error`, async ({ page, request }) => {
-      const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
-      await seed(request, owner, 'companies', { name: 'Acme Trading' });
+      const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+      await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
       await signIn(page, { email: owner.email, password: PASSWORD });
       const defaults = await dashboardOf(request, owner);
 
@@ -229,8 +237,8 @@ test.describe('Dashboard', () => {
   }
 
   test('shows the asked period, as the API answered for it', async ({ page, request }) => {
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
-    await seed(request, owner, 'companies', { name: 'Acme Trading' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
     await signIn(page, { email: owner.email, password: PASSWORD });
     const asked = await dashboardOf(request, owner, '?from=2026-01-01&to=2026-01-31');
     expect(asked.period).toStrictEqual({ from: '2026-01-01', to: '2026-01-31' });
@@ -249,8 +257,8 @@ test.describe('Dashboard', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
-    await seed(request, owner, 'companies', { name: 'Acme Trading' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
     await signIn(page, { email: owner.email, password: PASSWORD });
     const defaults = await dashboardOf(request, owner);
     await page.goto(owner.path);
@@ -303,8 +311,8 @@ test.describe('Dashboard', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
-    await seed(request, owner, 'companies', { name: 'Acme Trading' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
     const overdue = async (title: string) =>
       await seed(request, owner, 'tasks', {
         title,
@@ -312,7 +320,7 @@ test.describe('Dashboard', () => {
         assigneeId: owner.userId,
       });
     await overdue('Send the proposal');
-    await overdue('Call Globex');
+    await overdue(TASKS.call);
     await signIn(page, { email: owner.email, password: PASSWORD });
     await page.goto(owner.path);
     await expect(totals(page).getByRole('link', { name: 'All overdue tasks 2' })).toBeVisible();
@@ -337,8 +345,8 @@ test.describe('Dashboard', () => {
     page,
     request,
   }) => {
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
-    const riley = await addMember(request, owner, 'SALES_REP', 'Riley Rep');
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const riley = await addMember(request, owner, 'SALES_REP', PEOPLE.rep);
     await seed(request, owner, 'deals', { name: 'Olivia deal', amount: '900.00' });
     await seed(request, riley, 'deals', { name: 'Riley deal', amount: '300.00' });
     await seed(request, owner, 'tasks', {
@@ -377,8 +385,8 @@ test.describe('Dashboard', () => {
 
   test('keeps its title whole beside the create actions at 1024 px', async ({ page, request }) => {
     await page.setViewportSize({ width: 1024, height: 800 });
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
-    await seed(request, owner, 'companies', { name: 'Initech' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    await seed(request, owner, 'companies', { name: COMPANIES.kestrel.name });
     await signIn(page, { email: owner.email, password: PASSWORD });
     await page.goto(owner.path);
 
@@ -397,7 +405,7 @@ test.describe('Dashboard', () => {
     request,
   }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    const owner = await seedWorkspace(request, { workspace: 'Acme', owner: 'Olivia Owner' });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     await apiSend(request, owner, 'POST', `/workspaces/${owner.workspaceId}/pipeline-stages`, {
       name: 'วิเคราะห์ความต้องการ',
       probability: 30,
@@ -431,7 +439,7 @@ test.describe('Dashboard', () => {
 
     test('fits the width, with long Thai names wrapping', async ({ page, request }) => {
       const name = 'บริษัทการค้าระหว่างประเทศและการขนส่งสินค้าครบวงจรแห่งประเทศไทยจำกัดมหาชน';
-      const owner = await seedWorkspace(request, { workspace: name, owner: 'Olivia Owner' });
+      const owner = await seedWorkspace(request, { workspace: name, owner: PEOPLE.owner });
       const company = await seed(request, owner, 'companies', { name });
       await seed(request, owner, 'deals', {
         name,

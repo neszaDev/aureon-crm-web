@@ -122,6 +122,31 @@ export const CONTACTS = {
   lead: { firstName: 'Daniel', lastName: 'Okafor' },
 };
 
+/** 21 leads to follow up, for a list longer than the 20 the API sends at once. */
+export const MORE_LEADS = [
+  { firstName: 'Amara', lastName: 'Diallo' },
+  { firstName: 'Bruno', lastName: 'Ferreira' },
+  { firstName: 'Chloe', lastName: 'Dubois' },
+  { firstName: 'Dmitri', lastName: 'Volkov' },
+  { firstName: 'Elena', lastName: 'Garcia' },
+  { firstName: 'Farah', lastName: 'Haddad' },
+  { firstName: 'Gustav', lastName: 'Lindgren' },
+  { firstName: 'Hiro', lastName: 'Tanaka' },
+  { firstName: 'Ines', lastName: 'Laurent' },
+  { firstName: 'Jonas', lastName: 'Weber' },
+  { firstName: 'Kavya', lastName: 'Iyer' },
+  { firstName: 'Liam', lastName: 'Walsh' },
+  { firstName: 'Mei', lastName: 'Lin' },
+  { firstName: 'Nikolai', lastName: 'Petrov' },
+  { firstName: 'Olga', lastName: 'Kowalska' },
+  { firstName: 'Pedro', lastName: 'Alves' },
+  { firstName: 'Quinn', lastName: 'Murphy' },
+  { firstName: 'Rosa', lastName: 'Esposito' },
+  { firstName: 'Samir', lastName: 'Khan' },
+  { firstName: 'Thandi', lastName: 'Nkosi' },
+  { firstName: 'Uma', lastName: 'Reddy' },
+] as const;
+
 /** Deals the tests create by name. */
 export const DEALS = {
   tablets: 'Brightwater fleet tablets',

@@ -70,8 +70,10 @@ The containers in `docker/compose.yml` do the same: they create the admin (`admi
 sign-ins keeps its default; `Auth.e2e.ts` checks it. Never change or delete the admin in a test.
 
 Rules: every test registers its own user (`tests/e2e/helpers.ts`), so tests are independent and
-can run in any order. Use `signOut(page)`, which waits for sign-out to finish, before visiting a
-page that must be signed out.
+can run in any order. What they create reads like a real customer's CRM: the teams, people,
+companies, contacts and deals come from `tests/e2e/mockData.ts` (fictional, with `.example` email
+domains only), and `uniqueEmail()` is one of its people at a new address. Use `signOut(page)`,
+which waits for sign-out to finish, before visiting a page that must be signed out.
 
 What's covered: public pages, i18n switching, protected-route redirects (with locale), the full
 session lifecycle, **token refresh through the proxy** (access cookie removed → page still loads,

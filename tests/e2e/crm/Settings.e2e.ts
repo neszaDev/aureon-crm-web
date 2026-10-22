@@ -1,18 +1,19 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signUp } from '../helpers';
+import { emailFor, PEOPLE, TEAMS } from '../mockData';
 import { createWorkspace, expectNoA11yViolations } from './helpers';
 
 const NEW_PASSWORD = 'another-secure-password';
 
 /**
- * Signs up, creates "Acme" and returns the workspace's URL.
+ * Signs up, creates the default team's workspace and returns its URL.
  * @param page Playwright page.
  * @returns The new account's email and the workspace URL.
  */
-const startAcme = async (page: Page) => {
+const startWorkspace = async (page: Page) => {
   const email = await signUp(page);
-  const workspace = await createWorkspace(page, 'Acme');
+  const workspace = await createWorkspace(page, TEAMS.default.name);
 
   return { email, workspace };
 };
@@ -52,7 +53,7 @@ const barColours = async (page: Page) =>
 
 test.describe('Settings', () => {
   test('renames the workspace and changes its currency', async ({ page }) => {
-    const { workspace } = await startAcme(page);
+    const { workspace } = await startWorkspace(page);
 
     await page
       .getByRole('navigation', { name: 'Workspace navigation' })
@@ -62,42 +63,44 @@ test.describe('Settings', () => {
     await expect(page).toHaveTitle('Workspace');
     await expectNoA11yViolations(page);
 
-    await page.getByLabel('Workspace name').fill('Acme Trading');
+    await page.getByLabel('Workspace name').fill(TEAMS.renamed.name);
     await page.getByLabel('Default currency').selectOption('THB');
     await page.getByRole('button', { name: 'Save changes' }).click();
 
     await expect(page.getByText('Saved', { exact: true })).toBeVisible();
     await expect(
-      page.getByRole('button', { name: 'Switch workspace. Current: Acme Trading' }),
+      page.getByRole('button', { name: `Switch workspace. Current: ${TEAMS.renamed.name}` }),
     ).toBeVisible();
     await page.reload();
     await expect(page.getByLabel('Default currency')).toHaveValue('THB');
   });
 
   test('asks to reload when someone else saved the workspace first', async ({ page }) => {
-    const { workspace } = await startAcme(page);
+    const { workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/workspace`);
     const other = await page.context().newPage();
     await other.goto(`${workspace}/settings/workspace`);
     // The form fills its fields once hydrated; typing earlier would be overwritten.
-    await expect(other.getByLabel('Workspace name')).toHaveValue('Acme');
-    await other.getByLabel('Workspace name').fill('Acme by the other tab');
+    await expect(other.getByLabel('Workspace name')).toHaveValue(TEAMS.default.name);
+    await other.getByLabel('Workspace name').fill(`${TEAMS.default.name} by the other tab`);
     await other.getByRole('button', { name: 'Save changes' }).click();
     await expect(other.getByText('Saved', { exact: true })).toBeVisible();
 
-    await expect(page.getByLabel('Workspace name')).toHaveValue('Acme');
-    await page.getByLabel('Workspace name').fill('Acme by this tab');
+    await expect(page.getByLabel('Workspace name')).toHaveValue(TEAMS.default.name);
+    await page.getByLabel('Workspace name').fill(`${TEAMS.default.name} by this tab`);
     await page.getByRole('button', { name: 'Save changes' }).click();
 
     await expect(
       page.getByText('Someone else changed this. Reload to see their version.'),
     ).toBeVisible();
     await page.getByRole('button', { name: 'Reload' }).click();
-    await expect(page.getByLabel('Workspace name')).toHaveValue('Acme by the other tab');
+    await expect(page.getByLabel('Workspace name')).toHaveValue(
+      `${TEAMS.default.name} by the other tab`,
+    );
   });
 
   test('keeps the last owner, showing why', async ({ page }) => {
-    const { email, workspace } = await startAcme(page);
+    const { email, workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/members`);
     await expect(page).toHaveTitle('Members');
     await expect(page.getByRole('heading', { name: '1 member' })).toBeVisible();
@@ -132,7 +135,7 @@ test.describe('Settings', () => {
 
   test('keeps Invite member clear of the description at 640 px', async ({ page }) => {
     await page.setViewportSize({ width: 640, height: 800 });
-    const { workspace } = await startAcme(page);
+    const { workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/members`);
 
     const invite = page.getByRole('button', { name: 'Invite member' });
@@ -149,12 +152,13 @@ test.describe('Settings', () => {
     page,
     baseURL,
   }) => {
-    const { workspace } = await startAcme(page);
+    const { workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/members`);
     await expect(page.getByText('No pending invitations.')).toBeVisible();
 
     await page.getByRole('button', { name: 'Invite member' }).click();
-    await page.getByLabel('Email address').fill('new.colleague@example.com');
+    const colleague = emailFor(PEOPLE.admin);
+    await page.getByLabel('Email address').fill(colleague);
     await page.getByLabel('Role', { exact: true }).selectOption('MANAGER');
     await page.getByRole('button', { name: 'Create invitation link' }).click();
     const link = page.getByLabel('Invitation link', { exact: true });
@@ -167,10 +171,8 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'Done' }).click();
 
     const pending = page.getByRole('region', { name: 'Pending invitations' });
-    await expect(pending.getByText('new.colleague@example.com')).toBeVisible();
-    await pending
-      .getByRole('button', { name: 'Revoke the invitation for new.colleague@example.com' })
-      .click();
+    await expect(pending.getByText(colleague)).toBeVisible();
+    await pending.getByRole('button', { name: `Revoke the invitation for ${colleague}` }).click();
     await page.getByRole('alertdialog').getByRole('button', { name: 'Revoke' }).click();
     await expect(page.getByText('No pending invitations.')).toBeVisible();
     // The row and its button are gone: the list's heading takes the focus.
@@ -179,7 +181,7 @@ test.describe('Settings', () => {
     // In French, the link opens the French page.
     await page.goto(`${workspace.replace('/app/', '/fr/app/')}/settings/members`);
     await page.getByRole('button', { name: 'Inviter un membre' }).click();
-    await page.getByLabel('Adresse e-mail').fill('collegue@example.com');
+    await page.getByLabel('Adresse e-mail').fill(emailFor(PEOPLE.manager));
     await page.getByRole('button', { name: "Créer le lien d'invitation" }).click();
     await expect(page.getByLabel("Lien d'invitation", { exact: true })).toHaveValue(
       new RegExp(`^${baseURL}/fr/invite/[^/]+$`, 'u'),
@@ -189,7 +191,7 @@ test.describe('Settings', () => {
   test('adds, re-orders, renames and deletes stages, keeping Won and Lost last', async ({
     page,
   }) => {
-    const { workspace } = await startAcme(page);
+    const { workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/pipeline`);
     await expect(page).toHaveTitle('Pipeline');
     const defaults = ['Qualification', 'Needs analysis', 'Proposal', 'Negotiation'];
@@ -268,7 +270,7 @@ test.describe('Settings', () => {
   });
 
   test('asks to reload a pipeline that changed in another tab', async ({ page }) => {
-    const { workspace } = await startAcme(page);
+    const { workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/pipeline`);
     await expect(page.getByRole('button', { name: 'Move Proposal up' })).toBeVisible();
     const other = await page.context().newPage();
@@ -288,7 +290,7 @@ test.describe('Settings', () => {
   });
 
   test('asks to reload a source that changed in another tab', async ({ page }) => {
-    const { workspace } = await startAcme(page);
+    const { workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/sources`);
     await expect(page.getByRole('button', { name: 'Archive Website' })).toBeVisible();
     const other = await page.context().newPage();
@@ -309,7 +311,7 @@ test.describe('Settings', () => {
   });
 
   test('adds, archives and deletes a lead source', async ({ page }) => {
-    const { workspace } = await startAcme(page);
+    const { workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/sources`);
     await expect(page).toHaveTitle('Lead sources');
     await expectNoA11yViolations(page);
@@ -336,7 +338,7 @@ test.describe('Settings', () => {
   });
 
   test('changes your display name and password', async ({ page }) => {
-    const { email } = await startAcme(page);
+    const { email } = await startWorkspace(page);
     const account = page.getByRole('button', { name: 'Your account' });
     await account.click();
     await page.getByRole('menuitem', { name: 'Your profile' }).click();
@@ -344,15 +346,16 @@ test.describe('Settings', () => {
     await expect(page).toHaveTitle('Your profile');
     await expectNoA11yViolations(page);
 
-    await page.getByLabel('Display name').fill('Ana Lima');
+    await page.getByLabel('Display name').fill(PEOPLE.invitee);
     await page.getByRole('button', { name: 'Save profile' }).click();
     await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+    // The initials of PEOPLE.invitee.
     await expect(account).toHaveText('AL');
     // An edit after saving takes the confirmation away.
     await page.getByLabel('Display name').press('End');
     await page.getByLabel('Display name').press('Backspace');
     await expect(page.getByText('Saved', { exact: true })).toHaveCount(0);
-    await page.getByLabel('Display name').fill('Ana Lima');
+    await page.getByLabel('Display name').fill(PEOPLE.invitee);
 
     const current = page.getByLabel('Current password');
     await current.fill('not-my-password');
@@ -389,9 +392,9 @@ test.describe('Settings', () => {
     page,
     baseURL,
   }) => {
-    const { email, workspace } = await startAcme(page);
+    const { email, workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/workspace`);
-    await expect(page.getByLabel('Workspace name')).toHaveValue('Acme');
+    await expect(page.getByLabel('Workspace name')).toHaveValue(TEAMS.default.name);
     // The backend no longer accepts the access token.
     await page.context().addCookies([{ name: 'access_token', value: 'expired', url: baseURL }]);
 
@@ -405,25 +408,25 @@ test.describe('Settings', () => {
   });
 
   test('sends an action to sign in when another tab signed out', async ({ page }) => {
-    const { workspace } = await startAcme(page);
+    const { workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/workspace`);
     const other = await page.context().newPage();
     await other.goto(`${workspace}/settings/workspace`);
-    await expect(other.getByLabel('Workspace name')).toHaveValue('Acme');
+    await expect(other.getByLabel('Workspace name')).toHaveValue(TEAMS.default.name);
 
     await page.getByRole('button', { name: 'Your account' }).click();
     await page.getByRole('menuitem', { name: 'Sign out' }).click();
     await expect(page).toHaveURL(/\/$/u);
 
     // No session cookie at all now: the action itself must end on sign-in.
-    await other.getByLabel('Workspace name').fill('Acme Trading');
+    await other.getByLabel('Workspace name').fill(TEAMS.renamed.name);
     await other.getByRole('button', { name: 'Save changes' }).click();
     await expect(other).toHaveURL(/\/sign-in\?expired=1$/u);
     await expect(other.getByText('Your session has ended. Sign in again.')).toBeVisible();
   });
 
   test('switches to dark and to Thai from the account menu', async ({ page }) => {
-    const { workspace } = await startAcme(page);
+    const { workspace } = await startWorkspace(page);
     await page.goto(`${workspace}/settings/pipeline`);
     const account = page.getByRole('button', { name: 'Your account' });
 
@@ -455,7 +458,7 @@ test.describe('Settings', () => {
     test.use({ viewport: { width: 390, height: 844 } });
 
     test('stacks a pending invitation with its whole email', async ({ page }) => {
-      const { workspace } = await startAcme(page);
+      const { workspace } = await startWorkspace(page);
       await page.goto(`${workspace}/settings/members`);
       const email = 'a.very.long.colleague.name@subsidiary.example.com';
       await page.getByRole('button', { name: 'Invite member' }).click();
@@ -481,7 +484,7 @@ test.describe('Settings', () => {
     test.use({ viewport: { width: 390, height: 844 } });
 
     test('fits every settings page without sideways scrolling', async ({ page }) => {
-      const { workspace } = await startAcme(page);
+      const { workspace } = await startWorkspace(page);
       const thai = workspace.replace('/app/', '/th/app/');
 
       await expectFits(page, `${thai}/settings/workspace`);
