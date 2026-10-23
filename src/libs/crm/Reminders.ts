@@ -104,7 +104,7 @@ const DAY = 24 * 60 * 60 * 1000;
  * read: overdue (the overdue tasks, then the leads whose follow-up day has passed), today (the
  * tasks due before the workspace's midnight, then the leads due today) and upcoming (the rest of
  * the next 24 hours). A list at the API's cap may hold more than it shows: past its last item, so
- * only the group that item falls in is marked.
+ * the group that item falls in is marked, and today too for the leads (their last group).
  * @param reminders The caller's reminders.
  * @param timeZone The workspace's time zone, where its midnight falls.
  * @returns The groups in `INBOX_GROUPS`' order: their items, and whether they may be a cut.
@@ -133,8 +133,8 @@ export const inboxGroups = (reminders: BellReminders, timeZone: string) => {
         ...tasks(reminders.dueSoonTasks.filter(isToday)),
         ...leads(reminders.followUpLeads.filter((lead) => !isLate(lead))),
       ],
-      (cut(dueSoonTasks) && isToday(dueSoonTasks.at(-1))) ||
-        (cut(followUpLeads) && !isLate(followUpLeads.at(-1))),
+      // Today is the leads' last group: whatever a cut list leaves out may fall in it.
+      (cut(dueSoonTasks) && isToday(dueSoonTasks.at(-1))) || cut(followUpLeads),
     ],
     upcoming: [
       tasks(reminders.dueSoonTasks.filter((task) => !isToday(task))),

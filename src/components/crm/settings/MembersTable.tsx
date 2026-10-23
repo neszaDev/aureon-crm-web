@@ -175,7 +175,7 @@ const MemberTableRow = (props: {
             trigger={
               <Button variant="ghost" size="sm" aria-label={t('leave')}>
                 <LogOutIcon data-icon="inline-start" />
-                <span className="sm:max-md:sr-only">{t('leave')}</span>
+                <span className="sm:max-xl:sr-only">{t('leave')}</span>
               </Button>
             }
             title={t('leave_title', { workspace: props.workspaceName })}
@@ -201,7 +201,7 @@ const MemberTableRow = (props: {
               trigger={
                 <Button variant="ghost" size="sm" aria-label={t('remove_label', { name })}>
                   <UserMinusIcon data-icon="inline-start" />
-                  <span className="sm:max-md:sr-only">{t('remove')}</span>
+                  <span className="sm:max-xl:sr-only">{t('remove')}</span>
                 </Button>
               }
               title={t('remove_title', { name, workspace: props.workspaceName })}

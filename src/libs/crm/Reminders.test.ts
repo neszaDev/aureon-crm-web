@@ -146,4 +146,11 @@ describe(inboxGroups, () => {
 
     expect(groups.map((group) => group.capped)).toStrictEqual([false, true, false]);
   });
+
+  it('marks today too when the leads at the cap are all late: the next may be due today', () => {
+    const late = Array.from({ length: 20 }, (_, id) => bellLead(200 + id, '2026-10-18'));
+    const groups = inboxGroups({ ...reminders, followUpLeads: late }, 'Asia/Bangkok');
+
+    expect(groups.map((group) => group.capped)).toStrictEqual([true, true, false]);
+  });
 });

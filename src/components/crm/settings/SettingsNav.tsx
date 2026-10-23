@@ -24,6 +24,11 @@ const settingsNavItems = [
   { key: 'profile', icon: UserRoundIcon },
 ] as const;
 
+// On a phone the tabs scroll sideways: the current one is brought into view.
+const showCurrent = (node: HTMLAnchorElement | null) => {
+  node?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+};
+
 /**
  * The settings pages, inside the canvas: a column of links beside the page from 1024 px, the
  * sidebar's way (the current one on the violet tint); a row of tabs above it on smaller screens,
@@ -58,6 +63,7 @@ export const SettingsNav = (props: { workspaceId: string; audit: boolean }) => {
               <Link
                 href={`${base}/${item.key}`}
                 aria-current={current ? 'page' : undefined}
+                ref={current ? showCurrent : undefined}
                 className={cn(
                   // Its outline drawn inside: the row's scroll box would clip it.
                   'flex h-9 items-center gap-2.5 border-b-2 px-2 text-[0.8125rem] font-medium whitespace-nowrap no-underline transition-colors duration-150 focus-visible:-outline-offset-2 lg:h-8 lg:rounded-md lg:border-b-0 lg:px-2.5 lg:text-sm',

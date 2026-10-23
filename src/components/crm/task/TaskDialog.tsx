@@ -192,8 +192,10 @@ const TaskForm = (
 
     setFailure(
       applyFieldErrors(form, result, (name) => {
-        const field = LINKS.find((item) => item.id === name)?.field ?? name;
-        return isFormField(field) ? field : undefined;
+        const link = LINKS.find((item) => item.id === name);
+        const field = link?.field ?? name;
+        // On a record's own task the links aren't drawn: their error is the alert's.
+        return isFormField(field) && !(link && props.link) ? field : undefined;
       }),
     );
   });

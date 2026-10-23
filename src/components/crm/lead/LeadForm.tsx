@@ -89,7 +89,7 @@ export const LeadForm = (props: {
     resolver: zodResolver(LeadValidation),
     defaultValues: props.defaults,
   });
-  const { errors, isSubmitting } = form.formState;
+  const { errors, isSubmitting, isDirty } = form.formState;
   const creating = props.isEdit !== true;
   // What the chips show.
   const [priority, estimatedValue, currency] = useWatch({
@@ -125,6 +125,8 @@ export const LeadForm = (props: {
     <form
       method="post"
       onSubmit={onSubmit}
+      // Typed into: a record panel around it doesn't close on Escape or a click outside.
+      data-dirty={isDirty ? '' : undefined}
       // "Saved" is about the values sent: an edit takes it away.
       onChange={() => {
         setSaved(false);

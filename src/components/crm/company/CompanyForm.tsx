@@ -74,7 +74,7 @@ export const CompanyForm = (props: {
     resolver: zodResolver(CompanyValidation),
     defaultValues: props.defaults,
   });
-  const { errors, isSubmitting } = form.formState;
+  const { errors, isSubmitting, isDirty } = form.formState;
   const creating = props.recordId === undefined;
   const checkDuplicates = async () => {
     const values = form.getValues();
@@ -124,6 +124,8 @@ export const CompanyForm = (props: {
     <form
       method="post"
       onSubmit={onSubmit}
+      // Typed into: a record panel around it doesn't close on Escape or a click outside.
+      data-dirty={isDirty ? '' : undefined}
       // "Saved" is about the values sent: an edit takes it away.
       onChange={() => {
         setSaved(false);

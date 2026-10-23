@@ -709,7 +709,7 @@
     "email_label": "Adresse e-mail",
     "name_label": "Nom d'affichage",
     "optional": "Facultatif",
-    "name_hint": "Votre sceau affiche ses initiales sur tout ce que vous signez.",
+    "name_hint": "Votre avatar affiche ses initiales.",
     "password_label": "Mot de passe",
     "password_hint": "6 caractères au moins.",
     "register_button": "Créer le compte et rejoindre",
@@ -837,7 +837,7 @@
     "email_label": "Adresse e-mail",
     "name_label": "Nom d'affichage",
     "optional": "Facultatif",
-    "name_hint": "Votre sceau affiche ses initiales sur tout ce que vous signez.",
+    "name_hint": "Votre avatar affiche ses initiales.",
     "save": "Enregistrer le profil",
     "saved": "Enregistré",
     "error_invalid_input": "Vérifiez les champs signalés"
@@ -3540,7 +3540,7 @@
     "list_heading": "{count, plural, =0 {Aucune affaire} one {# affaire} other {# affaires}}",
     "archived_heading": "{count, plural, =0 {Aucune affaire archivée} one {# affaire archivée} other {# affaires archivées}}",
     "empty_title": "Aucune affaire pour l'instant",
-    "empty_text": "Ajoutez une affaire, ou convertissez un prospect qualifié. Chaque affaire passe d'étape en étape, et chaque passage est signé.",
+    "empty_text": "Ajoutez une affaire, ou convertissez un prospect qualifié. Chaque affaire passe d'étape en étape, et chaque passage est enregistré avec son auteur.",
     "archived_empty_text": "Les affaires que vous archivez apparaissent ici, prêtes à être restaurées.",
     "add_for": "Ajouter une affaire à {name}",
     "add_in": "Ajouter une affaire à l'étape {stage}"

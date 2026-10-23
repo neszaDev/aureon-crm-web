@@ -269,24 +269,44 @@ test.describe('Record panel', () => {
     await add.click();
     const form = page.getByRole('dialog', { name: 'New company' });
     await expect(form.getByLabel('Company name')).toBeFocused();
-    await form.getByLabel('Company name').fill(COMPANIES.brightwater.name);
-    // Escape is the panel's, though a field has the focus.
+    // Nothing typed: Escape is the panel's, though a field has the focus.
     await page.keyboard.press('Escape');
     await expect(form).toHaveCount(0);
     await expect(page).toHaveURL(`${owner.path}/companies`);
     await expect(add).toBeFocused();
 
+    // Typed into, it stays open on Escape and on a click beside it, what was typed kept; its
+    // Cancel closes it.
     await add.click();
+    await form.getByLabel('Company name').fill(COMPANIES.brightwater.name);
+    await page.keyboard.press('Escape');
+    await expect(form).toBeVisible();
+    await page.mouse.click(10, 400);
+    await expect(form).toBeVisible();
+    await expect(form.getByLabel('Company name')).toHaveValue(COMPANIES.brightwater.name);
+    await expect(page).toHaveURL(`${owner.path}/companies/new`);
     await form.getByRole('button', { name: 'Cancel' }).click();
     await expect(form).toHaveCount(0);
     await expect(page).toHaveURL(`${owner.path}/companies`);
     await expect(page.getByText('No companies yet')).toBeVisible();
 
     // Loaded at its address, the form is its full page, its name focused.
+    await seed(request, owner, 'contacts', CONTACTS.buyer);
     await page.goto(`${owner.path}/companies/new`);
     await expect(page.getByRole('heading', { level: 1, name: 'New company' })).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.getByLabel('Company name')).toBeFocused();
+
+    // A record found from it opens in the panel, over the form.
+    const search = page.getByRole('button', { name: 'Search records' });
+    await waitForHydration(search);
+    await search.click();
+    await page.getByRole('combobox', { name: 'Search records' }).fill(CONTACTS.buyer.lastName);
+    await page.getByRole('option', { name: BUYER }).click();
+    await expect(
+      page.getByRole('dialog', { name: BUYER }).getByRole('heading', { level: 1, name: BUYER }),
+    ).toBeVisible();
+    await expect(page.locator('#crm-main form')).toBeAttached();
   });
 
   test.describe('on a phone', () => {

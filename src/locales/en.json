@@ -709,7 +709,7 @@
     "email_label": "Email address",
     "name_label": "Display name",
     "optional": "Optional",
-    "name_hint": "Your seal shows its initials on everything you sign.",
+    "name_hint": "Your avatar shows its initials.",
     "password_label": "Password",
     "password_hint": "At least 6 characters.",
     "register_button": "Create account and join",
@@ -837,7 +837,7 @@
     "email_label": "Email address",
     "name_label": "Display name",
     "optional": "Optional",
-    "name_hint": "Your seal shows its initials on everything you sign.",
+    "name_hint": "Your avatar shows its initials.",
     "save": "Save profile",
     "saved": "Saved",
     "error_invalid_input": "Check the highlighted fields"
@@ -3540,7 +3540,7 @@
     "list_heading": "{count, plural, =0 {No deals} one {# deal} other {# deals}}",
     "archived_heading": "{count, plural, =0 {No archived deals} one {# archived deal} other {# archived deals}}",
     "empty_title": "No deals yet",
-    "empty_text": "Add a deal, or convert a qualified lead into one. Each deal moves from stage to stage, and every move is signed.",
+    "empty_text": "Add a deal, or convert a qualified lead into one. Each deal moves from stage to stage, and every move is recorded with who made it.",
     "archived_empty_text": "Deals you archive show here, ready to restore.",
     "add_for": "Add deal owned by {name}",
     "add_in": "Add deal in {stage}"

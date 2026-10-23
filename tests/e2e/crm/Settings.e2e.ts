@@ -502,6 +502,12 @@ test.describe('Settings', () => {
       await expectFits(page, `${thai}/settings/sources`);
       await expectFits(page, `${thai}/settings/audit`);
       await expectFits(page, `${thai}/settings/profile`);
+      // The tabs scroll sideways: the current one, the last, is brought into view.
+      await expect(
+        page
+          .getByRole('navigation', { name: 'การตั้งค่า', exact: true })
+          .locator('[aria-current="page"]'),
+      ).toBeInViewport({ ratio: 1 });
     });
   });
 });

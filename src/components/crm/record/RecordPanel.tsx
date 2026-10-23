@@ -12,8 +12,6 @@ import { leaveEscapeToForm } from '@/utils/Focus';
 // A record's URL, or a new record's form (any locale prefix): its list, and the kind of record,
 // which names its heading.
 const RECORD_PATH = /^(.*\/(companies|contacts|leads|deals|tasks))\/(?:\d+|new)$/u;
-// A new record's form as a full page (loaded at its address), which a record must not open over.
-const NEW_FORM = /\/(?:companies|contacts|leads|deals)\/new$/u;
 const KINDS = {
   companies: 'company',
   contacts: 'contact',
@@ -60,13 +58,14 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
   const opener = useRef<Element>(null);
   const [closing, setClosing] = useState(false);
   const [shown, setShown] = useState(pathname);
-  // Opened from its own edit page (its Cancel, the location's link), or from a new record's form
-  // loaded as its page: that page would stay behind the panel. The address bar still names the
-  // page behind while the panel first renders.
+  // Opened from its own edit page (its Cancel, the location's link), or as the record just created
+  // by its form loaded as a full page (that kind's new form): that page would stay behind the
+  // panel. The address bar still names the page behind while the panel first renders.
   const [fromForm, setFromForm] = useState(
     () =>
       typeof window !== 'undefined' &&
-      (window.location.pathname === `${pathname}/edit` || NEW_FORM.test(window.location.pathname)),
+      (window.location.pathname === `${pathname}/edit` ||
+        window.location.pathname === pathname.replace(/\d+$/u, 'new')),
   );
   // Another record opened from this one is open again, even after a close that went back to it.
   if (pathname !== shown && RECORD_PATH.test(pathname)) {
@@ -114,6 +113,9 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
     };
   }, [node, shown, kind]);
 
+  // A new record's form typed into: only × and its Cancel close the panel, so nothing typed is lost.
+  const keepsForm = () => creating && node?.querySelector('form[data-dirty]') !== null;
+
   const close = () => {
     if (closing) {
       return;
@@ -159,15 +161,20 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
           }
         }}
         // What takes Escape itself (`onEscape`: the activity composer closes on it) has it first;
-        // in any other form it closes the panel.
+        // in any other form it closes the panel, unless it is a new record's form typed into.
         onEscapeKeyDown={(event) => {
           if (event.target instanceof Element && event.target.closest('[data-escape]')) {
             leaveEscapeToForm(event);
+          } else if (keepsForm()) {
+            event.preventDefault();
           }
         }}
-        // A toast is no click outside.
+        // A toast is no click outside; nor is any click while a new record's form is typed into.
         onPointerDownOutside={(event) => {
-          if (event.target instanceof Element && event.target.closest('[data-sonner-toaster]')) {
+          if (
+            keepsForm() ||
+            (event.target instanceof Element && event.target.closest('[data-sonner-toaster]'))
+          ) {
             event.preventDefault();
           }
         }}

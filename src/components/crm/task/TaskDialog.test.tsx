@@ -115,4 +115,32 @@ describe(TaskDialog, () => {
       .element(page.getByRole('combobox', { name: 'Contact' }))
       .toHaveAttribute('aria-invalid', 'true');
   });
+
+  it("says in its alert why the backend refuses a record's own task, whose link isn't drawn", async () => {
+    vi.mocked(TaskActions.createTask).mockResolvedValue({
+      ok: false,
+      message: 'Check the highlighted fields and try again.',
+      fieldErrors: { companyId: 'is archived' },
+    });
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <TaskDialog
+          trigger={<button type="button">New</button>}
+          workspaceId={1}
+          link={{ companyId: 7 }}
+          linkLabel="Acme"
+          members={[MIA]}
+          me={MIA.userId}
+          canAssign
+          timeZone="UTC"
+        />
+      </NextIntlClientProvider>,
+    );
+    await page.getByRole('button', { name: 'New' }).click();
+    await page.getByRole('textbox', { name: 'Title' }).fill('Call back');
+
+    await page.getByRole('button', { name: 'Add task' }).click();
+
+    await expect.element(page.getByRole('alert')).toHaveTextContent('is archived');
+  });
 });

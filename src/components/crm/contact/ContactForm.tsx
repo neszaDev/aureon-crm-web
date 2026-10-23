@@ -89,7 +89,7 @@ export const ContactForm = (props: {
     resolver: zodResolver(ContactValidation),
     defaultValues: props.defaults,
   });
-  const { errors, isSubmitting } = form.formState;
+  const { errors, isSubmitting, isDirty } = form.formState;
   const creating = props.recordId === undefined;
   // The tags' own error (the 20-tag cap, a tag's length), typed as an array's by react-hook-form.
   const tagsError =
@@ -144,6 +144,8 @@ export const ContactForm = (props: {
     <form
       method="post"
       onSubmit={onSubmit}
+      // Typed into: a record panel around it doesn't close on Escape or a click outside.
+      data-dirty={isDirty ? '' : undefined}
       // "Saved" is about the values sent: an edit takes it away.
       onChange={() => {
         setSaved(false);
