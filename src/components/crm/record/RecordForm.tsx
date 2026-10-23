@@ -7,7 +7,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { use } from 'react';
 import type { FieldError as HookFormFieldError } from 'react-hook-form';
 import { PersonAvatar } from '@/components/crm/PersonAvatar';
-import { InRecordPanel } from '@/components/crm/record/RecordPanel';
+import { InRecordPanel, usePanelId } from '@/components/crm/record/RecordPanel';
 import { FieldError } from '@/components/FieldError';
 import { describedBy } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
@@ -184,16 +184,17 @@ export const DateValue = (props: { value: string }) => {
 /**
  * A record form's other fields, under a hairline below its chips.
  * @param props Component props.
- * @param props.id The heading's id.
+ * @param props.id The heading's id (`usePanelId`).
  * @param props.children The fields.
  * @returns The section.
  */
 export const FormDetails = (props: { id: string; children: React.ReactNode }) => {
   const t = useTranslations('RecordForm');
+  const id = usePanelId(props.id);
 
   return (
-    <section aria-labelledby={props.id} className="flex flex-col gap-5 border-t border-rule pt-5">
-      <h2 id={props.id} className="text-[0.8125rem] font-semibold text-muted-foreground">
+    <section aria-labelledby={id} className="flex flex-col gap-5 border-t border-rule pt-5">
+      <h2 id={id} className="text-[0.8125rem] font-semibold text-muted-foreground">
         {t('details')}
       </h2>
       {props.children}

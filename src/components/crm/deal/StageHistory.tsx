@@ -1,3 +1,5 @@
+'use client';
+
 import { ArrowRightIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useId } from 'react';

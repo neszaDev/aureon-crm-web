@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { loadActivities, logActivity } from '@/actions/crm/ActivityActions';
 import { ActivityComposer } from '@/components/crm/activity/ActivityComposer';
 import { ActivityItem } from '@/components/crm/activity/ActivityItem';
+import { usePanelId } from '@/components/crm/record/RecordPanel';
 import { Button } from '@/components/ui/button';
 import type { components } from '@/libs/api/schema';
 import { PAGE_SIZES } from '@/libs/crm/ListQuery';
@@ -119,7 +120,7 @@ export const ActivityTimeline = (props: {
       );
     }
   }
-  const headingId = `activity-heading-${Object.keys(props.link)[0]}`;
+  const headingId = usePanelId(`activity-heading-${Object.keys(props.link)[0]}`);
   const items = timelineOf([...older, ...props.first], saved, deleted);
 
   const showOlder = () => {

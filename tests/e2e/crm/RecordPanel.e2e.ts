@@ -309,6 +309,52 @@ test.describe('Record panel', () => {
     await expect(page.locator('#crm-main form')).toBeAttached();
   });
 
+  test('names a panel over the full page of a record of its kind by its own heading', async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const company = await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
+    await seed(request, owner, 'companies', { name: COMPANIES.kestrel.name });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    // Every id in the document once: a name or a label pointing at one finds its own element.
+    const repeatedIds = async () =>
+      await page.evaluate(() => {
+        const ids = [...document.querySelectorAll('[id]')].map((element) => element.id);
+        return ids.filter((id, index) => ids.indexOf(id) !== index);
+      });
+
+    // The full page of one company; another company found from it opens in the panel over it.
+    await page.goto(`${owner.path}/companies/${company.id}`);
+    const search = page.getByRole('button', { name: 'Search records' });
+    await waitForHydration(search);
+    await search.click();
+    await page.getByRole('combobox', { name: 'Search records' }).fill('kestrel');
+    await page.getByRole('option', { name: new RegExp(COMPANIES.kestrel.name, 'u') }).click();
+    const panel = page.getByRole('dialog', {
+      name: `${COMPANIES.kestrel.name} Company`,
+      exact: true,
+    });
+    await expect(panel.getByRole('heading', { level: 1 })).toBeFocused();
+    await expect(panel.getByRole('region', { name: /^Deals/u })).toBeVisible();
+    expect(await repeatedIds()).toStrictEqual([]);
+    await panel.getByRole('button', { name: 'Close' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+
+    // A new company's form over it is named by its own title too.
+    await page
+      .getByRole('navigation', { name: 'Quick access' })
+      .getByRole('button', { name: 'New', exact: true })
+      .click();
+    await page
+      .getByRole('menu', { name: 'New' })
+      .getByRole('menuitem', { name: 'Company' })
+      .click();
+    await expect(page.getByRole('dialog', { name: 'New company', exact: true })).toBeVisible();
+    expect(await repeatedIds()).toStrictEqual([]);
+  });
+
   test.describe('on a phone', () => {
     test.use({ viewport: { width: 390, height: 844 } });
 

@@ -10,6 +10,7 @@ import { ActionAlert } from '@/components/crm/ActionAlert';
 import { DateTimeField } from '@/components/crm/fields/DateTimeField';
 import { RecordPicker } from '@/components/crm/fields/RecordPicker';
 import { ConversionSummary } from '@/components/crm/lead/ConversionSummary';
+import { usePanelId } from '@/components/crm/record/RecordPanel';
 import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import {
@@ -433,7 +434,7 @@ const ConvertForm = (
  * @param props.defaultCurrency The workspace's currency, for a lead without one.
  * @param props.currencies The currencies on offer, each with its name in the page's language.
  * @param props.timeZone The workspace's time zone, for the calendar.
- * @param props.headingId The page's heading, which takes the focus when the dialog closes (the
+ * @param props.headingId The page's heading (`usePanelId`), which takes the focus when the dialog closes (the
  *   button that opened it goes once the lead is converted).
  * @returns The button, with its dialog.
  */
@@ -445,6 +446,7 @@ export const ConvertDialog = (props: ConvertProps & { headingId: string }) => {
   // One conversion at a time: a second submit before the first has answered is the same
   // conversion, dropped.
   const inFlight = useInFlight();
+  const headingId = usePanelId(props.headingId);
 
   return (
     <Dialog
@@ -471,7 +473,7 @@ export const ConvertDialog = (props: ConvertProps & { headingId: string }) => {
         className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl"
         onCloseAutoFocus={(event) => {
           const heading =
-            conversion && document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`);
+            conversion && document.querySelector<HTMLElement>(`#${CSS.escape(headingId)}`);
           if (heading) {
             event.preventDefault();
             heading.focus();

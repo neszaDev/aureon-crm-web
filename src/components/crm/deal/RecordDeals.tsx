@@ -1,6 +1,7 @@
 import { PlusIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { RecordSection, SECTION_NOTE, SECTION_ROW } from '@/components/crm/record/RecordLayout';
+import { SECTION_NOTE, SECTION_ROW } from '@/components/crm/record/RecordLayout';
+import { RecordSection } from '@/components/crm/record/RecordSection';
 import { StatusPill } from '@/components/crm/StatusPill';
 import { Button } from '@/components/ui/button';
 import type { components } from '@/libs/api/schema';

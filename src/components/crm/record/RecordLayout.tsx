@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl';
+import { RecordFormHeader } from '@/components/crm/record/RecordHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
@@ -39,21 +40,12 @@ export const RecordFormPage = (props: {
   children: React.ReactNode;
 }) => (
   <div className="mx-auto flex max-w-3xl flex-col gap-6">
-    <header className="flex flex-col gap-0.5 border-b border-rule pb-4">
-      {props.number && (
-        <p className="font-mono text-[0.75rem] text-muted-foreground tabular-nums">
-          {props.number}
-        </p>
-      )}
-      <h1
-        id={props.headingId}
-        tabIndex={props.headingId ? -1 : undefined}
-        className="rounded-sm text-base leading-6 font-semibold break-words"
-      >
-        {props.title}
-      </h1>
-      <p className="max-w-[65ch] text-[0.8125rem] text-muted-foreground">{props.description}</p>
-    </header>
+    <RecordFormHeader
+      number={props.number}
+      title={props.title}
+      headingId={props.headingId}
+      description={props.description}
+    />
     <section aria-label={props.label}>{props.children}</section>
   </div>
 );
@@ -74,42 +66,6 @@ export const RecordColumns = (props: { left: React.ReactNode; right: React.React
       {props.right}
     </div>
   </div>
-);
-
-/**
- * A list on a record's left column (its contacts, deals or tasks): a heading with its count and
- * an action on the right, then its compact rows under a hairline.
- * @param props Component props.
- * @param props.headingId The heading's id; it is focusable, for the focus to land on.
- * @param props.title Its name, such as "Deals".
- * @param props.count Its count, such as "3 deals".
- * @param props.action Its "New" or "Add" button.
- * @param props.children The rows, or what says there are none.
- * @returns The section.
- */
-export const RecordSection = (props: {
-  headingId: string;
-  title: string;
-  count: string;
-  action?: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <section aria-labelledby={props.headingId} className="flex flex-col">
-    <div className="flex min-h-9 flex-wrap items-center justify-between gap-x-3 gap-y-1 pb-1">
-      <h2
-        id={props.headingId}
-        tabIndex={-1}
-        className="flex items-baseline gap-2 rounded-sm text-sm font-semibold"
-      >
-        {props.title}
-        <span className="text-[0.8125rem] font-normal text-muted-foreground tabular-nums">
-          {props.count}
-        </span>
-      </h2>
-      {props.action}
-    </div>
-    <div className="border-t border-rule">{props.children}</div>
-  </section>
 );
 
 /** A record section's row: 36 px, its hairline under it. */

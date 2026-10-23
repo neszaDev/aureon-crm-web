@@ -3,7 +3,7 @@
 import { Maximize2Icon, XIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, use, useEffect, useRef, useState } from 'react';
 import { ShellTip } from '@/components/crm/shell/ShellTip';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -20,6 +20,9 @@ const KINDS = {
   tasks: 'task',
 } as const;
 
+// What the ids of a record's page start with in a record panel.
+const PANEL_ID = 'panel-';
+
 /**
  * What takes the focus in a record panel: a new record's first field, else the record's name.
  * @param node The panel.
@@ -28,13 +31,23 @@ const KINDS = {
  */
 const focusTarget = (node: Element, kind: string) =>
   node.querySelector<HTMLElement>('[data-autofocus]') ??
-  node.querySelector<HTMLElement>(`#${kind}-heading`);
+  node.querySelector<HTMLElement>(`#${PANEL_ID}${kind}-heading`);
 
 /**
  * Whether the component is in a record panel: a form there (a new record's) cancels by closing it
  * (`SheetClose`, as its × does) rather than leave for another page.
  */
 export const InRecordPanel = createContext(false);
+
+/**
+ * An id on a record's page (its heading, a section's), made the panel's own in a record panel:
+ * the full page of a record of the same kind behind it has the same ones, and a name or label
+ * pointing at an id would find that page's first. Applying it twice changes nothing.
+ * @param id The page's id, such as `company-heading`.
+ * @returns The id to use here.
+ */
+export const usePanelId = (id: string) =>
+  use(InRecordPanel) && !id.startsWith(PANEL_ID) ? `${PANEL_ID}${id}` : id;
 
 /**
  * A record opened from inside the app, in a wide panel over the page it was opened from (an
@@ -148,7 +161,9 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
         closeLabel={t('close')}
         // Its record's name, then what kind of record it is (alone when there is no record); a new
         // record's form by its title ("New deal").
-        aria-labelledby={creating ? `${kind}-heading` : `${kind}-heading record-panel-kind`}
+        aria-labelledby={
+          creating ? `${PANEL_ID}${kind}-heading` : `${PANEL_ID}${kind}-heading record-panel-kind`
+        }
         aria-describedby={undefined}
         // The record's name, or a new record's first field, takes the focus (the panel itself while
         // it loads): a first button would open its tooltip.

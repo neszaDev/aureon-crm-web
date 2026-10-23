@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
+import { usePanelId } from '@/components/crm/record/RecordPanel';
 import { Button } from '@/components/ui/button';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { focusOnMount } from '@/utils/Focus';
@@ -15,7 +16,7 @@ import { useSettle } from '@/utils/SettleAction';
  * one at once (a refusal shows in a toast). Success says so in a toast, and the focus moves to
  * the button that undoes it.
  * @param props Component props.
- * @param props.id The restore button's id.
+ * @param props.id The restore button's id (`usePanelId`).
  * @param props.name The record's name, for the confirmation and the toasts.
  * @param props.archived Whether the record is archived.
  * @param props.archive Archives it.
@@ -34,12 +35,13 @@ export const ArchiveButton = (props: {
   const [isPending, startTransition] = useTransition();
   // After a restore, the Archive button that replaces Restore takes the focus.
   const [restored, setRestored] = useState(false);
+  const id = usePanelId(props.id);
 
   return (
     <>
       {props.archived && (
         <Button
-          id={props.id}
+          id={id}
           variant="outline"
           // aria-disabled, not disabled: a disabled button drops the focus to the page.
           aria-disabled={isPending || undefined}
@@ -80,7 +82,7 @@ export const ArchiveButton = (props: {
         description={t('archive_text')}
         confirmLabel={t('archive_confirm')}
         cancelLabel={t('cancel')}
-        fallbackFocus={() => document.querySelector<HTMLElement>(`#${CSS.escape(props.id)}`)}
+        fallbackFocus={() => document.querySelector<HTMLElement>(`#${CSS.escape(id)}`)}
         action={async () => {
           const result = await props.archive();
           if (result.ok) {

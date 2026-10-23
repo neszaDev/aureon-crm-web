@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { cancelTask, completeTask, reopenTask } from '@/actions/crm/TaskActions';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
+import { usePanelId } from '@/components/crm/record/RecordPanel';
 import {
   StatusOption,
   StatusRefusal,
@@ -27,7 +28,7 @@ type Task = components['schemas']['TaskResponse'];
  * @param props.task The task.
  * @param props.workspaceId The workspace.
  * @param props.canEdit Whether the caller may change it.
- * @param props.headingId The list's heading, which takes the focus when the row has left.
+ * @param props.headingId The list's heading (`usePanelId`), which takes the focus when the row has left.
  * @returns The pill, with its confirmation.
  */
 export const TaskStatusPill = (props: {
@@ -38,6 +39,7 @@ export const TaskStatusPill = (props: {
 }) => {
   const t = useTranslations('TaskRow');
   const [cancelling, setCancelling] = useState(false);
+  const headingId = usePanelId(props.headingId);
   const key = `task-${props.task.id}`;
   const [cell, markUsed, release] = useKeptFocus(key);
   const change = useStatusChange(release);
@@ -88,7 +90,7 @@ export const TaskStatusPill = (props: {
         // The pill, or the list's heading once the cancelled task left the list.
         returnFocus={() =>
           cell.current?.querySelector('button') ??
-          document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
+          document.querySelector<HTMLElement>(`#${CSS.escape(headingId)}`)
         }
         title={t('cancel_title', { title })}
         description={t('cancel_text')}

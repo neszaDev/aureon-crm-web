@@ -3,7 +3,9 @@
 import { PlusIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { RecordSection, SECTION_NOTE } from '@/components/crm/record/RecordLayout';
+import { SECTION_NOTE } from '@/components/crm/record/RecordLayout';
+import { usePanelId } from '@/components/crm/record/RecordPanel';
+import { RecordSection } from '@/components/crm/record/RecordSection';
 import { TaskDialog } from '@/components/crm/task/TaskDialog';
 import { TaskTable } from '@/components/crm/task/TaskTable';
 import { Button } from '@/components/ui/button';
@@ -49,7 +51,7 @@ export const TaskPanel = (props: {
 }) => {
   const t = useTranslations('TaskPanel');
   const [showClosed, setShowClosed] = useState(false);
-  const headingId = `tasks-heading-${Object.keys(props.link)[0]}`;
+  const headingId = usePanelId(`tasks-heading-${Object.keys(props.link)[0]}`);
   const table = (tasks: Task[]) => (
     <TaskTable
       tasks={tasks}

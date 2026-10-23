@@ -1,5 +1,8 @@
+'use client';
+
 import { useTranslations } from 'next-intl';
 import { PersonAvatar } from '@/components/crm/PersonAvatar';
+import { usePanelId } from '@/components/crm/record/RecordPanel';
 import { Badge } from '@/components/ui/badge';
 import type { components } from '@/libs/api/schema';
 
@@ -12,7 +15,7 @@ import type { components } from '@/libs/api/schema';
  * @param props Component props.
  * @param props.number The record number, such as `C-0042`.
  * @param props.name The record's name.
- * @param props.headingId The `h1`'s id.
+ * @param props.headingId The `h1`'s id (`usePanelId`).
  * @param props.owner The owner, if any.
  * @param props.assigned Whether the owner is an assignee ("Assigned to"), as a task's.
  * @param props.archived Whether the record is archived.
@@ -36,6 +39,7 @@ export const RecordHeader = (props: {
 }) => {
   const t = useTranslations('RecordHeader');
   const owner = props.owner?.displayName ?? props.owner?.email ?? '';
+  const headingId = usePanelId(props.headingId);
 
   return (
     <header className="flex flex-col gap-4 border-b border-rule pb-5">
@@ -53,7 +57,7 @@ export const RecordHeader = (props: {
             )}
           </p>
           <h1
-            id={props.headingId}
+            id={headingId}
             tabIndex={-1}
             className="rounded-sm text-[1.5rem] leading-tight font-semibold tracking-[-0.01em] break-words"
           >
@@ -85,6 +89,45 @@ export const RecordHeader = (props: {
         </p>
       </div>
       {props.track}
+    </header>
+  );
+};
+
+/**
+ * The top of a record's form page, a new record's or an edit: its number when it has one, its
+ * title on a small scale (the form's large name input leads) and what the page is for, over a
+ * hairline.
+ * @param props Component props.
+ * @param props.number The record number, such as `C-0042`, when it is saved.
+ * @param props.title The page's title, its `h1`.
+ * @param props.headingId The title's id (`usePanelId`): a new record's `<kind>-heading` names the
+ *   record panel.
+ * @param props.description What the page is for.
+ * @returns The header.
+ */
+export const RecordFormHeader = (props: {
+  number?: string;
+  title: string;
+  headingId?: string;
+  description: string;
+}) => {
+  const headingId = usePanelId(props.headingId ?? '');
+
+  return (
+    <header className="flex flex-col gap-0.5 border-b border-rule pb-4">
+      {props.number && (
+        <p className="font-mono text-[0.75rem] text-muted-foreground tabular-nums">
+          {props.number}
+        </p>
+      )}
+      <h1
+        id={props.headingId && headingId}
+        tabIndex={props.headingId ? -1 : undefined}
+        className="rounded-sm text-base leading-6 font-semibold break-words"
+      >
+        {props.title}
+      </h1>
+      <p className="max-w-[65ch] text-[0.8125rem] text-muted-foreground">{props.description}</p>
     </header>
   );
 };
