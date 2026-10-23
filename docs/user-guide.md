@@ -66,8 +66,10 @@ them on.
 ## Companies and contacts
 
 **Companies** are the organisations you sell to; **contacts** are the people, each linked to a
-company if you like. Create one from its list (**New company**, **New contact**) or from the
-dashboard's quick actions. Once you have entered a company's name or website, or a contact's
+company if you like. Create one from its list (**Add company**, **Add contact**, or the **Add**
+row at the end of the list or of a group: a company from its name alone, on Enter; a contact
+through its form, filled in with the group's owner and the list's company) or from the dashboard's
+quick actions. Once you have entered a company's name or website, or a contact's
 email or phone, the records that look like it are listed, so the same one isn't entered twice;
 saving stays possible.
 
@@ -81,8 +83,8 @@ its timeline includes theirs.
 - **Edit** saves only if nobody else saved the record since you opened it; otherwise you are told
   "Someone else changed this" and can reload to see their version.
 - **Archive** hides a record from the lists and the search, keeping its history; the list's
-  **Archived** view shows archived records, ready to **Restore**. Records are never deleted; only
-  an activity can be.
+  **Archived** view shows archived records, ready to **Restore**. A list row's **…** menu does the
+  same. Records are never deleted; only an activity can be.
 
 **The lists** (companies, contacts, leads, deals, tasks) search, filter, sort and page on the
 server, and keep all of it in the address, so a view can be bookmarked or shared with a member:
@@ -92,6 +94,12 @@ server, and keep all of it in the address, so a view can be bookmarked or shared
 - Leads: search, status, source, priority, follow-up on or before a day, owner, active or archived.
 - Deals: on the board, search, owner and company; in the list view also contact, stage, status,
   the expected close range, and active or archived.
+
+Companies and contacts keep it on one line: the search, a chip per filter (an active one shows its
+value and an × that clears it), **Group**, the sort, **Me** (only yours) and the archived view; on a
+phone all but the search are behind **Filters**. **Group** by owner shows a section per member (you
+first) and one for the unassigned records, each with its count and at most 50 rows, then **View
+all** for the rest; a section folds away from its heading.
 
 Click a column heading to sort by it (again to reverse it), or use **Sort by** where a list has
 one; choose 20, 50 or 100 rows a page.

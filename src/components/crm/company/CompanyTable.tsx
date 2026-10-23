@@ -1,5 +1,8 @@
 import { useLocale, useTranslations } from 'next-intl';
+import { archiveCompany, restoreCompany } from '@/actions/crm/CompanyActions';
 import { OwnerCell } from '@/components/crm/list/OwnerCell';
+import { RecordRow } from '@/components/crm/list/RecordRow';
+import { RowMenu } from '@/components/crm/list/RowMenu';
 import { SortHeader } from '@/components/crm/list/SortHeader';
 import {
   Table,
@@ -12,16 +15,22 @@ import {
 import type { components } from '@/libs/api/schema';
 import { formatInstant, recordNumber } from '@/libs/crm/Format';
 import type { ListQuery } from '@/libs/crm/ListQuery';
-import { Link } from '@/libs/I18nNavigation';
+import type { Permission } from '@/libs/crm/Permissions';
+import { canEditRecord } from '@/libs/crm/RecordAccess';
 
 /**
- * A page of companies: name over its record number, industry, owner, contacts, open deals and
- * when it last changed. Name and "Updated" sort the list.
+ * Companies as list rows: the name with its record number, industry, owner, contacts, open deals,
+ * when it last changed, and the row menu (archive, or restore) where the caller may change it.
+ * Name and "Updated" sort the list.
  * @param props Component props.
  * @param props.rows The companies.
  * @param props.path The list's path; a company's page is under it.
  * @param props.query The current list query.
  * @param props.timeZone The workspace's time zone, for the dates.
+ * @param props.workspace The workspace, with the caller's permissions.
+ * @param props.workspace.id Its id.
+ * @param props.workspace.permissions The caller's permissions.
+ * @param props.me The caller's user id.
  * @returns The table.
  */
 export const CompanyTable = (props: {
@@ -29,46 +38,61 @@ export const CompanyTable = (props: {
   path: string;
   query: ListQuery;
   timeZone: string;
+  workspace: { id: number; permissions: Permission[] };
+  me: number;
 }) => {
   const t = useTranslations('CompanyTable');
+  const tList = useTranslations('ListToolbar');
   const locale = useLocale();
 
   return (
-    <Table>
+    // Fixed columns, so the groups of a grouped list line up.
+    <Table className="table-fixed">
       <TableHeader>
         <TableRow>
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
-          <TableHead className="max-md:hidden">{t('industry')}</TableHead>
-          <TableHead>{t('owner')}</TableHead>
-          <TableHead className="text-right max-lg:hidden">{t('contacts')}</TableHead>
-          <TableHead className="text-right max-lg:hidden">{t('open_deals')}</TableHead>
+          <TableHead className="w-[16%] truncate max-md:hidden">{t('industry')}</TableHead>
+          <TableHead className="w-[20%] truncate max-sm:w-32">{t('owner')}</TableHead>
+          <TableHead className="w-[10%] truncate text-right max-lg:hidden">
+            {t('contacts')}
+          </TableHead>
+          <TableHead className="w-[12%] truncate text-right max-lg:hidden">
+            {t('open_deals')}
+          </TableHead>
           <SortHeader
             label={t('updated')}
             sort="UPDATED_AT"
             path={props.path}
             query={props.query}
-            className="max-sm:hidden"
+            className="w-[14%] truncate max-sm:hidden"
           />
+          <TableHead className="w-10">
+            <span className="sr-only">{tList('actions')}</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {props.rows.map((company) => (
-          <TableRow key={company.id}>
-            <TableCell className="py-2 whitespace-normal">
-              <span className="flex min-w-0 flex-col">
-                <Link
-                  href={`${props.path}/${company.id}`}
-                  className="text-[0.9375rem] font-medium break-words text-foreground"
-                >
-                  {company.name}
-                </Link>
-                <span className="font-mono text-[0.8125rem] text-muted-foreground tabular-nums">
-                  {recordNumber('company', company.id)}
-                </span>
+          <RecordRow
+            key={company.id}
+            name={company.name}
+            href={`${props.path}/${company.id}`}
+            number={recordNumber('company', company.id)}
+            menu={
+              canEditRecord(props.workspace, props.me, company.owner?.userId) && (
+                <RowMenu
+                  name={company.name}
+                  archived={company.archived}
+                  archive={archiveCompany.bind(null, props.workspace.id, company.id)}
+                  restore={restoreCompany.bind(null, props.workspace.id, company.id)}
+                />
+              )
+            }
+          >
+            <TableCell className="max-md:hidden">
+              <span title={company.industry} className="block truncate">
+                {company.industry ?? <span className="text-muted-foreground">—</span>}
               </span>
-            </TableCell>
-            <TableCell className="whitespace-normal max-md:hidden">
-              {company.industry ?? <span className="text-muted-foreground">—</span>}
             </TableCell>
             <OwnerCell owner={company.owner} />
             <TableCell className="text-right tabular-nums max-lg:hidden">
@@ -77,10 +101,10 @@ export const CompanyTable = (props: {
             <TableCell className="text-right tabular-nums max-lg:hidden">
               {company.openDealCount}
             </TableCell>
-            <TableCell className="text-muted-foreground tabular-nums max-sm:hidden">
+            <TableCell className="truncate text-muted-foreground tabular-nums max-sm:hidden">
               {formatInstant(company.updatedAt, { locale, timeZone: props.timeZone })}
             </TableCell>
-          </TableRow>
+          </RecordRow>
         ))}
       </TableBody>
     </Table>

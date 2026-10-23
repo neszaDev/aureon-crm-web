@@ -2,9 +2,9 @@ import { useTranslations } from 'next-intl';
 import { StatusFilter } from '@/components/crm/lead/StatusFilter';
 import { ArchivedToggle } from '@/components/crm/list/ArchivedToggle';
 import { DateFilter } from '@/components/crm/list/DateFilter';
+import { FilterRow } from '@/components/crm/list/FilterRow';
 import type { FilterOption } from '@/components/crm/list/FilterSelect';
 import { FilterSelect } from '@/components/crm/list/FilterSelect';
-import { ListToolbar } from '@/components/crm/list/ListToolbar';
 import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
 import { SearchBox } from '@/components/crm/list/SearchBox';
 import type { LEAD_LIST } from '@/libs/api/CrmQueries';
@@ -42,7 +42,7 @@ export const LeadFilters = (props: {
   }));
 
   return (
-    <ListToolbar label={t('toolbar_label')}>
+    <FilterRow label={t('toolbar_label')}>
       <SearchBox
         id="leads-search"
         label={t('search_label')}
@@ -94,6 +94,6 @@ export const LeadFilters = (props: {
         timeZone={props.timeZone}
       />
       <ArchivedToggle path={props.path} query={props.query} />
-    </ListToolbar>
+    </FilterRow>
   );
 };

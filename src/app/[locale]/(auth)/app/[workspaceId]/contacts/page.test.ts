@@ -11,10 +11,21 @@ vi.mock(import('next-intl/server'), () => ({
 }));
 // @ts-expect-error -- stand-ins for only what the page reads
 vi.mock(import('@/libs/api/CrmQueries'), () => ({
-  CONTACT_LIST: { sorts: ['NAME'], defaultSort: 'NAME', filters: { companyId: 'id' } },
+  CONTACT_LIST: {
+    sorts: ['NAME'],
+    defaultSort: 'NAME',
+    filters: { companyId: 'id', ownerId: 'id' },
+    groups: ['owner'],
+  },
   getCompany: vi.fn<typeof getCompany>(),
   getContacts: vi.fn<typeof getContacts>(),
-  getMembers: async () => await Promise.resolve({ members: [] }),
+  getMembers: async () =>
+    await Promise.resolve({
+      members: [
+        { userId: 1, email: 'mia@acme.test' },
+        { userId: 2, email: 'owen@acme.test' },
+      ],
+    }),
   getLeadSources: async () => await Promise.resolve({ sources: [] }),
   getContactTags: async () => await Promise.resolve({ tags: [] }),
 }));
@@ -24,7 +35,8 @@ vi.mock(import('@/libs/api/Queries'), () => ({
 }));
 // @ts-expect-error -- only what the page reads
 vi.mock(import('@/libs/crm/OpenWorkspace'), () => ({
-  getOpenWorkspace: async () => await Promise.resolve({ workspace: { id: 1, timezone: 'UTC' } }),
+  getOpenWorkspace: async () =>
+    await Promise.resolve({ workspace: { id: 1, timezone: 'UTC', permissions: [] } }),
 }));
 vi.mock(import('@/libs/api/Session'), () => ({
   // @ts-expect-error -- the real one redirects; this one says it was asked to
@@ -51,5 +63,32 @@ describe(ContactsPage, () => {
 
     expect(endRejectedSession).toHaveBeenCalledWith('th');
     expect(rendered).toBe('session ended');
+  });
+});
+
+describe('ContactsPage grouped by owner', () => {
+  it('reads each group on its own, from its first row, at most 50 of them', async () => {
+    vi.mocked(getContacts).mockReset();
+    vi.mocked(getContacts).mockResolvedValue({
+      ...FLAGS,
+      // @ts-expect-error -- only what the page reads
+      contacts: { content: [], totalElements: 0, totalPages: 0 },
+    });
+
+    await ContactsPage({
+      params: Promise.resolve({ locale: 'en', workspaceId: '1' }),
+      searchParams: Promise.resolve({ group: 'owner', page: '4', q: 'acme' }),
+    });
+
+    const queries = vi.mocked(getContacts).mock.calls.map(([, query]) => query);
+    // The caller (Mia) first, then Owen, then Unassigned: no ungrouped read.
+    expect(queries.map((query) => [query.filters.ownerId, query.unassigned])).toStrictEqual([
+      [1, undefined],
+      [2, undefined],
+      [undefined, true],
+    ]);
+    expect(
+      queries.every((query) => query.page === 0 && query.size === 50 && query.q === 'acme'),
+    ).toBeTruthy();
   });
 });

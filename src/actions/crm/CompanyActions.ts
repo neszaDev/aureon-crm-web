@@ -28,14 +28,18 @@ const companyBody = (values: CompanyValues) => ({
 });
 
 /**
- * Creates a company (`POST /workspaces/{id}/companies`) and opens it.
+ * Creates a company (`POST /workspaces/{id}/companies`) and opens it, or stays on the page and
+ * refreshes it (a list's inline add).
  * @param workspaceId The workspace.
  * @param values Form values; no owner means the caller.
- * @returns Field or form errors; on success it redirects to the new company instead.
+ * @param options What follows a success.
+ * @param options.stay Whether to stay and refresh the page rather than open the new company.
+ * @returns Field or form errors; on success it redirects to the new company instead, or succeeds.
  */
 export async function createCompany(
   workspaceId: number,
   values: CompanyValues,
+  options?: { stay: boolean },
 ): Promise<ActionResult> {
   const t = await getTranslations('CompanyForm');
   const parsed = CompanyValidation.safeParse(values);
@@ -54,11 +58,37 @@ export async function createCompany(
   if (!data) {
     return { ok: false, message: t('error_generic') };
   }
+  if (options?.stay) {
+    refresh();
+    return { ok: true };
+  }
 
   return redirect({
     href: `/app/${workspaceId}/companies/${data.id}`,
     locale: await getLocale(),
   });
+}
+
+/**
+ * Adds a company by its name alone from a list (its inline add): created as `createCompany`
+ * does, with the owner and industry of the list's group or filter, and the list refreshed.
+ * @param workspaceId The workspace.
+ * @param preset What the list's group or filter gives it.
+ * @param preset.ownerId Its owner; none means the caller.
+ * @param preset.industry Its industry, or empty.
+ * @param name The name typed.
+ * @returns Success, or the refusal (its field errors by the backend's names).
+ */
+export async function addCompany(
+  workspaceId: number,
+  preset: { ownerId: number | null; industry: string },
+  name: string,
+): Promise<ActionResult> {
+  return await createCompany(
+    workspaceId,
+    { ...preset, name, website: '', phone: '', address: '', employeeCount: '', notes: '' },
+    { stay: true },
+  );
 }
 
 /**

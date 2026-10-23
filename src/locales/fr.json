@@ -859,6 +859,36 @@
     "unassigned": "Sans propriétaire",
     "sort_label": "Trier par"
   },
+  "ListToolbar": {
+    "filters": "Filtres",
+    "filters_on": "{count, plural, one {# filtre actif} other {# filtres actifs}}",
+    "close": "Fermer",
+    "chip_on": "{label} :",
+    "clear": "Retirer le filtre {label}",
+    "chip_search": "Rechercher",
+    "chip_empty": "Aucun résultat",
+    "current": "(actuel)",
+    "sort_by": "Trier par",
+    "ascending": "Croissant",
+    "descending": "Décroissant",
+    "sort_name": "Nom",
+    "sort_company": "Entreprise",
+    "sort_created": "Création",
+    "sort_updated": "Modification",
+    "group": "Grouper",
+    "group_on": "Groupe : {label}",
+    "group_by": "Grouper par",
+    "group_none": "Aucun",
+    "group_owner": "Propriétaire",
+    "me": "Moi",
+    "actions": "Actions",
+    "row_menu": "Actions pour {name}",
+    "view_all": "Tout voir ({count, number})",
+    "add_hint": "Entrée",
+    "added": "Ajouté : {name}",
+    "add_name_required": "Saisissez un nom, puis appuyez sur Entrée.",
+    "add_failed": "Ça n'a pas fonctionné. Réessayez."
+  },
   "ExportButton": {
     "label": "Exporter en CSV",
     "saved": "{name} enregistré"
@@ -907,8 +937,7 @@
   },
   "CompaniesPage": {
     "title": "Entreprises",
-    "description": "Les organisations à qui vous vendez, avec leurs contacts et leurs affaires.",
-    "new": "Nouvelle entreprise",
+    "new": "Ajouter une entreprise",
     "toolbar_label": "Rechercher des entreprises",
     "search_label": "Rechercher",
     "search_placeholder": "Nom, site web ou téléphone",
@@ -918,7 +947,8 @@
     "archived_heading": "{count, plural, =0 {Aucune entreprise archivée} one {# entreprise archivée} other {# entreprises archivées}}",
     "empty_title": "Aucune entreprise pour l'instant",
     "empty_text": "Ajoutez les organisations à qui vous vendez. Leurs contacts et leurs affaires s'y rattachent.",
-    "archived_empty_text": "Les entreprises archivées s'affichent ici, prêtes à être restaurées."
+    "archived_empty_text": "Les entreprises archivées s'affichent ici, prêtes à être restaurées.",
+    "add_for": "Ajouter une entreprise à {name}"
   },
   "CompanyTable": {
     "name": "Nom",
@@ -975,8 +1005,7 @@
   },
   "ContactsPage": {
     "title": "Contacts",
-    "description": "Les personnes avec qui vous traitez, dans leurs entreprises.",
-    "new": "Nouveau contact",
+    "new": "Ajouter un contact",
     "toolbar_label": "Rechercher des contacts",
     "search_label": "Rechercher",
     "search_placeholder": "Nom, e-mail, téléphone ou entreprise",
@@ -992,7 +1021,8 @@
     "archived_heading": "{count, plural, =0 {Aucun contact archivé} one {# contact archivé} other {# contacts archivés}}",
     "empty_title": "Aucun contact pour l'instant",
     "empty_text": "Ajoutez les personnes à qui vous parlez. Rattachez chacune à son entreprise pour la voir sur sa fiche.",
-    "archived_empty_text": "Les contacts archivés s'affichent ici, prêts à être restaurés."
+    "archived_empty_text": "Les contacts archivés s'affichent ici, prêts à être restaurés.",
+    "add_for": "Ajouter un contact à {name}"
   },
   "ContactTable": {
     "name": "Nom",

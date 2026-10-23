@@ -27,9 +27,10 @@ export default async function NewContactPage(props: NewContactPageProps) {
   const { locale, workspaceId } = await props.params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'NewContactPage' });
-  // From a company's page (`?companyId=`): the company comes filled in.
-  const { companyId: companyParam } = await props.searchParams;
+  // From a company's page or a list's group (`?companyId=`, `?ownerId=`): filled in.
+  const { companyId: companyParam, ownerId: ownerParam } = await props.searchParams;
   const companyId = typeof companyParam === 'string' ? toRecordId(companyParam) : undefined;
+  const ownerId = typeof ownerParam === 'string' ? toRecordId(ownerParam) : undefined;
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
   const [{ workspace }, { user }, members, sources, tags, linked] = await Promise.all([
@@ -49,6 +50,11 @@ export default async function NewContactPage(props: NewContactPageProps) {
   const path = `/app/${workspace.id}/contacts`;
   // An unknown company in the link is left out rather than refused.
   const company = linked?.company ? { id: linked.company.id, label: linked.company.name } : null;
+  // Another member only for a role that may give it to them; anyone else gets the caller.
+  const owner =
+    canAssign(workspace) && members.members.some((member) => member.userId === ownerId)
+      ? ownerId
+      : undefined;
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -68,7 +74,7 @@ export default async function NewContactPage(props: NewContactPageProps) {
             phone: '',
             jobTitle: '',
             companyId: company?.id ?? null,
-            ownerId: user.id,
+            ownerId: owner ?? user.id,
             sourceId: null,
             tags: [],
             notes: '',

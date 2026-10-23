@@ -1,7 +1,11 @@
+import type { components } from '@/libs/api/schema';
 import { toRecordId } from './WorkspaceId';
 
 /** The page sizes a list offers; the first is the default. */
 export const PAGE_SIZES = [20, 50, 100] as const;
+
+/** The rows a group of a grouped list shows at most; "View all" opens the rest. */
+const GROUP_ROWS = 50;
 
 // The largest `page × size` the backend takes (a Java int): a larger page is a 400.
 const MAX_OFFSET = 2 ** 31 - 1;
@@ -18,11 +22,15 @@ type Direction = 'ASC' | 'DESC';
  */
 type FilterKind = 'id' | 'text' | 'date' | 'bool' | { enum: readonly string[]; multiple?: boolean };
 
-/** What a list endpoint takes: its sorts, the default one, and its filters by param name. */
+/**
+ * What a list endpoint takes: its sorts, the default one, and its filters by param name; and
+ * what the page can group it by (`group`, the page's own param; ungrouped by default).
+ */
 export type ListSpec = {
   sorts: readonly string[];
   defaultSort: string;
   filters: Record<string, FilterKind>;
+  groups?: readonly string[];
 };
 
 type FilterValue<K> = K extends 'id'
@@ -50,6 +58,8 @@ export type ListQuery<S extends ListSpec = ListSpec> = {
   archived?: true;
   /** Only the records without an owner (`ownerId=unassigned` in the URL). */
   unassigned?: true;
+  /** What the page groups the rows by; ungrouped without it (`group=none`, the default). */
+  group?: S extends { groups: readonly (infer G)[] } ? G : never;
   filters: { [K in keyof S['filters']]?: FilterValue<S['filters'][K]> };
   /** The valid params, defaults left out: what `listHref` starts from. */
   params: Record<string, string | string[]>;
@@ -185,6 +195,10 @@ export const parseListQuery = <S extends ListSpec>(
   if (archived) {
     params.archived = 'true';
   }
+  const group = spec.groups?.find((item) => item === first(searchParams.group));
+  if (group) {
+    params.group = group;
+  }
   const sort = spec.sorts.find((item) => item === first(searchParams.sort)) ?? spec.defaultSort;
   if (sort !== spec.defaultSort) {
     params.sort = sort;
@@ -211,6 +225,9 @@ export const parseListQuery = <S extends ListSpec>(
     ...(q && { q }),
     ...(archived && { archived }),
     ...(unassigned && { unassigned }),
+    // One of the spec's groups, which is what this type reads off it.
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- see above
+    ...(group && { group: group as ListQuery<S>['group'] }),
     // Each value was read by its spec's kind, which is what this type maps the kinds to.
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- see above
     filters: filters as ListQuery<S>['filters'],
@@ -227,6 +244,63 @@ export const parseListQuery = <S extends ListSpec>(
  */
 export const isFiltered = <S extends ListSpec>(query: ListQuery<S>) =>
   [query.q, query.unassigned, ...Object.values(query.filters)].some((value) => value !== undefined);
+
+/**
+ * Counts the filters a list query applies (Unassigned too): what a phone's "Filters" button says
+ * is on. The search, the archived view, the sort and the paging aren't filters.
+ * @param query The list query.
+ * @returns How many.
+ */
+export const filterCount = <S extends ListSpec>(query: ListQuery<S>) =>
+  Object.keys(query.filters).length + (query.unassigned ? 1 : 0);
+
+/** A group of a list grouped by owner: the member (none: Unassigned) and what reads its rows. */
+export type OwnerGroup<S extends ListSpec> = {
+  member?: components['schemas']['MemberResponse'];
+  /** The list's query narrowed to the group, its first `GROUP_ROWS` rows. */
+  query: ListQuery<S>;
+  /** The group's filter as URL params, for the link to all of its rows. */
+  params: { ownerId: string };
+};
+
+/**
+ * The groups of a list grouped by owner: the caller, every other member, then Unassigned (the
+ * records of members who left too), or only the one the owner filter keeps. Each reads the
+ * list's own search, filters and sort, from the first row.
+ * @param query The list query.
+ * @param members The workspace's members.
+ * @param me The caller's user id.
+ * @returns The groups, in order.
+ */
+export const ownerGroups = <S extends ListSpec & { filters: { ownerId: 'id' } }>(
+  query: ListQuery<S>,
+  members: components['schemas']['MemberResponse'][],
+  me: number,
+): OwnerGroup<S>[] => {
+  const only = query.params.ownerId;
+  const narrowed = (ownerId?: number): ListQuery<S> => ({
+    ...query,
+    page: 0,
+    size: GROUP_ROWS,
+    unassigned: ownerId === undefined ? true : undefined,
+    filters: { ...query.filters, ownerId },
+  });
+  const groups: OwnerGroup<S>[] = [
+    ...members.filter((member) => member.userId === me),
+    ...members.filter((member) => member.userId !== me),
+  ]
+    .filter((member) => only === undefined || only === String(member.userId))
+    .map((member) => ({
+      member,
+      query: narrowed(member.userId),
+      params: { ownerId: String(member.userId) },
+    }));
+  if (only === undefined || only === 'unassigned') {
+    groups.push({ query: narrowed(), params: { ownerId: 'unassigned' } });
+  }
+
+  return groups;
+};
 
 /**
  * The direction a sort takes without `direction`: dates, amounts and priorities descending,
@@ -262,3 +336,20 @@ export const listHref = (
 
   return text ? `${path}?${text}` : path;
 };
+
+/**
+ * Where a page past the end of a list goes (a hand-edited link, or rows archived meanwhile): its
+ * last page.
+ * @param path The list's path.
+ * @param query The list query.
+ * @param page The page read, if any.
+ * @returns The link to the last page; undefined when the page has rows or the list has none.
+ */
+export const pastEndHref = (
+  path: string,
+  query: Pick<ListQuery, 'params'>,
+  page?: { content: unknown[]; totalPages: number },
+) =>
+  page && page.content.length === 0 && page.totalPages > 0
+    ? listHref(path, query, { page: page.totalPages > 1 ? String(page.totalPages - 1) : undefined })
+    : undefined;

@@ -1,9 +1,9 @@
 import { useTranslations } from 'next-intl';
 import { ArchivedToggle } from '@/components/crm/list/ArchivedToggle';
 import { DateFilter } from '@/components/crm/list/DateFilter';
+import { FilterRow } from '@/components/crm/list/FilterRow';
 import type { FilterOption } from '@/components/crm/list/FilterSelect';
 import { FilterSelect } from '@/components/crm/list/FilterSelect';
-import { ListToolbar } from '@/components/crm/list/ListToolbar';
 import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
 import { RecordFilter } from '@/components/crm/list/RecordFilter';
 import { SearchBox } from '@/components/crm/list/SearchBox';
@@ -54,7 +54,7 @@ export const DealFilters = (props: {
   }));
 
   return (
-    <ListToolbar label={t('toolbar_label')}>
+    <FilterRow label={t('toolbar_label')}>
       <SearchBox
         id="deals-search"
         label={t('search_label')}
@@ -175,6 +175,6 @@ export const DealFilters = (props: {
           <ArchivedToggle path={props.path} query={props.query} />
         </>
       )}
-    </ListToolbar>
+    </FilterRow>
   );
 };

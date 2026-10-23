@@ -1,10 +1,10 @@
 import { useTranslations } from 'next-intl';
 import { AuditEventItem } from '@/components/crm/audit/AuditEventItem';
+import { FilterRow } from '@/components/crm/list/FilterRow';
 import { FilterSelect } from '@/components/crm/list/FilterSelect';
 import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
 import { ListEmpty } from '@/components/crm/list/ListEmpty';
 import { ListPager } from '@/components/crm/list/ListPager';
-import { ListToolbar } from '@/components/crm/list/ListToolbar';
 import type { components } from '@/libs/api/schema';
 import type { AUDIT_LIST } from '@/libs/crm/Audit';
 import { AUDIT_ENTITY_TYPES } from '@/libs/crm/Audit';
@@ -70,7 +70,7 @@ export const AuditTrail = (props: {
 
   return (
     <>
-      <ListToolbar label={t('toolbar_label')}>
+      <FilterRow label={t('toolbar_label')}>
         <FilterSelect
           id="audit-entity"
           label={t('entity_label')}
@@ -99,7 +99,7 @@ export const AuditTrail = (props: {
           path={props.path}
           query={props.query}
         />
-      </ListToolbar>
+      </FilterRow>
       {list}
     </>
   );

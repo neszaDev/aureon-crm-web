@@ -1,6 +1,9 @@
 import { useLocale, useTranslations } from 'next-intl';
+import { archiveContact, restoreContact } from '@/actions/crm/ContactActions';
 import { TagBadge } from '@/components/crm/contact/TagBadge';
 import { OwnerCell } from '@/components/crm/list/OwnerCell';
+import { RecordRow } from '@/components/crm/list/RecordRow';
+import { RowMenu } from '@/components/crm/list/RowMenu';
 import { SortHeader } from '@/components/crm/list/SortHeader';
 import {
   Table,
@@ -13,22 +16,29 @@ import {
 import type { components } from '@/libs/api/schema';
 import { formatInstant, recordNumber } from '@/libs/crm/Format';
 import type { ListQuery } from '@/libs/crm/ListQuery';
+import type { Permission } from '@/libs/crm/Permissions';
+import { canEditRecord } from '@/libs/crm/RecordAccess';
 import { Link } from '@/libs/I18nNavigation';
 
-// Tags shown in a row; the rest are counted.
-const SHOWN_TAGS = 3;
+// Tags shown in a row, which keeps to one line; the rest are counted.
+const SHOWN_TAGS = 1;
 
 const none = <span className="text-muted-foreground">—</span>;
 
 /**
- * A page of contacts: name over its record number, company, email, phone, owner, the first tags
- * and when it last changed. Name, company and "Updated" sort the list.
+ * Contacts as list rows: the name with its record number, company, email, phone, owner, the first
+ * tags, when it last changed, and the row menu (archive, or restore) where the caller may change
+ * it. Name, company and "Updated" sort the list.
  * @param props Component props.
  * @param props.rows The contacts.
  * @param props.path The list's path; a contact's page is under it.
  * @param props.companiesPath The companies list, for the company links.
  * @param props.query The current list query.
  * @param props.timeZone The workspace's time zone, for the dates.
+ * @param props.workspace The workspace, with the caller's permissions.
+ * @param props.workspace.id Its id.
+ * @param props.workspace.permissions The caller's permissions.
+ * @param props.me The caller's user id.
  * @returns The table.
  */
 export const ContactTable = (props: {
@@ -37,12 +47,16 @@ export const ContactTable = (props: {
   companiesPath: string;
   query: ListQuery;
   timeZone: string;
+  workspace: { id: number; permissions: Permission[] };
+  me: number;
 }) => {
   const t = useTranslations('ContactTable');
+  const tList = useTranslations('ListToolbar');
   const locale = useLocale();
 
   return (
-    <Table>
+    // Fixed columns, so the groups of a grouped list line up.
+    <Table className="table-fixed">
       <TableHeader>
         <TableRow>
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
@@ -51,42 +65,48 @@ export const ContactTable = (props: {
             sort="COMPANY"
             path={props.path}
             query={props.query}
-            className="max-sm:hidden"
+            className="w-[14%] truncate max-sm:hidden"
           />
-          <TableHead className="max-md:hidden">{t('email')}</TableHead>
-          <TableHead className="max-lg:hidden">{t('phone')}</TableHead>
-          <TableHead>{t('owner')}</TableHead>
-          <TableHead className="max-lg:hidden">{t('tags')}</TableHead>
+          <TableHead className="w-[16%] truncate max-md:hidden">{t('email')}</TableHead>
+          <TableHead className="w-[9%] truncate max-lg:hidden">{t('phone')}</TableHead>
+          <TableHead className="w-[13%] truncate max-sm:w-32">{t('owner')}</TableHead>
+          <TableHead className="w-[13%] truncate max-lg:hidden">{t('tags')}</TableHead>
           <SortHeader
             label={t('updated')}
             sort="UPDATED_AT"
             path={props.path}
             query={props.query}
-            className="max-xl:hidden"
+            className="w-[12%] truncate max-xl:hidden"
           />
+          <TableHead className="w-10">
+            <span className="sr-only">{tList('actions')}</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {props.rows.map((contact) => (
-          <TableRow key={contact.id}>
-            <TableCell className="py-2 whitespace-normal">
-              <span className="flex min-w-0 flex-col">
-                <Link
-                  href={`${props.path}/${contact.id}`}
-                  className="text-[0.9375rem] font-medium break-words text-foreground"
-                >
-                  {contact.fullName}
-                </Link>
-                <span className="font-mono text-[0.8125rem] text-muted-foreground tabular-nums">
-                  {recordNumber('contact', contact.id)}
-                </span>
-              </span>
-            </TableCell>
-            <TableCell className="whitespace-normal max-sm:hidden">
+          <RecordRow
+            key={contact.id}
+            name={contact.fullName}
+            href={`${props.path}/${contact.id}`}
+            number={recordNumber('contact', contact.id)}
+            menu={
+              canEditRecord(props.workspace, props.me, contact.owner?.userId) && (
+                <RowMenu
+                  name={contact.fullName}
+                  archived={contact.archived}
+                  archive={archiveContact.bind(null, props.workspace.id, contact.id)}
+                  restore={restoreContact.bind(null, props.workspace.id, contact.id)}
+                />
+              )
+            }
+          >
+            <TableCell className="max-sm:hidden">
               {contact.company ? (
                 <Link
                   href={`${props.companiesPath}/${contact.company.id}`}
-                  className="break-words text-seal-ink"
+                  title={contact.company.name}
+                  className="block truncate text-violet-ink"
                 >
                   {contact.company.name}
                 </Link>
@@ -94,19 +114,31 @@ export const ContactTable = (props: {
                 none
               )}
             </TableCell>
-            <TableCell className="whitespace-normal max-md:hidden">
-              {contact.email ? <span className="break-all">{contact.email}</span> : none}
+            <TableCell className="max-md:hidden">
+              {contact.email ? (
+                <span title={contact.email} className="block truncate">
+                  {contact.email}
+                </span>
+              ) : (
+                none
+              )}
             </TableCell>
-            <TableCell className="tabular-nums max-lg:hidden">{contact.phone ?? none}</TableCell>
+            <TableCell title={contact.phone} className="truncate tabular-nums max-lg:hidden">
+              {contact.phone ?? none}
+            </TableCell>
             <OwnerCell owner={contact.owner} />
-            <TableCell className="whitespace-normal max-lg:hidden">
+            <TableCell className="max-lg:hidden">
               {contact.tags.length > 0 ? (
-                <span className="flex max-w-56 flex-wrap items-center gap-1">
+                <span className="flex items-center gap-1">
                   {contact.tags.slice(0, SHOWN_TAGS).map((tag) => (
-                    <TagBadge key={tag} tag={tag} />
+                    <TagBadge
+                      key={tag}
+                      tag={tag}
+                      className="block min-w-0 shrink truncate leading-5 break-normal whitespace-nowrap"
+                    />
                   ))}
                   {contact.tags.length > SHOWN_TAGS && (
-                    <span className="text-xs text-muted-foreground tabular-nums">
+                    <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                       <span aria-hidden="true">
                         {t('tags_more', { count: contact.tags.length - SHOWN_TAGS })}
                       </span>
@@ -120,10 +152,10 @@ export const ContactTable = (props: {
                 none
               )}
             </TableCell>
-            <TableCell className="text-muted-foreground tabular-nums max-xl:hidden">
+            <TableCell className="truncate text-muted-foreground tabular-nums max-xl:hidden">
               {formatInstant(contact.updatedAt, { locale, timeZone: props.timeZone })}
             </TableCell>
-          </TableRow>
+          </RecordRow>
         ))}
       </TableBody>
     </Table>

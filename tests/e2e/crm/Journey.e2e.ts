@@ -159,6 +159,11 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
   });
 
   await test.step('3. Create a company and a contact at it', async () => {
+    // From the empty list, whose header offers it.
+    await page.goto(`${owner.path}/companies`);
+    await expect(page.getByText('No companies yet')).toBeVisible();
+    await page.getByRole('main').getByRole('link', { name: 'Add company' }).first().click();
+    await expect(page).toHaveURL(`${owner.path}/companies/new`);
     ids.company = await createCompany(page, owner.path, {
       name: COMPANIES.brightwater.name,
       industry: COMPANIES.brightwater.industry,
@@ -539,7 +544,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     await expect(heading(page, '23 companies')).toBeVisible();
 
     // The rep's: three active, and one archived.
-    await page.getByRole('combobox', { name: 'Owner' }).click();
+    await page.getByRole('button', { name: 'Owner', exact: true }).click();
     await page.getByRole('option', { name: PEOPLE.rep }).click();
     await expect(heading(page, '3 companies')).toBeVisible();
     const show = page.getByRole('navigation', { name: 'Show' });

@@ -60,18 +60,20 @@ const listParams = <S extends ListSpec>(query: ListQuery<S>) => ({
   direction: query.direction,
 });
 
-/** The company list's sorts and filters (api.md, Companies). */
+/** The company list's sorts and filters (api.md, Companies), and the page's grouping. */
 export const COMPANY_LIST = {
   sorts: ['NAME', 'CREATED_AT', 'UPDATED_AT'],
   defaultSort: 'NAME',
   filters: { ownerId: 'id', industry: 'text' },
+  groups: ['owner'],
 } as const satisfies ListSpec;
 
-/** The contact list's sorts and filters (api.md, Contacts). */
+/** The contact list's sorts and filters (api.md, Contacts), and the page's grouping. */
 export const CONTACT_LIST = {
   sorts: ['NAME', 'COMPANY', 'CREATED_AT', 'UPDATED_AT'],
   defaultSort: 'NAME',
   filters: { companyId: 'id', ownerId: 'id', sourceId: 'id', tag: 'text' },
+  groups: ['owner'],
 } as const satisfies ListSpec;
 
 /** The lead list's sorts and filters (api.md, Leads): several statuses, `followUpBefore` inclusive. */

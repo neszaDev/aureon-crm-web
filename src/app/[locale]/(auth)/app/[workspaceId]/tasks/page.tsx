@@ -3,10 +3,10 @@ import { PlusIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
+import { FilterRow } from '@/components/crm/list/FilterRow';
 import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
 import { ListEmpty } from '@/components/crm/list/ListEmpty';
 import { ListPager } from '@/components/crm/list/ListPager';
-import { ListToolbar } from '@/components/crm/list/ListToolbar';
 import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
 import { SearchBox } from '@/components/crm/list/SearchBox';
 import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
@@ -144,7 +144,7 @@ export default async function TasksPage(props: TasksPageProps) {
       </nav>
 
       {view !== 'mine' && (
-        <ListToolbar label={t('toolbar_label')}>
+        <FilterRow label={t('toolbar_label')}>
           <SearchBox
             id="tasks-search"
             label={t('search_label')}
@@ -161,7 +161,7 @@ export default async function TasksPage(props: TasksPageProps) {
             path={path}
             query={query}
           />
-        </ListToolbar>
+        </FilterRow>
       )}
 
       {page ? (

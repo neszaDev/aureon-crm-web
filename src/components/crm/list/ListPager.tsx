@@ -28,13 +28,13 @@ export const ListPager = (props: { path: string; query: ListQuery; total: number
   return (
     <nav
       aria-label={t('pager_label')}
-      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-rule px-4 py-3 sm:px-5"
+      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-rule px-3 py-2"
     >
-      <p className="text-sm text-muted-foreground tabular-nums">
+      <p className="text-[0.8125rem] text-muted-foreground tabular-nums">
         {t('range', { from, to, total: props.total })}
       </p>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+        <label className="flex items-center gap-2 text-[0.8125rem] text-muted-foreground">
           {t('page_size')}
           <NativeSelect
             size="sm"

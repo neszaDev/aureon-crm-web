@@ -1,7 +1,7 @@
 import type { Locator } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
-import { COMPANIES, CONTACTS, DEALS, MORE_COMPANIES, PEOPLE } from '../mockData';
+import { COMPANIES, CONTACTS, DEALS, MORE_COMPANIES, MORE_LEADS, PEOPLE } from '../mockData';
 import {
   addMember,
   apiCall,
@@ -265,14 +265,17 @@ test.describe('Records', () => {
     await page.getByRole('link', { name: 'Clear filters' }).click();
     await expect(page.getByRole('heading', { name: '25 companies' })).toBeVisible();
 
-    // The industry filter takes a name.
+    // The industry chip takes a name, and shows it once on.
+    await page.getByRole('button', { name: 'Industry', exact: true }).click();
     await page.getByRole('searchbox', { name: 'Industry' }).fill('Retail');
     await expect(page.getByRole('heading', { name: '4 companies' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Industry: Retail' })).toBeVisible();
     await page.getByRole('searchbox', { name: 'Industry' }).fill('');
     await expect(page.getByRole('heading', { name: '25 companies' })).toBeVisible();
+    await page.keyboard.press('Escape');
 
     // Mia's three, then none once she has left, and the three show as unassigned.
-    await page.getByRole('combobox', { name: 'Owner' }).click();
+    await page.getByRole('button', { name: 'Owner', exact: true }).click();
     await page.getByRole('option', { name: PEOPLE.manager }).click();
     await expect(page.getByRole('heading', { name: '3 companies' })).toBeVisible();
     await apiSend(
@@ -282,9 +285,9 @@ test.describe('Records', () => {
       `/workspaces/${owner.workspaceId}/members/${mia.userId}`,
     );
     await page.reload();
-    await expect(page.getByRole('combobox', { name: 'Owner' })).toHaveText('Former member');
+    await expect(page.getByRole('button', { name: 'Owner: Former member' })).toBeVisible();
     await expect(page.getByText('Nothing matches', { exact: true })).toBeVisible();
-    await page.getByRole('combobox', { name: 'Owner' }).click();
+    await page.getByRole('button', { name: 'Owner: Former member' }).click();
     await page.getByRole('option', { name: 'Unassigned' }).click();
     await expect(page.getByRole('heading', { name: '3 companies' })).toBeVisible();
     await expect(page.getByRole('row', { name: COMPANIES.zephyr.name })).toContainText(
@@ -303,7 +306,7 @@ test.describe('Records', () => {
     await signIn(page, { email: owner.email, password: PASSWORD });
 
     await page.goto(
-      `${owner.path}/companies?page=-1&size=1000&sort=DROP&direction=up&ownerId=abc&industry=`,
+      `${owner.path}/companies?page=-1&size=1000&sort=DROP&direction=up&ownerId=abc&industry=&group=stage`,
     );
 
     await expect(page.getByRole('heading', { name: '3 companies' })).toBeVisible();
@@ -315,6 +318,8 @@ test.describe('Records', () => {
     await expect(page.getByRole('row').nth(1)).toContainText(MORE_COMPANIES[0]);
     await expect(page.getByText('1–3 of 3')).toBeVisible();
     await expect(page.getByLabel('Per page')).toHaveValue('20');
+    // Ungrouped: the menu says so.
+    await expect(page.getByRole('button', { name: 'Group', exact: true })).toBeVisible();
   });
 
   test('offers a reset, not an error page, when the backend refuses the search', async ({
@@ -375,8 +380,221 @@ test.describe('Records', () => {
     ).toBeVisible();
   });
 
+  test('groups companies by owner, 50 rows a group with a link to all, and adds one inline', async ({
+    page,
+    request,
+  }) => {
+    test.setTimeout(60_000);
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const mia = await addMember(request, owner, 'MANAGER', PEOPLE.manager);
+    // 51 of the owner's: one more than a group shows.
+    await Promise.all(
+      Array.from(
+        { length: 51 },
+        async (_, index) =>
+          await seed(request, owner, 'companies', {
+            name: `${MORE_COMPANIES[index % MORE_COMPANIES.length]} ${Math.floor(index / MORE_COMPANIES.length) + 1}`,
+          }),
+      ),
+    );
+    await seed(request, mia, 'companies', { name: COMPANIES.kestrel.name });
+    // Nobody's: saved without an owner.
+    const zephyr = await seed(request, owner, 'companies', { name: COMPANIES.zephyr.name });
+    await apiCall(
+      request,
+      owner,
+      'PUT',
+      `/workspaces/${owner.workspaceId}/companies/${zephyr.id}`,
+      {
+        name: COMPANIES.zephyr.name,
+        version: zephyr.version,
+      },
+    );
+    await signIn(page, { email: owner.email, password: PASSWORD });
+
+    await page.goto(`${owner.path}/companies?sort=UPDATED_AT`);
+    await waitForHydration(page.getByRole('button', { name: 'Group', exact: true }));
+    await page.getByRole('button', { name: 'Group', exact: true }).click();
+    await page.getByRole('menuitemradio', { name: 'Owner' }).click();
+    await expect(page).toHaveURL(/group=owner/u);
+    // The sort holds within the groups.
+    await expect(page).toHaveURL(/sort=UPDATED_AT/u);
+    await expect(page.getByRole('heading', { name: '53 companies' })).toBeVisible();
+
+    const group = (name: string) =>
+      page
+        .locator('[data-slot=collapsible]')
+        .filter({ has: page.getByRole('heading', { level: 3, name }) });
+    // The caller first: 50 of their 51, the API's total in the heading, and a link to all.
+    const mine = page.getByRole('button', { name: `${PEOPLE.owner} 51 companies` });
+    await expect(mine).toHaveAttribute('aria-expanded', 'true');
+    await expect(group(PEOPLE.owner).getByRole('row')).toHaveCount(51);
+    await expect(group(PEOPLE.manager).getByRole('row')).toHaveCount(2);
+    await expect(
+      group('Unassigned').getByRole('row', { name: COMPANIES.zephyr.name }),
+    ).toBeVisible();
+    // A new company is always someone's: Unassigned has no row to add one.
+    await expect(group('Unassigned').getByRole('textbox')).toHaveCount(0);
+
+    // A group folds away, and opens again.
+    const mias = page.getByRole('button', { name: `${PEOPLE.manager} 1 company` });
+    await mias.click();
+    await expect(mias).toHaveAttribute('aria-expanded', 'false');
+    await expect(group(PEOPLE.manager).getByRole('row')).toHaveCount(0);
+    await mias.click();
+    await expect(group(PEOPLE.manager).getByRole('row')).toHaveCount(2);
+
+    // Added from Mia's group: hers, with the list refreshed (no row before the server says so).
+    const add = page.getByRole('textbox', { name: `Add company owned by ${PEOPLE.manager}` });
+    await add.press('Enter');
+    await expect(page.getByText('Type a name, then press Enter.')).toBeVisible();
+    await add.fill(COMPANIES.brightwater.name);
+    await add.press('Enter');
+    await expect(page.getByRole('button', { name: `${PEOPLE.manager} 2 companies` })).toBeVisible();
+    await expect(
+      group(PEOPLE.manager).getByRole('row', { name: COMPANIES.brightwater.name }),
+    ).toContainText(PEOPLE.manager);
+    await expect(add).toHaveValue('');
+    await expectNoA11yViolations(page);
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expectNoA11yViolations(page);
+    await page.emulateMedia({ colorScheme: 'light' });
+
+    // "View all" is the owner's whole list, ungrouped.
+    await group(PEOPLE.owner).getByRole('link', { name: 'View all 51' }).click();
+    await expect(page).toHaveURL(new RegExp(`ownerId=${owner.userId}`, 'u'));
+    await expect(page).not.toHaveURL(/group=/u);
+    await expect(page.getByRole('heading', { name: '51 companies' })).toBeVisible();
+    await expect(page.getByText('1–20 of 51')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Me', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  test('archives a company from its row menu, and restores it from the archive', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request);
+    await seed(request, owner, 'companies', { name: COMPANIES.fernhill.name });
+    await seed(request, owner, 'companies', { name: COMPANIES.maple.name });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+
+    await page.goto(`${owner.path}/companies`);
+    const menu = page.getByRole('button', { name: `Actions for ${COMPANIES.fernhill.name}` });
+    await waitForHydration(menu);
+    await menu.click();
+    await page.getByRole('menuitem', { name: 'Archive' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Archive' }).click();
+    await expect(page.getByText(`${COMPANIES.fernhill.name} archived`)).toBeVisible();
+    await expect(page.getByRole('heading', { name: '1 company' })).toBeVisible();
+    await expect(page.getByRole('row', { name: COMPANIES.fernhill.name })).toHaveCount(0);
+
+    await page
+      .getByRole('navigation', { name: 'Show' })
+      .getByRole('link', { name: 'Archived' })
+      .click();
+    await expect(page.getByRole('heading', { name: '1 archived company' })).toBeVisible();
+    // The archive adds nothing.
+    await expect(page.getByRole('textbox', { name: 'Add company' })).toHaveCount(0);
+    await page.getByRole('button', { name: `Actions for ${COMPANIES.fernhill.name}` }).click();
+    await page.getByRole('menuitem', { name: 'Restore' }).click();
+    await expect(page.getByText(`${COMPANIES.fernhill.name} restored`)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'No archived companies' })).toBeVisible();
+  });
+
+  test('filters contacts by company, groups them by owner, and adds one there, filled in', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const mia = await addMember(request, owner, 'MANAGER', PEOPLE.manager);
+    const brightwater = await seed(request, owner, 'companies', {
+      name: COMPANIES.brightwater.name,
+    });
+    const kestrel = await seed(request, owner, 'companies', { name: COMPANIES.kestrel.name });
+    await Promise.all([
+      seed(request, owner, 'contacts', {
+        ...CONTACTS.buyer,
+        companyId: brightwater.id,
+        tags: ['vip'],
+      }),
+      seed(request, mia, 'contacts', { ...MORE_LEADS[0], companyId: brightwater.id }),
+      seed(request, owner, 'contacts', { ...MORE_LEADS[1], companyId: kestrel.id, tags: ['vip'] }),
+    ]);
+    await signIn(page, { email: owner.email, password: PASSWORD });
+
+    await page.goto(`${owner.path}/contacts`);
+    await expect(page.getByRole('heading', { name: '3 contacts' })).toBeVisible();
+    // The tag chip lists the workspace's tags.
+    await waitForHydration(page.getByRole('button', { name: 'Tag', exact: true }));
+    await page.getByRole('button', { name: 'Tag', exact: true }).click();
+    await page.getByRole('option', { name: 'vip' }).click();
+    await expect(page.getByRole('heading', { name: '2 contacts' })).toBeVisible();
+    await page.getByRole('link', { name: 'Clear the Tag filter' }).click();
+    await expect(page.getByRole('heading', { name: '3 contacts' })).toBeVisible();
+
+    // The company chip holds the record picker.
+    await page.getByRole('button', { name: 'Company', exact: true }).click();
+    await page.getByRole('combobox', { name: 'Company' }).click();
+    await page.getByRole('option', { name: COMPANIES.brightwater.name }).click();
+    await expect(page).toHaveURL(new RegExp(`companyId=${brightwater.id}`, 'u'));
+    await expect(page.getByRole('heading', { name: '2 contacts' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(
+      page.getByRole('button', { name: `Company: ${COMPANIES.brightwater.name}` }),
+    ).toBeVisible();
+
+    await page.getByRole('button', { name: 'Group', exact: true }).click();
+    await page.getByRole('menuitemradio', { name: 'Owner' }).click();
+    await expect(page.getByRole('button', { name: `${PEOPLE.owner} 1 contact` })).toBeVisible();
+    await expect(page.getByRole('button', { name: `${PEOPLE.manager} 1 contact` })).toBeVisible();
+    await expectNoA11yViolations(page);
+
+    // Mia's group adds a contact of hers at the company the list is filtered by.
+    await page.getByRole('link', { name: `Add contact owned by ${PEOPLE.manager}` }).click();
+    await expect(page).toHaveURL(
+      `${owner.path}/contacts/new?companyId=${brightwater.id}&ownerId=${mia.userId}`,
+    );
+    await expect(page.getByRole('combobox', { name: 'Company' })).toHaveText(
+      COMPANIES.brightwater.name,
+    );
+    await expect(page.getByRole('combobox', { name: 'Owner' })).toContainText(PEOPLE.manager);
+  });
+
   test.describe('on a phone', () => {
     test.use({ viewport: { width: 390, height: 640 } });
+
+    test('keeps the search and moves the filters into a sheet', async ({ page, request }) => {
+      const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+      const mia = await addMember(request, owner, 'MANAGER', PEOPLE.manager);
+      await seed(request, owner, 'companies', { name: COMPANIES.fernhill.name });
+      await seed(request, mia, 'companies', { name: COMPANIES.maple.name });
+      await signIn(page, { email: owner.email, password: PASSWORD });
+
+      await page.goto(`${owner.path}/companies`);
+      await expect(page.getByRole('searchbox', { name: 'Search' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Group', exact: true })).toBeHidden();
+      const filters = page.getByRole('button', { name: 'Filters', exact: true });
+      await waitForHydration(filters);
+      await filters.click();
+      const sheet = page.getByRole('dialog', { name: 'Filters' });
+      await expect(sheet.getByRole('button', { name: 'Owner', exact: true })).toBeVisible();
+      await expectNoA11yViolations(page);
+
+      await sheet.getByRole('button', { name: 'Me', exact: true }).click();
+      await expect(page).toHaveURL(new RegExp(`ownerId=${owner.userId}`, 'u'));
+      // The sheet stays for the next filter, and the button counts the one on.
+      await expect(sheet.getByRole('button', { name: 'Me', exact: true })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+      await sheet.getByRole('button', { name: 'Close' }).click();
+      await expect(page.getByRole('heading', { name: '1 company' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Filters 1 filter on' })).toBeVisible();
+      await expectNoSidewaysScroll(page, `${owner.path}/companies?group=owner`);
+    });
 
     test('scrolls the Unqualify and Convert dialogs to their buttons', async ({
       page,

@@ -22,6 +22,8 @@ const TYPING_PAUSE_MS = 300;
  * @param props.path The list's path.
  * @param props.query The current list query.
  * @param props.className Extra classes, such as `basis-full` for a row of its own.
+ * @param props.hideLabel Whether the label is for assistive technology only (a toolbar's search,
+ *   whose placeholder says what it searches).
  * @returns The labelled search field.
  */
 export const SearchBox = (props: {
@@ -32,6 +34,7 @@ export const SearchBox = (props: {
   path: string;
   query: ListQuery;
   className?: string;
+  hideLabel?: boolean;
 }) => {
   const router = useRouter();
   const current = props.query.params[props.param];
@@ -58,7 +61,9 @@ export const SearchBox = (props: {
 
   return (
     <div className={cn('flex min-w-48 flex-1 basis-56 flex-col gap-2', props.className)}>
-      <Label htmlFor={props.id}>{props.label}</Label>
+      <Label htmlFor={props.id} className={props.hideLabel ? 'sr-only' : undefined}>
+        {props.label}
+      </Label>
       <div className="relative">
         <SearchIcon
           aria-hidden="true"
@@ -72,7 +77,7 @@ export const SearchBox = (props: {
           maxLength={200}
           placeholder={props.placeholder}
           value={text}
-          className="pl-9"
+          className="pl-9 text-ellipsis"
           onChange={(event) => {
             const input = event.currentTarget;
             setText(input.value);
