@@ -62,6 +62,35 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
       window.location.replace(window.location.href);
     }
   }, [fullPage]);
+  // The panel's node, once its portal has drawn it.
+  const [node, setNode] = useState<HTMLDivElement | null>(null);
+  // A record's name takes the focus once it is drawn whenever the focus was lost meanwhile: the
+  // link to another record goes with the record it was on, and a record still loading leaves the
+  // focus on the panel itself. Until the viewer does something in the panel.
+  useEffect(() => {
+    const take = () => {
+      const lost = document.activeElement === document.body || document.activeElement === node;
+      if (node && lost) {
+        node.querySelector<HTMLElement>(`#${kind}-heading`)?.focus();
+      }
+    };
+    const observer = new MutationObserver(take);
+    const stop = () => {
+      observer.disconnect();
+    };
+    if (node) {
+      observer.observe(node, { childList: true, subtree: true });
+      node.addEventListener('pointerdown', stop, { once: true });
+      node.addEventListener('keydown', stop, { once: true });
+      take();
+    }
+
+    return () => {
+      stop();
+      node?.removeEventListener('pointerdown', stop);
+      node?.removeEventListener('keydown', stop);
+    };
+  }, [node, shown, kind]);
 
   const close = () => {
     if (closing) {
@@ -89,6 +118,7 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
       }}
     >
       <SheetContent
+        ref={setNode}
         side="right"
         showCloseButton={false}
         closeLabel={t('close')}
@@ -105,9 +135,10 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
             (target.querySelector<HTMLElement>(`#${kind}-heading`) ?? target).focus();
           }
         }}
-        // A form in the panel takes Escape first (the activity composer closes on it).
+        // What takes Escape itself (`onEscape`: the activity composer closes on it) has it first;
+        // in any other form it closes the panel.
         onEscapeKeyDown={(event) => {
-          if (event.target instanceof Element && event.target.closest('form')) {
+          if (event.target instanceof Element && event.target.closest('[data-escape]')) {
             leaveEscapeToForm(event);
           }
         }}

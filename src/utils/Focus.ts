@@ -27,11 +27,15 @@ export const leaveEscapeToForm = (event: KeyboardEvent) => {
  * inside (a calendar popover) took the key first (a record panel around it only lets it by,
  * `leaveEscapeToForm`), or it ends an input method's composition (the candidates close, not the
  * form). For a form that closes like its Cancel button; a listener on the element rather than a
- * `keydown` prop, which a form can't carry for the accessibility lint.
+ * `keydown` prop, which a form can't carry for the accessibility lint. The element is marked
+ * (`data-escape`), so a record panel around it knows the key is the element's.
  * @param handler Called on Escape.
  * @returns The ref callback, which removes its listener when the element goes.
  */
 export const onEscape = (handler: () => void) => (node: HTMLElement | null) => {
+  if (node) {
+    node.dataset.escape = '';
+  }
   const listen = (event: KeyboardEvent) => {
     if (
       event.key === 'Escape' &&

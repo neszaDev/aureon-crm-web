@@ -1,7 +1,13 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { createWorkspace, expectHome, expectNoA11yViolations, invite } from './crm/helpers';
-import { PASSWORD, signUp, uniqueEmail } from './helpers';
+import {
+  createWorkspace,
+  expectHome,
+  expectNoA11yViolations,
+  invite,
+  seedWorkspace,
+} from './crm/helpers';
+import { PASSWORD, signIn, signUp, uniqueEmail } from './helpers';
 import { TEAMS } from './mockData';
 
 /**
@@ -109,6 +115,23 @@ test.describe('Workspaces', () => {
     await expect(notFound).toBeVisible();
     await page.getByRole('link', { name: 'Go to your workspaces' }).click();
     await expect(page).toHaveURL(/\/app$/u);
+  });
+
+  test("says a mistyped page in a member's workspace is a page not found, in the shell", async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request);
+    await signIn(page, { email: owner.email, password: PASSWORD });
+
+    const answer = await page.goto(`${owner.path}/no-such-page`);
+
+    expect(answer?.status()).toBe(404);
+    await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Workspace navigation' })).toBeVisible();
+    await expectNoA11yViolations(page);
+    await page.getByRole('link', { name: 'Back to home' }).click();
+    await expectHome(page, TEAMS.default.name);
   });
 
   test('shows the pipeline read-only to an invited manager', async ({ page, request }) => {

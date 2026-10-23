@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 /**
  * The record header's "Log activity": opens the composer at the top of the record's activity
  * (its own button there, `data-log-activity`), which takes the focus and scrolls into view; when
- * the composer is open already, its Subject takes the focus.
+ * the composer is open already, its Subject takes the focus. Only while the record is one column:
+ * from 1024 px the activity's own button is beside the facts.
  * @returns The button.
  */
 export const LogActivityButton = () => {
@@ -16,6 +17,8 @@ export const LogActivityButton = () => {
   return (
     <Button
       variant="outline"
+      // From 1024 px the activity sits beside the facts with its own button in view.
+      className="lg:hidden"
       onClick={(event) => {
         const record = event.currentTarget.closest('[data-record]');
         const opener = record?.querySelector<HTMLElement>('[data-log-activity]');

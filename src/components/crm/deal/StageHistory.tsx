@@ -33,11 +33,12 @@ export const StageHistory = (props: { history: Change[]; timeZone: string }) => 
       ) : (
         <ol>
           {props.history.map((change) => (
+            // The move on the left; who and when on the right, a long name wrapping there.
             <li
               key={`${change.changedAt}-${change.toStage.id ?? change.toStage.name}`}
-              className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-rule px-5 py-3"
+              className="flex items-start gap-4 border-t border-rule px-5 py-3 text-sm"
             >
-              <span className="flex min-w-0 flex-1 basis-56 flex-wrap items-center gap-x-2 font-medium break-words">
+              <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 font-medium break-words">
                 {change.fromStage ? (
                   <>
                     {stageName(change.fromStage)}
@@ -52,28 +53,28 @@ export const StageHistory = (props: { history: Change[]; timeZone: string }) => 
                   t('created', { stage: stageName(change.toStage) })
                 )}
               </span>
-              <span className="flex items-center gap-2 text-sm">
+              <span className="flex max-w-[50%] flex-col items-end gap-0.5 text-right">
                 {change.changedBy ? (
-                  <>
-                    <PersonAvatar person={change.changedBy} size="sm" />
+                  <span className="flex items-center gap-2">
                     <span className="[overflow-wrap:anywhere]">
                       {change.changedBy.displayName ?? change.changedBy.email}
                     </span>
-                  </>
+                    <PersonAvatar person={change.changedBy} size="sm" />
+                  </span>
                 ) : (
                   <span className="text-muted-foreground">{t('former_member')}</span>
                 )}
+                <time
+                  dateTime={change.changedAt}
+                  className="text-[0.8125rem] text-muted-foreground tabular-nums"
+                >
+                  {formatInstant(change.changedAt, {
+                    locale,
+                    timeZone: props.timeZone,
+                    withTime: true,
+                  })}
+                </time>
               </span>
-              <time
-                dateTime={change.changedAt}
-                className="text-sm text-muted-foreground tabular-nums"
-              >
-                {formatInstant(change.changedAt, {
-                  locale,
-                  timeZone: props.timeZone,
-                  withTime: true,
-                })}
-              </time>
             </li>
           ))}
         </ol>

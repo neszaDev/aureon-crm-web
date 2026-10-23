@@ -46,12 +46,18 @@ test.describe('Record panel', () => {
       .filter({ has: page.locator('h3', { hasText: 'Contacted' }) });
     await expect(contacted).toContainText(AMARA);
 
-    // The header's "Log activity" opens the composer; Escape there closes the composer only.
-    await panel.getByRole('button', { name: 'Log activity' }).first().click();
+    // While the record is one column, the header's "Log activity" opens the composer (from
+    // 1024 px the activity's own button is in view instead); Escape there closes the composer only.
+    const logButtons = panel.getByRole('button', { name: 'Log activity' });
+    await expect(logButtons).toHaveCount(1);
+    await page.setViewportSize({ width: 900, height: 720 });
+    await expect(logButtons).toHaveCount(2);
+    await logButtons.first().click();
     await expect(panel.getByLabel('Subject')).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(panel.getByLabel('Subject')).toBeHidden();
     await expect(panel).toBeVisible();
+    await page.setViewportSize({ width: 1280, height: 720 });
     const activity = panel.getByRole('region', { name: /^Activity/u });
     await activity.getByRole('button', { name: 'Log activity' }).click();
     await panel.getByLabel('Subject').fill('Intro call');
@@ -107,6 +113,42 @@ test.describe('Record panel', () => {
     await expect(page).toHaveURL(`${owner.path}/contacts/${buyer.id}`);
     await expect(page.getByRole('heading', { level: 1, name: BUYER })).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
+
+  test('opens a record from another in the panel, its name focused, and × goes back one at a time', async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const company = await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
+    const buyer = await seed(request, owner, 'contacts', {
+      ...CONTACTS.buyer,
+      companyId: company.id,
+    });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(`${owner.path}/companies`);
+    const row = page.getByRole('link', { name: COMPANIES.brightwater.name });
+    await waitForHydration(row);
+    await row.click();
+    const first = page.getByRole('dialog', { name: COMPANIES.brightwater.name });
+    await expect(first.getByRole('heading', { level: 1 })).toBeFocused();
+
+    // The company's contact: the link that had the focus went with the company, and the
+    // contact's name has it.
+    await first.getByRole('link', { name: BUYER }).click();
+    await expect(page).toHaveURL(`${owner.path}/contacts/${buyer.id}`);
+    const second = page.getByRole('dialog', { name: BUYER });
+    await expect(second.getByRole('heading', { level: 1, name: BUYER })).toBeFocused();
+
+    // × is back: to the company, then to the list, its row focused.
+    await second.getByRole('button', { name: 'Close' }).click();
+    await expect(page).toHaveURL(`${owner.path}/companies/${company.id}`);
+    await expect(first.getByRole('heading', { level: 1 })).toBeVisible();
+    await first.getByRole('button', { name: 'Close' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page).toHaveURL(`${owner.path}/companies`);
+    await expect(row).toBeFocused();
   });
 
   test('shows an edit made in the panel on the list behind it, and closes from the backdrop', async ({

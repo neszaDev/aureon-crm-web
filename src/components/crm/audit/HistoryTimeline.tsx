@@ -2,7 +2,7 @@
 
 import { ChevronDownIcon, InboxIcon, LoaderCircleIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState, useTransition } from 'react';
+import { useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { loadHistory } from '@/actions/crm/AuditActions';
 import { AuditEventItem } from '@/components/crm/audit/AuditEventItem';
@@ -43,6 +43,8 @@ export const HistoryTimeline = (props: {
   total: number;
 }) => {
   const t = useTranslations('RecordHistory');
+  // Its own id: a record panel over a record's full page shows a history too.
+  const headingId = useId();
   // What "Show older" added.
   const [older, setOlder] = useState<AuditEvent[]>([]);
   const [isLoading, startLoading] = useTransition();
@@ -97,9 +99,9 @@ export const HistoryTimeline = (props: {
   };
 
   return (
-    <section aria-labelledby="history-heading">
+    <section aria-labelledby={headingId}>
       <h2
-        id="history-heading"
+        id={headingId}
         tabIndex={-1}
         // Once the last page is in, the button that had the focus is gone.
         ref={older.length > 0 && done ? focusOnMount : undefined}
