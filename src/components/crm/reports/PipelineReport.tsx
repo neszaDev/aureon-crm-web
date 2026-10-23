@@ -20,7 +20,7 @@ import { formatMoney } from '@/libs/crm/Format';
  * nothing is added across currencies, owners or stages.
  * @param props Component props.
  * @param props.report The pipeline report.
- * @returns The two panels.
+ * @returns The two panels, side by side from 1024 px.
  */
 export const PipelineReport = (props: { report: components['schemas']['PipelineReport'] }) => {
   const t = useTranslations('PipelineReport');
@@ -28,7 +28,7 @@ export const PipelineReport = (props: { report: components['schemas']['PipelineR
   const number = new Intl.NumberFormat(locale);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="grid items-start gap-5 lg:grid-cols-2">
       <StageDistribution stages={props.report.byStage} collapsible />
       <Panel id="owners" title={t('owners_title')}>
         {props.report.byOwner.length > 0 ? (

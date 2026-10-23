@@ -294,15 +294,15 @@
     "group_deals": "Affaires"
   },
   "RemindersBell": {
-    "label": "Rappels : {count}",
-    "title": "Rappels",
-    "overdue": "Tâches en retard",
-    "due_soon": "À faire dans les 24 prochaines heures",
-    "follow_up": "Prospects à relancer",
+    "label": "Boîte de réception : {count}",
+    "title": "Boîte de réception",
+    "group_overdue": "En retard",
     "empty": "Rien ne demande votre attention.",
     "all_tasks": "Toutes les tâches",
     "in_app": "Les rappels s'affichent ici, dans l'application.",
-    "error": "Impossible de charger vos rappels. Rechargez la page pour réessayer."
+    "error": "Impossible de charger vos rappels. Rechargez la page pour réessayer.",
+    "group_today": "Aujourd'hui",
+    "group_upcoming": "À venir"
   },
   "AccountMenu": {
     "label": "Votre compte",
@@ -313,8 +313,13 @@
   },
   "CrmDashboard": {
     "title": "Tableau de bord",
-    "description": "Votre travail, le pipeline et ce qui a changé dans {name}.",
     "loading": "Chargement du tableau de bord"
+  },
+  "CrmHome": {
+    "title": "Accueil",
+    "greeting": "{part, select, morning {Bonjour} afternoon {Bonjour} other {Bonsoir}}, {name}",
+    "description": "Votre travail dans {name} aujourd'hui.",
+    "loading": "Chargement de votre accueil"
   },
   "QuickActions": {
     "label": "Créer une fiche",
@@ -340,18 +345,20 @@
     "empty_text": "Les affaires dont vous êtes propriétaire et qui sont en cours apparaissent ici.",
     "new": "Nouvelle affaire"
   },
-  "FollowUps": {
-    "title": "À relancer",
-    "overdue": "Mes tâches en retard",
-    "upcoming": "Mes tâches à venir",
-    "leads": "Mes prospects à relancer",
-    "count": "{count, number}",
-    "count_capped": "{count, number}+",
-    "overdue_none": "Aucune tâche en retard.",
-    "upcoming_none": "Rien à venir.",
-    "leads_none": "Aucun prospect à relancer.",
-    "leads_unavailable": "Les relances de prospects n'ont pas pu être chargées.",
-    "all_tasks": "Toutes mes tâches"
+  "MyWork": {
+    "title": "Mon travail",
+    "all_tasks": "Toutes mes tâches",
+    "due": "Échéance",
+    "section_overdue": "En retard",
+    "section_today": "Aujourd'hui",
+    "section_week": "7 prochains jours",
+    "tasks_count": "{count, plural, one {# tâche} other {# tâches}}",
+    "tasks_count_capped": "{count, number} tâches ou plus",
+    "tasks_none": "Rien à faire dans les 7 prochains jours.",
+    "leads": "Prospects à relancer",
+    "leads_count": "{count, plural, one {# prospect} other {# prospects}}",
+    "leads_count_capped": "{count, number} prospects ou plus",
+    "leads_unavailable": "Les relances de prospects n'ont pas pu être chargées."
   },
   "PipelineSummary": {
     "title": "Pipeline en cours",
@@ -394,7 +401,9 @@
   },
   "RecentActivity": {
     "title": "Activité récente",
-    "empty": "Aucune activité saisie pour l'instant."
+    "empty": "Aucune activité saisie pour l'instant.",
+    "former": "Un ancien membre",
+    "on": "Sur"
   },
   "RecentChanges": {
     "title": "Modifications récentes",
@@ -3592,7 +3601,6 @@
   },
   "CrmReports": {
     "title": "Rapports",
-    "description": "Le pipeline, les affaires clôturées, l'entonnoir, l'activité de l'équipe et les relances de {name}.",
     "intro_pipeline": "Les affaires en cours à ce jour.",
     "intro_won-lost": "Les affaires clôturées chaque mois de la période, comptées selon leur étape actuelle.",
     "intro_funnel": "Les affaires créées sur la période et jusqu'où elles sont allées.",

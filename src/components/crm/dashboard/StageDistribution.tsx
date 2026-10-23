@@ -16,13 +16,16 @@ import {
 } from '@/components/ui/table';
 import type { components } from '@/libs/api/schema';
 import { formatMoney } from '@/libs/crm/Format';
+import { stageTone } from '@/libs/crm/StatusColors';
 import { usePrefersReducedMotion } from '@/utils/ReducedMotion';
 
 const BAR_HEIGHT = 36;
 
 /**
  * The open stages in order, each with how many deals it holds and what they are worth: bars of
- * the counts (each with its number at its end), and under them the table of the same figures,
+ * the counts in each stage's colour (`stageTone`), each named by its stage and ending in its
+ * number, so no colour has to read alone (the amber one can't), and under them the table of the
+ * same figures, each stage by its colour's dot,
  * with the totals for each currency on its own line, never added. A stage without deals is
  * listed too. The bars are the table's picture: assistive technology has the table.
  * @param props Component props.
@@ -39,7 +42,12 @@ export const StageDistribution = (props: {
   const locale = useLocale();
   const number = new Intl.NumberFormat(locale);
   const reducedMotion = usePrefersReducedMotion();
-  const config = { count: { label: t('deals'), color: 'var(--chart-2)' } } satisfies ChartConfig;
+  const config = { count: { label: t('deals') } } satisfies ChartConfig;
+  const toneOf = (bucket: components['schemas']['StageBucket']) =>
+    stageTone(
+      props.stages.map((item) => item.stage),
+      bucket.stage.id,
+    );
 
   const table = (
     <Table aria-labelledby="stages-heading">
@@ -63,7 +71,14 @@ export const StageDistribution = (props: {
               scope="row"
               className="px-4 text-sm font-medium whitespace-normal text-foreground sm:px-5"
             >
-              {bucket.stage.name}
+              <span className="flex items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  data-tone={toneOf(bucket)}
+                  className="size-2 shrink-0 rounded-full bg-(--tone)"
+                />
+                {bucket.stage.name}
+              </span>
             </TableHead>
             <TableCell className="text-right tabular-nums">{number.format(bucket.count)}</TableCell>
             <TableCell className="px-4 text-right whitespace-normal tabular-nums sm:px-5">
@@ -99,9 +114,11 @@ export const StageDistribution = (props: {
                 // The table is the equivalent; the chart is hidden from assistive technology, so
                 // nothing in it may take the focus.
                 accessibilityLayer={false}
+                // A bar takes the `fill` of its entry.
                 data={props.stages.map((bucket) => ({
                   name: bucket.stage.name,
                   count: bucket.count,
+                  fill: `var(--status-${toneOf(bucket)})`,
                 }))}
                 layout="vertical"
                 margin={{ top: 0, right: 28, bottom: 0, left: 0 }}
@@ -115,13 +132,7 @@ export const StageDistribution = (props: {
                   axisLine={false}
                 />
                 <XAxis type="number" hide />
-                <Bar
-                  dataKey="count"
-                  fill="var(--color-count)"
-                  radius={3}
-                  barSize={16}
-                  isAnimationActive={!reducedMotion}
-                >
+                <Bar dataKey="count" radius={3} barSize={16} isAnimationActive={!reducedMotion}>
                   <LabelList
                     dataKey="count"
                     position="right"

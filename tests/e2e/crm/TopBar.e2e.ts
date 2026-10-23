@@ -260,20 +260,20 @@ test.describe('Top bar', () => {
 
     // The badge is what the API counts.
     expect(await count()).toBe(3);
-    const bell = (n: number) => page.getByRole('button', { name: `Reminders: ${n}` });
+    const bell = (n: number) => page.getByRole('button', { name: `Inbox: ${n}` });
     await expect(bell(3)).toBeVisible();
     await waitForHydration(bell(3));
     await bell(3).click();
-    const popover = page.getByRole('dialog', { name: 'Reminders' });
-    await expect(popover.getByRole('region', { name: /Overdue tasks/u })).toContainText(
-      'Send the proposal',
-    );
-    await expect(popover.getByRole('region', { name: /Overdue tasks/u })).toContainText('Overdue');
-    await expect(popover.getByRole('region', { name: /Due in the next 24 hours/u })).toContainText(
+    const popover = page.getByRole('dialog', { name: 'Inbox' });
+    // By when they are due: the overdue task and yesterday's follow-up, then the call within the
+    // next 24 hours (today or tomorrow in Paris, by the time the test runs).
+    const overdue = popover.getByRole('region', { name: /^Overdue/u });
+    await expect(overdue).toContainText('Send the proposal');
+    await expect(overdue.getByRole('link', { name: 'Noa Park' })).toBeVisible();
+    // The group's pill, and each late item says so in words.
+    await expect(overdue.getByText('Overdue', { exact: true })).toHaveCount(3);
+    await expect(popover.getByRole('region', { name: /^(?:Today|Upcoming)/u })).toContainText(
       TASKS.call,
-    );
-    await expect(popover.getByRole('region', { name: /Leads to follow up/u })).toContainText(
-      'Noa Park',
     );
     await expect(popover).not.toContainText('Plan the quarter');
     await expect(popover.getByText('Reminders appear here in the app.')).toBeVisible();
@@ -318,17 +318,17 @@ test.describe('Top bar', () => {
     await overdue('Send the proposal');
     await signIn(page, { email: owner.email, password: PASSWORD });
     await page.goto(owner.path);
-    await expect(page.getByRole('button', { name: 'Reminders: 1' })).toBeVisible();
-    await waitForHydration(page.getByRole('button', { name: 'Reminders: 1' }));
+    await expect(page.getByRole('button', { name: 'Inbox: 1' })).toBeVisible();
+    await waitForHydration(page.getByRole('button', { name: 'Inbox: 1' }));
 
     // Someone assigns a second task: the layout isn't rendered again by a click on a link.
     await overdue(TASKS.call);
     await page.getByRole('link', { name: 'Companies' }).first().click();
     await expect(page).toHaveURL(/\/companies$/u);
 
-    await expect(page.getByRole('button', { name: 'Reminders: 2' })).toBeVisible();
-    await page.getByRole('button', { name: 'Reminders: 2' }).click();
-    await expect(page.getByRole('dialog', { name: 'Reminders' })).toContainText(TASKS.call);
+    await expect(page.getByRole('button', { name: 'Inbox: 2' })).toBeVisible();
+    await page.getByRole('button', { name: 'Inbox: 2' }).click();
+    await expect(page.getByRole('dialog', { name: 'Inbox' })).toContainText(TASKS.call);
   });
 
   test('says there is nothing to do, with no badge, when there are no reminders', async ({
@@ -339,7 +339,7 @@ test.describe('Top bar', () => {
     await signIn(page, { email: owner.email, password: PASSWORD });
     await page.goto(owner.path);
 
-    const bell = page.getByRole('button', { name: 'Reminders: 0' });
+    const bell = page.getByRole('button', { name: 'Inbox: 0' });
     await expect(bell).toBeVisible();
     await expect(bell).toHaveText('');
     await bell.click();
@@ -407,9 +407,9 @@ test.describe('Top bar', () => {
       ).toBe(true);
       await page.keyboard.press('Escape');
 
-      await page.getByRole('button', { name: /^เตือนความจำ: 1/u }).click();
-      await expect(page.getByRole('dialog', { name: 'เตือนความจำ' })).toContainText(name);
-      const box = await page.getByRole('dialog', { name: 'เตือนความจำ' }).boundingBox();
+      await page.getByRole('button', { name: /^กล่องข้อความ: 1/u }).click();
+      await expect(page.getByRole('dialog', { name: 'กล่องข้อความ' })).toContainText(name);
+      const box = await page.getByRole('dialog', { name: 'กล่องข้อความ' }).boundingBox();
       expect(box).not.toBeNull();
       expect((box?.x ?? -1) >= 0 && (box?.x ?? 0) + (box?.width ?? 0) <= 390).toBe(true);
     });

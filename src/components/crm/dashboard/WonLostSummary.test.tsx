@@ -44,18 +44,13 @@ describe(WonLostSummary, () => {
     await expect.element(page.getByRole('definition').nth(1)).toHaveTextContent('2 deals');
   });
 
-  it('says that only these follow the period, and holds the picker it is given', async () => {
-    await summary({
-      won: { count: 0, totals: [] },
-      lost: { count: 0 },
-      action: <button type="button">Pick</button>,
-    });
+  it('says that only these follow the period', async () => {
+    await summary({ won: { count: 0, totals: [] }, lost: { count: 0 } });
 
     await expect
       .element(
         page.getByText('Won and lost follow the period; the rest of this page is as of now.'),
       )
       .toBeVisible();
-    await expect.element(page.getByRole('button', { name: 'Pick' })).toBeVisible();
   });
 });

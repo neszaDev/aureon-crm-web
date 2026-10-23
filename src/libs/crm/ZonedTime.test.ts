@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { toInstant, toLocalInput, todayIn } from './ZonedTime';
+import { toInstant, toLocalInput, todayIn, partOfDay } from './ZonedTime';
 
 describe(toInstant, () => {
   it('reads a local time in the given time zone', () => {
@@ -63,5 +63,23 @@ describe(todayIn, () => {
 
     expect(todayIn('Asia/Bangkok')).toBe('2026-10-19');
     expect(todayIn('America/New_York')).toBe('2026-10-18');
+  });
+});
+
+// A time in Bangkok (UTC+7), by its UTC instant.
+const inBangkok = (utc: string) => partOfDay('Asia/Bangkok', new Date(utc));
+
+describe(partOfDay, () => {
+  it("names the part of the day by the zone's own clock", () => {
+    // 04:59 and 05:00, 11:59 and 12:00 in Bangkok.
+    expect(inBangkok('2026-10-18T21:59:00Z')).toBe('evening');
+    expect(inBangkok('2026-10-18T22:00:00Z')).toBe('morning');
+    expect(inBangkok('2026-10-19T04:59:00Z')).toBe('morning');
+    expect(inBangkok('2026-10-19T05:00:00Z')).toBe('afternoon');
+  });
+
+  it('turns to evening at 6 PM', () => {
+    expect(inBangkok('2026-10-19T10:59:00Z')).toBe('afternoon');
+    expect(inBangkok('2026-10-19T11:00:00Z')).toBe('evening');
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { listCount, reminderBadge, reminderCount, slimReminders } from './Reminders';
+import { inboxGroups, reminderBadge, reminderCount, slimReminders } from './Reminders';
 
 // Only how many of each there are matters to the count.
 const some = (count: number) => Array.from({ length: count }, (_, id) => ({ id }));
@@ -17,17 +17,6 @@ describe(reminderCount, () => {
 
   it('caps nothing: three full lists are sixty', () => {
     expect(reminderCount(remindersOf(20, 20, 20))).toBe(60);
-  });
-});
-
-describe(listCount, () => {
-  it('shows the number of a list that holds fewer than the API sends', () => {
-    expect(listCount(0)).toBe('0');
-    expect(listCount(19)).toBe('19');
-  });
-
-  it('shows "20+" for a list that holds as many as the API sends, which may be a cut', () => {
-    expect(listCount(20)).toBe('20+');
   });
 });
 
@@ -100,5 +89,61 @@ describe(slimReminders, () => {
       ],
       today: '2026-10-20',
     });
+  });
+});
+
+const bellTask = (id: number, dueAt: string, overdue = false) => ({
+  id,
+  title: `Task ${id}`,
+  version: 1,
+  dueAt,
+  overdue,
+});
+const bellLead = (id: number, followUpDate: string) => ({
+  id,
+  firstName: 'Noa',
+  lastName: `Park ${id}`,
+  followUpDate,
+  status: 'CONTACTED' as const,
+});
+// Each group as its key, its items (T for a task, L for a lead) and whether it may be a cut.
+const ids = (groups: ReturnType<typeof inboxGroups>) =>
+  groups.map((group) => [
+    group.key,
+    group.items.map((item) => ('task' in item ? `T${item.task.id}` : `L${item.lead.id}`)),
+    group.capped,
+  ]);
+
+describe(inboxGroups, () => {
+  // Read on 19 October in Bangkok, whose midnight is 17:00 UTC.
+  const reminders = {
+    overdueTasks: [bellTask(1, '2026-10-17T02:00:00Z', true)],
+    dueSoonTasks: [bellTask(2, '2026-10-19T16:59:00Z'), bellTask(3, '2026-10-19T17:00:00Z')],
+    followUpLeads: [bellLead(4, '2026-10-18'), bellLead(5, '2026-10-19')],
+    today: '2026-10-19',
+  };
+
+  it("parts the reminders at the workspace's midnight, the late leads with the overdue tasks", () => {
+    expect(ids(inboxGroups(reminders, 'Asia/Bangkok'))).toStrictEqual([
+      ['overdue', ['T1', 'L4'], false],
+      ['today', ['T2', 'L5'], false],
+      ['upcoming', ['T3'], false],
+    ]);
+  });
+
+  it("parts them at another zone's midnight", () => {
+    // Midnight in Paris (UTC+2 in October) is 22:00 UTC: both tasks are due today there.
+    expect(ids(inboxGroups(reminders, 'Europe/Paris'))[1]).toStrictEqual([
+      'today',
+      ['T2', 'T3', 'L5'],
+      false,
+    ]);
+  });
+
+  it('marks a group fed by a list at the cap as a possible cut', () => {
+    const full = Array.from({ length: 20 }, (_, id) => bellTask(100 + id, '2026-10-19T03:00:00Z'));
+    const groups = inboxGroups({ ...reminders, dueSoonTasks: full }, 'Asia/Bangkok');
+
+    expect(groups.map((group) => group.capped)).toStrictEqual([false, true, true]);
   });
 });

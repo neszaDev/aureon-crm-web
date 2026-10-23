@@ -294,15 +294,15 @@
     "group_deals": "Deals"
   },
   "RemindersBell": {
-    "label": "Reminders: {count}",
-    "title": "Reminders",
-    "overdue": "Overdue tasks",
-    "due_soon": "Due in the next 24 hours",
-    "follow_up": "Leads to follow up",
+    "label": "Inbox: {count}",
+    "title": "Inbox",
+    "group_overdue": "Overdue",
     "empty": "Nothing needs your attention.",
     "all_tasks": "All tasks",
     "in_app": "Reminders appear here in the app.",
-    "error": "Couldn't load your reminders. Reload the page to try again."
+    "error": "Couldn't load your reminders. Reload the page to try again.",
+    "group_today": "Today",
+    "group_upcoming": "Upcoming"
   },
   "AccountMenu": {
     "label": "Your account",
@@ -313,8 +313,13 @@
   },
   "CrmDashboard": {
     "title": "Dashboard",
-    "description": "Your work, the pipeline and what changed in {name}.",
     "loading": "Loading the dashboard"
+  },
+  "CrmHome": {
+    "title": "Home",
+    "greeting": "{part, select, morning {Good morning} afternoon {Good afternoon} other {Good evening}}, {name}",
+    "description": "Your work in {name} today.",
+    "loading": "Loading your home"
   },
   "QuickActions": {
     "label": "Create a record",
@@ -340,18 +345,20 @@
     "empty_text": "Deals you own that are still open appear here.",
     "new": "New deal"
   },
-  "FollowUps": {
-    "title": "Follow-ups",
-    "overdue": "My overdue tasks",
-    "upcoming": "My upcoming tasks",
-    "leads": "My leads to follow up",
-    "count": "{count, number}",
-    "count_capped": "{count, number}+",
-    "overdue_none": "No overdue tasks.",
-    "upcoming_none": "Nothing coming up.",
-    "leads_none": "No leads to follow up.",
-    "leads_unavailable": "Lead follow-ups could not be loaded.",
-    "all_tasks": "All my tasks"
+  "MyWork": {
+    "title": "My work",
+    "all_tasks": "All my tasks",
+    "due": "Due",
+    "section_overdue": "Overdue",
+    "section_today": "Today",
+    "section_week": "Next 7 days",
+    "tasks_count": "{count, plural, one {# task} other {# tasks}}",
+    "tasks_count_capped": "{count, number} tasks or more",
+    "tasks_none": "Nothing due in the next 7 days.",
+    "leads": "Leads to follow up",
+    "leads_count": "{count, plural, one {# lead} other {# leads}}",
+    "leads_count_capped": "{count, number} leads or more",
+    "leads_unavailable": "Lead follow-ups could not be loaded."
   },
   "PipelineSummary": {
     "title": "Open pipeline",
@@ -394,7 +401,9 @@
   },
   "RecentActivity": {
     "title": "Recent activity",
-    "empty": "No activity logged yet."
+    "empty": "No activity logged yet.",
+    "former": "A former member",
+    "on": "On"
   },
   "RecentChanges": {
     "title": "Recent changes",
@@ -3592,7 +3601,6 @@
   },
   "CrmReports": {
     "title": "Reports",
-    "description": "The pipeline, closed deals, funnel, team activity and follow-ups of {name}.",
     "intro_pipeline": "The open deals as of now.",
     "intro_won-lost": "Deals closed in each month of the period, counted by the stage they are in now.",
     "intro_funnel": "Deals created in the period, and how far they got.",

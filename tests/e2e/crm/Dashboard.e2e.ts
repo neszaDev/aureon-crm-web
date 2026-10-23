@@ -39,6 +39,9 @@ const LINKS = ['New company', 'New contact', 'New lead', 'New deal'];
 
 const totals = (page: Page) => page.getByRole('region', { name: 'Workspace totals' });
 
+// Insights › Dashboard: the workspace's pulse; the workspace's own path is the caller's home.
+const dashboard = (path: string, query = '') => `${path}/dashboard${query}`;
+
 /**
  * Through the API: moves a deal to the first stage of a kind, or the named open one.
  * @param request Playwright API client.
@@ -63,18 +66,29 @@ const closeDeal = async (
   });
 };
 
-test.describe('Dashboard', () => {
+test.describe('Home and dashboard', () => {
   test('starts an empty workspace with its first records', async ({ page, request }) => {
     const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     await signIn(page, { email: owner.email, password: PASSWORD });
-    await page.goto(owner.path);
+    await page.goto(dashboard(owner.path));
 
     await expect(page.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible();
     await expect(
       page.getByRole('heading', { name: 'Start with your first records' }),
     ).toBeVisible();
-    // No counts, panels or seals: nothing has been signed yet.
+    // No counts or panels: there is nothing to count yet.
     await expect(totals(page)).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /^Period: /u })).toHaveCount(0);
+
+    // Home too starts with them, in place of the caller's work.
+    await page.goto(owner.path);
+    await expect(
+      page.getByRole('heading', { level: 1, name: /^Good (?:morning|afternoon|evening), /u }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Start with your first records' }),
+    ).toBeVisible();
+    await expect(page.getByRole('region', { name: 'My work' })).toHaveCount(0);
     await Promise.all(
       LINKS.map(async (name) => {
         await expect(page.getByRole('link', { name })).toBeVisible();
@@ -98,7 +112,12 @@ test.describe('Dashboard', () => {
       firstName: CONTACTS.buyer.firstName,
       lastName: CONTACTS.buyer.lastName,
     });
-    await seed(request, owner, 'leads', { firstName: 'Noa', lastName: 'Park' });
+    // Its follow-up day passed yesterday: a lead to follow up, on Home.
+    await seed(request, owner, 'leads', {
+      firstName: 'Noa',
+      lastName: 'Park',
+      followUpDate: new Date(Date.now() - 24 * HOUR).toISOString().slice(0, 10),
+    });
     await seed(request, owner, 'leads', { firstName: 'Kit', lastName: 'Lee' });
     await seed(request, owner, 'deals', {
       name: DEALS.tablets,
@@ -131,7 +150,7 @@ test.describe('Dashboard', () => {
     await signIn(page, { email: owner.email, password: PASSWORD });
     const api = await dashboardOf(request, owner);
 
-    await page.goto(owner.path);
+    await page.goto(dashboard(owner.path));
 
     // Every figure is the API's.
     const { counts } = api;
@@ -201,13 +220,20 @@ test.describe('Dashboard', () => {
     await expect(
       page.getByRole('button', { name: `Period: ${periodLabel(api.period)}` }),
     ).toBeVisible();
-    await expect(page.getByRole('region', { name: 'My deals' })).toContainText(DEALS.tablets);
-    await expect(page.getByRole('region', { name: 'Follow-ups' })).toContainText(
-      'Send the proposal',
-    );
     await expect(page.getByRole('region', { name: 'Recent changes' })).toContainText(
       `${PEOPLE.owner} created`,
     );
+    await expectNoA11yViolations(page);
+
+    // What is the caller's is on Home: their deals, their overdue task and their lead to follow up.
+    await page
+      .getByRole('navigation', { name: 'Quick access' })
+      .getByRole('link', { name: 'Home' })
+      .click();
+    await expect(page.getByRole('region', { name: 'My deals' })).toContainText(DEALS.tablets);
+    const work = page.getByRole('region', { name: 'My work' });
+    await expect(work).toContainText('Send the proposal');
+    await expect(work.getByRole('link', { name: 'Noa Park' })).toBeVisible();
     await expectNoA11yViolations(page);
   });
 
@@ -226,7 +252,7 @@ test.describe('Dashboard', () => {
       await signIn(page, { email: owner.email, password: PASSWORD });
       const defaults = await dashboardOf(request, owner);
 
-      await page.goto(`${owner.path}${query}`);
+      await page.goto(dashboard(owner.path, query));
 
       await expect(page.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible();
       await expect(
@@ -243,7 +269,9 @@ test.describe('Dashboard', () => {
     const asked = await dashboardOf(request, owner, '?from=2026-01-01&to=2026-01-31');
     expect(asked.period).toStrictEqual({ from: '2026-01-01', to: '2026-01-31' });
 
+    // At the dashboard's own address, and at the workspace's, where it was before Home.
     await page.goto(`${owner.path}?from=2026-01-01&to=2026-01-31`);
+    await expect(page).toHaveURL(dashboard(owner.path, '?from=2026-01-01&to=2026-01-31'));
 
     await expect(
       page.getByRole('button', { name: `Period: ${periodLabel(asked.period)}` }),
@@ -261,7 +289,7 @@ test.describe('Dashboard', () => {
     await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
     await signIn(page, { email: owner.email, password: PASSWORD });
     const defaults = await dashboardOf(request, owner);
-    await page.goto(owner.path);
+    await page.goto(dashboard(owner.path));
     const trigger = (period: { from: string; to: string }) =>
       page.getByRole('button', { name: `Period: ${periodLabel(period)}` });
     await expect(trigger(defaults.period)).toBeVisible();
@@ -276,7 +304,7 @@ test.describe('Dashboard', () => {
     await page.getByRole('link', { name: 'Last 7 days' }).click();
 
     // The URL names the days, and the label is what the API answered for them.
-    await expect(page).toHaveURL(/\?from=\d{4}-\d{2}-\d{2}&to=\d{4}-\d{2}-\d{2}$/u);
+    await expect(page).toHaveURL(/\/dashboard\?from=\d{4}-\d{2}-\d{2}&to=\d{4}-\d{2}-\d{2}$/u);
     const url = new URL(page.url());
     const asked = await dashboardOf(
       request,
@@ -307,10 +335,7 @@ test.describe('Dashboard', () => {
     await expect(trigger(range)).toBeVisible();
   });
 
-  test('completes an overdue task from the follow-ups, and the counts follow', async ({
-    page,
-    request,
-  }) => {
+  test('completes an overdue task from Home, and the counts follow', async ({ page, request }) => {
     const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
     const overdue = async (title: string) =>
@@ -322,26 +347,38 @@ test.describe('Dashboard', () => {
     await overdue('Send the proposal');
     await overdue(TASKS.call);
     await signIn(page, { email: owner.email, password: PASSWORD });
-    await page.goto(owner.path);
+    await page.goto(dashboard(owner.path));
     await expect(totals(page).getByRole('link', { name: 'All overdue tasks 2' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Reminders: 2' })).toBeVisible();
+    await page
+      .getByRole('navigation', { name: 'Quick access' })
+      .getByRole('link', { name: 'Home' })
+      .click();
+    const work = page.getByRole('region', { name: 'My work' });
+    await expect(work.getByRole('heading', { name: /^Due: Overdue/u })).toContainText('2 tasks');
+    await expect(page.getByRole('button', { name: 'Inbox: 2' })).toBeVisible();
     const checkbox = page.getByRole('checkbox', { name: 'Complete Send the proposal' });
     await waitForHydration(checkbox);
 
     await checkbox.click();
 
-    // The task leaves the list, the strip counts one, the bell one, and the API agrees.
+    // The task leaves the list, the section and the inbox count one, the API agrees, and so does
+    // the dashboard's line.
     await expect(page.getByRole('checkbox', { name: 'Complete Send the proposal' })).toHaveCount(0);
-    await expect(totals(page).getByRole('link', { name: 'All overdue tasks 1' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Reminders: 1' })).toBeVisible();
+    await expect(work.getByRole('heading', { name: /^Due: Overdue/u })).toContainText('1 task');
+    await expect(page.getByRole('button', { name: 'Inbox: 1' })).toBeVisible();
     const after = await dashboardOf(request, owner);
     expect(after.counts.overdueTasks).toBe(1);
+    await page
+      .getByRole('navigation', { name: 'Workspace navigation' })
+      .getByRole('link', { name: 'Dashboard' })
+      .click();
+    await expect(totals(page).getByRole('link', { name: 'All overdue tasks 1' })).toBeVisible();
     await page.getByRole('link', { name: 'Companies' }).first().click();
     await expect(page).toHaveURL(/\/companies$/u);
-    await expect(page.getByRole('button', { name: 'Reminders: 1' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Inbox: 1' })).toBeVisible();
   });
 
-  test('shows a rep only their own deals and follow-ups, with the create actions', async ({
+  test('shows a rep only their own deals and tasks, with the create actions', async ({
     page,
     request,
   }) => {
@@ -368,32 +405,38 @@ test.describe('Dashboard', () => {
     // The status track names Riley, who created and so entered the deal's first stage.
     const track = mine.getByRole('list', { name: 'Stage 1 of 4: Qualification' });
     await expect(track.getByText(`moved here by ${PEOPLE.rep} on `)).toBeVisible();
-    const followUps = page.getByRole('region', { name: 'Follow-ups' });
-    await expect(followUps).toContainText('Riley task');
-    await expect(followUps).not.toContainText('Olivia task');
+    const work = page.getByRole('region', { name: 'My work' });
+    await expect(work).toContainText('Riley task');
+    await expect(work).not.toContainText('Olivia task');
+    await expectNoA11yViolations(page);
+    // Everyone may create all five, from the rail's "+ New".
+    const rail = page.getByRole('navigation', { name: 'Quick access' });
+    await waitForHydration(rail.getByRole('button', { name: 'New', exact: true }));
+    await rail.getByRole('button', { name: 'New', exact: true }).click();
+    await expect(page.getByRole('menu', { name: 'New' }).getByRole('menuitem')).toHaveText([
+      'Company',
+      'Contact',
+      'Lead',
+      'Deal',
+      'Task',
+    ]);
+    await page.keyboard.press('Escape');
     // The counts are the workspace's: two deals.
+    await page.goto(dashboard(riley.path));
     await expect(totals(page).getByRole('link', { name: 'Open deals 2' })).toBeVisible();
-    // Everyone may create all five.
-    const actions = page.getByRole('group', { name: 'Create a record' });
-    await Promise.all(
-      LINKS.map(async (name) => {
-        await expect(actions.getByRole('link', { name })).toBeVisible();
-      }),
-    );
-    await expect(actions.getByRole('button', { name: 'New task' })).toBeVisible();
     await expectNoA11yViolations(page);
   });
 
-  test('keeps its title whole beside the create actions at 1024 px', async ({ page, request }) => {
+  test('keeps its title whole beside the period chip at 1024 px', async ({ page, request }) => {
     await page.setViewportSize({ width: 1024, height: 800 });
     const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
     await seed(request, owner, 'companies', { name: COMPANIES.kestrel.name });
     await signIn(page, { email: owner.email, password: PASSWORD });
-    await page.goto(owner.path);
+    await page.goto(dashboard(owner.path));
 
     const title = page.getByRole('heading', { level: 1, name: 'Dashboard' });
-    await expect(page.getByRole('group', { name: 'Create a record' })).toBeVisible();
-    // One line: the actions wrap rather than squeeze the word apart.
+    await expect(page.getByRole('button', { name: /^Period: /u })).toBeVisible();
+    // One line: the chip wraps rather than squeeze the word apart.
     const { height, lineHeight } = await title.evaluate((h1) => ({
       height: h1.getBoundingClientRect().height,
       lineHeight: Number(getComputedStyle(h1).lineHeight.replace(/px$/u, '')),
@@ -413,7 +456,7 @@ test.describe('Dashboard', () => {
     });
     await seed(request, owner, 'deals', { name: 'Renewal', amount: '100.00' });
     await signIn(page, { email: owner.email, password: PASSWORD });
-    await page.goto(owner.path);
+    await page.goto(dashboard(owner.path));
 
     // The chart's stage names, as drawn: a name the axis can't hold is broken into lines (one
     // tspan each), or runs past the chart's left edge.
@@ -455,7 +498,11 @@ test.describe('Dashboard', () => {
       });
       await signIn(page, { email: owner.email, password: PASSWORD });
 
-      await expectNoSidewaysScroll(page, owner.path.replace('/app/', '/th/app/'));
+      const home = owner.path.replace('/app/', '/th/app/');
+      await expectNoSidewaysScroll(page, home);
+      await expect(page.getByRole('heading', { level: 1, name: /^สวัสดี/u })).toBeVisible();
+      await expectNoA11yViolations(page);
+      await expectNoSidewaysScroll(page, dashboard(home));
       await expect(page.getByRole('heading', { level: 1, name: 'แดชบอร์ด' })).toBeVisible();
       await expectNoA11yViolations(page);
     });

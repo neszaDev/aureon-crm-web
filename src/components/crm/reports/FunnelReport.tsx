@@ -1,4 +1,3 @@
-import { cn } from 'cn';
 import { TriangleAlertIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Panel } from '@/components/crm/dashboard/Panel';
@@ -12,10 +11,12 @@ import {
 } from '@/components/ui/table';
 import type { components } from '@/libs/api/schema';
 import { formatDate } from '@/libs/crm/Format';
+import { stageTone } from '@/libs/crm/StatusColors';
 
 /**
  * The deals created in the period and, for each stage (the open ones in order, then Won), how many
- * of them reached it or a later one, as "reached of created" with a bar under the same figure.
+ * of them reached it or a later one, as "reached of created" with a bar of the same figure in the
+ * stage's colour (`stageTone`), beside the stage's name and figure so no colour reads alone.
  * When the workspace's stage history starts after the period does (or has not started), the
  * counts of the deals created before it are low for want of records, so a caution says so, with
  * the day the history starts; a funnel is never shown as if the history were complete. The bars
@@ -78,10 +79,11 @@ export const FunnelReport = (props: { report: components['schemas']['FunnelRepor
                         className="h-3 min-w-16 flex-1 rounded-sm bg-muted"
                       >
                         <span
-                          className={cn(
-                            'block h-full rounded-sm',
-                            step.stage.kind === 'WON' ? 'bg-chart-3' : 'bg-chart-2',
+                          data-tone={stageTone(
+                            stages.map((item) => item.stage),
+                            step.stage.id,
                           )}
+                          className="block h-full rounded-sm bg-(--tone)"
                           style={{ width: `${Math.min(100, (step.reached * 100) / created)}%` }}
                         />
                       </span>

@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { createWorkspace, expectDashboard, expectNoA11yViolations, invite } from './crm/helpers';
+import { createWorkspace, expectHome, expectNoA11yViolations, invite } from './crm/helpers';
 import { PASSWORD, signUp, uniqueEmail } from './helpers';
 import { TEAMS } from './mockData';
 
@@ -28,17 +28,17 @@ test.describe('Workspaces', () => {
 
     await createWorkspace(page, TEAMS.default.name);
 
-    // The home is the dashboard; a workspace with nothing in it starts with its first records.
-    await expectDashboard(page, TEAMS.default.name);
+    // It opens on its home; a workspace with nothing in it starts with its first records.
+    await expectHome(page, TEAMS.default.name);
     await expect(
       page.getByRole('heading', { name: 'Start with your first records' }),
     ).toBeVisible();
     const nav = page.getByRole('navigation', { name: 'Workspace navigation' });
-    await expect(nav.getByRole('link', { name: 'Dashboard' })).toHaveAttribute(
-      'aria-current',
-      'page',
-    );
-    await expect(page).toHaveTitle('Dashboard');
+    await expect(
+      page.getByRole('navigation', { name: 'Quick access' }).getByRole('link', { name: 'Home' }),
+    ).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Dashboard' })).not.toHaveAttribute('aria-current');
+    await expect(page).toHaveTitle('Home');
     await expectNoA11yViolations(page);
 
     // With one workspace, the CRM home opens it.
@@ -80,7 +80,7 @@ test.describe('Workspaces', () => {
     await page.getByRole('menuitem', { name: 'Create workspace' }).click();
     await expect(page.getByRole('heading', { name: 'Create a workspace' })).toBeVisible();
     await createWorkspace(page, TEAMS.other.name);
-    await expectDashboard(page, TEAMS.other.name);
+    await expectHome(page, TEAMS.other.name);
 
     await page
       .getByRole('button', {
@@ -88,7 +88,7 @@ test.describe('Workspaces', () => {
       })
       .click();
     await page.getByRole('menuitem', { name: TEAMS.default.name }).click();
-    await expectDashboard(page, TEAMS.default.name);
+    await expectHome(page, TEAMS.default.name);
 
     await page.goto('/app');
     await expect(page.getByRole('heading', { name: 'Your workspaces' })).toBeVisible();
@@ -175,7 +175,7 @@ test.describe('Workspaces', () => {
     await page.getByRole('button', { name: 'เปิดเมนู' }).click();
     const nav = page.getByRole('navigation', { name: 'เมนูพื้นที่ทำงาน' });
     await expect(nav.getByRole('link', { name: 'แดชบอร์ด' })).toBeVisible();
-    await expect(page).toHaveTitle('แดชบอร์ด');
+    await expect(page).toHaveTitle('หน้าแรก');
     await expectNoA11yViolations(page);
   });
 });

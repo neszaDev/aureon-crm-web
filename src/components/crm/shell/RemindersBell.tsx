@@ -16,20 +16,24 @@ import {
 import { loadReminders } from '@/actions/crm/ReminderActions';
 import { completeTask } from '@/actions/crm/TaskActions';
 import { LeadFollowUp, isFollowUpOverdue } from '@/components/crm/lead/LeadFollowUp';
+import { SpaceChip } from '@/components/crm/shell/CrmNav';
 import { ShellTip } from '@/components/crm/shell/ShellTip';
+import { PILL } from '@/components/crm/StatusPill';
 import { TaskDue } from '@/components/crm/task/TaskRow';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@/components/ui/popover';
 import { fullName, recordNumber } from '@/libs/crm/Format';
 import type { BellReminders, BellTask } from '@/libs/crm/Reminders';
-import { listCount, reminderBadge, reminderCount } from '@/libs/crm/Reminders';
+import { inboxGroups, reminderBadge, reminderCount } from '@/libs/crm/Reminders';
+import type { StatusTone } from '@/libs/crm/StatusColors';
 import { Link, usePathname } from '@/libs/I18nNavigation';
 import { toastActionFailure } from '@/utils/ActionToast';
 import { useSettle } from '@/utils/SettleAction';
 
-const ITEM = 'flex items-start gap-3 px-3 py-2';
-const TITLE = 'text-[0.9375rem] font-medium break-words text-foreground';
+const ITEM = 'flex items-start gap-3 px-3 py-1.5';
+const TITLE = 'text-sm font-medium break-words text-foreground no-underline hover:underline';
+const META = 'flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground';
 
 /**
  * A task to do: a box that completes it (ticked at once, unticked with a toast if refused), its
@@ -102,7 +106,7 @@ const ReminderTask = (props: {
         >
           {props.task.title}
         </Link>
-        <span className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] text-muted-foreground">
+        <span className={META}>
           <span className="font-mono tabular-nums">{recordNumber('task', props.task.id)}</span>
           <TaskDue
             dueAt={props.task.dueAt}
@@ -116,27 +120,33 @@ const ReminderTask = (props: {
 };
 
 /**
- * A group of reminders under its heading and count; nothing when it is empty.
+ * A group of the inbox under its heading, the pill of its colour and its count ("20+" when it may
+ * be a cut); nothing when it is empty.
  * @param props Component props.
  * @param props.heading The group's name.
- * @param props.length How many it holds.
+ * @param props.tone Its colour.
+ * @param props.count How many it holds, as shown.
  * @param props.children Its items.
  * @returns The group.
  */
-const Group = (props: { heading: string; length: number; children: React.ReactNode }) => {
+const Group = (props: {
+  heading: string;
+  tone: StatusTone;
+  count: string;
+  children: React.ReactNode;
+}) => {
   const id = useId();
-  if (props.length === 0) {
-    return null;
-  }
 
   return (
     <section aria-labelledby={id}>
-      <h3
-        id={id}
-        className="flex items-baseline justify-between gap-2 px-3 pt-3 pb-1 text-xs font-semibold text-muted-foreground"
-      >
-        {props.heading}
-        <span className="font-normal tabular-nums">{listCount(props.length)}</span>
+      <h3 id={id} className="flex items-center gap-2 px-3 pt-3 pb-1">
+        <span data-tone={props.tone} className={PILL}>
+          <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-(--tone)" />
+          {props.heading}
+        </span>
+        <span className="text-xs font-medium text-muted-foreground tabular-nums">
+          {props.count}
+        </span>
       </h3>
       <ul>{props.children}</ul>
     </section>
@@ -144,9 +154,12 @@ const Group = (props: { heading: string; length: number; children: React.ReactNo
 };
 
 /**
- * The reminders (the rail's inbox): a badge with how many you have (hidden at none) and a popover
- * with them, in three groups: your overdue tasks, your tasks due in the next 24 hours, and the
- * leads whose follow-up is due. Reminders live in the app only; the popover says so. The layout
+ * The inbox on the rail: a badge with how many reminders you have (hidden at none) and a popover
+ * with them by when they are due (`inboxGroups`): overdue (your overdue tasks and the leads whose
+ * follow-up day has passed), today (your tasks due before the workspace's midnight and today's
+ * follow-ups) and upcoming (the rest of the next 24 hours), each group headed by a pill of its
+ * colour. A task is done from its box; every link opens its record in the side panel. Reminders
+ * live in the app only; the popover says so. The layout
  * reads them when it renders (a full load, and after every action that refreshes the page, so
  * completing a task, here or on any page, updates the count), which a soft navigation doesn't
  * repeat. So the bell asks again itself on each navigation and when the tab comes back into view,
@@ -221,17 +234,6 @@ export const RemindersBell = (props: {
   const close = () => {
     setOpen(false);
   };
-  const taskItems = (tasks: BellTask[]) =>
-    tasks.map((task) => (
-      <ReminderTask
-        key={task.id}
-        task={task}
-        workspaceId={props.workspaceId}
-        timeZone={props.timeZone}
-        headingId={headingId}
-        onNavigate={close}
-      />
-    ));
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -275,36 +277,55 @@ export const RemindersBell = (props: {
         <div className="max-h-[min(24rem,60dvh)] overflow-y-auto pb-2">
           {reminders ? (
             <>
-              <Group heading={t('overdue')} length={reminders.overdueTasks.length}>
-                {taskItems(reminders.overdueTasks)}
-              </Group>
-              <Group heading={t('due_soon')} length={reminders.dueSoonTasks.length}>
-                {taskItems(reminders.dueSoonTasks)}
-              </Group>
-              <Group heading={t('follow_up')} length={reminders.followUpLeads.length}>
-                {reminders.followUpLeads.map((lead) => (
-                  <li key={lead.id} className={cn(ITEM, 'pl-10')}>
-                    <span className="flex min-w-0 flex-col">
-                      <Link
-                        href={`/app/${props.workspaceId}/leads/${lead.id}`}
-                        className={TITLE}
-                        onNavigate={close}
-                      >
-                        {fullName(lead)}
-                      </Link>
-                      <span className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] text-muted-foreground">
-                        <span className="font-mono tabular-nums">
-                          {recordNumber('lead', lead.id)}
-                        </span>
-                        <LeadFollowUp
-                          date={lead.followUpDate}
-                          overdue={isFollowUpOverdue(lead, reminders.today)}
-                        />
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </Group>
+              {inboxGroups(reminders, props.timeZone).map(
+                (group) =>
+                  group.items.length > 0 && (
+                    <Group
+                      key={group.key}
+                      heading={t(`group_${group.key}`)}
+                      tone={group.tone}
+                      count={`${group.items.length}${group.capped ? '+' : ''}`}
+                    >
+                      {group.items.map((item) =>
+                        'task' in item ? (
+                          <ReminderTask
+                            key={`task-${item.task.id}`}
+                            task={item.task}
+                            workspaceId={props.workspaceId}
+                            timeZone={props.timeZone}
+                            headingId={headingId}
+                            onNavigate={close}
+                          />
+                        ) : (
+                          <li key={`lead-${item.lead.id}`} className={ITEM}>
+                            {/* Where a task has its box: the leads' chip, which tells them apart. */}
+                            <span className="-mx-0.5 mt-0.5">
+                              <SpaceChip space="leads" />
+                            </span>
+                            <span className="flex min-w-0 flex-col">
+                              <Link
+                                href={`/app/${props.workspaceId}/leads/${item.lead.id}`}
+                                className={TITLE}
+                                onNavigate={close}
+                              >
+                                {fullName(item.lead)}
+                              </Link>
+                              <span className={META}>
+                                <span className="font-mono tabular-nums">
+                                  {recordNumber('lead', item.lead.id)}
+                                </span>
+                                <LeadFollowUp
+                                  date={item.lead.followUpDate}
+                                  overdue={isFollowUpOverdue(item.lead, reminders.today)}
+                                />
+                              </span>
+                            </span>
+                          </li>
+                        ),
+                      )}
+                    </Group>
+                  ),
+              )}
               {count === 0 && (
                 <p className="px-3 py-6 text-center text-muted-foreground">{t('empty')}</p>
               )}

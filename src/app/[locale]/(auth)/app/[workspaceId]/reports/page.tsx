@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
+import { ListHeader } from '@/components/crm/list/ListHeader';
 import { PeriodPicker } from '@/components/crm/PeriodPicker';
 import { ActivityReport } from '@/components/crm/reports/ActivityReport';
 import { FollowUpReport } from '@/components/crm/reports/FollowUpReport';
@@ -9,7 +10,6 @@ import { FunnelReport } from '@/components/crm/reports/FunnelReport';
 import { PipelineReport } from '@/components/crm/reports/PipelineReport';
 import { ReportTabs } from '@/components/crm/reports/ReportTabs';
 import { WonLostReport } from '@/components/crm/reports/WonLostReport';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import {
   getActivityReport,
   getFollowUpReport,
@@ -110,11 +110,13 @@ export default async function ReportsPage(props: ReportsPageProps) {
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title')} description={t('description', { name: workspace.name })} />
-      <ReportTabs current={tab} path={path} period={query} />
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <p className="max-w-[65ch] text-muted-foreground">{t(`intro_${tab}`)}</p>
+    <div className="mx-auto flex max-w-6xl flex-col gap-4">
+      <ListHeader
+        title={t('title')}
+        tabs={<ReportTabs current={tab} path={path} period={query} />}
+      />
+      {/* The toolbar: the period's chip, for a report of a period, and what the report counts. */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         {hasPeriod(tab) && period && (
           <PeriodPicker
             period={period}
@@ -124,6 +126,7 @@ export default async function ReportsPage(props: ReportsPageProps) {
             timeZone={workspace.timezone}
           />
         )}
+        <p className="max-w-[65ch] text-[0.8125rem] text-muted-foreground">{t(`intro_${tab}`)}</p>
       </div>
       {body ?? <InvalidFilterNotice resetHref={`${path}?tab=${tab}`} />}
     </div>

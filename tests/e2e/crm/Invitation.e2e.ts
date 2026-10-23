@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signOut, signUp, uniqueEmail } from '../helpers';
 import { PEOPLE, TEAMS } from '../mockData';
-import { BACKEND_URL, expectDashboard, expectNoA11yViolations, invite } from './helpers';
+import { BACKEND_URL, expectHome, expectNoA11yViolations, invite } from './helpers';
 
 // The backend's database, for the one state the API can't produce: an expired link. Defaults to
 // the API repository's local Compose project.
@@ -75,7 +75,7 @@ test.describe('Invitation links', () => {
     await page.getByRole('button', { name: 'Create account and join' }).click();
 
     await expect(page).toHaveURL(`${baseURL}/app/${workspaceId}`);
-    await expectDashboard(page, TEAMS.default.name);
+    await expectHome(page, TEAMS.default.name);
     await expectRole(page, 'Manager');
     const cookies = await context.cookies();
     expect(cookies.find((cookie) => cookie.name === 'access_token')?.httpOnly).toBe(true);

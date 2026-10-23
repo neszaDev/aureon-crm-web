@@ -193,8 +193,8 @@ export const TaskRow = (props: {
           <span className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] text-muted-foreground">
             <span className="font-mono tabular-nums">{recordNumber('task', props.task.id)}</span>
             {props.compact && !isOpen && <span>{t(`status_${props.task.status}`)}</span>}
-            {/* A phone's full row has no room for the due column: the due time sits here. */}
-            {!props.compact && <span className="sm:hidden">{due}</span>}
+            {/* A phone's row has no room for the due column: the due time sits here. */}
+            <span className="sm:hidden">{due}</span>
             {props.compact && (
               <LinkedRecords
                 record={props.task}
@@ -215,9 +215,7 @@ export const TaskRow = (props: {
           />
         </TableCell>
       )}
-      <TableCell className={cn('whitespace-normal', !props.compact && 'max-sm:hidden')}>
-        {due}
-      </TableCell>
+      <TableCell className="whitespace-normal max-sm:hidden">{due}</TableCell>
       {!props.compact && (
         <>
           <TableCell className="max-md:hidden">

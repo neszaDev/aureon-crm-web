@@ -1,4 +1,5 @@
 import type { components } from '@/libs/api/schema';
+import { toInstant } from '@/libs/crm/ZonedTime';
 
 type Schemas = components['schemas'];
 type Lists = { [List in keyof Schemas['RemindersResponse']]: readonly unknown[] };
@@ -10,7 +11,7 @@ export type BellTask = Pick<
 >;
 
 /** What the bell shows of a lead: its name, and what tells whether its follow-up is late. */
-type BellLead = Pick<
+export type BellLead = Pick<
   Schemas['LeadResponse'],
   'id' | 'firstName' | 'lastName' | 'followUpDate' | 'status'
 >;
@@ -43,14 +44,6 @@ const listsOf = (reminders: Lists) => [
  */
 export const reminderCount = (reminders: Lists) =>
   listsOf(reminders).reduce((total, list) => total + list.length, 0);
-
-/**
- * A list's count as shown. A list of 20 may be a cut of a longer one, so it reads "20+".
- * @param length How many the list holds.
- * @returns The count, e.g. `3` or `20+`.
- */
-export const listCount = (length: number) =>
-  length >= REMINDER_CAP ? `${REMINDER_CAP}+` : String(length);
 
 /**
  * The bell's badge: the count, with a plus when a list is at the cap, since the count is then a
@@ -93,3 +86,61 @@ export const slimReminders = (
   })),
   today,
 });
+
+/** The inbox's groups, in order, each with its colour (the task lists' due colours). */
+const INBOX_GROUPS = [
+  { key: 'overdue', tone: 'red' },
+  { key: 'today', tone: 'amber' },
+  { key: 'upcoming', tone: 'blue' },
+] as const;
+
+/** One thing in the inbox: a task to do, or a lead to follow up. */
+export type InboxItem = { task: BellTask } | { lead: BellLead };
+
+const DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * The reminders by when they are due, as the inbox groups them, on the workspace's day they were
+ * read: overdue (the overdue tasks, then the leads whose follow-up day has passed), today (the
+ * tasks due before the workspace's midnight, then the leads due today) and upcoming (the rest of
+ * the next 24 hours). A group fed by a list at the API's cap may hold more than it shows.
+ * @param reminders The caller's reminders.
+ * @param timeZone The workspace's time zone, where its midnight falls.
+ * @returns The groups in `INBOX_GROUPS`' order: their items, and whether they may be a cut.
+ */
+export const inboxGroups = (reminders: BellReminders, timeZone: string) => {
+  const next = new Date(Date.parse(`${reminders.today}T00:00:00Z`) + DAY)
+    .toISOString()
+    .slice(0, 10);
+  // A real instant for any real day (a midnight the clocks skip moves forward by the gap).
+  const midnight = toInstant(`${next}T00:00`, timeZone);
+  const tomorrow = midnight ? Date.parse(midnight) : Number.POSITIVE_INFINITY;
+  const isToday = (task: BellTask) => !task.dueAt || Date.parse(task.dueAt) < tomorrow;
+  const isLate = (lead: BellLead) =>
+    lead.followUpDate !== undefined && lead.followUpDate < reminders.today;
+  const cut = (list: readonly unknown[]) => list.length >= REMINDER_CAP;
+  const tasks = (list: BellTask[]) => list.map((task): InboxItem => ({ task }));
+  const leads = (list: BellLead[]) => list.map((lead): InboxItem => ({ lead }));
+  const groups: Record<(typeof INBOX_GROUPS)[number]['key'], [InboxItem[], boolean]> = {
+    overdue: [
+      [...tasks(reminders.overdueTasks), ...leads(reminders.followUpLeads.filter(isLate))],
+      cut(reminders.overdueTasks) || cut(reminders.followUpLeads),
+    ],
+    today: [
+      [
+        ...tasks(reminders.dueSoonTasks.filter(isToday)),
+        ...leads(reminders.followUpLeads.filter((lead) => !isLate(lead))),
+      ],
+      cut(reminders.dueSoonTasks) || cut(reminders.followUpLeads),
+    ],
+    upcoming: [
+      tasks(reminders.dueSoonTasks.filter((task) => !isToday(task))),
+      cut(reminders.dueSoonTasks),
+    ],
+  };
+
+  return INBOX_GROUPS.map((group) => {
+    const [items, capped] = groups[group.key];
+    return { ...group, items, capped };
+  });
+};

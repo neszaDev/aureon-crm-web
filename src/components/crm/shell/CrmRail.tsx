@@ -19,9 +19,9 @@ const RAIL_BUTTON =
   'size-10 rounded-md text-on-rail/75 hover:bg-white/10 hover:text-on-rail focus-visible:ring-on-rail focus-visible:ring-offset-rail aria-expanded:bg-white/10 aria-expanded:text-on-rail sm:size-10 [&_svg:not([class*=size-])]:size-5';
 
 /**
- * The global rail, ink violet, 56 px: the Aureon mark, Home, the reminders (the inbox), the
+ * The global rail, ink violet, 56 px: the Aureon mark, Home, the inbox (your reminders), the
  * record search and "+ New", and your avatar at the foot for the account menu; a tooltip names
- * each. In the phone's drawer the reminders and the search stay in the top bar.
+ * each. In the phone's drawer the inbox and the search stay in the top bar.
  * @param props Component props.
  * @param props.workspace The open workspace.
  * @param props.workspace.id Its id.
@@ -97,7 +97,7 @@ export const CrmRail = (props: {
 };
 
 /**
- * Below 768 px, the rail's reminders and record search in the top bar.
+ * Below 768 px, the rail's inbox and record search in the top bar.
  * @param props Component props.
  * @param props.workspace The open workspace.
  * @param props.workspace.id Its id.

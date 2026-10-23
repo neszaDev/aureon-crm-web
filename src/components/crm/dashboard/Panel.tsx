@@ -1,7 +1,7 @@
 import { cn } from 'cn';
 
 /**
- * A dashboard panel: a hairline paper section with its heading row (the title left, something
+ * A plain panel of the home, the dashboard and the reports: a hairline section with its heading row (the title left, something
  * small such as a count or a picker right) over its content. The heading takes the focus when a
  * row leaves the panel (a task completed out of a list).
  * @param props Component props.
@@ -26,8 +26,12 @@ export const Panel = (props: {
       props.className,
     )}
   >
-    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1.5 px-4 pt-4 pb-3 sm:px-5">
-      <h2 id={`${props.id}-heading`} tabIndex={-1} className="rounded-sm font-semibold">
+    <div className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-4 py-2.5 sm:px-5">
+      <h2
+        id={`${props.id}-heading`}
+        tabIndex={-1}
+        className="rounded-sm text-[0.9375rem] font-semibold"
+      >
         {props.title}
       </h2>
       {props.aside}

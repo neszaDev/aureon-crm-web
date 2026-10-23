@@ -43,20 +43,25 @@ const recent = async (activities: Activity[]) =>
   );
 
 describe(RecentActivity, () => {
-  it('lists the entries as the timeline writes them, read-only, with every record they are on', async () => {
+  it('lists the entries as a feed, read-only, each by its author, with every record it is on', async () => {
     await recent([
       activity(1, 'Site visit', { body: 'Walked the floor' }),
       activity(2, 'Sent the price list', { deal: { id: 9, name: 'Renewal' } }),
+      activity(3, 'Old note', { type: 'NOTE', author: undefined }),
     ]);
 
     await expect.element(page.getByRole('heading', { name: 'Recent activity' })).toBeVisible();
-    await expect.element(page.getByText('Site visit')).toBeVisible();
-    await expect.element(page.getByText('Logged by Riley Rep').first()).toBeVisible();
+    await expect.element(page.getByRole('heading', { name: 'Site visit' })).toBeVisible();
+    await expect.element(page.getByText('Walked the floor')).toBeVisible();
+    // Who logged it, with their avatar, its type and when, in the workspace's time zone.
+    const first = page.getByRole('listitem').first();
+    await expect.element(first).toHaveTextContent(/^RRRiley RepCallOct 18, 2026, 8:00.PM/u);
+    await expect.element(page.getByText('A former member')).toBeVisible();
     // The records are links; nothing is left out, since no record is being viewed.
     await expect
       .element(page.getByRole('link', { name: 'Renewal' }))
       .toHaveAttribute('href', '/app/1/deals/9');
-    expect(page.getByRole('link', { name: 'Acme' }).elements()).toHaveLength(2);
+    expect(page.getByRole('link', { name: 'Acme' }).elements()).toHaveLength(3);
     // The caller may not edit or delete here, even their own entry.
     expect(page.getByRole('button').elements()).toHaveLength(0);
   });

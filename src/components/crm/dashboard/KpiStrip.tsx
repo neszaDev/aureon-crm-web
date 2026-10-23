@@ -18,13 +18,14 @@ const CELLS = [
 ] as const;
 
 /**
- * The workspace's counts as one strip: a small label over a large tabular figure, each cell a
- * link to the list it counts. The figures are the API's, as of now. Overdue tasks, when there
- * are some, come with a warning icon besides the crimson, and the label says what they are.
+ * The workspace's counts as one line of figures, not tiles: each a label and its tabular figure,
+ * a link to the list it counts, the five apart by hairlines and wrapping on a phone. The figures
+ * are the API's, as of now. Overdue tasks, when there are some, come with a warning icon besides
+ * the red, and the label says what they are.
  * @param props Component props.
  * @param props.counts The dashboard's `counts`.
  * @param props.workspaceId The workspace the links stay in.
- * @returns The strip.
+ * @returns The line.
  */
 export const KpiStrip = (props: {
   counts: components['schemas']['Counts'];
@@ -36,27 +37,30 @@ export const KpiStrip = (props: {
 
   return (
     <section aria-label={t('label')}>
-      <ul className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-rule bg-rule sm:grid-cols-5">
+      <ul className="-mx-2 flex flex-wrap items-center gap-x-1 gap-y-0.5">
         {CELLS.map((cell) => {
           const value = props.counts[cell.field];
           const late = cell.field === 'overdueTasks' && value > 0;
 
           return (
-            <li key={cell.key} className="bg-card last:max-sm:col-span-2">
+            <li
+              key={cell.key}
+              className="flex items-center sm:not-first:before:mr-2 sm:not-first:before:ml-1 sm:not-first:before:h-5 sm:not-first:before:w-px sm:not-first:before:bg-rule"
+            >
               <Link
                 href={`/app/${props.workspaceId}${cell.href}`}
-                className="flex h-full flex-col gap-0.5 px-4 py-3.5 no-underline transition-colors duration-150 hover:bg-muted focus-visible:-outline-offset-2 sm:px-5"
+                className="flex items-baseline gap-2 rounded-md px-2 py-1 no-underline transition-colors duration-150 hover:bg-ink/6"
               >
                 <span className="text-[0.8125rem] font-medium text-muted-foreground">
                   {t(`cell_${cell.key}`)}
                 </span>{' '}
                 <span
                   className={cn(
-                    'flex items-center gap-2 text-[1.75rem] leading-tight font-semibold text-foreground tabular-nums',
+                    'inline-flex items-center gap-1.5 text-[1.125rem] leading-6 font-semibold text-foreground tabular-nums',
                     late && 'text-danger',
                   )}
                 >
-                  {late && <CircleAlertIcon aria-hidden="true" className="size-5 shrink-0" />}
+                  {late && <CircleAlertIcon aria-hidden="true" className="size-4 shrink-0" />}
                   {number.format(value)}
                 </span>
               </Link>

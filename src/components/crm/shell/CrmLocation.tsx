@@ -19,6 +19,7 @@ const SECTIONS = [
   'leads',
   'deals',
   'tasks',
+  'dashboard',
   'reports',
   'settings',
 ] as const;

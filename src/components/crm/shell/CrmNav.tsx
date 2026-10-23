@@ -27,29 +27,36 @@ export const SPACES = [
   { key: 'tasks', icon: ListTodoIcon, tone: 'red' },
 ] as const satisfies readonly { key: string; icon: LucideIcon; tone: StatusTone }[];
 
-// `section` is the first URL segment under the workspace (empty for its home); `href` is where
-// the link lands.
+// `section` is the first URL segment under the workspace; `href` is where the link lands. The
+// workspace's home is the rail's Home.
 const INSIGHTS = [
-  { key: 'dashboard', section: '', href: '', icon: LayoutDashboardIcon },
+  { key: 'dashboard', section: 'dashboard', href: '/dashboard', icon: LayoutDashboardIcon },
   { key: 'reports', section: 'reports', href: '/reports', icon: ChartNoAxesColumnIcon },
 ] as const;
 
 /**
  * A space's icon on a chip of its colour: its ink on its tint, which reads alone (in the strip)
- * in both themes.
+ * in both themes. Named by its key, so a server component can draw one too (this module is the
+ * client's: `SPACES` itself doesn't reach the server).
  * @param props Component props.
- * @param props.space The space.
+ * @param props.space The space's key, such as `leads`.
  * @returns The chip.
  */
-export const SpaceChip = (props: { space: (typeof SPACES)[number] }) => (
-  <span
-    aria-hidden="true"
-    data-tone={props.space.tone}
-    className="grid size-5 shrink-0 place-items-center rounded-[5px] bg-(--tone-tint) text-(--tone-ink)"
-  >
-    <props.space.icon className="size-3.5" />
-  </span>
-);
+export const SpaceChip = (props: { space: (typeof SPACES)[number]['key'] }) => {
+  const space = SPACES.find((item) => item.key === props.space);
+
+  return (
+    space && (
+      <span
+        aria-hidden="true"
+        data-tone={space.tone}
+        className="grid size-5 shrink-0 place-items-center rounded-[5px] bg-(--tone-tint) text-(--tone-ink)"
+      >
+        <space.icon className="size-3.5" />
+      </span>
+    )
+  );
+};
 
 // The other sections' icons sit in a box the chips' size, so every label starts at one edge.
 const plainIcon = (Icon: LucideIcon) => (
@@ -124,7 +131,7 @@ export const CrmNav = (props: {
               label: t(`nav_${space.key}`),
               href: `/${space.key}`,
               current: section === space.key,
-              icon: <SpaceChip space={space} />,
+              icon: <SpaceChip space={space.key} />,
             }),
           )}
         </ul>

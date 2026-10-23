@@ -112,6 +112,14 @@ describe(FunnelReport, () => {
     expect(
       bars.map((bar) => bar.firstElementChild?.getAttribute('style') ?? '').map((s) => s.trim()),
     ).toStrictEqual(['width: 90%;', 'width: 55%;', 'width: 0%;', 'width: 20%;']);
+    // Each in its stage's colour: the open ones walk blue to amber, Won is green.
+    const fills = [...document.querySelectorAll<HTMLElement>('[data-bar] > [data-tone]')];
+    expect(fills.map((fill) => fill.dataset.tone)).toStrictEqual([
+      'blue',
+      'violet',
+      'amber',
+      'green',
+    ]);
   });
 
   it('says so when no deal was created in the period', async () => {

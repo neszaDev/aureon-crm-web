@@ -42,7 +42,7 @@ export const NewMenu = (props: { workspaceId: number; className?: string }) => {
         {SPACES.map((space) => (
           <DropdownMenuItem key={space.key} asChild>
             <Link href={space.key === 'tasks' ? `${base}/tasks?new=1` : `${base}/${space.key}/new`}>
-              <SpaceChip space={space} />
+              <SpaceChip space={space.key} />
               {t(`new_${space.key}`)}
             </Link>
           </DropdownMenuItem>

@@ -577,7 +577,7 @@ test.describe('Security', () => {
       await expect(frame.getByText(TEAMS.framed.name)).toHaveCount(0);
       // The tab itself is still signed in.
       await page.goto(owner.path);
-      await expect(page.getByText(`what changed in ${TEAMS.framed.name}.`)).toBeVisible();
+      await expect(page.getByText(`Your work in ${TEAMS.framed.name} today.`)).toBeVisible();
     });
   });
 

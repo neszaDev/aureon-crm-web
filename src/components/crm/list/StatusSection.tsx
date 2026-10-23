@@ -11,7 +11,8 @@ import { Link } from '@/libs/I18nNavigation';
  * link to all of them.
  * @param props Component props.
  * @param props.title What heads the group: a status pill, or an owner (`OwnerTitle`).
- * @param props.count How many records the group holds (the API's total).
+ * @param props.count How many records the group holds (the API's total), or a lower bound such as
+ *   "8+" where the API sends only the first few.
  * @param props.countLabel The count in words, read out, such as "3 companies".
  * @param props.closed Whether it starts folded.
  * @param props.viewAll The link to all of the group's records, when it shows only some.
@@ -22,7 +23,7 @@ import { Link } from '@/libs/I18nNavigation';
  */
 export const StatusSection = (props: {
   title: React.ReactNode;
-  count: number;
+  count: number | string;
   countLabel: string;
   closed?: boolean;
   viewAll?: { href: string; label: string };

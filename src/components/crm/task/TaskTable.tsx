@@ -21,8 +21,8 @@ import type { ActivityLink } from '@/validations/crm/ActivityValidation';
  * @param props.timeZone The workspace's time zone.
  * @param props.viewed The record whose page this is, left out of the linked records.
  * @param props.headingId The heading of the list, which takes the focus when a row leaves.
- * @param props.compact A narrow list (the dashboard's): without the status, priority and assignee
- *   columns.
+ * @param props.compact A narrow list (the home's): without the status, priority and assignee
+ *   columns, its head read out but not drawn.
  * @param props.bounds Where the due sections part: an open task's due time takes its section's
  *   colour.
  * @param props.fixed Fixed columns, so the groups of a grouped list line up.
@@ -45,7 +45,9 @@ export const TaskTable = (props: {
 
   return (
     <Table className={cn(props.fixed && 'table-fixed')}>
-      <TableHeader>
+      {/* A compact list's section already says what its rows are: the head is for assistive
+          technology only. */}
+      <TableHeader className={cn(props.compact && 'sr-only')}>
         <TableRow>
           <TableHead className="w-10 pr-0">
             <span className="sr-only">{t('done')}</span>
@@ -58,7 +60,7 @@ export const TaskTable = (props: {
           )}
           <TableHead
             title={t('due')}
-            className={cn(props.fixed && 'w-[17%]', 'truncate', !props.compact && 'max-sm:hidden')}
+            className={cn(props.fixed && 'w-[17%]', 'truncate max-sm:hidden')}
           >
             {t('due')}
           </TableHead>

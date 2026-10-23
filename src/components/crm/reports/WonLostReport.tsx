@@ -32,8 +32,9 @@ const LABELLED_MONTHS = 6;
  * The deals closed in each month of the period, as the API counted them (a month without deals
  * is there too, oldest first): grouped bars of the deals won and lost, with their counts on them
  * while there is room, and under them the table of the same figures with the won totals, each
- * currency on its own line and never added. Won is a solid pine bar and Lost a hatched ink one,
- * so the two read apart without their colours. The bars are the table's picture: assistive
+ * currency on its own line and never added. Won is a solid green bar and Lost a hatched red one
+ * (the status colours of Won and Lost), so the two read apart without their colours. The bars
+ * are the table's picture: assistive
  * technology has the table.
  * @param props Component props.
  * @param props.report The won and lost report.
@@ -47,7 +48,7 @@ export const WonLostReport = (props: { report: components['schemas']['WonLostRep
   const hatch = `lost-${useId()}`;
   const config = {
     won: { label: t('won'), color: 'var(--chart-3)' },
-    lost: { label: t('lost'), color: 'var(--foreground)' },
+    lost: { label: t('lost'), color: 'var(--chart-5)' },
   } satisfies ChartConfig;
   const labelled = props.report.months.length <= LABELLED_MONTHS;
 
@@ -61,10 +62,10 @@ export const WonLostReport = (props: { report: components['schemas']['WonLostRep
           </li>
           <li className="flex items-center gap-1.5">
             <span
-              className="size-3 rounded-xs border border-foreground"
+              className="size-3 rounded-xs border border-chart-5"
               style={{
                 background:
-                  'repeating-linear-gradient(45deg, var(--foreground) 0 1.5px, transparent 1.5px 4px)',
+                  'repeating-linear-gradient(45deg, var(--chart-5) 0 1.5px, transparent 1.5px 4px)',
               }}
             />
             {t('lost')}

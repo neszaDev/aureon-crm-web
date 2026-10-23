@@ -17,6 +17,7 @@ import {
   createWorkspace,
   dragAndSave,
   expectDashboard,
+  expectHome,
   handleOf,
   money,
   monthLabel,
@@ -60,8 +61,7 @@ const linkedId = async (scope: Locator, name: string) => {
   return Number(href?.split('/').at(-1));
 };
 
-const bell = (page: Page, count: number) =>
-  page.getByRole('button', { name: `Reminders: ${count}` });
+const bell = (page: Page, count: number) => page.getByRole('button', { name: `Inbox: ${count}` });
 
 const rail = (page: Page) => page.getByRole('navigation', { name: 'Workspace navigation' });
 
@@ -156,7 +156,7 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     const url = await createWorkspace(page, TEAMS.default.name);
     const workspaceId = Number(new URL(url).pathname.split('/').at(-1));
     owner = { ...user, workspaceId, path: `/app/${workspaceId}` };
-    await expectDashboard(page, TEAMS.default.name);
+    await expectHome(page, TEAMS.default.name);
   });
 
   await test.step('3. Create a company and a contact at it', async () => {

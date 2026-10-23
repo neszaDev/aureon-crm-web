@@ -39,13 +39,27 @@ export const expectNoA11yViolations = async (page: Page) => {
 };
 
 /**
- * Checks the dashboard of a workspace is open: its heading, and the workspace named under it.
+ * Checks the home of a workspace is open: its greeting, and the workspace named under it.
+ * @param page Playwright page.
+ * @param name The workspace's name.
+ */
+export const expectHome = async (page: Page, name: string) => {
+  await expect(
+    page.getByRole('heading', { level: 1, name: /^Good (?:morning|afternoon|evening), /u }),
+  ).toBeVisible();
+  await expect(page.getByText(`Your work in ${name} today.`)).toBeVisible();
+};
+
+/**
+ * Checks the dashboard of a workspace is open: its heading, and the workspace in the location.
  * @param page Playwright page.
  * @param name The workspace's name.
  */
 export const expectDashboard = async (page: Page, name: string) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible();
-  await expect(page.getByText(`what changed in ${name}.`)).toBeVisible();
+  await expect(
+    page.getByRole('navigation', { name: 'Location' }).getByRole('link', { name }),
+  ).toBeVisible();
 };
 
 /**

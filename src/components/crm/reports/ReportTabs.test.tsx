@@ -52,15 +52,15 @@ describe(ReportTabs, () => {
       .toHaveAttribute('href', '/app/7/reports?tab=activities&from=2026-09-01&to=2026-09-30');
   });
 
-  it('marks the current tab with weight as well as a fill', async () => {
+  it('marks the current tab with an underline as well as its colour', async () => {
     await tabs();
 
     await expect
       .element(page.getByRole('link', { name: 'Funnel' }))
-      .toHaveClass('bg-muted', 'font-semibold');
+      .toHaveClass('border-violet-ink', 'text-foreground');
     await expect
       .element(page.getByRole('link', { name: 'Pipeline' }))
-      .not.toHaveClass('font-semibold');
+      .toHaveClass('border-transparent');
   });
 
   it('names the tabs in the page language', async () => {

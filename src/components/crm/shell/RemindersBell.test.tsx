@@ -93,6 +93,8 @@ const Bell = (props: { reminders?: Reminders; path?: string }) => (
 );
 
 const bell = (name: string | RegExp) => page.getByRole('button', { name });
+// A group of the open inbox, by its heading's start.
+const group = (name: string) => page.getByRole('region', { name: new RegExp(`^${name}`, 'u') });
 const pause = async (ms: number) => {
   const { promise, resolve } = Promise.withResolvers<undefined>();
   setTimeout(resolve, ms);
@@ -103,38 +105,43 @@ describe(RemindersBell, () => {
   it('hides the badge at 0 and says so in its label', async () => {
     await render(<Bell reminders={NONE} />);
 
-    await expect.element(bell('Reminders: 0')).toBeVisible();
+    await expect.element(bell('Inbox: 0')).toBeVisible();
     // The badge is the button's only text.
-    expect(bell('Reminders: 0').element().textContent).toBe('');
+    expect(bell('Inbox: 0').element().textContent).toBe('');
   });
 
   it('counts the overdue tasks, the tasks due soon and the leads to follow up', async () => {
     await render(<Bell reminders={REMINDERS} />);
 
-    await expect.element(bell('Reminders: 3')).toHaveTextContent('3');
+    await expect.element(bell('Inbox: 3')).toHaveTextContent('3');
   });
 
   it('shows "20+" when a list is at the cap, since there may be more', async () => {
     const full = Array.from({ length: 20 }, (_, index) => task(100 + index, `Task ${index}`));
     await render(<Bell reminders={{ ...NONE, dueSoonTasks: full, followUpLeads: [LEAD] }} />);
 
-    await expect.element(bell('Reminders: 21+')).toBeVisible();
-    await bell('Reminders: 21+').click();
+    await expect.element(bell('Inbox: 21+')).toBeVisible();
+    await bell('Inbox: 21+').click();
     await expect.element(page.getByText('20+', { exact: true })).toBeVisible();
   });
 
-  it('lists the three groups, each item linking to its record, with due times in the workspace zone', async () => {
-    await render(<Bell reminders={REMINDERS} />);
+  it('groups them by when they are due, each item linking to its record, with due times in the workspace zone', async () => {
+    // Due at 3 AM on the 20th in Bangkok: within the 24 hours, past the workspace's midnight.
+    const LATER = task(44, 'Renew the contract', { dueAt: '2026-10-19T20:00:00Z' });
+    await render(<Bell reminders={{ ...REMINDERS, dueSoonTasks: [SOON, LATER] }} />);
 
-    await bell('Reminders: 3').click();
+    await bell('Inbox: 4').click();
 
-    const popover = page.getByRole('dialog', { name: 'Reminders' });
-    await expect.element(popover.getByRole('heading', { name: /Overdue tasks/u })).toBeVisible();
+    const popover = page.getByRole('dialog', { name: 'Inbox' });
+    // The overdue task, and the lead whose follow-up day (1 October) has passed.
+    await expect.element(group('Overdue')).toHaveTextContent(/^Overdue2/u);
     await expect
-      .element(popover.getByRole('heading', { name: /Due in the next 24 hours/u }))
+      .element(group('Overdue').getByRole('link', { name: 'Send the proposal' }))
       .toBeVisible();
+    await expect.element(group('Overdue').getByRole('link', { name: 'Noa Park' })).toBeVisible();
+    await expect.element(group('Today').getByRole('link', { name: 'Call Globex' })).toBeVisible();
     await expect
-      .element(popover.getByRole('heading', { name: /Leads to follow up/u }))
+      .element(group('Upcoming').getByRole('link', { name: 'Renew the contract' }))
       .toBeVisible();
     await expect
       .element(popover.getByRole('link', { name: 'Send the proposal' }))
@@ -147,18 +154,10 @@ describe(RemindersBell, () => {
     // "Overdue" in words.
     await expect.element(popover.getByText(/Oct 19, 2026, 4:30.PM/u)).toBeVisible();
     await expect
-      .element(
-        popover
-          .getByRole('region', { name: /Overdue tasks/u })
-          .getByText('Overdue', { exact: true }),
-      )
+      .element(group('Overdue').getByText('Overdue', { exact: true }).nth(1))
       .toBeVisible();
     // The lead's follow-up date, 1 October, is long past.
-    await expect
-      .element(
-        popover.getByRole('region', { name: /Leads to follow up/u }).getByText('Oct 1, 2026'),
-      )
-      .toBeVisible();
+    await expect.element(group('Overdue').getByText('Oct 1, 2026')).toBeVisible();
     await expect
       .element(popover.getByRole('link', { name: 'All tasks' }))
       .toHaveAttribute('href', expect.stringContaining('/app/1/tasks?assigneeId=3'));
@@ -167,9 +166,9 @@ describe(RemindersBell, () => {
   it('says reminders appear in the app, and promises nothing else', async () => {
     await render(<Bell reminders={NONE} />);
 
-    await bell('Reminders: 0').click();
+    await bell('Inbox: 0').click();
 
-    const popover = page.getByRole('dialog', { name: 'Reminders' });
+    const popover = page.getByRole('dialog', { name: 'Inbox' });
     await expect.element(popover.getByText('Reminders appear here in the app.')).toBeVisible();
     await expect.element(popover.getByText('Nothing needs your attention.')).toBeVisible();
     await expect.element(popover.getByText(/e-?mail|push|calendar/iu)).not.toBeInTheDocument();
@@ -179,7 +178,7 @@ describe(RemindersBell, () => {
     const answer = Promise.withResolvers<{ ok: boolean }>();
     vi.mocked(TaskActions.completeTask).mockReturnValue(answer.promise);
     const { rerender } = await render(<Bell reminders={REMINDERS} />);
-    await bell('Reminders: 3').click();
+    await bell('Inbox: 3').click();
 
     await page.getByRole('checkbox', { name: 'Complete Send the proposal' }).click();
 
@@ -191,7 +190,7 @@ describe(RemindersBell, () => {
     answer.resolve({ ok: true });
     await rerender(<Bell reminders={{ ...REMINDERS, overdueTasks: [] }} />);
 
-    await expect.element(bell('Reminders: 2')).toHaveTextContent('2');
+    await expect.element(bell('Inbox: 2')).toHaveTextContent('2');
     expect(page.getByRole('link', { name: 'Send the proposal' }).elements()).toHaveLength(0);
   });
 
@@ -201,7 +200,7 @@ describe(RemindersBell, () => {
       message: "This task's status changed meanwhile.",
     });
     await render(<Bell reminders={REMINDERS} />);
-    await bell('Reminders: 3').click();
+    await bell('Inbox: 3').click();
 
     await page.getByRole('checkbox', { name: 'Complete Send the proposal' }).click();
 
@@ -209,14 +208,14 @@ describe(RemindersBell, () => {
     await expect
       .element(page.getByRole('checkbox', { name: 'Complete Send the proposal' }))
       .not.toBeChecked();
-    await expect.element(bell('Reminders: 3')).toBeVisible();
+    await expect.element(bell('Inbox: 3')).toBeVisible();
   });
 
   it('says so, without a count, when the reminders could not be read', async () => {
     await render(<Bell />);
 
-    expect(bell('Reminders').element().textContent).toBe('');
-    await bell('Reminders').click();
+    expect(bell('Inbox').element().textContent).toBe('');
+    await bell('Inbox').click();
     await expect
       .element(page.getByText("Couldn't load your reminders. Reload the page to try again."))
       .toBeVisible();
@@ -241,12 +240,12 @@ describe('the bell refreshing itself', () => {
   it('asks again once for each navigation, not on the first paint, and shows the new count', async () => {
     vi.mocked(loadReminders).mockResolvedValue(FRESH);
     const { rerender } = await render(<Bell reminders={REMINDERS} />);
-    await expect.element(bell('Reminders: 3')).toBeVisible();
+    await expect.element(bell('Inbox: 3')).toBeVisible();
     expect(loadReminders).not.toHaveBeenCalled();
 
     await rerender(<Bell path="/app/1/tasks" reminders={REMINDERS} />);
 
-    await expect.element(bell('Reminders: 4')).toBeVisible();
+    await expect.element(bell('Inbox: 4')).toBeVisible();
     // The same page rendering again asks nothing more.
     await rerender(<Bell path="/app/1/tasks" reminders={REMINDERS} />);
     await pause(100);
@@ -266,7 +265,7 @@ describe('the bell refreshing itself', () => {
     visibility.mockReturnValue('visible');
     document.dispatchEvent(new Event('visibilitychange'));
 
-    await expect.element(bell('Reminders: 4')).toBeVisible();
+    await expect.element(bell('Inbox: 4')).toBeVisible();
     expect(loadReminders).toHaveBeenCalledExactlyOnceWith(1, 'Asia/Bangkok');
     visibility.mockRestore();
   });
@@ -285,7 +284,7 @@ describe('the bell refreshing itself', () => {
     await expect.poll(() => vi.mocked(loadReminders).mock.calls.length).toBe(1);
     await pause(100);
 
-    await expect.element(bell('Reminders: 3')).toBeVisible();
+    await expect.element(bell('Inbox: 3')).toBeVisible();
   });
 
   it('lets a page that refreshed meanwhile beat an older answer, and a newer page an answer it had', async () => {
@@ -299,19 +298,19 @@ describe('the bell refreshing itself', () => {
     await rerender(<Bell path="/app/1/tasks" reminders={{ ...REMINDERS, overdueTasks: [] }} />);
     slow.resolve(FRESH);
     await pause(100);
-    await expect.element(bell('Reminders: 2')).toBeVisible();
+    await expect.element(bell('Inbox: 2')).toBeVisible();
 
     // And the other way round: an answer shows until the page renders its own, newer reminders.
     vi.mocked(loadReminders).mockResolvedValueOnce(FRESH);
     await rerender(<Bell path="/app/1/leads" reminders={{ ...REMINDERS, overdueTasks: [] }} />);
-    await expect.element(bell('Reminders: 4')).toBeVisible();
+    await expect.element(bell('Inbox: 4')).toBeVisible();
     await rerender(
       <Bell
         path="/app/1/leads"
         reminders={{ ...REMINDERS, overdueTasks: [], followUpLeads: [] }}
       />,
     );
-    await expect.element(bell('Reminders: 1')).toBeVisible();
+    await expect.element(bell('Inbox: 1')).toBeVisible();
   });
 
   it('tells a late follow-up by the day the reminders were read, so it turns late past midnight', async () => {
@@ -319,15 +318,15 @@ describe('the bell refreshing itself', () => {
     const first: Reminders = { ...NONE, followUpLeads: [LEAD], today: '2026-10-01' };
     vi.mocked(loadReminders).mockResolvedValue({ ...first, today: '2026-10-02' });
     const { rerender } = await render(<Bell reminders={first} />);
-    await bell('Reminders: 1').click();
-    const leads = page.getByRole('region', { name: /Leads to follow up/u });
-    await expect.element(leads.getByText('Oct 1, 2026')).toBeVisible();
-    expect(leads.getByText('Overdue', { exact: true }).elements()).toHaveLength(0);
+    await bell('Inbox: 1').click();
+    await expect.element(group('Today').getByText('Oct 1, 2026')).toBeVisible();
+    expect(page.getByText('Overdue', { exact: true }).elements()).toHaveLength(0);
 
     // Asked again on the 2nd: the same lead, now late.
     await rerender(<Bell path="/app/1/tasks" reminders={first} />);
 
-    await expect.element(leads.getByText('Overdue', { exact: true })).toBeVisible();
+    await expect.element(group('Overdue').getByText('Oct 1, 2026')).toBeVisible();
+    expect(page.getByRole('region', { name: /^Today/u }).elements()).toHaveLength(0);
   });
 
   it('drops an answer that comes after a newer request was made', async () => {
@@ -336,11 +335,11 @@ describe('the bell refreshing itself', () => {
     const { rerender } = await render(<Bell reminders={REMINDERS} />);
     await rerender(<Bell path="/app/1/tasks" reminders={REMINDERS} />);
     await rerender(<Bell path="/app/1/leads" reminders={REMINDERS} />);
-    await expect.element(bell('Reminders: 4')).toBeVisible();
+    await expect.element(bell('Inbox: 4')).toBeVisible();
 
     slow.resolve({ ...FRESH, followUpLeads: [] });
     await pause(100);
 
-    await expect.element(bell('Reminders: 4')).toBeVisible();
+    await expect.element(bell('Inbox: 4')).toBeVisible();
   });
 });

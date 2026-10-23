@@ -73,3 +73,19 @@ export const toLocalInput = (instant: string, timeZone: string) => {
  */
 export const todayIn = (timeZone: string) =>
   toLocalInput(new Date().toISOString(), timeZone).slice(0, 10);
+
+/**
+ * The part of the day it is in a time zone, for a greeting: morning from 5 AM, afternoon from
+ * noon, evening from 6 PM (and through the night).
+ * @param timeZone The workspace's time zone.
+ * @param now The time: now unless given.
+ * @returns `morning`, `afternoon` or `evening`.
+ */
+export const partOfDay = (timeZone: string, now = new Date()) => {
+  const hour = Number(toLocalInput(now.toISOString(), timeZone).slice(11, 13));
+  if (hour >= 5 && hour < 12) {
+    return 'morning';
+  }
+
+  return hour >= 12 && hour < 18 ? 'afternoon' : 'evening';
+};

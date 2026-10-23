@@ -75,6 +75,25 @@ describe(StageDistribution, () => {
     expect(chart?.closest('[aria-hidden="true"]')).not.toBeNull();
   });
 
+  it("draws each bar in its stage's colour, and puts the same colour beside the stage in the table", async () => {
+    await distribution(STAGES);
+
+    // The first open stage is blue and the last amber (the empty stage draws no bar).
+    await expect
+      .poll(() =>
+        [...document.querySelectorAll('.recharts-bar-rectangle path')].map((bar) =>
+          bar.getAttribute('fill'),
+        ),
+      )
+      .toStrictEqual(['var(--status-blue)', 'var(--status-amber)']);
+    const dots = page
+      .getByRole('row')
+      .elements()
+      .slice(1)
+      .map((row) => row.querySelector<HTMLElement>('[data-tone]')?.dataset.tone);
+    expect(dots).toStrictEqual(['blue', 'violet', 'amber']);
+  });
+
   it('writes the counts as numbers in the page language, in the table and on the bars', async () => {
     await distribution([{ stage: stage(1, 'Qualification'), count: 12_345, totals: [] }]);
 

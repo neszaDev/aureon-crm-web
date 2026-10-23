@@ -18,9 +18,10 @@ const Pending = () => {
 };
 
 /**
- * The reports as a row of links, one per tab (`?tab=`): the current one in weight and a fill
- * (`aria-current`), the followed one with a spinner until it answers. The period the page shows
- * goes with each link, so a range chosen on one report is still there on the next.
+ * The reports as tabs under the page's title, as a list's views: one link per report (`?tab=`),
+ * the current one underlined in violet (`aria-current`), the followed one with a spinner until it
+ * answers. The period the page shows goes with each link, so a range chosen on one report is still
+ * there on the next. On a phone the row scrolls sideways inside itself.
  * @param props Component props.
  * @param props.current The tab shown.
  * @param props.path The reports page's path.
@@ -31,17 +32,19 @@ export const ReportTabs = (props: { current: ReportTab; path: string; period: Pe
   const t = useTranslations('ReportTabs');
 
   return (
-    <nav aria-label={t('label')}>
-      <ul className="flex flex-wrap gap-1.5">
+    <nav aria-label={t('label')} className="-mb-px overflow-x-auto">
+      <ul className="flex gap-1">
         {REPORT_TABS.map((tab) => (
-          <li key={tab}>
+          <li key={tab} className="shrink-0">
             <Link
               href={periodHref(props.path, { tab }, props.period)}
               aria-current={tab === props.current ? 'page' : undefined}
               scroll={false}
               className={cn(
-                'flex min-h-9 items-center gap-2 rounded-md px-3 text-[0.9375rem] no-underline transition-colors duration-150 hover:bg-muted',
-                tab === props.current ? 'bg-muted font-semibold' : 'font-medium text-foreground',
+                'flex h-9 items-center gap-1.5 border-b-2 px-2 text-[0.8125rem] font-medium whitespace-nowrap no-underline transition-colors duration-150',
+                tab === props.current
+                  ? 'border-violet-ink text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground',
               )}
             >
               {t(`tab_${tab}`)}

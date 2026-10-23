@@ -5,6 +5,7 @@ import { CalendarIcon, CheckIcon, ChevronDownIcon, TriangleAlertIcon } from 'luc
 import { useLocale, useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 import { DateTimeField } from '@/components/crm/fields/DateTimeField';
+import { TOOL_PART, toolClass } from '@/components/crm/list/FilterChip';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Spinner } from '@/components/ui/spinner';
@@ -14,8 +15,9 @@ import { parsePeriod, periodHref, periodPresets } from '@/libs/crm/PeriodQuery';
 import { Link, useRouter } from '@/libs/I18nNavigation';
 
 /**
- * Picks the period a page reports on: Last 7, 30 or 90 days, This month, Last month (counted in
- * the workspace's time zone, each a link) or a custom range (two days, applied with a button).
+ * Picks the period a page reports on, from a toolbar chip: Last 7, 30 or 90 days, This month,
+ * Last month (counted in the workspace's time zone, each a link) or a custom range (two days,
+ * applied with a button).
  * The button shows the period the API answered with, so the label is always the range the
  * figures are for, whatever the URL asked. Last 30 days is the default and leaves the dates out
  * of the URL. A custom range the API would refuse (the end before the start, or more than 366
@@ -66,16 +68,25 @@ export const PeriodPicker = (props: {
       }}
     >
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
+        {/* A toolbar chip, as the lists' filters: always on, since a page always has a period. */}
+        <button
+          type="button"
           aria-label={t('trigger', { period: label })}
           aria-busy={isPending}
+          className={cn(
+            toolClass(false),
+            TOOL_PART,
+            'aria-expanded:bg-black/5 dark:aria-expanded:bg-white/8',
+          )}
         >
-          {isPending ? <Spinner aria-hidden="true" /> : <CalendarIcon aria-hidden="true" />}
-          <span className="tabular-nums">{label}</span>
-          <ChevronDownIcon aria-hidden="true" />
-        </Button>
+          {isPending ? (
+            <Spinner aria-hidden="true" className="size-3.5" />
+          ) : (
+            <CalendarIcon aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
+          )}
+          <span className="truncate tabular-nums">{label}</span>
+          <ChevronDownIcon aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
+        </button>
       </PopoverTrigger>
       <PopoverContent
         align="end"
