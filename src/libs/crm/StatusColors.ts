@@ -4,6 +4,14 @@ import type { Stage } from '@/libs/crm/Stages';
 /** The status colours (`--status-<tone>` in global.css; `data-tone` applies one). */
 export type StatusTone = 'blue' | 'violet' | 'amber' | 'green' | 'red' | 'slate';
 
+/**
+ * A status pill's look (`StatusPill`) on an element with `data-tone`, for what draws one without
+ * the component: a board column's heading, the sign-in page's sample. Here, not in the component,
+ * so a server-drawn page can use it without the pill's menu code.
+ */
+export const PILL =
+  'inline-flex h-6 max-w-full min-w-0 items-center gap-1.5 rounded-full border border-transparent bg-(--tone-tint) px-2.5 text-xs font-semibold whitespace-nowrap text-(--tone-ink)';
+
 /** A lead's status walks blue → violet → amber to converted green; unqualified rests in slate. */
 export const LEAD_STATUS_TONES: Record<
   components['schemas']['LeadResponse']['status'],

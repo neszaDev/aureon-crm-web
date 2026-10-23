@@ -3,7 +3,7 @@
 import { ErrorState } from '@/components/ErrorState';
 import { PublicFrame } from '@/components/PublicFrame';
 
-// The public pages' error: their ink-violet bar, and the error's card on the ground.
+// The public pages' error: the wordmark over the canvas, and the error's card on it.
 export default function ErrorPage(props: {
   error: Error & { digest?: string };
   retry: () => void;

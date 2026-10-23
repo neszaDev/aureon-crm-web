@@ -140,13 +140,16 @@
     "credits": "Split from the <boilerplate>Next.js + Spring Boilerplate</boilerplate>, itself based on <upstream>Next.js Boilerplate</upstream> by ixartz (MIT licence)."
   },
   "AuthLayout": {
-    "aside_title": "Every step of a relationship is signed.",
     "aside_text": "Aureon CRM shows each person what needs doing next and who owns it.",
     "back_home": "Back to home",
-    "aside_workspaces": "One workspace per business, with a role for each person in it.",
-    "aside_pipeline": "Deals move through the pipeline stage by stage, and every move stays in the stage history.",
-    "aside_follow_ups": "Follow-ups and reminders show what is due and who owns it.",
-    "aside_languages": "In English, French and Thai."
+    "sample_label": "Sample workspace",
+    "sample_description": "An illustration of the leads list in a sample workspace: three qualified leads, each with its owner and estimated value.",
+    "sample_lead_1": "Elena Duarte",
+    "sample_lead_2": "Tomás Weber",
+    "sample_lead_3": "Priya Nair",
+    "sample_owner_1": "Jade Moreau",
+    "sample_owner_2": "Kofi Mensah",
+    "sample_owner_3": "Lina Haddad"
   },
   "SignInPage": {
     "meta_title": "Sign in",

@@ -3,6 +3,7 @@
 import '@/styles/global.css';
 import type { ComponentType } from 'react';
 import { lazy, Suspense } from 'react';
+import { AureonMark } from '@/components/brand/AureonMark';
 import { routing } from '@/libs/I18nRouting';
 import { THEME_SCRIPT } from '@/libs/Theme';
 
@@ -14,31 +15,40 @@ import { THEME_SCRIPT } from '@/libs/Theme';
  * @returns The page's body.
  */
 const StaticFallback = () => (
-  <main className="grid min-h-dvh place-items-center bg-background px-4 py-16">
-    <div
-      role="alert"
-      className="flex w-full max-w-lg flex-col items-start gap-5 rounded-lg border border-rule bg-card p-6 shadow-sheet sm:p-8"
-    >
-      <h1 className="text-2xl font-bold">
-        <span lang="en">Something went wrong</span>
-      </h1>
-      <p className="flex flex-col gap-1 text-muted-foreground">
-        <span lang="en">The app hit an error. Reload the page.</span>
-        <span lang="fr">Une erreur est survenue. Rechargez la page.</span>
-        <span lang="th">เกิดข้อผิดพลาด โปรดโหลดหน้านี้ใหม่</span>
-      </p>
-      <button
-        type="button"
-        onClick={() => {
-          window.location.reload();
-        }}
-        className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-violet-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+  <div className="flex min-h-dvh flex-col bg-background">
+    {/* The public pages' frame (`PublicFrame`): the brand's name is the same in every language. */}
+    <header className="flex h-16 items-center px-4 sm:px-8">
+      <span className="inline-flex items-center gap-2 text-xl font-semibold tracking-[-0.02em]">
+        <AureonMark className="size-6 shrink-0 text-violet-ink" />
+        Aureon
+      </span>
+    </header>
+    <main className="flex flex-1 items-start justify-center px-4 pt-10 pb-16 sm:items-center sm:pt-16">
+      <div
+        role="alert"
+        className="flex w-full max-w-lg flex-col items-start gap-4 rounded-lg border border-rule bg-card p-6 sm:p-8"
       >
-        <span lang="en">Reload</span>&nbsp;·&nbsp;<span lang="fr">Recharger</span>&nbsp;·&nbsp;
-        <span lang="th">โหลดใหม่</span>
-      </button>
-    </div>
-  </main>
+        <h1 className="text-[1.25rem] leading-7 font-semibold tracking-[-0.01em]">
+          <span lang="en">Something went wrong</span>
+        </h1>
+        <p className="flex flex-col gap-1 text-sm text-muted-foreground">
+          <span lang="en">The app hit an error. Reload the page.</span>
+          <span lang="fr">Une erreur est survenue. Rechargez la page.</span>
+          <span lang="th">เกิดข้อผิดพลาด โปรดโหลดหน้านี้ใหม่</span>
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            window.location.reload();
+          }}
+          className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-violet-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+        >
+          <span lang="en">Reload</span>&nbsp;·&nbsp;<span lang="fr">Recharger</span>&nbsp;·&nbsp;
+          <span lang="th">โหลดใหม่</span>
+        </button>
+      </div>
+    </main>
+  </div>
 );
 
 // Loaded only when it shows: imported here, every page would carry all its messages and parts.
@@ -54,7 +64,7 @@ const GlobalErrorContent = lazy<ComponentType<{ retry: () => void }>>(async () =
 });
 
 // Replaces the root layout, so it brings its own document and theme, and draws the public pages'
-// bar and card.
+// frame and card.
 export default function GlobalError(props: {
   error: Error & { digest?: string };
   retry: () => void;

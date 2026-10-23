@@ -15,6 +15,9 @@ import { useSettle } from '@/utils/SettleAction';
 import type { AuthValues } from '@/validations/AuthValidation';
 import { SignInValidation, SignUpValidation } from '@/validations/AuthValidation';
 
+// The auth pages hold one form each: their fields and button are a size up (40 px).
+const FIELD = 'h-10 sm:h-10';
+
 export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
   const t = useTranslations('AuthForm');
   const settle = useSettle();
@@ -48,6 +51,7 @@ export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
         <Input
           id="email"
           type="email"
+          className={FIELD}
           autoComplete="email"
           inputMode="email"
           aria-invalid={errors.email ? true : undefined}
@@ -65,6 +69,7 @@ export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
         <Input
           id="password"
           type="password"
+          className={FIELD}
           autoComplete={isSignUp ? 'new-password' : 'current-password'}
           aria-invalid={errors.password ? true : undefined}
           aria-describedby={errors.password || isSignUp ? describedBy('password') : undefined}
@@ -72,7 +77,7 @@ export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
         />
       </FormField>
 
-      <Button type="submit" className="mt-1 w-full" disabled={isSubmitting}>
+      <Button type="submit" size="lg" className="mt-1 w-full" disabled={isSubmitting}>
         {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
         {isSignUp ? t('sign_up_button') : t('sign_in_button')}
       </Button>

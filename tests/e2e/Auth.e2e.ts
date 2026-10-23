@@ -1,6 +1,6 @@
 import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { createWorkspace } from './crm/helpers';
+import { createWorkspace, expectNoA11yViolations } from './crm/helpers';
 import { ADMIN, PASSWORD, signOut, signUp, uniqueEmail } from './helpers';
 import { TEAMS } from './mockData';
 
@@ -362,6 +362,50 @@ test.describe('Auth', () => {
 
       await expect(page.getByText('Enter a valid email address')).toBeVisible();
       await expect(page.getByText('Use at least 6 characters')).toBeVisible();
+      await expectNoA11yViolations(page);
+    });
+  });
+
+  test.describe('Layout', () => {
+    test('frames the form beside the brand panel, and alone under the mark on a phone', async ({
+      page,
+      context,
+      baseURL,
+    }) => {
+      await page.goto('/sign-in');
+
+      // The brand panel: the mark, one line on what the CRM does, and a sample that is only
+      // decoration (assistive technology reads its description).
+      const panel = page.getByRole('complementary');
+      await expect(panel.getByRole('link', { name: 'Aureon CRM home' })).toBeVisible();
+      await expect(
+        panel.getByText('Aureon CRM shows each person what needs doing next and who owns it.'),
+      ).toBeVisible();
+      await expect(
+        panel.locator('div[aria-hidden="true"]').filter({ hasText: 'Sample workspace' }),
+      ).toBeVisible();
+      await expect(
+        panel.getByText('An illustration of the leads list in a sample workspace', {
+          exact: false,
+        }),
+      ).toHaveClass(/sr-only/u);
+      await expectNoA11yViolations(page);
+
+      await context.addCookies([{ name: 'theme', value: 'dark', url: baseURL }]);
+      await page.reload();
+      await expect(page.locator('html')).toHaveClass(/dark/u);
+      await expectNoA11yViolations(page);
+
+      // A phone, in Thai: the form alone under the mark, nothing wider than the screen.
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto('/th/sign-in');
+      await expect(page.getByRole('complementary')).toBeHidden();
+      await expect(page.getByRole('link', { name: 'หน้าแรก Aureon CRM' })).toBeVisible();
+      await expect(page.getByLabel('ที่อยู่อีเมล')).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        390,
+      );
+      await expectNoA11yViolations(page);
     });
   });
 });

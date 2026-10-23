@@ -9,7 +9,7 @@ type AuthPage = '/sign-in' | '/sign-up';
 const SwitchLink = (props: { href: AuthPage; next?: string | null; children: React.ReactNode }) => (
   <Link
     href={props.next ? { pathname: props.href, query: { next: props.next } } : props.href}
-    className="font-semibold text-seal-ink underline decoration-seal-ink/40 underline-offset-4 hover:decoration-seal-ink"
+    className="font-semibold text-violet-ink underline decoration-violet-ink/40 underline-offset-4 hover:decoration-violet-ink"
   >
     {props.children}
   </Link>

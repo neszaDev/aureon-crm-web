@@ -1,5 +1,5 @@
 import { cn } from 'cn';
-import { initialsOf } from '@/components/crm/PersonAvatar';
+import { initialsOf } from '@/libs/crm/Format';
 
 /**
  * A workspace as its avatar: a violet square with its initials (people's avatars are round).

@@ -38,7 +38,11 @@ const CLOSED_ICONS = {
   unknown: Link2OffIcon,
 } satisfies Record<string, LucideIcon>;
 
-const PANEL = 'flex flex-col gap-5 rounded-lg border border-rule bg-card p-6 sm:p-7';
+const PANEL = 'flex flex-col gap-5';
+// Who the invitation is for, or who is signed in: rows in one hairline box.
+const PEOPLE = 'flex flex-col divide-y divide-rule rounded-lg border border-rule';
+// As on the sign-in page: the fields and buttons of this page's one form are a size up (40 px).
+const FIELD = 'h-10 sm:h-10';
 
 /**
  * The page heading: the workspace's chop (or an icon), the title and one line under it.
@@ -58,17 +62,22 @@ const Heading = (props: {
   const Icon = props.icon;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {Icon ? (
-        <Icon aria-hidden="true" className="size-9 text-muted-foreground" strokeWidth={1.75} />
+        <span
+          aria-hidden="true"
+          className="grid size-10 place-items-center rounded-lg bg-muted text-muted-foreground"
+        >
+          <Icon className="size-5" />
+        </span>
       ) : (
-        <WorkspaceMark name={props.workspaceName ?? ''} className="size-12 text-base" />
+        <WorkspaceMark name={props.workspaceName ?? ''} className="size-10 rounded-lg text-sm" />
       )}
-      <div className="flex flex-col gap-2">
-        <h1 className="text-[1.5rem] leading-tight font-semibold tracking-[-0.01em] text-balance break-words">
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-2xl leading-tight font-semibold tracking-[-0.01em] text-balance break-words">
           {props.title}
         </h1>
-        <p className="text-[0.9375rem] leading-relaxed text-muted-foreground">{props.children}</p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{props.children}</p>
       </div>
     </div>
   );
@@ -86,12 +95,12 @@ const Person = (props: { label: string; email: string; name?: string }) => {
   const at = props.email.lastIndexOf('@');
 
   return (
-    <div className="flex items-center gap-3.5">
+    <div className="flex items-center gap-3 px-3.5 py-3">
       <PersonAvatar person={{ displayName: props.name, email: props.email }} />
       <div className="flex min-w-0 flex-col">
         <span className="text-[0.8125rem] text-muted-foreground">{props.label}</span>
         {/* A long address wraps before the @ rather than mid-word. */}
-        <span className="font-medium wrap-anywhere">
+        <span className="text-sm font-medium wrap-anywhere">
           {props.email.slice(0, at)}
           <wbr />
           {props.email.slice(at)}
@@ -115,7 +124,7 @@ const ClosedInvitation = (props: { invitation?: Invitation }) => {
   const accepted = kind === 'ACCEPTED';
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-7">
       <Heading icon={CLOSED_ICONS[kind]} title={t(`closed_${kind}_title`)}>
         {t(`closed_${kind}_text`, { workspace: props.invitation?.workspaceName ?? '' })}
       </Heading>
@@ -167,7 +176,9 @@ const RegisterForm = (props: {
     <form method="post" onSubmit={onSubmit} className={PANEL} noValidate>
       <ActionAlert result={failure} />
       {/* The invitation's email, not editable; the avatar shows the initials as the name is typed. */}
-      <Person label={t('email_label')} email={props.email} name={name.trim() || undefined} />
+      <div className={PEOPLE}>
+        <Person label={t('email_label')} email={props.email} name={name.trim() || undefined} />
+      </div>
       {/* Lets a password manager save the new password under this email. */}
       <input type="email" autoComplete="username" value={props.email} readOnly hidden />
       <FormField
@@ -180,6 +191,7 @@ const RegisterForm = (props: {
         <Input
           id="display-name"
           autoComplete="name"
+          className={FIELD}
           aria-invalid={errors.displayName ? true : undefined}
           aria-describedby={describedBy('display-name')}
           {...form.register('displayName')}
@@ -195,12 +207,13 @@ const RegisterForm = (props: {
           id="password"
           type="password"
           autoComplete="new-password"
+          className={FIELD}
           aria-invalid={errors.password ? true : undefined}
           aria-describedby={describedBy('password')}
           {...form.register('password')}
         />
       </FormField>
-      <Button type="submit" className="mt-1 w-full" disabled={isSubmitting}>
+      <Button type="submit" size="lg" className="mt-1 w-full" disabled={isSubmitting}>
         {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
         {t('register_button')}
       </Button>
@@ -245,7 +258,7 @@ export const InvitationCard = (props: {
 
   if (!userEmail) {
     return (
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-7">
         <Heading workspaceName={workspace} title={t('join_title', { workspace })}>
           {t('register_text', { role })}
         </Heading>
@@ -254,7 +267,7 @@ export const InvitationCard = (props: {
           email={props.invitation.email}
           register={props.register}
         />
-        <p className="text-sm text-muted-foreground">
+        <p className="border-t border-rule pt-6 text-sm text-muted-foreground">
           {t('have_account')}{' '}
           <Link
             href={{ pathname: '/sign-in', query: { next: `/invite/${props.token}` } }}
@@ -269,15 +282,18 @@ export const InvitationCard = (props: {
 
   if (userEmail !== props.invitation.email) {
     return (
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-7">
         <Heading workspaceName={workspace} title={t('wrong_title')}>
           {t('wrong_text', { workspace })}
         </Heading>
         <div className={PANEL}>
           <ActionAlert result={failure} />
-          <Person label={t('invited_label')} email={props.invitation.email} />
-          <Person label={t('signed_in_label')} email={userEmail} name={props.user?.displayName} />
+          <div className={PEOPLE}>
+            <Person label={t('invited_label')} email={props.invitation.email} />
+            <Person label={t('signed_in_label')} email={userEmail} name={props.user?.displayName} />
+          </div>
           <Button
+            size="lg"
             className="mt-1 w-full"
             disabled={pending}
             onClick={() => {
@@ -301,15 +317,18 @@ export const InvitationCard = (props: {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-7">
       <Heading workspaceName={workspace} title={t('join_title', { workspace })}>
         {t('invited_as', { role })}
       </Heading>
       <div className={PANEL}>
         <ActionAlert result={failure} />
-        <Person label={t('signed_in_label')} email={userEmail} name={props.user?.displayName} />
+        <div className={PEOPLE}>
+          <Person label={t('signed_in_label')} email={userEmail} name={props.user?.displayName} />
+        </div>
         <Button
-          className="mt-1 h-auto min-h-9 w-full py-2 break-words whitespace-normal"
+          size="lg"
+          className="mt-1 h-auto min-h-10 w-full py-2 break-words whitespace-normal"
           disabled={pending}
           onClick={() => {
             setFailure(undefined);

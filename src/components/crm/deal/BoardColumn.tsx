@@ -5,12 +5,12 @@ import { cn } from 'cn';
 import { ChevronsLeftRightIcon, ChevronsRightLeftIcon, ListIcon, PlusIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { PILL } from '@/components/crm/StatusPill';
 import type { components } from '@/libs/api/schema';
 import { formatMoney } from '@/libs/crm/Format';
 import type { ListQuery } from '@/libs/crm/ListQuery';
 import { listHref } from '@/libs/crm/ListQuery';
 import type { StatusTone } from '@/libs/crm/StatusColors';
+import { PILL } from '@/libs/crm/StatusColors';
 import { Link } from '@/libs/I18nNavigation';
 
 /**

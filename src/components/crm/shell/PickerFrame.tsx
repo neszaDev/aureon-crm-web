@@ -3,7 +3,7 @@ import { Wordmark } from '@/components/Wordmark';
 
 /**
  * The frame of the pages outside any workspace (the workspace list, creating one, "not found"):
- * the wordmark and your avatar over a centred column.
+ * the wordmark and your avatar over a centred column, framed as the sign-in page is on a phone.
  * @param props Component props.
  * @param props.user The signed-in user, when known.
  * @param props.children Page content.
@@ -14,7 +14,7 @@ export const PickerFrame = (props: {
   children: React.ReactNode;
 }) => (
   <div className="flex min-h-dvh flex-col">
-    <header className="flex h-16 items-center justify-between gap-4 px-4 sm:px-7">
+    <header className="flex h-16 items-center justify-between gap-4 px-4 sm:px-8">
       <Wordmark href="/app" />
       {props.user?.email && (
         <AccountMenu

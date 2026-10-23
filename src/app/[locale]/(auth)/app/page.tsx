@@ -46,11 +46,13 @@ export default async function AppPage(props: AppPageProps) {
   if (workspaces.length === 0) {
     return (
       <PickerFrame user={user}>
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold tracking-[-0.01em]">{t('create_title')}</h1>
-          <p className="text-muted-foreground">{t('create_text')}</p>
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-2xl leading-tight font-semibold tracking-[-0.01em]">
+            {t('create_title')}
+          </h1>
+          <p className="text-sm text-muted-foreground">{t('create_text')}</p>
         </div>
-        <section className="rounded-lg border border-rule bg-card p-5 shadow-sheet sm:p-7">
+        <section className="rounded-lg border border-rule bg-card p-5 sm:p-7">
           <CreateWorkspaceForm />
         </section>
       </PickerFrame>
@@ -59,21 +61,23 @@ export default async function AppPage(props: AppPageProps) {
 
   return (
     <PickerFrame user={user}>
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-[-0.01em]">{t('title')}</h1>
-        <p className="text-muted-foreground">{t('description')}</p>
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-2xl leading-tight font-semibold tracking-[-0.01em]">{t('title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('description')}</p>
       </div>
-      <ul className="overflow-hidden rounded-lg border border-rule bg-card shadow-sheet">
+      <ul className="overflow-hidden rounded-lg border border-rule bg-card">
         {workspaces.map((workspace) => (
           <li key={workspace.id} className="border-b border-rule last:border-b-0">
             <Link
               href={`/app/${workspace.id}`}
-              className="group flex min-h-16 items-center gap-3.5 px-4 py-3 no-underline transition-colors duration-150 hover:bg-muted focus-visible:-outline-offset-2 sm:px-5"
+              className="group flex min-h-14 items-center gap-3 px-4 py-2.5 no-underline transition-colors duration-150 hover:bg-muted focus-visible:-outline-offset-2 sm:px-5"
             >
-              <WorkspaceMark name={workspace.name} className="size-9" />
+              <WorkspaceMark name={workspace.name} />
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="font-semibold break-words text-foreground">{workspace.name}</span>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm font-semibold break-words text-foreground">
+                  {workspace.name}
+                </span>
+                <span className="text-[0.8125rem] text-muted-foreground">
                   {tRole(`role_${workspace.role}`)}
                 </span>
               </span>

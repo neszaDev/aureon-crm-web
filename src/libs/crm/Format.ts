@@ -155,3 +155,30 @@ export const recordNumber = (kind: keyof typeof RECORD_PREFIXES, id: number) =>
  */
 export const fullName = (person: { firstName: string; lastName?: string }) =>
   [person.firstName, person.lastName].filter(Boolean).join(' ');
+
+// A Thai legal form before or after a name (company, limited partnership, partnership; limited,
+// public): "บริษัท ไทยรุ่ง จำกัด" signs as ไทยรุ่ง does.
+const THAI_LEGAL_FORM = /^(?:ห้างหุ้นส่วนจำกัด|ห้างหุ้นส่วน|บริษัท|หจก\.)\s*|\s*(?:จำกัด)?\s*(?:\(มหาชน\))?$/gu;
+
+/**
+ * A name's initials: the first character of the first two words of the name, a Thai legal form
+ * aside, else the first two characters of the email's local part. A character is a code point
+ * (`/./u`), so a Thai name gives its first consonant or leading vowel, without the marks stacked
+ * on it.
+ * @param name Display name, if any.
+ * @param email Email address.
+ * @returns The initials, upper-cased.
+ */
+export const initialsOf = (name: string | undefined, email: string) => {
+  const trimmed = name?.trim() ?? '';
+  const words = (trimmed.replaceAll(THAI_LEGAL_FORM, '') || trimmed).split(/\s+/u).filter(Boolean);
+  const initials =
+    words.length > 0
+      ? words
+          .slice(0, 2)
+          .map((word) => /./u.exec(word)?.[0])
+          .join('')
+      : /^.{0,2}/u.exec(email.split('@')[0] ?? '')?.[0];
+
+  return (initials ?? '').toUpperCase();
+};

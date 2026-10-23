@@ -34,11 +34,11 @@ export default async function NewWorkspacePage(props: NewWorkspacePageProps) {
           {tShell('all_workspaces')}
         </Link>
       </Button>
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-[-0.01em]">{t('title')}</h1>
-        <p className="text-muted-foreground">{t('description')}</p>
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-2xl leading-tight font-semibold tracking-[-0.01em]">{t('title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('description')}</p>
       </div>
-      <section className="rounded-lg border border-rule bg-card p-5 shadow-sheet sm:p-7">
+      <section className="rounded-lg border border-rule bg-card p-5 sm:p-7">
         <CreateWorkspaceForm />
       </section>
     </PickerFrame>
