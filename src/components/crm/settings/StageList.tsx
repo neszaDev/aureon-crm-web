@@ -254,7 +254,7 @@ const StageItem = (props: {
       }}
       className={cn(
         'flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-rule bg-card px-4 py-2.5 motion-reduce:transition-none! sm:px-5',
-        isDragging && 'relative z-10 shadow-sheet',
+        isDragging && 'relative z-10 shadow-float',
       )}
     >
       {props.canManage &&

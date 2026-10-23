@@ -34,7 +34,7 @@ export const MarketingTemplate = (props: { children: React.ReactNode }) => {
     <div className="flex min-h-dvh flex-col">
       <a
         href="#main"
-        className="sr-only rounded-md bg-field text-sm font-semibold text-foreground shadow-sheet focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2"
+        className="sr-only rounded-md bg-field text-sm font-semibold text-foreground shadow-float focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2"
       >
         {t('skip_link')}
       </a>

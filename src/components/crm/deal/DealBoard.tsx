@@ -382,7 +382,7 @@ export const DealBoard = (props: {
               workspaceId={props.workspaceId}
               stages={stageRefs}
               now={props.now}
-              className="shadow-sheet"
+              className="shadow-float"
             />
           )}
         </DragOverlay>

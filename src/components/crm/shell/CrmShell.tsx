@@ -55,7 +55,7 @@ export const CrmShell = (props: {
     <div className="min-h-dvh lg:grid lg:grid-cols-[14.5rem_minmax(0,1fr)]">
       <a
         href="#crm-main"
-        className="sr-only rounded-md bg-field text-sm font-semibold text-foreground shadow-sheet focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus-visible:outline-on-seal"
+        className="sr-only rounded-md bg-field text-sm font-semibold text-foreground shadow-float focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus-visible:outline-on-seal"
       >
         {t('skip_to_content')}
       </a>

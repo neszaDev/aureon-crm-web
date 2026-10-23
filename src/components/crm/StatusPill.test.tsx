@@ -1,3 +1,4 @@
+import '@/styles/global.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
@@ -20,6 +21,15 @@ describe(StatusPill, () => {
 
     await expect.element(page.getByText('Qualified', { exact: true })).toBeVisible();
     expect(document.querySelector<HTMLElement>('[data-tone]')?.dataset.tone).toBe('amber');
+  });
+
+  it("draws its words in the tone's ink on the tone's tint", async () => {
+    await renderPill(<StatusPill tone="amber" label="Qualified" />);
+
+    // The tokens reach the pill through `data-tone`: amber ink #956412 on amber tint #fcf2e1.
+    const pill = getComputedStyle(document.querySelector('[data-tone]') ?? document.body);
+    expect(pill.color).toBe('rgb(149, 100, 18)');
+    expect(pill.backgroundColor).toBe('rgb(252, 242, 225)');
   });
 
   it('reads as one phrase naming what it is the status of', async () => {

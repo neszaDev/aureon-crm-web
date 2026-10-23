@@ -11,9 +11,10 @@ import { routing } from '@/libs/I18nRouting';
 const TONES = {
   paper: '',
   folder:
-    '[&_select]:border-white/25 [&_select]:bg-white/10 [&_select]:text-folder-ink [&_select]:shadow-none [&_select]:hover:border-white/50 [&_select]:focus-visible:border-folder-ink [&_select]:focus-visible:ring-white/25 [&_svg]:text-folder-ink-soft',
-  // On the seal: on-seal outline and text (4.9:1), a darker fill on hover, the on-seal ring.
-  seal: '[&_select]:border-on-seal [&_select]:bg-transparent [&_select]:text-on-seal [&_select]:shadow-none [&_select]:hover:border-on-seal [&_select]:hover:bg-black/10 [&_select]:focus-visible:border-on-seal [&_select]:focus-visible:ring-2 [&_select]:focus-visible:ring-on-seal [&_select]:focus-visible:ring-offset-2 [&_select]:focus-visible:ring-offset-seal [&_svg]:text-on-seal',
+    '[&_select]:border-white/25 [&_select]:bg-white/10 [&_select]:text-folder-ink [&_select]:shadow-none [&_select]:hover:border-white/50 [&_select]:focus-visible:border-folder-ink [&_select]:focus-visible:outline-folder-ink [&_svg]:text-folder-ink-soft',
+  // On the seal: on-seal outline and text (4.9:1), a darker fill on hover, the focus outline in
+  // on-seal (the page's violet one would sit on the ink-violet bar).
+  seal: '[&_select]:border-on-seal [&_select]:bg-transparent [&_select]:text-on-seal [&_select]:shadow-none [&_select]:hover:border-on-seal [&_select]:hover:bg-black/10 [&_select]:focus-visible:border-on-seal [&_select]:focus-visible:outline-on-seal [&_svg]:text-on-seal',
 };
 
 /**
