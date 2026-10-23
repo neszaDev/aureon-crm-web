@@ -170,4 +170,9 @@ describe(initialsOf, () => {
     expect(initialsOf('Acme Trading Ltd', '')).toBe('AT');
     expect(initialsOf('Thai Rung Co', '')).toBe('TR');
   });
+
+  it('skips a word with no letter or digit, such as an ampersand', () => {
+    expect(initialsOf('Harbor & Pine Outfitters', '')).toBe('HP');
+    expect(initialsOf('—', 'mia@acme.test')).toBe('MI');
+  });
 });

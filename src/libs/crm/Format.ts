@@ -161,8 +161,8 @@ export const fullName = (person: { firstName: string; lastName?: string }) =>
 const THAI_LEGAL_FORM = /^(?:ห้างหุ้นส่วนจำกัด|ห้างหุ้นส่วน|บริษัท|หจก\.)\s*|\s*(?:จำกัด)?\s*(?:\(มหาชน\))?$/gu;
 
 /**
- * A name's initials: the first character of the first two words of the name, a Thai legal form
- * aside, else the first two characters of the email's local part. A character is a code point
+ * A name's initials: the first character of the first two words of the name (a word has a
+ * letter or a digit), a Thai legal form aside, else the first two characters of the email's local part. A character is a code point
  * (`/./u`), so a Thai name gives its first consonant or leading vowel, without the marks stacked
  * on it.
  * @param name Display name, if any.
@@ -171,7 +171,10 @@ const THAI_LEGAL_FORM = /^(?:ห้างหุ้นส่วนจำกัด
  */
 export const initialsOf = (name: string | undefined, email: string) => {
   const trimmed = name?.trim() ?? '';
-  const words = (trimmed.replaceAll(THAI_LEGAL_FORM, '') || trimmed).split(/\s+/u).filter(Boolean);
+  // A word is one with a letter or a digit: "Harbor & Pine" signs as HP, not H&.
+  const words = (trimmed.replaceAll(THAI_LEGAL_FORM, '') || trimmed)
+    .split(/\s+/u)
+    .filter((word) => /[\p{L}\p{N}]/u.test(word));
   const initials =
     words.length > 0
       ? words

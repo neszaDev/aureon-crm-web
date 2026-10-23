@@ -24,9 +24,13 @@ const settingsNavItems = [
   { key: 'profile', icon: UserRoundIcon },
 ] as const;
 
-// On a phone the tabs scroll sideways: the current one is brought into view.
+// On a phone the tabs scroll sideways: the current one is brought to the middle of their row,
+// which alone scrolls (`scrollIntoView` would scroll the page too).
 const showCurrent = (node: HTMLAnchorElement | null) => {
-  node?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  const row = node?.closest('ul');
+  if (node && row) {
+    row.scrollLeft = node.offsetLeft - row.offsetLeft - (row.clientWidth - node.offsetWidth) / 2;
+  }
 };
 
 /**

@@ -83,6 +83,21 @@ describe(MembersTable, () => {
       expect(page.getByRole('option', { name: 'Owner' }).elements()).toHaveLength(0);
     });
 
+    it('names its icon-only Remove in a tooltip from 640 to 1279 px', async () => {
+      await page.viewport(1024, 800);
+      await renderTable({
+        members: [OWNER, ADMIN, MANAGER],
+        me: ADMIN.userId,
+        callerRole: 'ADMIN',
+      });
+
+      await page.getByRole('button', { name: 'Remove Mia Manager' }).hover();
+
+      await expect
+        .element(page.getByRole('tooltip', { name: 'Remove Mia Manager' }))
+        .toBeInTheDocument();
+    });
+
     it("changes another member's role straight away", async () => {
       const changeRole = vi.fn<ChangeRole>().mockResolvedValue({ ok: true });
       await renderTable({

@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { useSettle } from '@/utils/SettleAction';
 import type { WorkspaceRole } from '@/validations/crm/MemberValidation';
@@ -170,51 +171,67 @@ const MemberTableRow = (props: {
         {props.member.joined}
       </TableCell>
       <TableCell className="w-px text-right max-sm:w-auto max-sm:p-0">
-        {props.isMe ? (
-          <ConfirmAction
-            trigger={
-              <Button variant="ghost" size="sm" aria-label={t('leave')}>
-                <LogOutIcon data-icon="inline-start" />
-                <span className="sm:max-xl:sr-only">{t('leave')}</span>
-              </Button>
-            }
-            title={t('leave_title', { workspace: props.workspaceName })}
-            description={t('leave_text')}
-            confirmLabel={t('leave')}
-            cancelLabel={t('cancel')}
-            action={async () => await props.actions.remove(props.member.userId)}
-          >
-            {/* The backend refuses it anyway; saying so first saves a try. */}
-            {props.lastOwner && (
-              <p className="flex items-start gap-2.5 rounded-md border border-rule bg-muted px-3.5 py-3 text-sm font-medium">
-                <InfoIcon
-                  aria-hidden="true"
-                  className="mt-px size-4 shrink-0 text-muted-foreground"
+        {/* Icon-only from 640 to 1279 px, where its tooltip names it. The tooltip's trigger is
+            inside the dialog's: each hands its props on to the button. */}
+        <TooltipProvider delayDuration={300}>
+          {props.isMe ? (
+            <Tooltip>
+              <ConfirmAction
+                trigger={
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" aria-label={t('leave')}>
+                      <LogOutIcon data-icon="inline-start" />
+                      <span className="sm:max-xl:sr-only">{t('leave')}</span>
+                    </Button>
+                  </TooltipTrigger>
+                }
+                title={t('leave_title', { workspace: props.workspaceName })}
+                description={t('leave_text')}
+                confirmLabel={t('leave')}
+                cancelLabel={t('cancel')}
+                action={async () => await props.actions.remove(props.member.userId)}
+              >
+                {/* The backend refuses it anyway; saying so first saves a try. */}
+                {props.lastOwner && (
+                  <p className="flex items-start gap-2.5 rounded-md border border-rule bg-muted px-3.5 py-3 text-sm font-medium">
+                    <InfoIcon
+                      aria-hidden="true"
+                      className="mt-px size-4 shrink-0 text-muted-foreground"
+                    />
+                    {t('leave_last_owner')}
+                  </p>
+                )}
+              </ConfirmAction>
+              <TooltipContent className="max-sm:hidden xl:hidden">{t('leave')}</TooltipContent>
+            </Tooltip>
+          ) : (
+            props.manageable && (
+              <Tooltip>
+                <ConfirmAction
+                  trigger={
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" aria-label={t('remove_label', { name })}>
+                        <UserMinusIcon data-icon="inline-start" />
+                        <span className="sm:max-xl:sr-only">{t('remove')}</span>
+                      </Button>
+                    </TooltipTrigger>
+                  }
+                  title={t('remove_title', { name, workspace: props.workspaceName })}
+                  description={t('remove_text')}
+                  confirmLabel={t('remove')}
+                  cancelLabel={t('cancel')}
+                  fallbackFocus={() =>
+                    document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
+                  }
+                  action={async () => await props.actions.remove(props.member.userId)}
                 />
-                {t('leave_last_owner')}
-              </p>
-            )}
-          </ConfirmAction>
-        ) : (
-          props.manageable && (
-            <ConfirmAction
-              trigger={
-                <Button variant="ghost" size="sm" aria-label={t('remove_label', { name })}>
-                  <UserMinusIcon data-icon="inline-start" />
-                  <span className="sm:max-xl:sr-only">{t('remove')}</span>
-                </Button>
-              }
-              title={t('remove_title', { name, workspace: props.workspaceName })}
-              description={t('remove_text')}
-              confirmLabel={t('remove')}
-              cancelLabel={t('cancel')}
-              fallbackFocus={() =>
-                document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
-              }
-              action={async () => await props.actions.remove(props.member.userId)}
-            />
-          )
-        )}
+                <TooltipContent className="max-sm:hidden xl:hidden">
+                  {t('remove_label', { name })}
+                </TooltipContent>
+              </Tooltip>
+            )
+          )}
+        </TooltipProvider>
       </TableCell>
     </TableRow>
   );
