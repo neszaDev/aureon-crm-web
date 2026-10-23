@@ -3,7 +3,7 @@
 import { cn } from 'cn';
 import { ChevronDownIcon, XIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { FilterOption } from '@/components/crm/list/FilterSelect';
 import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import {
@@ -17,7 +17,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { ListQuery } from '@/libs/crm/ListQuery';
 import { listHref } from '@/libs/crm/ListQuery';
-import { Link, useRouter } from '@/libs/I18nNavigation';
+import { useRouter } from '@/libs/I18nNavigation';
 
 // From this many options the list gets a search field.
 const SEARCH_FROM = 8;
@@ -44,7 +44,8 @@ export const TOOL_PART =
 
 /**
  * A list filter as a toolbar chip that opens its control in a popover. Once on, the chip shows
- * the value (cut short, whole in its tooltip) and an × that clears it.
+ * the value (cut short, whole in its tooltip) and an × that clears it, handing the focus to the
+ * chip (the × leaves with the value).
  * @param props Component props.
  * @param props.label The filter, such as "Owner".
  * @param props.value Its value, when it is on.
@@ -63,13 +64,15 @@ export const FilterChip = (props: {
   children: React.ReactNode;
 }) => {
   const t = useTranslations('ListToolbar');
+  const router = useRouter();
+  const trigger = useRef<HTMLButtonElement>(null);
   const on = props.value !== undefined;
 
   return (
     <div className={toolClass(on)}>
       <Popover open={props.open} onOpenChange={props.onOpenChange}>
         <PopoverTrigger asChild>
-          <button type="button" className={cn(TOOL_PART, on && 'pr-1.5')}>
+          <button ref={trigger} type="button" className={cn(TOOL_PART, on && 'pr-1.5')}>
             <span className="shrink-0">
               {on ? t('chip_on', { label: props.label }) : props.label}
             </span>
@@ -89,14 +92,17 @@ export const FilterChip = (props: {
         </PopoverContent>
       </Popover>
       {on && (
-        <Link
-          href={props.clearHref}
-          scroll={false}
+        <button
+          type="button"
           aria-label={t('clear', { label: props.label })}
           className={cn(TOOL_PART, 'px-1.5')}
+          onClick={() => {
+            router.push(props.clearHref, { scroll: false });
+            trigger.current?.focus();
+          }}
         >
           <XIcon aria-hidden="true" className="size-3.5" />
-        </Link>
+        </button>
       )}
     </div>
   );

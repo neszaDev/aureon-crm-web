@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { ListSpec } from '@/libs/crm/ListQuery';
 import { parseListQuery } from '@/libs/crm/ListQuery';
 import messages from '@/locales/en.json';
@@ -55,13 +55,16 @@ describe(OptionsChip, () => {
     await expect.element(page.getByRole('option', { name: 'Riley Rep' })).not.toBeInTheDocument();
   });
 
-  it('shows the value it is on, and an × that clears it', async () => {
+  it('shows the value it is on, and an × that clears it, the focus back on the chip', async () => {
+    router.push.mockClear();
     await renderChip({ ownerId: '3' });
 
-    await expect.element(page.getByRole('button', { name: 'Owner: Riley Rep' })).toBeVisible();
-    await expect
-      .element(page.getByRole('link', { name: 'Clear the Owner filter' }))
-      .toHaveAttribute('href', `${PATH}?size=50`);
+    const chip = page.getByRole('button', { name: 'Owner: Riley Rep' });
+    await expect.element(chip).toBeVisible();
+    await userEvent.click(page.getByRole('button', { name: 'Clear the Owner filter' }));
+
+    expect(router.push).toHaveBeenCalledExactlyOnceWith(`${PATH}?size=50`, { scroll: false });
+    await expect.element(chip).toHaveFocus();
   });
 
   it('names a value the options no longer hold', async () => {

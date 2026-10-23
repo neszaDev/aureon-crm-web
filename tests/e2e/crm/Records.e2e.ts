@@ -532,7 +532,7 @@ test.describe('Records', () => {
     await page.getByRole('button', { name: 'Tag', exact: true }).click();
     await page.getByRole('option', { name: 'vip' }).click();
     await expect(page.getByRole('heading', { name: '2 contacts' })).toBeVisible();
-    await page.getByRole('link', { name: 'Clear the Tag filter' }).click();
+    await page.getByRole('button', { name: 'Clear the Tag filter' }).click();
     await expect(page.getByRole('heading', { name: '3 contacts' })).toBeVisible();
 
     // The company chip holds the record picker.

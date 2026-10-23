@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
+import { Toaster } from '@/components/ui/sonner';
 import type { ActionResult } from '@/libs/api/ApiError';
 import messages from '@/locales/en.json';
 import { InlineAddRow } from './InlineAddRow';
@@ -14,6 +15,7 @@ const renderRow = async (action: (name: string) => Promise<ActionResult>) => {
   await render(
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
       <InlineAddRow label="Add company" placeholder="Add company" action={action} />
+      <Toaster />
     </NextIntlClientProvider>,
   );
 
@@ -49,6 +51,19 @@ describe(InlineAddRow, () => {
     // Typing again clears it.
     await userEvent.type(field, 's');
     await expect.element(page.getByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it("shows the message, not another field's bare error, for a refusal off the name", async () => {
+    const action = vi.fn<(name: string) => Promise<ActionResult>>().mockResolvedValue({
+      ok: false,
+      message: 'Check the industry.',
+      fieldErrors: { industry: 'Too long' },
+    });
+    const field = await renderRow(action);
+
+    await userEvent.type(field, 'Brightwater{Enter}');
+
+    await expect.element(page.getByRole('alert')).toHaveTextContent('Check the industry.');
   });
 
   it('asks for a name rather than sending an empty one', async () => {

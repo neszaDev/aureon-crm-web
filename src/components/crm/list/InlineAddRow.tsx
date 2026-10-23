@@ -3,6 +3,7 @@
 import { LoaderCircleIcon, PlusIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId, useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { Link } from '@/libs/I18nNavigation';
 import { useSettle } from '@/utils/SettleAction';
@@ -13,7 +14,8 @@ const ROW =
 /**
  * The last row of a list or of a group, to add a record there. With `action` it is a field: type
  * a name and press Enter, and the row waits for the server's answer: the list refreshes with the
- * new record, or the refusal shows under the row (the text stays, to fix). Escape clears it. With
+ * new record and a toast says so, or the refusal shows under the row (the text stays, to fix): the
+ * name's own error, else the action's message. Escape clears it. With
  * `href` it is a link to the create form, filled in for the group.
  * @param props Component props.
  * @param props.label What it adds, such as "Add company" (with the group: "Add company owned by
@@ -34,7 +36,6 @@ export const InlineAddRow = (
   const errorId = useId();
   const [name, setName] = useState('');
   const [error, setError] = useState<string>();
-  const [added, setAdded] = useState('');
   const [isPending, startTransition] = useTransition();
 
   if ('href' in props) {
@@ -89,12 +90,10 @@ export const InlineAddRow = (
               const result = await settle(action(typed));
               if (result.ok) {
                 setName('');
-                setAdded(t('added', { name: typed }));
+                // Said aloud too, and seen when the new row lands off the page or the group.
+                toast.success(t('added', { name: typed }));
               } else {
-                const fields = Object.values(result.fieldErrors ?? {});
-                setError(
-                  fields.length > 0 ? fields.join(' ') : (result.message ?? t('add_failed')),
-                );
+                setError(result.fieldErrors?.name ?? result.message ?? t('add_failed'));
               }
             });
           }}
@@ -110,7 +109,6 @@ export const InlineAddRow = (
           {error}
         </p>
       )}
-      <output className="sr-only">{added}</output>
     </div>
   );
 };

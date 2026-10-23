@@ -63,7 +63,7 @@ export const ContactFilters = (props: {
           path={props.path}
           query={props.query}
           hideLabel
-          className="min-w-40 basis-60 md:max-w-64 md:flex-none"
+          className="min-w-40 basis-60 md:max-w-56 md:flex-none"
         />
       }
       end={

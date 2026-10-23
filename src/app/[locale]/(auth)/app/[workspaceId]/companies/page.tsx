@@ -118,7 +118,7 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
             path={path}
             query={query}
             hideLabel
-            className="min-w-40 basis-60 md:max-w-64 md:flex-none"
+            className="min-w-40 basis-60 md:max-w-56 md:flex-none"
           />
         }
         end={
@@ -206,7 +206,11 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
               placeholder={t('new')}
               action={addCompany.bind(null, workspace.id, {
                 ownerId: owner?.userId ?? null,
-                industry: industry ?? '',
+                // As the records spell it, which the filter may not.
+                industry: industry
+                  ? (pages?.find((page) => page.content.length > 0)?.content[0]?.industry ??
+                    industry)
+                  : '',
               })}
             />
           )}

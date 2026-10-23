@@ -67,10 +67,18 @@ export const ContactTable = (props: {
             query={props.query}
             className="w-[14%] truncate max-sm:hidden"
           />
-          <TableHead className="w-[16%] truncate max-md:hidden">{t('email')}</TableHead>
-          <TableHead className="w-[9%] truncate max-lg:hidden">{t('phone')}</TableHead>
-          <TableHead className="w-[13%] truncate max-sm:w-32">{t('owner')}</TableHead>
-          <TableHead className="w-[13%] truncate max-lg:hidden">{t('tags')}</TableHead>
+          <TableHead title={t('email')} className="w-[16%] truncate max-md:hidden">
+            {t('email')}
+          </TableHead>
+          <TableHead title={t('phone')} className="w-[9%] truncate max-lg:hidden">
+            {t('phone')}
+          </TableHead>
+          <TableHead title={t('owner')} className="w-[13%] truncate max-sm:w-32">
+            {t('owner')}
+          </TableHead>
+          <TableHead title={t('tags')} className="w-[13%] truncate max-lg:hidden">
+            {t('tags')}
+          </TableHead>
           <SortHeader
             label={t('updated')}
             sort="UPDATED_AT"

@@ -15,8 +15,9 @@ export type AddOwner = { userId: number; name: string };
  * A list page's records under their heading (read out, not drawn: the page header shows the
  * count). Ungrouped: the page of rows, the row that adds one, and the pager. Grouped by owner: a
  * collapsible section per group that has records, its first rows, the row that adds one, and
- * "View all N" when it holds more. Without records, the empty state: nothing matches the search and
- * filters, the archive is empty, or nothing yet (with the create action). The add row shows only where
+ * "View all N" when it holds more; the caller's own section shows even when empty, for its add row.
+ * Without records, the empty state: nothing matches the search and filters (clearing them keeps
+ * the grouping and the sort), the archive is empty, or nothing yet (with the create action). The add row shows only where
  * the new record lands in view: not in the archive, nor under Unassigned (a new record is always
  * someone's), nor for an owner the caller may not give records to.
  * @param props Component props.
@@ -68,7 +69,14 @@ export const RecordList = <Row,>(props: {
     />
   );
   if (isFiltered(props.query)) {
-    empty = <ListEmpty variant="filtered" clearHref={props.path} />;
+    // The search and filters go; the grouping and the sort stay.
+    const { group, sort, direction } = props.query.params;
+    empty = (
+      <ListEmpty
+        variant="filtered"
+        clearHref={listHref(props.path, { params: {} }, { group, sort, direction })}
+      />
+    );
   } else if (props.query.archived) {
     empty = (
       <ListEmpty
@@ -95,7 +103,9 @@ export const RecordList = <Row,>(props: {
       )}
       {props.groups?.map((group, index) => {
         const rows = props.pages[index];
-        if (!rows?.totalElements) {
+        // The caller's own group stays, empty too, for the row that adds one of theirs.
+        const addRow = group.member && add(group.member);
+        if (!rows || (!rows.totalElements && !(addRow && group.member?.userId === props.me))) {
           return null;
         }
         return (
@@ -113,8 +123,8 @@ export const RecordList = <Row,>(props: {
                 : undefined
             }
           >
-            {props.table(rows.content)}
-            {group.member && add(group.member)}
+            {rows.content.length > 0 && props.table(rows.content)}
+            {addRow}
           </StatusSection>
         );
       })}

@@ -51,12 +51,16 @@ export const CompanyTable = (props: {
       <TableHeader>
         <TableRow>
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
-          <TableHead className="w-[16%] truncate max-md:hidden">{t('industry')}</TableHead>
-          <TableHead className="w-[20%] truncate max-sm:w-32">{t('owner')}</TableHead>
-          <TableHead className="w-[10%] truncate text-right max-lg:hidden">
+          <TableHead title={t('industry')} className="w-[16%] truncate max-md:hidden">
+            {t('industry')}
+          </TableHead>
+          <TableHead title={t('owner')} className="w-[20%] truncate max-sm:w-32">
+            {t('owner')}
+          </TableHead>
+          <TableHead title={t('contacts')} className="w-[10%] truncate text-right max-lg:hidden">
             {t('contacts')}
           </TableHead>
-          <TableHead className="w-[12%] truncate text-right max-lg:hidden">
+          <TableHead title={t('open_deals')} className="w-[12%] truncate text-right max-lg:hidden">
             {t('open_deals')}
           </TableHead>
           <SortHeader

@@ -34,7 +34,12 @@ export const SortHeader = (props: {
   const Icon = active ? ICONS[direction] : ArrowUpDownIcon;
 
   return (
-    <TableHead aria-sort={active ? ARIA_SORT[direction] : undefined} className={props.className}>
+    <TableHead
+      aria-sort={active ? ARIA_SORT[direction] : undefined}
+      // Whole in its tooltip when a narrow column cuts it short.
+      title={props.label}
+      className={props.className}
+    >
       <Link
         href={listHref(props.path, props.query, { sort: props.sort, direction: next })}
         scroll={false}
