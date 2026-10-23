@@ -52,7 +52,7 @@ export const LeadLifecycle = (props: { status: Status; reason?: string }) => {
                 aria-hidden="true"
                 title={name}
                 className={cn(
-                  'text-[0.75rem] leading-snug font-medium [overflow-wrap:anywhere] sm:truncate',
+                  'truncate text-[0.75rem] font-medium',
                   state === 'current' && 'font-semibold text-(--tone-ink)',
                   !filled && 'text-muted-foreground',
                 )}

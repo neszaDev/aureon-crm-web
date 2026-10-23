@@ -115,49 +115,65 @@ export const StatusTrack = (props: {
 
   if (props.full) {
     return (
-      <TooltipProvider delayDuration={200}>
-        <ol data-tone={tone} aria-label={name} className={cn('flex gap-1', props.className)}>
-          {segments.map((segment) => (
-            <Tooltip key={segment.stage.id}>
-              <TooltipTrigger asChild>
-                <li className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <span
-                    aria-hidden="true"
-                    className={cn(
-                      'block h-1.5 rounded-full',
-                      segment.filled ? 'bg-(--tone)' : 'bg-rule',
-                    )}
-                  />
-                  <span aria-hidden="true" className="flex min-w-0 flex-col text-[0.75rem]">
-                    <span className="flex min-w-0 items-baseline gap-1">
-                      <span
-                        className={cn(
-                          // A phone's segments are narrow: the name wraps there rather than cut.
-                          'leading-snug font-medium [overflow-wrap:anywhere] sm:truncate',
-                          segment.own && 'font-semibold text-(--tone-ink)',
-                          !segment.filled && 'text-muted-foreground',
-                        )}
-                      >
-                        {segment.stage.name}
-                      </span>
-                      {segment.own && !closed && (
-                        <span className="shrink-0 text-muted-foreground tabular-nums">
-                          {t('days_short', { count: days })}
-                        </span>
+      <div data-tone={tone} className={cn('flex flex-col gap-1.5', props.className)}>
+        <TooltipProvider delayDuration={200}>
+          <ol aria-label={name} className="flex gap-1">
+            {segments.map((segment) => (
+              <Tooltip key={segment.stage.id}>
+                <TooltipTrigger asChild>
+                  <li className="flex min-w-0 flex-1 flex-col gap-1.5">
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'block h-1.5 rounded-full',
+                        segment.filled ? 'bg-(--tone)' : 'bg-rule',
                       )}
+                    />
+                    {/* A phone's segments are too narrow for names: the line under the track says it. */}
+                    <span
+                      aria-hidden="true"
+                      className="flex min-w-0 flex-col text-[0.75rem] max-sm:hidden"
+                    >
+                      <span className="flex min-w-0 items-baseline gap-1">
+                        <span
+                          className={cn(
+                            'truncate font-medium',
+                            segment.own && 'font-semibold text-(--tone-ink)',
+                            !segment.filled && 'text-muted-foreground',
+                          )}
+                        >
+                          {segment.stage.name}
+                        </span>
+                        {segment.own && !closed && (
+                          <span className="shrink-0 text-muted-foreground tabular-nums">
+                            {t('days_short', { count: days })}
+                          </span>
+                        )}
+                      </span>
+                      <span className="min-h-[1.2em] truncate text-[0.6875rem] text-muted-foreground tabular-nums">
+                        {segment.signed}
+                      </span>
                     </span>
-                    <span className="min-h-[1.2em] truncate text-[0.6875rem] text-muted-foreground tabular-nums max-sm:hidden">
-                      {segment.signed}
-                    </span>
-                  </span>
-                  <span className="sr-only">{segment.label}</span>
-                </li>
-              </TooltipTrigger>
-              <TooltipContent>{segment.label}</TooltipContent>
-            </Tooltip>
-          ))}
-        </ol>
-      </TooltipProvider>
+                    <span className="sr-only">{segment.label}</span>
+                  </li>
+                </TooltipTrigger>
+                <TooltipContent>{segment.label}</TooltipContent>
+              </Tooltip>
+            ))}
+          </ol>
+        </TooltipProvider>
+        <p
+          aria-hidden="true"
+          className="flex min-w-0 items-baseline gap-1 text-xs font-medium text-(--tone-ink) sm:hidden"
+        >
+          <span className="truncate">{props.stage.name}</span>
+          {!closed && (
+            <span className="shrink-0 text-muted-foreground tabular-nums">
+              {t('days_short', { count: days })}
+            </span>
+          )}
+        </p>
+      </div>
     );
   }
 
