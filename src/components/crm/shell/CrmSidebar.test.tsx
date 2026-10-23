@@ -19,6 +19,9 @@ const renderSidebar = async () =>
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
       <TooltipProvider>
         <input aria-label="Notes" />
+        <div contentEditable suppressContentEditableWarning>
+          Rich notes
+        </div>
         <CrmSidebar
           workspace={{ id: 1, name: 'Northwind Supply' }}
           workspaces={[{ id: 1, name: 'Northwind Supply', role: 'OWNER' }]}
@@ -61,6 +64,10 @@ describe(CrmSidebar, () => {
     await expect
       .element(toggle('Collapse sidebar'))
       .toHaveAttribute('aria-controls', 'crm-sidebar');
+    // Key values, as the attribute takes them.
+    await expect
+      .element(toggle('Collapse sidebar'))
+      .toHaveAttribute('aria-keyshortcuts', 'Control+\\ Meta+\\');
     expect(width()).toBe(240);
 
     await toggle('Collapse sidebar').click();
@@ -72,6 +79,8 @@ describe(CrmSidebar, () => {
     // The links keep their names, the current one its mark, and a tooltip names each icon.
     const companies = page.getByRole('link', { name: 'Companies' });
     await expect.element(companies).toHaveAttribute('aria-current', 'page');
+    // The tint alone doesn't show on the sidebar: the current icon is ringed.
+    expect(getComputedStyle(companies.element()).boxShadow).not.toBe('none');
     await companies.hover();
     await expect.element(page.getByRole('tooltip', { name: 'Companies' })).toBeInTheDocument();
 
@@ -116,10 +125,35 @@ describe(CrmSidebar, () => {
       .element(page.getByRole('tooltip'))
       .toHaveTextContent(/Collapse sidebar(⌘\\|Ctrl \\)/u);
 
+    // A held key's repeats don't flicker it.
+    pressToggleKey({ ctrlKey: true, repeat: true });
+    expect(document.documentElement.dataset.sidebar).toBe('expanded');
+
     await userEvent.click(page.getByRole('textbox', { name: 'Notes' }));
     pressToggleKey({ ctrlKey: true });
     expect(document.documentElement.dataset.sidebar).toBe('expanded');
+    await userEvent.click(page.getByText('Rich notes'));
+    pressToggleKey({ metaKey: true });
+    expect(document.documentElement.dataset.sidebar).toBe('expanded');
     await expect.element(toggle('Collapse sidebar')).toBeInTheDocument();
+  });
+
+  it('puts the stored choice back when React rendered <html> without it', async () => {
+    localStorage.setItem(SIDEBAR_KEY, 'collapsed');
+    // No head script: the root layout was rendered anew, its attributes cleared.
+    await renderSidebar();
+
+    expect(document.documentElement.dataset.sidebar).toBe('collapsed');
+    await expect.element(toggle('Expand sidebar')).toBeInTheDocument();
+  });
+
+  it('ignores a stored value it does not know', async () => {
+    localStorage.setItem(SIDEBAR_KEY, 'x" onload=1');
+    runHeadScript();
+    await renderSidebar();
+
+    expect(document.documentElement.dataset.sidebar).toBeUndefined();
+    expect(width()).toBe(240);
   });
 
   it('still toggles, and renders by width, when storage is off', async () => {

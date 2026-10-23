@@ -40,7 +40,7 @@ export const WorkspaceSwitcher = (props: {
       <ShellTip label={props.current.name} active={props.strip === true}>
         <DropdownMenuTrigger
           aria-label={t('switcher_label', { name: props.current.name })}
-          className="flex h-9 min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-md px-2 text-left text-foreground transition-colors duration-150 hover:bg-ink/6 data-[state=open]:bg-ink/6 strip:w-10 strip:flex-none"
+          className="flex h-9 min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-md px-2 text-left text-foreground transition-colors duration-150 hover:bg-ink/6 aria-expanded:bg-ink/6 strip:w-10 strip:flex-none"
         >
           <WorkspaceMark name={props.current.name} className="size-6 text-[0.625rem]" />
           <span

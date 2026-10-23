@@ -125,7 +125,7 @@ test.describe('Shell', () => {
     await expect(contacts).toHaveAttribute('aria-current', 'page');
 
     // Ctrl+\ expands it, outside a field.
-    await page.locator('body').click({ position: { x: 700, y: 300 } });
+    await page.getByRole('main').focus();
     await page.keyboard.press('Control+Backslash');
     await expect(collapse).toHaveAttribute('aria-expanded', 'true');
     await expect.poll(async () => await sidebarWidth(page)).toBe(240);

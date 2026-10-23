@@ -58,7 +58,8 @@ export const CrmRail = (props: {
           className={cn(
             'grid place-items-center outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2',
             RAIL_BUTTON,
-            home && 'bg-violet text-white hover:bg-violet',
+            // The fill is 2.71:1 on the rail: a light ring carries the 3:1.
+            home && 'bg-violet text-white ring-1 ring-on-rail/50 ring-inset hover:bg-violet',
           )}
         >
           <HouseIcon className="size-5" />

@@ -2,17 +2,24 @@
 
 import { ChevronsLeftIcon, ChevronsRightIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useLayoutEffect, useSyncExternalStore } from 'react';
 import { CrmNav } from '@/components/crm/shell/CrmNav';
 import { ShellTip } from '@/components/crm/shell/ShellTip';
 import { WorkspaceSwitcher } from '@/components/crm/shell/WorkspaceSwitcher';
 import { Button } from '@/components/ui/button';
 import type { components } from '@/libs/api/schema';
-import { isSidebarCollapsed, subscribeToSidebar, toggleSidebar } from '@/libs/crm/Sidebar';
+import {
+  applyStoredSidebar,
+  isSidebarCollapsed,
+  subscribeToSidebar,
+  toggleSidebar,
+} from '@/libs/crm/Sidebar';
 import { useIsApple } from '@/utils/Platform';
 
 // The backslash key: its character, or on a layout whose key gives another one (Thai), its place.
+// Once per press: a held key's repeats would flicker the sidebar.
 const isToggleKey = (event: KeyboardEvent) =>
+  !event.repeat &&
   (event.metaKey || event.ctrlKey) &&
   !event.altKey &&
   !event.shiftKey &&
@@ -44,6 +51,7 @@ export const CrmSidebar = (props: {
   const apple = useIsApple();
   const label = collapsed ? t('expand_sidebar') : t('collapse_sidebar');
 
+  useLayoutEffect(applyStoredSidebar, []);
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       // Below 768 px the sidebar is in the drawer, which has no strip.
@@ -64,39 +72,45 @@ export const CrmSidebar = (props: {
       data-strip
       className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col overflow-hidden border-r border-rule bg-sidebar transition-[width] duration-200 ease-out-expo motion-reduce:transition-none md:flex strip:w-14"
     >
-      <div className="flex h-12 shrink-0 items-center gap-1 px-2 strip:h-auto strip:flex-col strip:items-start strip:pt-2">
+      <div className="flex h-12 shrink-0 items-center px-2">
         <WorkspaceSwitcher
           current={props.workspace}
           workspaces={props.workspaces}
           strip={collapsed}
         />
-        <ShellTip
-          label={
-            <>
-              {label}
-              <kbd data-slot="kbd" className="font-sans opacity-75">
-                {apple ? '⌘\\' : 'Ctrl \\'}
-              </kbd>
-            </>
-          }
-        >
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={label}
-            aria-expanded={!collapsed}
-            aria-controls="crm-sidebar"
-            aria-keyshortcuts="Control+Backslash Meta+Backslash"
-            onClick={toggleSidebar}
-            className="text-ink-2 hover:bg-ink/6 aria-expanded:bg-transparent aria-expanded:hover:bg-ink/6 sm:size-7 strip:ml-1.5"
-          >
-            {/* Drawn by CSS, so the first paint shows the right one before React knows. */}
-            <ChevronsLeftIcon className="strip:hidden" />
-            <ChevronsRightIcon className="hidden strip:block" />
-          </Button>
-        </ShellTip>
       </div>
-      <CrmNav workspaceId={props.workspace.id} strip={collapsed} />
+      <CrmNav
+        workspaceId={props.workspace.id}
+        strip={collapsed}
+        // Beside Settings, so the workspace's name has the head's width.
+        footer={
+          <ShellTip
+            label={
+              <>
+                {label}
+                <kbd data-slot="kbd" className="font-sans opacity-75">
+                  {apple ? '⌘\\' : 'Ctrl \\'}
+                </kbd>
+              </>
+            }
+          >
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={label}
+              aria-expanded={!collapsed}
+              aria-controls="crm-sidebar"
+              aria-keyshortcuts="Control+\ Meta+\"
+              onClick={toggleSidebar}
+              className="text-ink-2 hover:bg-ink/6 aria-expanded:bg-transparent aria-expanded:hover:bg-ink/6 sm:size-7 strip:ml-1.5"
+            >
+              {/* Drawn by CSS, so the first paint shows the right one before React knows. */}
+              <ChevronsLeftIcon className="strip:hidden" />
+              <ChevronsRightIcon className="hidden strip:block" />
+            </Button>
+          </ShellTip>
+        }
+      />
     </div>
   );
 };

@@ -12,6 +12,23 @@ export const SIDEBAR_KEY = 'aureon.sidebar';
  */
 export const SIDEBAR_SCRIPT = `try{var s=localStorage.getItem('${SIDEBAR_KEY}');if(s==='collapsed'||s==='expanded')document.documentElement.dataset.sidebar=s}catch(e){}`;
 
+/**
+ * Puts the stored choice on `<html>` again, as `SIDEBAR_SCRIPT` did before the first paint: React
+ * clears `<html>`'s attributes when it renders the root layout anew (Fast Refresh, or a client
+ * render after a hydration error). Storage that can't be read leaves the width to decide. Browser
+ * only.
+ */
+export const applyStoredSidebar = () => {
+  try {
+    const stored = localStorage.getItem(SIDEBAR_KEY);
+    if (stored === 'collapsed' || stored === 'expanded') {
+      document.documentElement.dataset.sidebar = stored;
+    }
+  } catch {
+    // Storage is off (a private window, blocked site data).
+  }
+};
+
 const WIDE = '(width >= 80rem)';
 
 /**

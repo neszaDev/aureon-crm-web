@@ -64,14 +64,20 @@ const GROUP_LABEL =
 /**
  * The workspace's sections in the sidebar: its spaces (Companies to Tasks, each on its colour),
  * its insights (Dashboard, Reports) and Settings at the foot. The current one is filled with the
- * violet tint and set in a heavier weight (a cue besides colour); a hovered one only darkens. In
- * the strip each is its icon, named in a tooltip; in the drawer the sidebar is always expanded.
+ * violet tint and set in a heavier weight (a cue besides colour), and in the strip ringed in violet;
+ * a hovered one only darkens. In the strip each is its icon, named in a tooltip; in the drawer the
+ * sidebar is always expanded.
  * @param props Component props.
  * @param props.workspaceId The workspace the links stay in.
  * @param props.strip Whether the sidebar is its icon strip: the links' tooltips show.
+ * @param props.footer What sits beside Settings: the sidebar's collapse toggle.
  * @returns The navigation.
  */
-export const CrmNav = (props: { workspaceId: number; strip?: boolean }) => {
+export const CrmNav = (props: {
+  workspaceId: number;
+  strip?: boolean;
+  footer?: React.ReactNode;
+}) => {
   const t = useTranslations('CrmShell');
   const spacesId = useId();
   const insightsId = useId();
@@ -92,7 +98,8 @@ export const CrmNav = (props: { workspaceId: number; strip?: boolean }) => {
           className={cn(
             'flex h-8 items-center gap-2.5 overflow-hidden rounded-md px-2.5 text-sm font-medium whitespace-nowrap no-underline transition-colors duration-150',
             entry.current
-              ? 'bg-violet-tint font-semibold text-violet-ink'
+              ? // In the strip the icon alone can't carry the tint (1.05:1 on the sidebar): a ring.
+                'bg-violet-tint font-semibold text-violet-ink strip:ring-[1.5px] strip:ring-violet-ink strip:ring-inset'
               : 'text-ink-2 hover:bg-ink/6 hover:text-foreground',
           )}
         >
@@ -135,14 +142,17 @@ export const CrmNav = (props: { workspaceId: number; strip?: boolean }) => {
           )}
         </ul>
       </div>
-      <ul className="border-t border-rule p-2">
-        {item({
-          label: t('nav_settings'),
-          href: '/settings/workspace',
-          current: section === 'settings',
-          icon: plainIcon(SettingsIcon),
-        })}
-      </ul>
+      <div className="flex items-center gap-1 border-t border-rule p-2 strip:flex-col strip:items-start">
+        <ul className="min-w-0 flex-1 strip:w-full">
+          {item({
+            label: t('nav_settings'),
+            href: '/settings/workspace',
+            current: section === 'settings',
+            icon: plainIcon(SettingsIcon),
+          })}
+        </ul>
+        {props.footer}
+      </div>
     </nav>
   );
 };
