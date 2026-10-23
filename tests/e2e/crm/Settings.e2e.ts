@@ -435,11 +435,11 @@ test.describe('Settings', () => {
     await page.getByRole('menuitemradio', { name: 'Dark' }).click();
     await expect(page.locator('html')).toHaveClass(/\bdark\b/u);
     // The browser's bar takes the lacquer ground too, though the OS is light.
-    await expect.poll(async () => await barColours(page)).toStrictEqual(['#141212', '#141212']);
+    await expect.poll(async () => await barColours(page)).toStrictEqual(['#17151f', '#17151f']);
     await page.keyboard.press('Escape');
     await page.reload();
     await expect(page.locator('html')).toHaveClass(/\bdark\b/u);
-    await expect.poll(async () => await barColours(page)).toStrictEqual(['#141212', '#141212']);
+    await expect.poll(async () => await barColours(page)).toStrictEqual(['#17151f', '#17151f']);
 
     await account.click();
     await page.getByRole('menuitem', { name: 'Language' }).click();
@@ -447,7 +447,7 @@ test.describe('Settings', () => {
     await expect(page).toHaveURL(/\/th\/app\/\d+\/settings\/pipeline$/u);
     await expect(page).toHaveTitle('ไปป์ไลน์');
     // A navigation in the app keeps it.
-    expect(await barColours(page)).toStrictEqual(['#141212', '#141212']);
+    expect(await barColours(page)).toStrictEqual(['#17151f', '#17151f']);
     await expect(
       page.getByRole('navigation', { name: 'เมนูพื้นที่ทำงาน' }).getByRole('link', { name: 'การตั้งค่า' }),
     ).toHaveAttribute('aria-current', 'page');

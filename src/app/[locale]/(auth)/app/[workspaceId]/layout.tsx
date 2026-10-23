@@ -48,7 +48,7 @@ export default async function WorkspaceLayout(props: {
     <CrmShell
       workspace={{ id: workspace.id, name: workspace.name, timeZone: workspace.timezone }}
       workspaces={mine.workspaces}
-      user={{ email: user.email, displayName: user.displayName }}
+      user={{ id: user.id, email: user.email, displayName: user.displayName }}
       // Any other answer (a 5xx) leaves the bell saying so, and the page usable.
       reminders={
         reminders.reminders && slimReminders(reminders.reminders, todayIn(workspace.timezone))

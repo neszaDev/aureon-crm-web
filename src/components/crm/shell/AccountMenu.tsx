@@ -15,7 +15,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { signOut } from '@/actions/AuthActions';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,16 +80,18 @@ const ThemeChoices = () => {
 };
 
 /**
- * Your seal, opening the account menu: who is signed in, profile, theme, language, the
+ * Your avatar, opening the account menu: who is signed in, profile, theme, language, the
  * boilerplate's demo pages and sign out.
  * @param props Component props.
+ * @param props.userId The signed-in user's id (their avatar's colour).
  * @param props.email Email of the signed-in user.
  * @param props.displayName Their display name, if set.
  * @param props.workspaceId The open workspace, for the profile link (none outside one).
- * @param props.className Extra classes for the trigger (focus colour on the vermilion bar).
+ * @param props.className Extra classes for the trigger (focus colour on the ink-violet bar).
  * @returns The menu.
  */
 export const AccountMenu = (props: {
+  userId: number;
   email: string;
   displayName?: string;
   workspaceId?: number;
@@ -98,6 +100,7 @@ export const AccountMenu = (props: {
   const t = useTranslations('AccountMenu');
   const tTheme = useTranslations('ThemeSwitcher');
   const locale = useLocale();
+  const person = { userId: props.userId, displayName: props.displayName, email: props.email };
   const pathname = usePathname();
   const router = useRouter();
   const settle = useSettle();
@@ -111,11 +114,11 @@ export const AccountMenu = (props: {
           props.className,
         )}
       >
-        <Seal name={props.displayName} email={props.email} />
+        <PersonAvatar person={person} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="flex items-center gap-3 py-2 font-normal text-foreground">
-          <Seal name={props.displayName} email={props.email} size="lg" />
+          <PersonAvatar person={person} />
           <span className="flex min-w-0 flex-col">
             {props.displayName && (
               <span className="truncate font-semibold">{props.displayName}</span>

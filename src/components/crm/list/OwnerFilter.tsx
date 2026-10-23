@@ -27,7 +27,7 @@ export const OwnerFilter = (props: {
 }) => {
   const t = useTranslations('OwnerFilter');
   const options: FilterOption[] = [
-    { value: String(props.me.id), label: t('me'), person: props.me },
+    { value: String(props.me.id), label: t('me'), person: { ...props.me, userId: props.me.id } },
     { value: 'unassigned', label: t('unassigned') },
     ...props.members
       .filter((member) => member.userId !== props.me.id)

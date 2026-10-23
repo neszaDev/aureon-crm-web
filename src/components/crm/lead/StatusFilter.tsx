@@ -48,7 +48,7 @@ export const StatusFilter = (props: { path: string; query: ListQuery }) => {
         }}
       >
         {LEAD_STATUSES.map((status) => (
-          <ToggleGroupItem key={status} value={status} className="h-10 px-3">
+          <ToggleGroupItem key={status} value={status} className="h-9 px-3 sm:h-8">
             {selected.includes(status) && <CheckIcon aria-hidden="true" />}
             {tStatus(`status_${status}`)}
           </ToggleGroupItem>

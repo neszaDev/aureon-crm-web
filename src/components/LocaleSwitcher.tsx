@@ -20,7 +20,7 @@ const TONES = {
  * The language picker: the UI kit's small native select (`NativeSelect`), drawn here without
  * its class merging (`cn`), whose rule tables the public pages would otherwise load for it alone.
  * @param props Component props.
- * @param props.tone `paper` (default), `seal` on the vermilion fields of the public pages, or
+ * @param props.tone `paper` (default), `seal` on the ink-violet fields of the public pages, or
  *   `folder` on the boilerplate demo's green.
  * @param props.className Extra classes.
  * @returns The picker.

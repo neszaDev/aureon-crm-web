@@ -1,11 +1,11 @@
 import { useTranslations } from 'next-intl';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { Badge } from '@/components/ui/badge';
 import type { components } from '@/libs/api/schema';
 
 /**
  * The top of a record page: its number in mono, its name (the page's `h1`, focusable so focus
- * can land there after an action), "Archived" or its status when it is, its owner's seal (a
+ * can land there after an action), "Archived" or its status when it is, its owner's avatar (a
  * task's assignee), a figure under the name (a deal's amount), and its actions.
  * @param props Component props.
  * @param props.number The record number, such as `C-0042`.
@@ -65,7 +65,7 @@ export const RecordHeader = (props: {
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           {props.owner ? (
             <>
-              <Seal name={props.owner.displayName} email={props.owner.email} size="sm" />
+              <PersonAvatar person={props.owner} size="sm" />
               {props.assigned
                 ? t('assignee', { name: props.owner.displayName ?? props.owner.email })
                 : t('owner', { name: props.owner.displayName ?? props.owner.email })}

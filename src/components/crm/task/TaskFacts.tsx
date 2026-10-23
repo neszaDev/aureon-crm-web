@@ -1,7 +1,7 @@
 import { useLocale, useTranslations } from 'next-intl';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { LinkedRecords } from '@/components/crm/record/LinkedRecords';
 import { RecordFacts } from '@/components/crm/record/RecordFacts';
-import { Seal } from '@/components/crm/Seal';
 import { TaskDue } from '@/components/crm/task/TaskRow';
 import type { components } from '@/libs/api/schema';
 import { formatInstant } from '@/libs/crm/Format';
@@ -54,11 +54,7 @@ export const TaskFacts = (props: {
           // Missing once that member left the workspace.
           value: props.task.createdBy ? (
             <span className="flex items-center gap-2">
-              <Seal
-                name={props.task.createdBy.displayName}
-                email={props.task.createdBy.email}
-                size="sm"
-              />
+              <PersonAvatar person={props.task.createdBy} size="sm" />
               {props.task.createdBy.displayName ?? props.task.createdBy.email}
             </span>
           ) : (

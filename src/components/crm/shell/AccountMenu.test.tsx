@@ -21,7 +21,7 @@ describe(AccountMenu, () => {
     vi.mocked(signOut).mockRejectedValue(new TypeError('Failed to fetch'));
     await render(
       <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-        <AccountMenu email="mia@acme.test" displayName="Mia Manager" workspaceId={1} />
+        <AccountMenu userId={3} email="mia@acme.test" displayName="Mia Manager" workspaceId={1} />
         <Toaster />
       </NextIntlClientProvider>,
     );

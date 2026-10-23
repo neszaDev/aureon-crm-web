@@ -31,13 +31,13 @@ test.describe('Sanity', () => {
 
       expect(response?.status()).toBe(404);
       await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
-      // Aureon's public page: the vermilion bar with the wordmark, one card, no stamp on it.
+      // Aureon's public page: the ink-violet bar with the wordmark, one card, no stamp on it.
       const bar = page.getByRole('banner');
-      await expect(bar).toHaveCSS('background-color', 'rgb(200, 54, 28)');
+      await expect(bar).toHaveCSS('background-color', 'rgb(29, 26, 46)');
       await expect(bar.getByRole('link', { name: 'Aureon CRM home' })).toBeVisible();
       await expect(page.getByText("We can't find that page.", { exact: false })).toBeVisible();
       const home = page.getByRole('link', { name: 'Back to home' });
-      await expect(home).toHaveCSS('height', '36px');
+      await expect(home).toHaveCSS('height', '32px');
 
       await home.click();
       await expect(page).toHaveURL(/\/$/u);

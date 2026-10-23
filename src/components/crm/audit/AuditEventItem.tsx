@@ -1,6 +1,6 @@
 import { cn } from 'cn';
 import { useLocale, useTranslations } from 'next-intl';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import type { components } from '@/libs/api/schema';
 import {
   formatAmount,
@@ -193,7 +193,7 @@ const sideOf = (value: unknown, side: 'from' | 'to'): unknown =>
 
 /**
  * One entry of the history: who did what to which record, when (in the workspace's time zone),
- * and what changed. The actor signs it with their own seal, or it says "Former member" without
+ * and what changed. The actor signs it with their own avatar, or it says "Former member" without
  * one. The record is a link to its page (a deleted one and an activity have none). An update
  * lists its changed fields as "Field: from → to": money with its currency when the event names
  * it (never a guess), days and instants as dates in the workspace's zone, a member or a record by
@@ -356,9 +356,9 @@ export const AuditEventItem = (props: {
   return (
     <li className="flex items-start gap-3 border-t border-rule px-4 py-3 sm:px-5">
       {actorName && event.actor ? (
-        <Seal name={event.actor.displayName} email={event.actor.email ?? ''} size="sm" />
+        <PersonAvatar person={event.actor} size="sm" />
       ) : (
-        // Nobody signs it: a seal is only ever someone's.
+        // Nobody signs it: an avatar is only ever someone's.
         <span aria-hidden="true" className="size-6 shrink-0" />
       )}
       <div className="flex min-w-0 flex-1 flex-col gap-1">

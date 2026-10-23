@@ -157,7 +157,7 @@ const Group = (props: { heading: string; length: number; children: React.ReactNo
  * @param props.workspaceId The workspace.
  * @param props.timeZone The workspace's time zone, for due times and the day a read is on.
  * @param props.reminders What the layout read; undefined when it could not be.
- * @param props.className Extra classes for the trigger (colours on the vermilion bar).
+ * @param props.className Extra classes for the trigger (colours on the ink-violet bar).
  * @returns The bell and its popover.
  */
 export const RemindersBell = (props: {

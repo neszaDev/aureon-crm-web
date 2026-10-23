@@ -32,7 +32,7 @@ const StaticFallback = () => (
         onClick={() => {
           window.location.reload();
         }}
-        className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-ply hover:bg-seal-deep focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+        className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-violet-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
       >
         <span lang="en">Reload</span>&nbsp;·&nbsp;<span lang="fr">Recharger</span>&nbsp;·&nbsp;
         <span lang="th">โหลดใหม่</span>

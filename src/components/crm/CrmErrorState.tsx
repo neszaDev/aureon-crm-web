@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Link } from '@/libs/I18nNavigation';
 
 /**
- * What a CRM error boundary shows: what happened, in crimson with its icon (never the seal's
- * vermilion), a retry, and the way back to the workspace list.
+ * What a CRM error boundary shows: what happened, in the danger red with its icon, a
+ * retry, and the way back to the workspace list.
  * @param props Component props.
  * @param props.retry Loads the failed segment again.
  * @returns The error panel.

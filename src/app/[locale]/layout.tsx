@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
-import { Anuphan } from 'next/font/google';
+import { Anuphan, Inter } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { ThemeClass } from '@/components/ThemeClass';
 import { routing } from '@/libs/I18nRouting';
@@ -9,12 +9,17 @@ import { THEME_GROUNDS, THEME_SCRIPT } from '@/libs/Theme';
 import { getBaseUrl } from '@/utils/Helpers';
 import '@/styles/global.css';
 
-// Anuphan sets Latin and Thai alike, self-hosted by next/font at build (the demos' Kalam is in
-// their own layout).
+// Inter sets the UI and Anuphan the Thai Inter lacks (one stack, `--font-sans`), both self-hosted
+// by next/font at build; the demos' Kalam is in their own layout. The subsets are the ones
+// preloaded on every page; latin-ext (œ and rarer letters) still loads when a page draws one.
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
 const anuphan = Anuphan({
-  // The subsets preloaded on every page; latin-ext (œ and rarer letters) still loads when a page
-  // draws one of its letters.
-  subsets: ['latin', 'thai'],
+  subsets: ['thai'],
   variable: '--font-anuphan',
   display: 'swap',
 });
@@ -77,7 +82,11 @@ export default async function RootLayout(props: {
   // The theme class comes from the cookie in the browser (THEME_SCRIPT, before the first paint),
   // so pages stay static; the server renders none, hence suppressHydrationWarning.
   return (
-    <html lang={locale} className={anuphan.variable} suppressHydrationWarning>
+    <html
+      lang={locale}
+      className={`${inter.variable} ${anuphan.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         {/* The ground of each OS scheme; `applyTheme` sets both to a theme chosen in the app. */}
         <meta

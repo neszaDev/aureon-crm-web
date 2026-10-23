@@ -1,0 +1,81 @@
+import { NextIntlClientProvider } from 'next-intl';
+import { describe, expect, it, vi } from 'vitest';
+import { render } from 'vitest-browser-react';
+import { page, userEvent } from 'vitest/browser';
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { LEAD_STATUS_TONES } from '@/libs/crm/StatusColors';
+import messages from '@/locales/en.json';
+import { StatusPill } from './StatusPill';
+
+const renderPill = async (pill: React.ReactNode) =>
+  await render(
+    <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+      {pill}
+    </NextIntlClientProvider>,
+  );
+
+describe(StatusPill, () => {
+  it('takes the tone of the status it shows', async () => {
+    await renderPill(<StatusPill tone={LEAD_STATUS_TONES.QUALIFIED} label="Qualified" />);
+
+    await expect.element(page.getByText('Qualified', { exact: true })).toBeVisible();
+    expect(document.querySelector<HTMLElement>('[data-tone]')?.dataset.tone).toBe('amber');
+  });
+
+  it('reads as one phrase naming what it is the status of', async () => {
+    await renderPill(<StatusPill tone="amber" label="Qualified" />);
+
+    const pill = document.querySelector('[data-tone]');
+
+    // The drawn word is hidden from assistive technology, which reads the phrase instead.
+    expect(pill?.querySelector('.sr-only')?.textContent).toBe('Status: Qualified');
+    await expect
+      .element(page.getByText('Qualified', { exact: true }))
+      .toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('names a stage as a stage', async () => {
+    await renderPill(<StatusPill tone="blue" label="Proposal" field="Stage" />);
+
+    expect(document.querySelector('[data-tone] .sr-only')?.textContent).toBe('Stage: Proposal');
+  });
+
+  describe('with a menu', () => {
+    it('is the button that opens it, named "Status: Qualified"', async () => {
+      const choose = vi.fn<() => void>();
+      await renderPill(
+        <StatusPill
+          tone="amber"
+          label="Qualified"
+          menu={<DropdownMenuItem onSelect={choose}>Contacted</DropdownMenuItem>}
+        />,
+      );
+
+      const button = page.getByRole('button', { name: 'Status: Qualified' });
+      await expect.element(button).toHaveAttribute('aria-expanded', 'false');
+      await button.click();
+      await page.getByRole('menuitem', { name: 'Contacted' }).click();
+
+      expect(choose).toHaveBeenCalledOnce();
+    });
+
+    it('opens from the keyboard and gives focus back when closed', async () => {
+      await renderPill(
+        <StatusPill
+          tone="amber"
+          label="Qualified"
+          menu={<DropdownMenuItem>Contacted</DropdownMenuItem>}
+        />,
+      );
+
+      const button = page.getByRole('button', { name: 'Status: Qualified' });
+      await userEvent.keyboard('{Tab}');
+      await expect.element(button).toHaveFocus();
+      await userEvent.keyboard('{Enter}');
+      await expect.element(page.getByRole('menuitem', { name: 'Contacted' })).toHaveFocus();
+      await userEvent.keyboard('{Escape}');
+
+      await expect.element(button).toHaveFocus();
+    });
+  });
+});

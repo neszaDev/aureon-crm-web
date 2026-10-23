@@ -23,7 +23,7 @@ export const MobileCrmNav = (props: { children: React.ReactNode }) => {
           variant="ghost"
           size="icon"
           aria-label={t('open_menu')}
-          className="text-on-seal hover:bg-black/10 hover:text-white focus-visible:ring-on-seal focus-visible:ring-offset-seal aria-expanded:bg-black/10"
+          className="text-on-seal hover:bg-rail-raised hover:text-white focus-visible:ring-on-seal focus-visible:ring-offset-seal aria-expanded:bg-rail-raised"
         >
           <MenuIcon />
         </Button>
@@ -31,7 +31,7 @@ export const MobileCrmNav = (props: { children: React.ReactNode }) => {
       <SheetContent
         side="left"
         closeLabel={t('close_menu')}
-        className="w-72 border-none bg-seal p-0 pt-10 text-on-seal [&>[data-slot=sheet-close]]:text-on-seal [&>[data-slot=sheet-close]]:hover:bg-black/10 [&>[data-slot=sheet-close]]:focus-visible:ring-on-seal [&>[data-slot=sheet-close]]:focus-visible:ring-offset-seal"
+        className="w-72 border-none bg-seal p-0 pt-10 text-on-seal [&>[data-slot=sheet-close]]:text-on-seal [&>[data-slot=sheet-close]]:hover:bg-rail-raised [&>[data-slot=sheet-close]]:focus-visible:ring-on-seal [&>[data-slot=sheet-close]]:focus-visible:ring-offset-seal"
       >
         <SheetTitle className="sr-only">{t('nav_label')}</SheetTitle>
         {props.children}

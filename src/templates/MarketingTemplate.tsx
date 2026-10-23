@@ -13,7 +13,7 @@ const NAV_LINK =
   'rounded-md px-2.5 py-1.5 text-[0.9375rem] font-medium text-on-seal no-underline hover:bg-black/10 focus-visible:outline-on-seal';
 
 /**
- * Public pages: the vermilion header (the top of the landing page's band), the page on the
+ * Public pages: the ink-violet header (the top of the landing page's band), the page on the
  * ground, and a footer with the sample-product note.
  * @param props Component props.
  * @param props.children Page content.

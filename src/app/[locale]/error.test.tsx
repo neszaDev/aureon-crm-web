@@ -8,7 +8,7 @@ import '@/styles/global.css';
 import ErrorPage from './error';
 
 describe(ErrorPage, () => {
-  it("draws a public page's error in Aureon's world: the vermilion bar and one card", async () => {
+  it("draws a public page's error in Aureon's world: the ink-violet bar and one card", async () => {
     const retry = vi.fn<() => void>();
     // Only what the root layout gives the public pages' client components.
     await render(
@@ -22,11 +22,11 @@ describe(ErrorPage, () => {
     );
 
     const bar = page.getByRole('banner').element();
-    expect(getComputedStyle(bar).backgroundColor).toBe('rgb(200, 54, 28)');
+    expect(getComputedStyle(bar).backgroundColor).toBe('rgb(29, 26, 46)');
     await expect.element(page.getByRole('link', { name: 'Aureon CRM home' })).toBeVisible();
     const card = page.getByRole('alert').element();
-    // Bond paper with the hairline, never the demos' Marksheet card.
-    expect(getComputedStyle(card).backgroundColor).toBe('rgb(251, 251, 249)');
+    // A white panel with the hairline, never the demos' Marksheet card.
+    expect(getComputedStyle(card).backgroundColor).toBe('rgb(255, 255, 255)');
     expect(document.querySelector('.paper, [class*="text-ink-"], [class*="bg-folder"]')).toBeNull();
     await expect
       .element(page.getByRole('heading', { level: 1, name: 'Something went wrong' }))

@@ -3,12 +3,18 @@
 @import 'shadcn/tailwind.css';
 
 /*
- * Aureon, "Seal and circular": every step of a relationship is signed. A vermilion seal rail,
- * bond-paper panels on a grey ground, sumi ink text, one hairline system; people are round
- * vermilion seals. Dark is lacquer black with the same seal.
+ * Aureon, a work OS for the pipeline: an ink-violet rail beside a cool off-white sidebar and a
+ * white canvas, Aureon violet for primary actions, selection and focus, and status colours that do
+ * the work. Hairlines separate; shadows only lift what floats (menus, popovers, the side panel,
+ * dialogs). Dark is the same structure on violet-black.
  *
- * Seal roles: `seal` and `seal-deep` are fills that carry white text (rail, primary button);
- * seal-coloured text, rings and lines on paper use `seal-ink`, which stays AA in both themes.
+ * Status tones: `--status-<tone>` is the hue (dots, bars, chips), `-tint` a pill's ground and
+ * `-ink` the text on it or on the canvas (4.5:1 or more on both, in both themes). Any element with
+ * `data-tone="<tone>"` gets them as `--tone`, `--tone-tint` and `--tone-ink`.
+ *
+ * Legacy names: the pages Tasks 2-10 of the rework rebuild still read the "Seal and circular"
+ * tokens; they resolve to this palette (`seal` is the rail, `seal-ink` the violet ink, `paper`
+ * a panel, `ground` the canvas, `ink` the text, `rule` the hairline).
  */
 
 /* Dark: the `.dark` class on <html>, or the OS preference while the theme cookie is `system`. */
@@ -27,31 +33,72 @@
 :root {
   color-scheme: light;
 
-  --seal: #c8361c;
-  --seal-deep: #9e2812;
-  --seal-tint: #f6e3dc;
-  --seal-ink: #b8321a;
-  /* Text on the seal fills (rail, mobile bar): 4.9:1 on seal, 7:1 on seal-deep. */
-  --on-seal: #fff4f0;
-  --paper: #fbfbf9;
-  --ground: #eff0ec;
-  /* Controls (inputs, outline buttons, menus) sit on white, a step above the paper. */
+  --rail: #1d1a2e;
+  /* A hovered or current item on the rail. */
+  --rail-raised: #2e2a45;
+  --on-rail: #ffffff;
+  --sidebar: #f7f7fa;
+  --ground: #ffffff;
+  --paper: #ffffff;
+  /* Controls (inputs, outline buttons, menus). */
   --field: #ffffff;
-  --ink: #1c1d21;
-  --ink-2: #5b5e66;
-  --rule: #d9dad4;
+  --ink: #1f2030;
+  --ink-2: #5d6072;
+  --rule: #e6e6ec;
 
-  /* Danger is crimson, kept apart from the seal's vermilion; pair it with an icon and words. */
-  --danger: #b4123a;
-  --warning: #8a5700;
-  --success: #2f6b4f;
-  --info: #1f5d8c;
+  /* Primary fills carry white text (6.25:1); violet ink is violet text, rings and focus. */
+  --violet: #5a45e0;
+  --violet-hover: #4a36c7;
+  --violet-tint: #efedfd;
+  --violet-ink: #5a45e0;
 
-  --chart-1: var(--seal);
-  --chart-2: #1f5d8c;
-  --chart-3: #2f6b4f;
-  --chart-4: #a86a10;
-  --chart-5: #6d4c8f;
+  --status-blue: #2f7de1;
+  --status-blue-tint: #e4eefb;
+  --status-blue-ink: #2769bd;
+  --status-violet: #5a45e0;
+  --status-violet-tint: #efedfd;
+  --status-violet-ink: #5a45e0;
+  /* The contract's amber is 2.3:1 on white: as a hue it only ever sits beside its words. */
+  --status-amber: #e69a1c;
+  --status-amber-tint: #fcf2e1;
+  --status-amber-ink: #956412;
+  --status-green: #1f9d63;
+  --status-green-tint: #e2f2eb;
+  --status-green-ink: #187a4d;
+  --status-red: #d8433a;
+  --status-red-tint: #fae7e5;
+  --status-red-ink: #bc3a32;
+  --status-slate: #8b8fa3;
+  --status-slate-tint: #f0f0f3;
+  --status-slate-ink: #686b7a;
+
+  /* People's avatars, by member id: white initials at 5:1 or more on each, in both themes. */
+  --avatar-1: #5a45e0;
+  --avatar-2: #2769bd;
+  --avatar-3: #187a4d;
+  --avatar-4: #bc3a32;
+  --avatar-5: #956412;
+  --avatar-6: #0e7490;
+  --avatar-7: #b4367a;
+  --avatar-8: #686b7a;
+
+  /* Danger is the red ink; pair it with an icon and words. */
+  --danger: var(--status-red-ink);
+  --warning: var(--status-amber-ink);
+  --success: var(--status-green-ink);
+  --info: var(--status-blue-ink);
+
+  --chart-1: var(--violet);
+  --chart-2: var(--status-blue);
+  --chart-3: var(--status-green);
+  --chart-4: #c98410;
+  --chart-5: var(--status-red);
+
+  --seal: var(--rail);
+  --seal-deep: var(--rail-raised);
+  --seal-tint: var(--violet-tint);
+  --seal-ink: var(--violet-ink);
+  --on-seal: var(--on-rail);
 
   /*
    * Marksheet, the boilerplate's demo world under /dashboard. Kept so
@@ -83,52 +130,69 @@
   --card-foreground: var(--ink);
   --popover: var(--field);
   --popover-foreground: var(--ink);
-  --primary: var(--seal);
+  --primary: var(--violet);
   --primary-foreground: #ffffff;
   --secondary: var(--muted);
   --secondary-foreground: var(--ink);
-  --muted: #e6e7e2;
+  --muted: #f1f1f5;
   --muted-foreground: var(--ink-2);
   --accent: var(--muted);
   --accent-foreground: var(--ink);
   --destructive: var(--danger);
   --border: var(--rule);
-  /* Control borders: 3:1 against field, paper and ground (WCAG 1.4.11). */
-  --input: #84867f;
-  --ring: var(--seal);
+  /* Control borders: 3:1 against the canvas, panels and the sidebar (WCAG 1.4.11). */
+  --input: #878b9f;
+  --ring: var(--violet-ink);
   --radius: 0.375rem;
 
+  /* Floating layers only: menus and popovers, then the side panel and dialogs. */
+  --shadow-float: 0 4px 12px -2px rgb(29 26 46 / 10%), 0 12px 28px -6px rgb(29 26 46 / 14%);
+  --shadow-overlay: 0 12px 32px -8px rgb(29 26 46 / 18%), 0 32px 64px -16px rgb(29 26 46 / 24%);
+  /* Panels and controls lie flat; these two stay for the pages that still name them. */
+  --shadow-ply: 0 0 #0000;
+  --shadow-sheet: 0 0 #0000;
+  /* Marksheet's paper, for the demos. */
   --shadow-paper:
     0 1px 0 rgb(17 27 48 / 6%), 0 2px 4px -2px rgb(17 27 48 / 10%),
     0 24px 48px -24px rgb(10 32 22 / 45%);
-  --shadow-ply: 0 1px 2px rgb(17 27 48 / 10%);
-  /* A card lying flat on the desk, for app panels. */
-  --shadow-sheet: 0 1px 0 rgb(17 27 48 / 5%), 0 1px 3px rgb(17 27 48 / 8%);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Lacquer black with the same seal. */
   @variant dark {
     color-scheme: dark;
 
-    --seal-tint: #3d1a12;
-    --seal-ink: #ec7357;
-    --paper: #1c1a19;
-    --ground: #141212;
-    --field: #252220;
-    --ink: #eeece8;
-    --ink-2: #a9a49e;
-    --rule: #3a3533;
+    --rail: #120f1f;
+    --rail-raised: #262140;
+    --sidebar: #1b1925;
+    --ground: #17151f;
+    --paper: #1f1c2a;
+    --field: #1f1c2a;
+    --ink: #ecebf2;
+    --ink-2: #a4a2b6;
+    --rule: #2f2c3d;
 
-    --danger: #ff7a95;
-    --warning: #e5a845;
-    --success: #62c08f;
-    --info: #78b4e2;
+    --violet-hover: #6956e3;
+    --violet-tint: #2e284f;
+    --violet-ink: #9689eb;
 
-    --chart-1: var(--seal-ink);
-    --chart-2: #78b4e2;
-    --chart-3: #62c08f;
-    --chart-4: #e5a845;
-    --chart-5: #b79be0;
+    --status-violet: #6956e3;
+    --status-violet-tint: #2e284f;
+    --status-violet-ink: #9689eb;
+    --status-blue-tint: #222f4f;
+    --status-blue-ink: #5f9be8;
+    --status-amber-tint: #473527;
+    --status-amber-ink: #e69a1c;
+    --status-green-tint: #1f3635;
+    --status-green-ink: #45ae7e;
+    --status-red-tint: #44242d;
+    --status-red-ink: #e3766f;
+    --status-slate-tint: #353342;
+    --status-slate-ink: #9a9eaf;
+
+    --chart-1: var(--violet-ink);
+    --chart-2: var(--status-blue-ink);
+    --chart-3: var(--status-green-ink);
+    --chart-4: var(--status-amber);
+    --chart-5: var(--status-red-ink);
 
     /* Marksheet had no dark theme: its neutrals follow Aureon's so the demos stay legible. */
     --paper-card: var(--paper);
@@ -145,9 +209,48 @@
     --pen: var(--danger);
     --pencil: var(--ink-2);
 
-    --muted: #2c2826;
-    --input: #7a746e;
+    --muted: #2a2737;
+    --input: #6f6c82;
+
+    --shadow-float: 0 4px 12px -2px rgb(0 0 0 / 35%), 0 12px 28px -6px rgb(0 0 0 / 45%);
+    --shadow-overlay: 0 12px 32px -8px rgb(0 0 0 / 45%), 0 32px 64px -16px rgb(0 0 0 / 55%);
   }
+}
+
+[data-tone='blue'] {
+  --tone: var(--status-blue);
+  --tone-tint: var(--status-blue-tint);
+  --tone-ink: var(--status-blue-ink);
+}
+
+[data-tone='violet'] {
+  --tone: var(--status-violet);
+  --tone-tint: var(--status-violet-tint);
+  --tone-ink: var(--status-violet-ink);
+}
+
+[data-tone='amber'] {
+  --tone: var(--status-amber);
+  --tone-tint: var(--status-amber-tint);
+  --tone-ink: var(--status-amber-ink);
+}
+
+[data-tone='green'] {
+  --tone: var(--status-green);
+  --tone-tint: var(--status-green-tint);
+  --tone-ink: var(--status-green-ink);
+}
+
+[data-tone='red'] {
+  --tone: var(--status-red);
+  --tone-tint: var(--status-red-tint);
+  --tone-ink: var(--status-red-ink);
+}
+
+[data-tone='slate'] {
+  --tone: var(--status-slate);
+  --tone-tint: var(--status-slate-tint);
+  --tone-ink: var(--status-slate-ink);
 }
 
 /*
@@ -191,9 +294,23 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
+  /*
+   * Inter sets the UI; Thai, which Inter lacks, falls through to Anuphan. The UI's type scale is
+   * 12/13/14/16/20/24 px: xs, `text-[0.8125rem]` (rows and small controls; a named size would
+   * read as a colour to `cn`, which then drops the element's text colour), sm, base, xl, 2xl.
+   */
+  --font-sans: var(--font-inter), var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
   --font-hand: var(--font-kalam), 'Bradley Hand', cursive;
+
+  --color-rail: var(--rail);
+  --color-rail-raised: var(--rail-raised);
+  --color-on-rail: var(--on-rail);
+  --color-sidebar: var(--sidebar);
+  --color-violet: var(--violet);
+  --color-violet-hover: var(--violet-hover);
+  --color-violet-tint: var(--violet-tint);
+  --color-violet-ink: var(--violet-ink);
 
   --color-seal: var(--seal);
   --color-seal-deep: var(--seal-deep);
@@ -253,11 +370,14 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
+  /* 6 px controls (md), 8 px panels (lg); pills and avatars are `rounded-full`. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 
+  --shadow-float: var(--shadow-float);
+  --shadow-overlay: var(--shadow-overlay);
   --shadow-paper: var(--shadow-paper);
   --shadow-ply: var(--shadow-ply);
   --shadow-sheet: var(--shadow-sheet);
@@ -272,7 +392,7 @@
   html {
     @apply bg-background font-sans text-foreground antialiased;
     font-feature-settings: 'kern', 'liga';
-    scrollbar-color: var(--input) transparent;
+    scrollbar-color: color-mix(in oklab, var(--ink-2) 40%, transparent) transparent;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -282,11 +402,11 @@
 
   body {
     @apply min-h-dvh bg-background text-foreground;
-    caret-color: var(--seal-ink);
+    caret-color: var(--violet-ink);
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--seal) 24%, transparent);
+    background: color-mix(in oklab, var(--violet) 22%, transparent);
     color: var(--ink);
   }
 

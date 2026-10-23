@@ -1,6 +1,7 @@
 {
   "Brand": {
     "home_label": "Aureon CRM home",
+    "wordmark": "Aureon",
     "sample_note": "Aureon CRM is a sample product built on the Next.js + Spring Boilerplate. Replace its name and this copy with your own."
   },
   "RootLayout": {
@@ -3269,6 +3270,10 @@
     "owner": "Owner",
     "value": "Estimated value",
     "created": "Created"
+  },
+  "StatusPill": {
+    "name": "{field}: {label}",
+    "status": "Status"
   },
   "LeadStatus": {
     "status_NEW": "New",

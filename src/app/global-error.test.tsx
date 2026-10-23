@@ -4,7 +4,7 @@ import { page } from 'vitest/browser';
 import GlobalError from './global-error';
 
 describe(GlobalError, () => {
-  it("draws the last-resort error in Aureon's world: the vermilion bar and one card", async () => {
+  it("draws the last-resort error in Aureon's world: the ink-violet bar and one card", async () => {
     const retry = vi.fn<() => void>();
     // It is a whole document: React says <html> can't be inside the test's <div>, and draws it.
     await render(<GlobalError error={new Error('Boom')} retry={retry} />);
@@ -12,10 +12,10 @@ describe(GlobalError, () => {
     // Its content loads when it shows.
     await expect.element(page.getByRole('banner')).toBeVisible();
     const bar = page.getByRole('banner').element();
-    expect(getComputedStyle(bar).backgroundColor).toBe('rgb(200, 54, 28)');
+    expect(getComputedStyle(bar).backgroundColor).toBe('rgb(29, 26, 46)');
     await expect.element(page.getByRole('link', { name: 'Aureon CRM home' })).toBeVisible();
     const card = page.getByRole('alert').element();
-    expect(getComputedStyle(card).backgroundColor).toBe('rgb(251, 251, 249)');
+    expect(getComputedStyle(card).backgroundColor).toBe('rgb(255, 255, 255)');
     expect(document.querySelector('.paper, [class*="text-ink-"], [class*="bg-folder"]')).toBeNull();
 
     await page.getByRole('button', { name: 'Try again' }).click();

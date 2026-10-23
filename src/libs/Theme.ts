@@ -34,8 +34,8 @@ export const THEME_SCRIPT = `try{var m=document.cookie.match(${String(THEME_COOK
 export const themeFromCookie = (cookie: string) =>
   parseTheme(THEME_COOKIE_PATTERN.exec(cookie)?.[1]);
 
-/** Each theme's ground (`--ground`): the browser's bar colour too (`themeColor`). */
-export const THEME_GROUNDS = { light: '#eff0ec', dark: '#141212' } as const;
+/** Each theme's canvas (`--ground`): the browser's bar colour too (`themeColor`). */
+export const THEME_GROUNDS = { light: '#ffffff', dark: '#17151f' } as const;
 
 /**
  * Puts the theme's class on `<html>`: `light` or `dark`, none for `system`; and tints the

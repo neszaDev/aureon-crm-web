@@ -29,7 +29,7 @@ export const ArchivedToggle = (props: { path: string; query: ListQuery }) => {
       </span>
       <nav
         aria-label={t('view_label')}
-        className="flex h-10 items-stretch gap-0.5 rounded-md border border-input bg-field p-0.5 shadow-ply"
+        className="flex h-9 items-stretch gap-0.5 rounded-md border border-input bg-field p-0.5 sm:h-8"
       >
         {views.map((view) => (
           <Link
@@ -38,7 +38,7 @@ export const ArchivedToggle = (props: { path: string; query: ListQuery }) => {
             aria-current={view.current ? 'page' : undefined}
             scroll={false}
             className={cn(
-              'flex items-center rounded-sm px-3 text-sm font-medium no-underline transition-colors duration-150',
+              'flex items-center rounded-sm px-2.5 text-sm font-medium no-underline transition-colors duration-150',
               view.current
                 ? 'bg-muted font-semibold text-foreground'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',

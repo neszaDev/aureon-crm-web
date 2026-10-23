@@ -1,10 +1,10 @@
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import type { components } from '@/libs/api/schema';
 
 /**
- * A member in a report: their seal and their name (the email without one). Without a member (a
- * report's entry for deals or tasks nobody holds) it is `none` and no seal, since a seal is only
- * ever someone's; a blank of the seal's size keeps the words in line with the names above.
+ * A member in a report: their avatar and their name (the email without one). Without a member (a
+ * report's entry for deals or tasks nobody holds) it is `none` and no avatar, since an avatar is only
+ * ever someone's; a blank of the avatar's size keeps the words in line with the names above.
  * @param props Component props.
  * @param props.member The member, if any.
  * @param props.none What to say without one.
@@ -16,7 +16,7 @@ export const ReportMember = (props: {
 }) => (
   <span className="flex min-w-0 items-center gap-2">
     {props.member ? (
-      <Seal size="sm" name={props.member.displayName} email={props.member.email} />
+      <PersonAvatar person={props.member} size="sm" />
     ) : (
       <span aria-hidden="true" className="size-6 shrink-0" />
     )}

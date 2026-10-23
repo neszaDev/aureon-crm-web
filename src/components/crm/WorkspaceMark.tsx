@@ -1,12 +1,12 @@
 import { cn } from 'cn';
-import { initialsOf } from '@/components/crm/Seal';
+import { initialsOf } from '@/components/crm/PersonAvatar';
 
 /**
  * A workspace as a square chop with its initials: the seal's shape for organisations, the
  * circle being for people. Decorative: the name is always written next to it.
  * @param props Component props.
  * @param props.name Workspace name.
- * @param props.tone `rail` on the vermilion rail, `paper` (default) on paper and menus.
+ * @param props.tone `rail` on the ink-violet rail, `paper` (default) on paper and menus.
  * @param props.className Extra classes (size).
  * @returns The mark.
  */

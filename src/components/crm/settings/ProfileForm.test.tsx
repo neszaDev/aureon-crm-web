@@ -14,7 +14,7 @@ describe(ProfileForm, () => {
     const action = vi.fn<Action>().mockResolvedValue({ ok: true });
     await render(
       <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-        <ProfileForm email="mia@acme.test" displayName="Mia" action={action} />
+        <ProfileForm userId={3} email="mia@acme.test" displayName="Mia" action={action} />
       </NextIntlClientProvider>,
     );
 

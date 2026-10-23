@@ -1,6 +1,6 @@
 'use client';
 
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -16,11 +16,11 @@ import { useRouter } from '@/libs/I18nNavigation';
 // The "Any" option's value: a select item can't have an empty one. No filter value is this.
 const ANY = '*';
 
-/** One option of a filter; a person shows with their seal. */
+/** One option of a filter; a person shows with their avatar. */
 export type FilterOption = {
   value: string;
   label: string;
-  person?: { displayName?: string; email: string };
+  person?: { userId?: number; displayName?: string; email: string };
 };
 
 /**
@@ -73,9 +73,7 @@ export const FilterSelect = (props: {
           {missing && <SelectItem value={value}>{props.missingLabel}</SelectItem>}
           {props.options.map((option) => (
             <SelectItem key={option.value} value={option.value}>
-              {option.person && (
-                <Seal name={option.person.displayName} email={option.person.email} size="sm" />
-              )}
+              {option.person && <PersonAvatar person={option.person} size="sm" />}
               {option.label}
             </SelectItem>
           ))}

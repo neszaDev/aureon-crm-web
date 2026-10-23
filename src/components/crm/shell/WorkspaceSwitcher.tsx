@@ -35,7 +35,7 @@ export const WorkspaceSwitcher = (props: {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={t('switcher_label', { name: props.current.name })}
-        className="flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-on-seal transition-colors duration-150 hover:bg-black/10 focus-visible:outline-on-seal data-[state=open]:bg-black/10"
+        className="flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-on-seal transition-colors duration-150 hover:bg-rail-raised focus-visible:outline-on-seal data-[state=open]:bg-rail-raised"
       >
         <WorkspaceMark name={props.current.name} tone="rail" />
         <span className="line-clamp-2 min-w-0 flex-1 text-[0.9375rem] leading-snug font-bold break-words">

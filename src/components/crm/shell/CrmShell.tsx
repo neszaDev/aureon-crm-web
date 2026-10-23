@@ -12,14 +12,14 @@ import type { BellReminders } from '@/libs/crm/Reminders';
 
 type Schemas = components['schemas'];
 
-// The top bar's icon buttons: on the vermilion bar (below lg) in its white; from lg the bar is
+// The top bar's icon buttons: on the ink-violet bar (below lg) in its white; from lg the bar is
 // paper, and they take the page's colours and ring.
 const BAR_BUTTON =
-  'text-on-seal hover:bg-black/10 hover:text-white focus-visible:ring-on-seal focus-visible:ring-offset-seal aria-expanded:bg-black/10 lg:text-foreground lg:hover:bg-accent lg:hover:text-foreground lg:focus-visible:ring-ring lg:focus-visible:ring-offset-background lg:aria-expanded:bg-accent';
+  'text-on-seal hover:bg-rail-raised hover:text-white focus-visible:ring-on-seal focus-visible:ring-offset-seal aria-expanded:bg-rail-raised lg:text-foreground lg:hover:bg-accent lg:hover:text-foreground lg:focus-visible:ring-ring lg:focus-visible:ring-offset-background lg:aria-expanded:bg-accent';
 
 /**
- * The CRM's frame: the vermilion seal rail (workspace switcher, sections) on large screens, a
- * vermilion bar opening the rail as a drawer below that, and in the top bar's one row the record
+ * The CRM's frame: the ink-violet rail (workspace switcher, sections) on large screens, a
+ * ink-violet bar opening the rail as a drawer below that, and in the top bar's one row the record
  * search, the reminders bell and your seal for the account menu. A skip link, first in the tab
  * order, jumps past the rail to the page.
  * @param props Component props.
@@ -37,7 +37,7 @@ const BAR_BUTTON =
 export const CrmShell = (props: {
   workspace: { id: number; name: string; timeZone: string };
   workspaces: Schemas['WorkspaceSummaryResponse'][];
-  user: { email: string; displayName?: string };
+  user: { id: number; email: string; displayName?: string };
   reminders?: BellReminders;
   children: React.ReactNode;
 }) => {
@@ -82,6 +82,7 @@ export const CrmShell = (props: {
             className={BAR_BUTTON}
           />
           <AccountMenu
+            userId={props.user.id}
             email={props.user.email}
             displayName={props.user.displayName}
             workspaceId={props.workspace.id}

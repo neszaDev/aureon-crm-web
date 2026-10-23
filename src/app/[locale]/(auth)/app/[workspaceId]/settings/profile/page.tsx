@@ -40,7 +40,12 @@ export default async function ProfilePage(props: ProfilePageProps) {
           <h2 id="profile-heading" className="mb-4 font-semibold">
             {t('profile_heading')}
           </h2>
-          <ProfileForm email={user.email} displayName={user.displayName} action={updateProfile} />
+          <ProfileForm
+            userId={user.id}
+            email={user.email}
+            displayName={user.displayName}
+            action={updateProfile}
+          />
         </section>
         <section
           aria-labelledby="password-heading"

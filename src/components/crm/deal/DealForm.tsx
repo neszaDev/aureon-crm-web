@@ -167,7 +167,9 @@ export const DealForm = (props: {
             <span className="text-[0.8125rem] leading-snug font-medium text-muted-foreground">
               {t('stage_label')}
             </span>
-            <p className="flex min-h-10 items-center font-medium break-words">{props.stageName}</p>
+            <p className="flex min-h-9 items-center font-medium break-words sm:min-h-8">
+              {props.stageName}
+            </p>
             <p className="text-[0.8125rem] text-muted-foreground">{t('stage_read_only')}</p>
           </div>
         ) : (

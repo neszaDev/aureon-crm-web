@@ -36,7 +36,7 @@ describe(ThemeSwitcher, () => {
       const meta = document.createElement('meta');
       meta.name = 'theme-color';
       meta.media = `(prefers-color-scheme: ${scheme})`;
-      meta.content = scheme === 'light' ? '#eff0ec' : '#141212';
+      meta.content = scheme === 'light' ? '#ffffff' : '#17151f';
       document.head.append(meta);
       return meta;
     });
@@ -50,17 +50,17 @@ describe(ThemeSwitcher, () => {
       await page.getByRole('radio', { name: 'Dark' }).click();
       await expect
         .poll(() => tags.map((meta) => meta.content))
-        .toStrictEqual(['#141212', '#141212']);
+        .toStrictEqual(['#17151f', '#17151f']);
 
       await page.getByRole('radio', { name: 'Light' }).click();
       await expect
         .poll(() => tags.map((meta) => meta.content))
-        .toStrictEqual(['#eff0ec', '#eff0ec']);
+        .toStrictEqual(['#ffffff', '#ffffff']);
 
       await page.getByRole('radio', { name: 'System' }).click();
       await expect
         .poll(() => tags.map((meta) => meta.content))
-        .toStrictEqual(['#eff0ec', '#141212']);
+        .toStrictEqual(['#ffffff', '#17151f']);
     } finally {
       for (const meta of tags) {
         meta.remove();

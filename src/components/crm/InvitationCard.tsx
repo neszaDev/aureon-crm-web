@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { ActionAlert } from '@/components/crm/ActionAlert';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { WorkspaceMark } from '@/components/crm/WorkspaceMark';
 import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
@@ -75,7 +75,7 @@ const Heading = (props: {
 };
 
 /**
- * A person as their seal, with a small label over their email.
+ * A person as their avatar, with a small label over their email.
  * @param props Component props.
  * @param props.label What this person is ("Signed in as").
  * @param props.email Their email.
@@ -87,7 +87,7 @@ const Person = (props: { label: string; email: string; name?: string }) => {
 
   return (
     <div className="flex items-center gap-3.5">
-      <Seal name={props.name} email={props.email} size="lg" />
+      <PersonAvatar person={{ displayName: props.name, email: props.email }} />
       <div className="flex min-w-0 flex-col">
         <span className="text-[0.8125rem] text-muted-foreground">{props.label}</span>
         {/* A long address wraps before the @ rather than mid-word. */}
@@ -166,7 +166,7 @@ const RegisterForm = (props: {
   return (
     <form method="post" onSubmit={onSubmit} className={PANEL} noValidate>
       <ActionAlert result={failure} />
-      {/* The invitation's email, not editable; the seal shows the initials as the name is typed. */}
+      {/* The invitation's email, not editable; the avatar shows the initials as the name is typed. */}
       <Person label={t('email_label')} email={props.email} name={name.trim() || undefined} />
       {/* Lets a password manager save the new password under this email. */}
       <input type="email" autoComplete="username" value={props.email} readOnly hidden />

@@ -101,9 +101,9 @@ export const DateTimeField = (props: {
               className={cn(
                 fieldSurface,
                 fieldStates,
-                'flex h-10 min-w-40 flex-1 items-center gap-2 px-3 text-left',
+                'flex h-9 min-w-40 flex-1 items-center gap-2 px-2.5 text-left sm:h-8',
                 // A button takes no aria-invalid: the error, under the field, describes it.
-                props.error && 'border-destructive ring-3 ring-destructive/15',
+                props.error && 'border-destructive',
               )}
             >
               <CalendarIcon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />

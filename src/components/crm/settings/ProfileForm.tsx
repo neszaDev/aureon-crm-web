@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { ActionAlert } from '@/components/crm/ActionAlert';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,14 +17,16 @@ import type { ProfileValues } from '@/validations/ProfileValidation';
 import { ProfileValidation } from '@/validations/ProfileValidation';
 
 /**
- * Your display name, with your seal as it will look. The email is shown, not edited here.
+ * Your display name, with your avatar as it will look. The email is shown, not edited here.
  * @param props Component props.
+ * @param props.userId The signed-in user's id (their avatar's colour).
  * @param props.email The signed-in user's email.
  * @param props.displayName Their display name, if set.
  * @param props.action Saves the name (`updateProfile`).
  * @returns The form.
  */
 export const ProfileForm = (props: {
+  userId: number;
   email: string;
   displayName?: string;
   action: (values: ProfileValues) => Promise<ActionResult>;
@@ -69,7 +71,13 @@ export const ProfileForm = (props: {
     >
       <ActionAlert result={failure} />
       <div className="flex items-center gap-3.5">
-        <Seal name={name.trim() || undefined} email={props.email} size="lg" />
+        <PersonAvatar
+          person={{
+            userId: props.userId,
+            displayName: name.trim() || undefined,
+            email: props.email,
+          }}
+        />
         <div className="flex min-w-0 flex-col">
           <span className="text-[0.8125rem] text-muted-foreground">{t('email_label')}</span>
           <span className="font-medium break-all">{props.email}</span>

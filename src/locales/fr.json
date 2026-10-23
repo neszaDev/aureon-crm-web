@@ -1,6 +1,7 @@
 {
   "Brand": {
     "home_label": "Accueil Aureon CRM",
+    "wordmark": "Aureon",
     "sample_note": "Aureon CRM est un produit d'exemple construit sur le Next.js + Spring Boilerplate. Remplacez son nom et ces textes par les vôtres."
   },
   "RootLayout": {
@@ -3269,6 +3270,10 @@
     "owner": "Propriétaire",
     "value": "Valeur estimée",
     "created": "Créé"
+  },
+  "StatusPill": {
+    "name": "{field} : {label}",
+    "status": "Statut"
   },
   "LeadStatus": {
     "status_NEW": "Nouveau",

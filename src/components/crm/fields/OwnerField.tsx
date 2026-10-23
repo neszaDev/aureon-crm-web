@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import type { FieldError as HookFormFieldError } from 'react-hook-form';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { FieldError } from '@/components/FieldError';
 import { describedBy } from '@/components/FormField';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ const UNASSIGNED = 'unassigned';
 
 /**
  * Who owns a record, for a form that controls it (react-hook-form `Controller`). With
- * `RECORDS_ASSIGN` it is a select of the members, by seal and name; without it, the owner
+ * `RECORDS_ASSIGN` it is a select of the members, by avatar and name; without it, the owner
  * written out, and the form still sends the current one (keeping it needs no permission).
  * @param props Component props.
  * @param props.id The select's id.
@@ -62,10 +62,10 @@ export const OwnerField = (props: {
         <span className="text-[0.8125rem] leading-snug font-medium text-muted-foreground">
           {props.label}
         </span>
-        <p className="flex min-h-10 items-center gap-2 font-medium break-words">
+        <p className="flex min-h-9 items-center gap-2 font-medium break-words sm:min-h-8">
           {owner ? (
             <>
-              <Seal name={owner.displayName} email={owner.email} size="sm" />
+              <PersonAvatar person={owner} size="sm" />
               <span className="min-w-0 [overflow-wrap:anywhere]">{nameOf(owner)}</span>
             </>
           ) : (
@@ -99,7 +99,7 @@ export const OwnerField = (props: {
           {props.allowUnassigned && <SelectItem value={UNASSIGNED}>{t('unassigned')}</SelectItem>}
           {props.members.map((member) => (
             <SelectItem key={member.userId} value={String(member.userId)}>
-              <Seal name={member.displayName} email={member.email} size="sm" />
+              <PersonAvatar person={member} size="sm" />
               {nameOf(member)}
             </SelectItem>
           ))}

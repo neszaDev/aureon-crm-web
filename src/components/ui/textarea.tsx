@@ -9,7 +9,7 @@ function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
       className={cn(
         fieldSurface,
         fieldStates,
-        'flex field-sizing-content min-h-20 w-full px-3 py-2 placeholder:text-muted-foreground',
+        'flex field-sizing-content min-h-20 w-full px-2.5 py-1.5 placeholder:text-muted-foreground',
         className,
       )}
       {...props}

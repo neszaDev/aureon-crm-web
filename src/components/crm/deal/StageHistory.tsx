@@ -1,6 +1,6 @@
 import { ArrowRightIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import type { components } from '@/libs/api/schema';
 import { formatInstant } from '@/libs/crm/Format';
 
@@ -9,9 +9,9 @@ type StageRef = components['schemas']['HistoryStageRef'];
 
 /**
  * A deal's stage history, newest first: from one stage to the next (the first entry says where
- * the deal began), who moved it, as their seal and name, and when. Each stage shows the name it
+ * the deal began), who moved it, as their avatar and name, and when. Each stage shows the name it
  * had then; one that has since been deleted says so, and signs nothing on the stamp row. A
- * member who left reads "Former member", with no seal: a seal is only ever someone's.
+ * member who left reads "Former member", with no avatar: an avatar is only ever someone's.
  * @param props Component props.
  * @param props.history The entries, newest first, as the API lists them.
  * @param props.timeZone The workspace's time zone, for the times.
@@ -58,11 +58,7 @@ export const StageHistory = (props: { history: Change[]; timeZone: string }) => 
               <span className="flex items-center gap-2 text-sm">
                 {change.changedBy ? (
                   <>
-                    <Seal
-                      name={change.changedBy.displayName}
-                      email={change.changedBy.email}
-                      size="sm"
-                    />
+                    <PersonAvatar person={change.changedBy} size="sm" />
                     <span className="[overflow-wrap:anywhere]">
                       {change.changedBy.displayName ?? change.changedBy.email}
                     </span>

@@ -10,7 +10,7 @@ function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
       className={cn(
         fieldSurface,
         fieldStates,
-        'h-10 w-full min-w-0 px-3 py-2 placeholder:text-muted-foreground file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium',
+        'h-9 w-full min-w-0 px-2.5 py-1 placeholder:text-muted-foreground sm:h-8 file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium',
         className,
       )}
       {...props}

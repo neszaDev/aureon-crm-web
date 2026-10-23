@@ -126,7 +126,7 @@ export const TagInput = (props: {
       <div
         className={cn(
           fieldSurface,
-          'flex min-h-10 w-full flex-wrap items-center gap-1.5 px-2 py-1.5 has-focus-visible:border-ring has-focus-visible:ring-3 has-focus-visible:ring-ring/20 has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/15',
+          'flex min-h-9 w-full flex-wrap items-center gap-1.5 px-2 py-1 sm:min-h-8 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring has-aria-invalid:border-destructive',
         )}
       >
         {props.value.length > 0 && (
@@ -177,7 +177,7 @@ export const TagInput = (props: {
           aria-disabled={full ? true : undefined}
           aria-invalid={props.invalid ? true : undefined}
           aria-describedby={props.errorId ? `${hintId} ${props.errorId}` : hintId}
-          className="h-7 min-w-28 flex-1 bg-transparent px-1 outline-none placeholder:text-muted-foreground aria-disabled:cursor-not-allowed"
+          className="h-7 min-w-28 flex-1 bg-transparent px-1 outline-none placeholder:text-muted-foreground aria-disabled:cursor-not-allowed sm:h-6"
           onChange={(event) => {
             // A comma ends a tag, typed or pasted: what follows the last one is still being typed.
             const parts = event.currentTarget.value.split(',');

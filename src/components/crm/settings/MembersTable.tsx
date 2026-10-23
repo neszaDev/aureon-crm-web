@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useOptimistic, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { Button } from '@/components/ui/button';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import {
@@ -36,7 +36,7 @@ type MemberActions = {
 };
 
 /**
- * One member: seal and name, role (a select when the caller may change it), when they joined,
+ * One member: avatar and name, role (a select when the caller may change it), when they joined,
  * and remove (or leave, on your own row). Changing your own role asks first: it can take away
  * your right to change it back.
  * @param props Component props.
@@ -80,7 +80,7 @@ const MemberTableRow = (props: {
           table. */}
       <TableCell className="w-full max-w-0 py-2.5 whitespace-normal max-sm:col-span-2 max-sm:w-auto max-sm:max-w-none max-sm:p-0">
         <span className="flex min-w-0 items-center gap-3">
-          <Seal name={props.member.displayName} email={props.member.email} size="sm" />
+          <PersonAvatar person={props.member} size="sm" />
           <span className="flex min-w-0 flex-col">
             <span ref={nameRef} tabIndex={-1} className="rounded-sm font-medium break-words">
               {name}

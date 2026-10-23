@@ -1,7 +1,7 @@
 import { Wordmark } from '@/components/Wordmark';
 
 /**
- * A public page that is only a card: the vermilion bar with the wordmark, and the card on the
+ * A public page that is only a card: the ink-violet bar with the wordmark, and the card on the
  * ground (the not-found and error pages).
  * @param props Component props.
  * @param props.children The card.

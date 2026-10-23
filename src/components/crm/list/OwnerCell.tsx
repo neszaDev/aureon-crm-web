@@ -1,11 +1,11 @@
 import { cn } from 'cn';
 import { useTranslations } from 'next-intl';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { TableCell } from '@/components/ui/table';
 import type { components } from '@/libs/api/schema';
 
 /**
- * A list row's owner: their seal and name, or "Unassigned". From 640 px the name keeps to one
+ * A list row's owner: their avatar and name, or "Unassigned". From 640 px the name keeps to one
  * line, and one too long for the cell is cut short, in full as its title; below that it wraps,
  * since a phone can't hover a title.
  * @param props Component props.
@@ -23,7 +23,7 @@ export const OwnerCell = (props: {
     <TableCell className={cn('max-sm:whitespace-normal', props.className)}>
       {props.owner ? (
         <span className="flex items-center gap-2">
-          <Seal name={props.owner.displayName} email={props.owner.email} size="sm" />
+          <PersonAvatar person={props.owner} size="sm" />
           <span
             title={props.owner.displayName ?? props.owner.email}
             className="max-w-40 min-w-0 break-words sm:truncate"

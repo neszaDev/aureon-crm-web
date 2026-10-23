@@ -1,7 +1,7 @@
 import { ArrowRightIcon, CheckIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { StampBox } from '@/components/crm/StampBox';
 import { HeroShot } from '@/components/marketing/HeroShot';
 import { Note, Row } from '@/components/marketing/Row';
@@ -199,7 +199,7 @@ export default async function IndexPage(props: IndexPageProps) {
 
   return (
     <>
-      {/* The band: the header's vermilion runs on into the hero, down into the board's sheet. */}
+      {/* The band: the header's ink-violet runs on into the hero, down into the board's sheet. */}
       <section aria-labelledby="hero-title" className="text-on-seal">
         <div className="bg-seal">
           <div className="mx-auto max-w-[76rem] px-4 pt-8 sm:px-7 lg:pt-10">
@@ -461,7 +461,10 @@ export default async function IndexPage(props: IndexPageProps) {
                   <span className="font-semibold">{item.role}</span>
                   <span className="text-[0.9375rem] text-ink-2">{item.text}</span>
                   <span className="flex items-center gap-2.5 text-sm max-md:mt-1.5 sm:max-md:col-start-2">
-                    <Seal name={item.member.name} email={item.member.email} size="sm" />
+                    <PersonAvatar
+                      person={{ displayName: item.member.name, email: item.member.email }}
+                      size="sm"
+                    />
                     {item.member.name}
                   </span>
                 </li>

@@ -49,7 +49,7 @@ const isKKey = (event: KeyboardEvent) =>
  * text no longer matches. Closed, it gives the focus back to what had it when the shortcut opened it.
  * @param props Component props.
  * @param props.workspaceId The workspace searched.
- * @param props.className Extra classes for the button (its colours on the vermilion bar).
+ * @param props.className Extra classes for the button (its colours on the ink-violet bar).
  * @returns The button and its palette.
  */
 export const RecordSearch = (props: { workspaceId: number; className?: string }) => {
@@ -156,7 +156,7 @@ export const RecordSearch = (props: { workspaceId: number; className?: string })
           className={cn(
             'size-9',
             props.className,
-            'md:w-52 md:justify-start md:bg-black/10 md:px-3 md:hover:bg-black/20 lg:w-64 lg:border-input lg:bg-field lg:font-normal lg:text-muted-foreground lg:shadow-ply lg:hover:border-muted-foreground lg:hover:bg-accent',
+            'md:w-52 md:justify-start md:bg-white/10 md:px-3 md:hover:bg-white/15 lg:w-64 lg:border-input lg:bg-field lg:font-normal lg:text-muted-foreground lg:shadow-ply lg:hover:border-muted-foreground lg:hover:bg-accent',
           )}
         >
           <SearchIcon />

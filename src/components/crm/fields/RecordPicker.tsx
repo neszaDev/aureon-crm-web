@@ -123,7 +123,7 @@ export const RecordPicker = (props: {
             className={cn(
               fieldSurface,
               fieldStates,
-              'flex h-10 w-full min-w-0 items-center justify-between gap-1.5 py-2 pr-2.5 pl-3 text-left data-[clearable=true]:pr-16',
+              'flex h-9 w-full min-w-0 items-center justify-between gap-1.5 py-1 pr-2 pl-2.5 text-left sm:h-8 data-[clearable=true]:pr-16',
             )}
             data-clearable={props.value !== null}
             onKeyDown={(event) => {

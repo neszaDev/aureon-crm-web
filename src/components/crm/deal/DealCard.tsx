@@ -4,7 +4,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { cn } from 'cn';
 import { EllipsisIcon, GripVerticalIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Seal } from '@/components/crm/Seal';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { StampRow } from '@/components/crm/StampRow';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,7 +23,7 @@ type Deal = components['schemas']['DealSummary'];
 
 /**
  * What a board card shows: the deal's number in mono, its name (a link to the deal), its company,
- * its amount, its owner's seal, a compact stamp row (each reached stage with its signer's seal)
+ * its amount, its owner's avatar, a compact stamp row (each reached stage with its signer's seal)
  * and the expected close date. The dragged
  * copy shows the same, without controls.
  * @param props Component props.
@@ -76,9 +76,8 @@ export const DealCardBody = (props: {
           {formatMoney(props.deal.amount, props.deal.currency, locale)}
         </span>
         {props.deal.owner && (
-          <Seal
-            name={props.deal.owner.displayName}
-            email={props.deal.owner.email}
+          <PersonAvatar
+            person={props.deal.owner}
             size="sm"
             title={props.deal.owner.displayName ?? props.deal.owner.email}
           />

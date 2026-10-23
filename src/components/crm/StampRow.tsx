@@ -3,7 +3,7 @@
 import { CheckIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { initialsOf } from '@/components/crm/Seal';
+import { initialsOf } from '@/components/crm/PersonAvatar';
 import { StampBox } from '@/components/crm/StampBox';
 import type { components } from '@/libs/api/schema';
 import { daysSince } from '@/libs/crm/Format';

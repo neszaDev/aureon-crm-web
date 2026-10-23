@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import { deleteActivity, updateActivity } from '@/actions/crm/ActivityActions';
 import { ActivityComposer, ActivityTypeIcon } from '@/components/crm/activity/ActivityComposer';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { LinkedRecords } from '@/components/crm/record/LinkedRecords';
-import { Seal } from '@/components/crm/Seal';
 import { Button } from '@/components/ui/button';
 import type { components } from '@/libs/api/schema';
 import { formatInstant } from '@/libs/crm/Format';
@@ -21,7 +21,7 @@ type Activity = components['schemas']['ActivityResponse'];
 
 /**
  * One entry of a timeline: its type, when it happened (in the workspace's time zone), the subject,
- * the details with their line breaks, who logged it (their seal) and the records it is on, as
+ * the details with their line breaks, who logged it (their avatar) and the records it is on, as
  * links, except the one being viewed. Its author and `RECORDS_EDIT_ANY` edit it in place or
  * delete it (confirmed).
  * @param props Component props.
@@ -192,13 +192,7 @@ export const ActivityItem = (props: {
       )}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
         <span className="flex items-center gap-2">
-          {props.activity.author && (
-            <Seal
-              name={props.activity.author.displayName}
-              email={props.activity.author.email}
-              size="sm"
-            />
-          )}
+          {props.activity.author && <PersonAvatar person={props.activity.author} size="sm" />}
           {props.activity.author
             ? t('by', { name: props.activity.author.displayName ?? props.activity.author.email })
             : t('by_former')}

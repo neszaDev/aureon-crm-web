@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Link } from '@/libs/I18nNavigation';
 
 /**
- * What an error boundary shows: what happened, in crimson with its icon (never the seal's
- * vermilion), a way to retry, and the way home, on a card.
+ * What an error boundary shows: what happened, in the danger red with its icon, a
+ * way to retry, and the way home, on a card.
  * @param props Component props.
  * @param props.retry Re-renders the failed segment.
  * @param props.homeHref Where "Back to home" goes.

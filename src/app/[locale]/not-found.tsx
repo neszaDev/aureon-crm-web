@@ -4,7 +4,7 @@ import { PublicFrame } from '@/components/PublicFrame';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/libs/I18nNavigation';
 
-// The public pages' not-found: their vermilion bar, and one card on the ground (as the app's).
+// The public pages' not-found: their ink-violet bar, and one card on the ground (as the app's).
 export default function NotFoundPage() {
   const t = useTranslations('NotFound');
 
