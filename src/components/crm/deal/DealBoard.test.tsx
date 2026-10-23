@@ -232,7 +232,7 @@ describe(DealBoard, () => {
       column('Qualification').element().getBoundingClientRect().width / 2,
     );
     await expect
-      .element(won.getByRole('button', { name: 'Expand Won' }))
+      .element(won.getByRole('button', { name: 'Won cards' }))
       .toHaveAttribute('aria-expanded', 'false');
   });
 
@@ -246,8 +246,10 @@ describe(DealBoard, () => {
     ]);
     const won = column('Won');
 
-    await won.getByRole('button', { name: 'Expand Won' }).click();
+    const strip = won.getByRole('button', { name: 'Won cards' });
+    await strip.click();
 
+    await expect.element(strip).toHaveAttribute('aria-expanded', 'true');
     await expect.element(won.getByRole('link', { name: 'Won big' })).toBeVisible();
     // Whole, it is as wide as an open column, and its totals keep their cents.
     expect(won.element().getBoundingClientRect().width).toBe(
@@ -259,21 +261,22 @@ describe(DealBoard, () => {
       .element(won.getByRole('list', { name: 'Won: closed as won' }).first())
       .toBeVisible();
 
-    await won.getByRole('button', { name: 'Collapse Won' }).click();
+    await strip.click();
 
     // Folded, its cards are hidden, out of the page's tree.
     await expect.element(won.getByRole('link', { name: 'Won big' })).not.toBeInTheDocument();
-    await expect.element(won.getByRole('button', { name: 'Expand Won' })).toHaveFocus();
+    await expect.element(strip).toHaveAttribute('aria-expanded', 'false');
+    await expect.element(strip).toHaveFocus();
   });
 
   it('folds a strip with the keyboard too', async () => {
     await renderBoard();
 
-    column('Lost').getByRole('button', { name: 'Expand Lost' }).element().focus();
+    column('Lost').getByRole('button', { name: 'Lost cards' }).element().focus();
     await userEvent.keyboard('{Enter}');
 
     await expect
-      .element(column('Lost').getByRole('button', { name: 'Collapse Lost' }))
+      .element(column('Lost').getByRole('button', { name: 'Lost cards' }))
       .toHaveAttribute('aria-expanded', 'true');
     await expect.element(column('Lost').getByText('No deals')).toBeVisible();
   });
@@ -358,6 +361,46 @@ describe(DealBoard, () => {
     // The card's track and its stage's name on one line.
     const track = page.getByRole('list', { name: 'Stage 1 of 4: Qualification' }).element();
     expect(track.parentElement?.getBoundingClientRect().height).toBeLessThanOrEqual(20);
+  });
+
+  it('keeps an expanded strip at the board’s end in view, with the button that folds it', async () => {
+    await page.viewport(1440, 900);
+    const open = (id: number, name: string) => stage(id, name, 'OPEN');
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        {/* The content column of a 1440 px screen beside the expanded sidebar. */}
+        <div style={{ width: 1088 }}>
+          <DealBoard
+            workspaceId={1}
+            columns={[
+              { stage: open(11, 'Qualification'), count: 1, totals: [], deals: [MINE] },
+              { stage: open(12, 'Needs analysis'), count: 0, totals: [], deals: [] },
+              { stage: open(15, 'Proposal'), count: 0, totals: [], deals: [] },
+              { stage: open(16, 'Negotiation'), count: 0, totals: [], deals: [] },
+              { stage: WON, count: 0, totals: [], deals: [] },
+              { stage: LOST, count: 0, totals: [], deals: [] },
+            ]}
+            me={1}
+            permissions={[]}
+            path="/app/1/deals"
+            query={{ params: {} }}
+            now={NOW}
+            timeZone="UTC"
+          />
+        </div>
+      </NextIntlClientProvider>,
+    );
+    const strip = column('Won').getByRole('button', { name: 'Won cards' });
+
+    await strip.click();
+
+    await expect.element(strip).toHaveAttribute('aria-expanded', 'true');
+    const scroller = document.querySelector('.board-scroll');
+    // The board scrolls sideways now; the expanded column was brought into view, button and all.
+    await expect
+      .poll(() => strip.element().getBoundingClientRect().right)
+      .toBeLessThanOrEqual(scroller?.getBoundingClientRect().right ?? 0);
+    expect(scroller?.scrollLeft).toBeGreaterThan(0);
   });
 
   it('scrolls sideways from a fifth open stage at that width', async () => {

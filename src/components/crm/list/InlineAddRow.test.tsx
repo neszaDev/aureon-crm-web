@@ -148,9 +148,11 @@ describe(InlineAddRow, () => {
     await userEvent.type(field, 'Noa{Enter}');
 
     await expect.element(field).toHaveValue('');
-    await expect
-      .element(page.getByRole('alert'))
-      .toHaveTextContent('Added as New: the move was refused.');
+    const note = page.getByRole('alert');
+    await expect.element(note).toHaveTextContent('Added as New: the move was refused.');
+    // A note, not a fault of the cleared field: neither invalid nor in the error's red.
+    await expect.element(field).not.toHaveAttribute('aria-invalid');
+    expect(note.element()).not.toHaveClass('text-destructive');
     // Enter again sends nothing: the field is empty, not a second copy of the lead.
     await userEvent.keyboard('{Enter}');
     expect(action).toHaveBeenCalledOnce();

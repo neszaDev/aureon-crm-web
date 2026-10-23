@@ -3445,8 +3445,7 @@
     "more": "{shown} affichées sur {count} — <link>ouvrir la liste</link>",
     "view_list": "Voir dans la liste",
     "view_list_label": "Voir dans la liste : {name}",
-    "expand": "Déplier {name}",
-    "collapse": "Replier {name}"
+    "cards": "Cartes de l'étape {name}"
   },
   "DealCard": {
     "close": "Clôture le {date}",

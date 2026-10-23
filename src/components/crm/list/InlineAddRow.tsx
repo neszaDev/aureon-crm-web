@@ -46,6 +46,8 @@ export const InlineAddRow = (
   const [name, setName] = useState('');
   const [extra, setExtra] = useState('');
   const [error, setError] = useState<string>();
+  // What a success has to say (a lead added in New, not its group's status): no fault of a field.
+  const [notice, setNotice] = useState<string>();
   const [isPending, startTransition] = useTransition();
 
   if ('href' in props) {
@@ -67,10 +69,12 @@ export const InlineAddRow = (
         setName('');
         setExtra('');
         setError(undefined);
+        setNotice(undefined);
       }
       if (event.key !== 'Enter' || event.nativeEvent.isComposing || isPending) {
         return;
       }
+      setNotice(undefined);
       const typed = name.trim();
       if (!typed) {
         setError(t('add_name_required'));
@@ -84,7 +88,7 @@ export const InlineAddRow = (
           // Made, with something to say (a lead added in New, not its group's status), or said
           // aloud and seen when the new row lands off the page or the group.
           if (result.message) {
-            setError(result.message);
+            setNotice(result.message);
           } else {
             toast.success(t('added', { name: typed }));
           }
@@ -119,6 +123,7 @@ export const InlineAddRow = (
             onChange={(event) => {
               setName(event.target.value);
               setError(undefined);
+              setNotice(undefined);
             }}
           />
         </label>
@@ -135,6 +140,7 @@ export const InlineAddRow = (
             onChange={(event) => {
               setExtra(event.target.value);
               setError(undefined);
+              setNotice(undefined);
             }}
           />
         )}
@@ -147,6 +153,11 @@ export const InlineAddRow = (
       {error && (
         <p id={errorId} role="alert" className="px-3 pb-2 pl-9 text-[0.8125rem] text-destructive">
           {error}
+        </p>
+      )}
+      {notice && (
+        <p role="alert" className="px-3 pb-2 pl-9 text-[0.8125rem] text-muted-foreground">
+          {notice}
         </p>
       )}
     </div>

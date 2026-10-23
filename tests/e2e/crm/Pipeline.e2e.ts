@@ -109,7 +109,7 @@ test.describe('Pipeline', () => {
       column(page, 'Lost').getByRole('link', { name: 'View in list: Lost' }),
     ).toBeVisible();
     const won = await column(page, 'Won').boundingBox();
-    expect(won?.width).toBeLessThan(100);
+    expect(won?.width).toBe(40);
     // Nothing to scroll to: all six fit, so the edge fade is off and the page doesn't scroll.
     const board = await column(page, 'Qualification')
       .locator('..')
@@ -207,12 +207,15 @@ test.describe('Pipeline', () => {
     await expect(page.getByRole('link', { name: DEALS.tablets, exact: true })).toHaveCount(0);
 
     // Expanded, the strip is a whole column with the card, its track closed as won.
-    await column(page, 'Won').getByRole('button', { name: 'Expand Won' }).click();
+    const strip = column(page, 'Won').getByRole('button', { name: 'Won cards' });
+    await strip.click();
+    await expect(strip).toHaveAttribute('aria-expanded', 'true');
     await expect(column(page, 'Won').getByRole('link', { name: DEALS.tablets })).toBeVisible();
     await expect(
       column(page, 'Won').getByRole('list', { name: 'Won: closed as won' }),
     ).toBeVisible();
-    await column(page, 'Won').getByRole('button', { name: 'Collapse Won' }).click();
+    await strip.click();
+    await expect(strip).toHaveAttribute('aria-expanded', 'false');
     await expect(page.getByRole('link', { name: DEALS.tablets, exact: true })).toHaveCount(0);
   });
 

@@ -53,10 +53,7 @@ export const TaskStatusPill = (props: {
       key={target}
       tone={TASK_STATUS_TONES[target]}
       label={t(`status_${target}`)}
-      onSelect={() => {
-        markUsed();
-        onSelect();
-      }}
+      onSelect={onSelect}
     />
   );
 
@@ -71,6 +68,7 @@ export const TaskStatusPill = (props: {
           status === 'OPEN'
             ? [
                 option('COMPLETED', () => {
+                  markUsed();
                   run(completeTask, t('completed', { title }));
                 }),
                 option('CANCELLED', () => {
@@ -78,6 +76,7 @@ export const TaskStatusPill = (props: {
                 }),
               ]
             : option('OPEN', () => {
+                markUsed();
                 run(reopenTask, t('reopened', { title }));
               })
         }
@@ -95,10 +94,14 @@ export const TaskStatusPill = (props: {
         description={t('cancel_text')}
         confirmLabel={t('cancel_task')}
         cancelLabel={t('keep')}
+        // Used only once confirmed ("Keep" changes nothing), and released again when refused.
         action={async () => {
+          markUsed();
           const result = await cancelTask(props.workspaceId, props.task.id, props.task.version);
           if (result.ok) {
             toast.success(t('cancelled', { title }));
+          } else {
+            release();
           }
           return result;
         }}

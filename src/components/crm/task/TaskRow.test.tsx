@@ -55,6 +55,8 @@ const renderRow = async (task: Task, compact?: boolean) => {
 const checkbox = () => page.getByRole('checkbox', { name: 'Complete Send the proposal' });
 const menu = () => page.getByRole('button', { name: 'More actions for Send the proposal' });
 const pill = (status: string) => page.getByRole('button', { name: `Status: ${status}` });
+// Marked while a change is on its way, so a refresh that redraws the row keeps the focus.
+const used = () => document.querySelector<HTMLElement>('[data-pill="task-42"]')?.dataset.used;
 
 // Two sections of one list: the row is drawn anew in the other once the refresh lands.
 const twoSections = (task: Task, section: 'open' | 'completed') => (
@@ -145,6 +147,27 @@ describe(TaskRow, () => {
       .element(page.getByRole('alertdialog', { name: 'Cancel “Send the proposal”?' }))
       .toBeVisible();
     expect(TaskActions.cancelTask).not.toHaveBeenCalled();
+  });
+
+  it('marks its pill to keep the focus only for a cancel confirmed, and drops it when refused', async () => {
+    vi.mocked(TaskActions.cancelTask).mockResolvedValue({ ok: false, message: 'Not yours.' });
+    await renderRow(TASK);
+    const confirm = page.getByRole('alertdialog', { name: 'Cancel “Send the proposal”?' });
+
+    // Kept: nothing changes, so a later redraw leaves the focus where it is.
+    await pill('Open').click();
+    await page.getByRole('menuitem', { name: 'Cancelled' }).click();
+    await confirm.getByRole('button', { name: 'Keep it' }).click();
+    await expect.element(confirm).not.toBeInTheDocument();
+    expect(used()).toBeUndefined();
+
+    // Confirmed and refused: the refusal says so, and the mark goes again.
+    await pill('Open').click();
+    await page.getByRole('menuitem', { name: 'Cancelled' }).click();
+    await confirm.getByRole('button', { name: 'Cancel task' }).click();
+    await expect.element(confirm.getByText('Not yours.')).toBeVisible();
+    expect(TaskActions.cancelTask).toHaveBeenCalledWith(1, 42, 3);
+    expect(used()).toBeUndefined();
   });
 
   it('reopens a completed task from its pill, waiting for the server', async () => {

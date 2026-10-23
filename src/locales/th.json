@@ -3445,8 +3445,7 @@
     "more": "แสดง {shown} จาก {count} ดีล — <link>เปิดรายการ</link>",
     "view_list": "ดูในรายการ",
     "view_list_label": "ดูในรายการ: {name}",
-    "expand": "ขยาย {name}",
-    "collapse": "ย่อ {name}"
+    "cards": "การ์ดในขั้น {name}"
   },
   "DealCard": {
     "close": "คาดว่าจะปิด {date}",

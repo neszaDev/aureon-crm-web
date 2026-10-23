@@ -67,7 +67,7 @@ export const BoardColumn = (props: {
           ? 'md:w-10 md:shrink-0 md:items-center md:px-0'
           : 'md:max-w-80 md:min-w-56 md:flex-1 md:basis-0',
         // A card over it: ringed in the stage's colour.
-        isOver && 'ring-2 ring-(--tone) ring-inset',
+        isOver && 'ring-2 ring-(--tone-ink) ring-inset',
         !props.selected && 'max-md:hidden',
       )}
     >
@@ -78,11 +78,15 @@ export const BoardColumn = (props: {
               type="button"
               aria-expanded={expanded}
               aria-controls={cardsId}
-              aria-label={
-                expanded ? t('collapse', { name: stage.name }) : t('expand', { name: stage.name })
-              }
-              onClick={() => {
+              // One name, "Won cards": its state is aria-expanded's.
+              aria-label={t('cards', { name: stage.name })}
+              onClick={(event) => {
+                const column = event.currentTarget.closest('section');
                 setExpanded(!expanded);
+                // Expanded at the board's end, it would push itself (and this button) out of view.
+                requestAnimationFrame(() => {
+                  column?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                });
               }}
               className={cn(
                 'grid size-6 shrink-0 place-items-center rounded-md text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring max-md:hidden',

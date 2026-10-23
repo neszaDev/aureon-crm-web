@@ -3445,8 +3445,7 @@
     "more": "Showing {shown} of {count} — <link>open the list</link>",
     "view_list": "View in list",
     "view_list_label": "View in list: {name}",
-    "expand": "Expand {name}",
-    "collapse": "Collapse {name}"
+    "cards": "{name} cards"
   },
   "DealCard": {
     "close": "Closes {date}",
