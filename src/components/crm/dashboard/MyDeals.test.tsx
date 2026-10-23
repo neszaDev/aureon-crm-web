@@ -38,6 +38,7 @@ const props = (extra: Partial<Props> = {}): Props => ({
   workspaceId: 1,
   me: 3,
   now: new Date('2026-10-18T12:00:00Z'),
+  timeZone: 'UTC',
   ...extra,
 });
 
@@ -49,7 +50,7 @@ const mine = async (value: Props) =>
   );
 
 describe(MyDeals, () => {
-  it("shows the caller's deals with number, amount and the signed stamp row", async () => {
+  it("shows the caller's deals with number, amount and the status track", async () => {
     await mine(props());
 
     await expect.element(page.getByRole('heading', { name: 'My deals' })).toBeVisible();
@@ -60,8 +61,8 @@ describe(MyDeals, () => {
     await expect.element(page.getByText('D-0009')).toBeVisible();
     await expect.element(page.getByText('€4,500.00')).toBeVisible();
     await expect.element(page.getByText('Lumen Works')).toBeVisible();
-    // The qualification box is signed by Riley, who moved the deal there; the open one counts days.
-    const row = page.getByRole('list', { name: 'Deal progress' });
+    // Riley moved the deal into Qualification; the current stage counts its days.
+    const row = page.getByRole('list', { name: 'Stage 2 of 2: Proposal' });
     await expect.element(row).toBeVisible();
     expect(row.element().textContent).toContain('Qualification: reached, moved here by Riley Rep');
     expect(row.element().textContent).toContain('Proposal: current, 8 days');

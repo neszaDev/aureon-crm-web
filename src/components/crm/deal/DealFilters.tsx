@@ -6,6 +6,7 @@ import { FilterChip, OptionsChip } from '@/components/crm/list/FilterChip';
 import { GroupMenu } from '@/components/crm/list/GroupMenu';
 import { ListToolbar } from '@/components/crm/list/ListToolbar';
 import { MeToggle } from '@/components/crm/list/MeToggle';
+import { MoreFilters } from '@/components/crm/list/MoreFilters';
 import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
 import { RecordFilter } from '@/components/crm/list/RecordFilter';
 import { SearchBox } from '@/components/crm/list/SearchBox';
@@ -19,10 +20,11 @@ import type { Permission } from '@/libs/crm/Permissions';
 import { DEAL_STATUSES } from '@/validations/crm/DealValidation';
 
 /**
- * The deals page's toolbar. The board takes the text search, the owner and company chips and
- * "Me"; the list adds the contact, stage, status, source and expected close (from, until, both
- * inclusive) chips, the grouping (stage by default, owner, or none), the sort and the archived
- * view. The export ends it in both.
+ * The deals page's toolbar, one line from 1440 px. The board takes the text search, the owner and
+ * company chips and "Me" (the board's API takes no other filter); the list adds the stage chip,
+ * "More" (status, contact, source, expected close from and until, both inclusive), the
+ * grouping (stage by default, owner, or none), the sort and the archived view. The export ends it
+ * in both.
  * @param props Component props.
  * @param props.workspace The workspace, with the caller's permissions (the export needs `EXPORT`).
  * @param props.workspace.id Its id; the pickers search its companies and contacts.
@@ -57,7 +59,7 @@ export const DealFilters = (props: {
   const tSource = useTranslations('SourceField');
   const tList = useTranslations('ListToolbar');
   const locale = useLocale();
-  const { companyId, contactId, closeFrom, closeTo } = props.query.filters;
+  const { companyId, contactId, status, sourceId, closeFrom, closeTo } = props.query.filters;
   const company =
     companyId === undefined
       ? null
@@ -103,7 +105,8 @@ export const DealFilters = (props: {
           path={props.path}
           query={props.query}
           hideLabel
-          className="min-w-40 basis-60 md:max-w-56 md:flex-none"
+          // The line breaks by its 160 px; it grows into the room the line leaves.
+          className="min-w-40 basis-60 md:max-w-56 md:basis-40"
         />
       }
       end={
@@ -142,23 +145,6 @@ export const DealFilters = (props: {
       </FilterChip>
       {props.view === 'list' && (
         <>
-          <FilterChip
-            label={t('contact_label')}
-            value={contact?.label}
-            clearHref={listHref(props.path, props.query, { contactId: undefined })}
-          >
-            <RecordFilter
-              id="deals-contact"
-              label={t('contact_label')}
-              placeholder={t('contact_any')}
-              workspaceId={props.workspace.id}
-              kind="contact"
-              param="contactId"
-              value={contact}
-              path={props.path}
-              query={props.query}
-            />
-          </FilterChip>
           <OptionsChip
             label={t('stage_label')}
             anyLabel={t('stage_any')}
@@ -168,33 +154,58 @@ export const DealFilters = (props: {
             path={props.path}
             query={props.query}
           />
-          <OptionsChip
-            label={t('status_label')}
-            anyLabel={t('status_any')}
-            // The URL holds only a valid status, which the options list.
-            missingLabel=""
-            param="status"
-            options={DEAL_STATUSES.map((status) => ({
-              value: status,
-              label: tStatus(`status_${status}`),
-            }))}
-            path={props.path}
-            query={props.query}
-          />
-          <OptionsChip
-            label={t('source_label')}
-            anyLabel={t('source_any')}
-            missingLabel={t('source_unknown')}
-            param="sourceId"
-            options={props.sources.map((source) => ({
-              value: String(source.id),
-              label: source.archived ? tSource('archived', { name: source.name }) : source.name,
-            }))}
-            path={props.path}
-            query={props.query}
-          />
-          {closeChip('closeFrom', t('close_from_label'), closeFrom)}
-          {closeChip('closeTo', t('close_to_label'), closeTo)}
+          <MoreFilters
+            count={
+              [status, contactId, sourceId, closeFrom, closeTo].filter(
+                (value) => value !== undefined,
+              ).length
+            }
+          >
+            <OptionsChip
+              label={t('status_label')}
+              anyLabel={t('status_any')}
+              // The URL holds only a valid status, which the options list.
+              missingLabel=""
+              param="status"
+              options={DEAL_STATUSES.map((item) => ({
+                value: item,
+                label: tStatus(`status_${item}`),
+              }))}
+              path={props.path}
+              query={props.query}
+            />
+            <FilterChip
+              label={t('contact_label')}
+              value={contact?.label}
+              clearHref={listHref(props.path, props.query, { contactId: undefined })}
+            >
+              <RecordFilter
+                id="deals-contact"
+                label={t('contact_label')}
+                placeholder={t('contact_any')}
+                workspaceId={props.workspace.id}
+                kind="contact"
+                param="contactId"
+                value={contact}
+                path={props.path}
+                query={props.query}
+              />
+            </FilterChip>
+            <OptionsChip
+              label={t('source_label')}
+              anyLabel={t('source_any')}
+              missingLabel={t('source_unknown')}
+              param="sourceId"
+              options={props.sources.map((source) => ({
+                value: String(source.id),
+                label: source.archived ? tSource('archived', { name: source.name }) : source.name,
+              }))}
+              path={props.path}
+              query={props.query}
+            />
+            {closeChip('closeFrom', t('close_from_label'), closeFrom)}
+            {closeChip('closeTo', t('close_to_label'), closeTo)}
+          </MoreFilters>
           <GroupMenu
             options={[
               { group: 'stage', label: tList('group_stage') },

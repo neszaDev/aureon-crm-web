@@ -893,7 +893,9 @@
     "group_due": "Due date",
     "sort_follow_up": "Follow-up",
     "sort_priority": "Priority",
-    "sort_due": "Due date"
+    "sort_due": "Due date",
+    "more": "More",
+    "more_label": "More filters{count, plural, =0 {} one {, # on} other {, # on}}"
   },
   "ExportButton": {
     "label": "Export CSV",
@@ -3408,16 +3410,13 @@
     "hint": "A lead moves from New to Contacted to Qualified, or is marked Unqualified with a reason. Convert a qualified lead to make it a contact, with a company and a deal if you want them."
   },
   "StampRow": {
-    "label": "Deal progress",
-    "state_reached": "{name}: reached",
-    "state_signed": "{name}: reached, moved here by {signer}",
-    "moved_by": "Moved here by {signer}",
-    "state_current": "{name}: current, {count, plural, one {# day} other {# days}}",
-    "state_blank": "{name}: not reached",
-    "state_unknown": "{name}: not shown",
-    "state_lost": "{name}: closed as lost",
-    "days_short": "{count}d",
-    "lost_word": "Lost"
+    "days_short": "{count}d"
+  },
+  "StatusTrack": {
+    "open": "Stage {index} of {count}: {name}",
+    "closed": "{name}: {kind, select, WON {closed as won} other {closed as lost}}",
+    "segment": "{name}: {state, select, current {current, {days, plural, one {# day} other {# days}}} blank {not reached} unknown {no move recorded} won {closed as won} lost {closed as lost} other {reached}}{mover, select, member {, moved here by {signer}{when, select, none {} other { on {when}}}} left {, moved here by a former member{when, select, none {} other { on {when}}}} other {{when, select, none {} other {, entered on {when}}}}}",
+    "days_short": "{count}d"
   },
   "DealBoard": {
     "stage_select": "Stage shown",
@@ -3436,14 +3435,17 @@
     "empty": "No deals",
     "more": "Showing {shown} of {count} — <link>open the list</link>",
     "view_list": "View in list",
-    "view_list_label": "View in list: {name}"
+    "view_list_label": "View in list: {name}",
+    "expand": "Expand {name}",
+    "collapse": "Collapse {name}"
   },
   "DealCard": {
     "close": "Closes {date}",
     "drag_role": "draggable deal",
     "drag": "Drag {number} {name}",
     "actions": "Actions for {name}",
-    "move_to": "Move to…"
+    "move_to": "Move to…",
+    "close_past": "Close date passed: {date}"
   },
   "MoveDealDialog": {
     "close": "Close",

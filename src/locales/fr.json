@@ -893,7 +893,9 @@
     "group_due": "Échéance",
     "sort_follow_up": "Relance",
     "sort_priority": "Priorité",
-    "sort_due": "Échéance"
+    "sort_due": "Échéance",
+    "more": "Plus",
+    "more_label": "Plus de filtres{count, plural, =0 {} one {, # actif} other {, # actifs}}"
   },
   "ExportButton": {
     "label": "Exporter en CSV",
@@ -3408,16 +3410,13 @@
     "hint": "Un prospect passe de Nouveau à Contacté puis à Qualifié, ou est marqué Non qualifié avec un motif. Convertissez un prospect qualifié pour en faire un contact, avec une entreprise et une affaire si vous le souhaitez."
   },
   "StampRow": {
-    "label": "Avancement de l'affaire",
-    "state_reached": "{name} : atteinte",
-    "state_signed": "{name} : atteinte, déplacée ici par {signer}",
-    "moved_by": "Déplacée ici par {signer}",
-    "state_current": "{name} : en cours, {count, plural, one {# jour} other {# jours}}",
-    "state_blank": "{name} : pas encore atteinte",
-    "state_unknown": "{name} : non affichée",
-    "state_lost": "{name} : clôturée comme perdue",
-    "days_short": "{count}j",
-    "lost_word": "Perdu"
+    "days_short": "{count}j"
+  },
+  "StatusTrack": {
+    "open": "Étape {index} sur {count} : {name}",
+    "closed": "{name} : {kind, select, WON {clôturée comme gagnée} other {clôturée comme perdue}}",
+    "segment": "{name} : {state, select, current {en cours, {days, plural, one {# jour} other {# jours}}} blank {pas encore atteinte} unknown {aucun passage enregistré} won {clôturée comme gagnée} lost {clôturée comme perdue} other {atteinte}}{mover, select, member {, déplacée ici par {signer}{when, select, none {} other { le {when}}}} left {, déplacée ici par un ancien membre{when, select, none {} other { le {when}}}} other {{when, select, none {} other {, entrée le {when}}}}}",
+    "days_short": "{count}j"
   },
   "DealBoard": {
     "stage_select": "Étape affichée",
@@ -3436,14 +3435,17 @@
     "empty": "Aucune affaire",
     "more": "{shown} affichées sur {count} — <link>ouvrir la liste</link>",
     "view_list": "Voir dans la liste",
-    "view_list_label": "Voir dans la liste : {name}"
+    "view_list_label": "Voir dans la liste : {name}",
+    "expand": "Déplier {name}",
+    "collapse": "Replier {name}"
   },
   "DealCard": {
     "close": "Clôture le {date}",
     "drag_role": "affaire déplaçable",
     "drag": "Faire glisser {number} {name}",
     "actions": "Actions pour {name}",
-    "move_to": "Déplacer vers…"
+    "move_to": "Déplacer vers…",
+    "close_past": "Date de clôture dépassée : {date}"
   },
   "MoveDealDialog": {
     "close": "Fermer",

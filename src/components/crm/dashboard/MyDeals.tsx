@@ -1,7 +1,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { Panel } from '@/components/crm/dashboard/Panel';
 import { ListEmpty } from '@/components/crm/list/ListEmpty';
-import { StampRow } from '@/components/crm/StampRow';
+import { StatusTrack } from '@/components/crm/StatusTrack';
 import { Button } from '@/components/ui/button';
 import type { components } from '@/libs/api/schema';
 import { signaturesOf } from '@/libs/crm/DealHistory';
@@ -11,15 +11,16 @@ import { Link } from '@/libs/I18nNavigation';
 
 /**
  * The caller's most recently updated open deals: each with its number, name, company, amount and
- * its stamp row, compact, with the seal of whoever moved the deal into each stage it has passed.
+ * its status track, which names whoever moved the deal into each stage it has passed.
  * @param props Component props.
  * @param props.deals The deals (the first page of `GET /deals?status=OPEN&ownerId=<me>`, by
  *   `UPDATED_AT`).
  * @param props.total How many open deals the caller has in all.
- * @param props.stages The pipeline's stages, in order, for the stamp rows.
+ * @param props.stages The pipeline's stages, in order, for the status tracks.
  * @param props.workspaceId The workspace.
  * @param props.me The caller's user id, for the link to all their deals.
  * @param props.now The current time, which the days in the stage run to.
+ * @param props.timeZone The workspace's time zone, for the dates.
  * @returns The panel.
  */
 export const MyDeals = (props: {
@@ -29,6 +30,7 @@ export const MyDeals = (props: {
   workspaceId: number;
   me: number;
   now: Date;
+  timeZone: string;
 }) => {
   const t = useTranslations('MyDeals');
   const locale = useLocale();
@@ -75,16 +77,14 @@ export const MyDeals = (props: {
                     {formatMoney(deal.amount, deal.currency, locale)}
                   </span>
                 </div>
-                <StampRow
+                <StatusTrack
                   stages={props.stages}
-                  current={{
-                    stageId: deal.stage.id,
-                    kind: deal.stage.kind,
-                    enteredAt: deal.stageEnteredAt,
-                  }}
+                  stage={deal.stage}
+                  enteredAt={deal.stageEnteredAt}
                   signatures={signaturesOf(deal.signatures)}
                   now={props.now}
-                  size="compact"
+                  timeZone={props.timeZone}
+                  className="max-w-md"
                 />
               </li>
             ))}

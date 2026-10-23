@@ -44,9 +44,9 @@ type WonLost = {
 type Funnel = { created: number; stages: { stage: { name: string }; reached: number }[] };
 type Reminders = Record<'overdueTasks' | 'dueSoonTasks' | 'followUpLeads', unknown[]>;
 
-// The board's six columns fit a 1536 px screen beside the expanded rail and sidebar (296 px), so
-// every drop target is in view.
-test.use({ viewport: { width: 1536, height: 900 } });
+// The board's four open stages and the Won and Lost strips fit a 1440 px screen beside the rail
+// and the expanded sidebar (296 px), so every drop target is in view.
+test.use({ viewport: { width: 1440, height: 900 } });
 
 /**
  * The id at the end of a link to a record.
@@ -229,11 +229,11 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     await moveOnBoard(page, 'Proposal');
     await moveOnBoard(page, 'Negotiation');
     await moveOnBoard(page, 'Won');
-    // Won closes it: the card leaves the board, and the slim column counts it.
+    // Won closes it: the card leaves the board, and the Won strip counts it.
     await expect(page.getByRole('link', { name: DEALS.tablets, exact: true })).toHaveCount(0);
     await expect(column(page, 'Won')).toContainText('€1,250.00');
 
-    // Each step is in the history, newest first, and signed on the stamp row.
+    // Each step is in the history, newest first, and named on the status track.
     await page.goto(`${owner.path}/deals/${ids.deal}`);
     const steps = page.getByRole('region', { name: 'Stage history' }).getByRole('listitem');
     await expect(steps).toHaveCount(5);
@@ -252,14 +252,17 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
         );
       }),
     );
-    const row = page.getByRole('list', { name: 'Deal progress' });
+    const row = page.getByRole('list', { name: 'Won: closed as won' });
     await Promise.all(
-      ['Qualification', 'Needs analysis', 'Proposal', 'Negotiation', 'Won'].map(async (stage) => {
+      ['Qualification', 'Needs analysis', 'Proposal', 'Negotiation'].map(async (stage) => {
         await expect(
-          row.getByText(`${stage}: reached, moved here by ${PEOPLE.owner}`),
+          row.getByText(`${stage}: reached, moved here by ${PEOPLE.owner} on `),
         ).toBeVisible();
       }),
     );
+    await expect(
+      row.getByText(`Won: closed as won, moved here by ${PEOPLE.owner} on `),
+    ).toBeVisible();
   });
 
   await test.step('7. Create a follow-up task on the deal and complete it', async () => {

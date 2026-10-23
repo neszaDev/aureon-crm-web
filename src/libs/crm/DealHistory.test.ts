@@ -22,8 +22,11 @@ const CREATED: Change = {
 const HISTORY: Change[] = [MOVED, CREATED];
 
 describe(stageSignatures, () => {
-  it('signs each stage with whoever moved the deal into it', () => {
-    expect(stageSignatures(HISTORY)).toStrictEqual({ 1: MIA, 2: RILEY });
+  it('names whoever moved the deal into each stage, and when', () => {
+    expect(stageSignatures(HISTORY)).toStrictEqual({
+      1: { by: MIA, at: '2026-10-10T09:00:00Z' },
+      2: { by: RILEY, at: '2026-10-12T09:00:00Z' },
+    });
   });
 
   it('keeps the newest entry when a deal entered a stage twice', () => {
@@ -37,10 +40,13 @@ describe(stageSignatures, () => {
       ...HISTORY,
     ];
 
-    expect(stageSignatures(back)).toStrictEqual({ 1: RILEY, 2: RILEY });
+    expect(stageSignatures(back)).toStrictEqual({
+      1: { by: RILEY, at: '2026-10-14T09:00:00Z' },
+      2: { by: RILEY, at: '2026-10-12T09:00:00Z' },
+    });
   });
 
-  it('signs nothing for a stage that was deleted, but lists the others', () => {
+  it('names nobody for a stage that was deleted, but lists the others', () => {
     const deleted: Change[] = [
       {
         fromStage: { name: 'Demo' },
@@ -57,14 +63,19 @@ describe(stageSignatures, () => {
       CREATED,
     ];
 
-    expect(stageSignatures(deleted)).toStrictEqual({ 1: MIA, 2: RILEY });
-    expect(Object.keys(stageSignatures(deleted))).toHaveLength(2);
+    expect(stageSignatures(deleted)).toStrictEqual({
+      1: { by: MIA, at: '2026-10-10T09:00:00Z' },
+      2: { by: RILEY, at: '2026-10-12T09:00:00Z' },
+    });
   });
 
-  it('leaves a stage unsigned once the member who moved the deal there has left', () => {
+  it('keeps the move of a member who has left, without a member', () => {
     const left: Change[] = [{ ...MOVED, changedBy: undefined }, CREATED];
 
-    expect(stageSignatures(left)).toStrictEqual({ 1: MIA });
+    expect(stageSignatures(left)).toStrictEqual({
+      1: { by: MIA, at: '2026-10-10T09:00:00Z' },
+      2: { by: undefined, at: '2026-10-12T09:00:00Z' },
+    });
   });
 });
 
@@ -75,10 +86,13 @@ describe(signaturesOf, () => {
         { stageId: 2, by: RILEY },
         { stageId: 1, by: MIA },
       ]),
-    ).toStrictEqual({ 1: MIA, 2: RILEY });
+    ).toStrictEqual({ 1: { by: MIA }, 2: { by: RILEY } });
   });
 
-  it('leaves a stage whose last mover has left without a signer', () => {
-    expect(signaturesOf([{ stageId: 1, by: MIA }, { stageId: 2 }])).toStrictEqual({ 1: MIA });
+  it('keeps a stage whose last mover has left, without a member', () => {
+    expect(signaturesOf([{ stageId: 1, by: MIA }, { stageId: 2 }])).toStrictEqual({
+      1: { by: MIA },
+      2: { by: undefined },
+    });
   });
 });

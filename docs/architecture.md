@@ -136,8 +136,8 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
   keyboard, or from "Move to…"; only the people who may move the deal (its owner, or
   `RECORDS_EDIT_ANY`) get the handle and the menu. A drop outside every column cancels; a drop on
   Lost asks for the reason first. A refused move puts the card back and says why in a toast. A
-  deal's page shows the stamp row (`StampRow`: each reached stage signed by whoever moved the
-  deal into it) and the stage history.
+  deal's card and page show its status track (`StatusTrack`: a segment per open stage, each naming
+  whoever moved the deal into it and when) and its page the stage history.
 
 ### Insights
 

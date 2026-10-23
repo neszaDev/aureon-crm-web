@@ -91,6 +91,7 @@ const board = (
       path="/app/1/deals"
       query={{ params: { q: 'acme' } }}
       now={NOW}
+      timeZone="UTC"
       {...over}
     />
     <Toaster />
@@ -189,7 +190,7 @@ describe(DealBoard, () => {
     await expect.element(column('Proposal').getByText('No deals')).toBeVisible();
   });
 
-  it('draws Won and Lost slim: name, count, totals without their cents, a link to the list, no cards', async () => {
+  it('folds Won and Lost into strips: pill, count, totals without their cents, a link to the list, no cards', async () => {
     await renderBoard({}, [
       FIRST_COLUMN,
       { stage: PROPOSAL, count: 0, totals: [], deals: [] },
@@ -230,6 +231,68 @@ describe(DealBoard, () => {
     expect(won.element().getBoundingClientRect().width).toBeLessThan(
       column('Qualification').element().getBoundingClientRect().width / 2,
     );
+    await expect
+      .element(won.getByRole('button', { name: 'Expand Won' }))
+      .toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('expands a strip into a whole column, cards and all, and folds it back', async () => {
+    const wonDeal = deal({ id: 103, name: 'Won big', stage: WON, status: 'WON' });
+    await renderBoard({}, [
+      FIRST_COLUMN,
+      { stage: PROPOSAL, count: 0, totals: [], deals: [] },
+      { stage: WON, count: 1, totals: [{ currency: 'USD', amount: '47000.00' }], deals: [wonDeal] },
+      { stage: LOST, count: 0, totals: [], deals: [] },
+    ]);
+    const won = column('Won');
+
+    await won.getByRole('button', { name: 'Expand Won' }).click();
+
+    await expect.element(won.getByRole('link', { name: 'Won big' })).toBeVisible();
+    // Whole, it is as wide as an open column, and its totals keep their cents.
+    expect(won.element().getBoundingClientRect().width).toBe(
+      column('Qualification').element().getBoundingClientRect().width,
+    );
+    await expect.element(won.getByText('$47,000.00', { exact: true })).toBeVisible();
+    // Its track: every open stage reached, then Won.
+    await expect
+      .element(won.getByRole('list', { name: 'Won: closed as won' }).first())
+      .toBeVisible();
+
+    await won.getByRole('button', { name: 'Collapse Won' }).click();
+
+    // Folded, its cards are hidden, out of the page's tree.
+    await expect.element(won.getByRole('link', { name: 'Won big' })).not.toBeInTheDocument();
+    await expect.element(won.getByRole('button', { name: 'Expand Won' })).toHaveFocus();
+  });
+
+  it('folds a strip with the keyboard too', async () => {
+    await renderBoard();
+
+    column('Lost').getByRole('button', { name: 'Expand Lost' }).element().focus();
+    await userEvent.keyboard('{Enter}');
+
+    await expect
+      .element(column('Lost').getByRole('button', { name: 'Collapse Lost' }))
+      .toHaveAttribute('aria-expanded', 'true');
+    await expect.element(column('Lost').getByText('No deals')).toBeVisible();
+  });
+
+  it('ends each open column with "Add deal", the create form in that stage', async () => {
+    await renderBoard();
+
+    await expect
+      .element(column('Proposal').getByRole('link', { name: 'Add deal in Proposal' }))
+      .toHaveAttribute('href', '/app/1/deals/new?stageId=12');
+    await expect
+      .element(column('Proposal').getByRole('link', { name: 'Add deal in Proposal' }))
+      .toHaveTextContent('Add deal');
+    // A deal starts in an open stage.
+    expect(
+      column('Won')
+        .getByRole('link', { name: /^Add deal/u })
+        .elements(),
+    ).toHaveLength(0);
   });
 
   it('shows Won in full on a phone, cards and all', async () => {
@@ -259,7 +322,7 @@ describe(DealBoard, () => {
     ).toHaveLength(0);
   });
 
-  it('fits the default pipeline in the 1152 px content column of a 1440 px screen, stamp rows on one line', async () => {
+  it('fits four open stages and both strips in the content column of a 1440 px screen beside the expanded sidebar', async () => {
     await page.viewport(1440, 900);
     const open = (id: number, name: string) => stage(id, name, 'OPEN');
     const columns: Column[] = [
@@ -272,7 +335,8 @@ describe(DealBoard, () => {
     ];
     await render(
       <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-        <div style={{ width: 1152 }}>
+        {/* 1440 px less the rail (56), the expanded sidebar (240) and the canvas's padding (56). */}
+        <div style={{ width: 1088 }}>
           <DealBoard
             workspaceId={1}
             columns={columns}
@@ -281,6 +345,7 @@ describe(DealBoard, () => {
             path="/app/1/deals"
             query={{ params: {} }}
             now={NOW}
+            timeZone="UTC"
           />
         </div>
       </NextIntlClientProvider>,
@@ -290,23 +355,54 @@ describe(DealBoard, () => {
 
     expect(scroller?.scrollWidth).toBe(scroller?.clientWidth);
     expect(fadeOpacity()).toBe('0');
-    // With room to spare: a content column a few pixels narrower doesn't scroll by one.
-    const content = scroller?.parentElement?.parentElement;
-    if (content instanceof HTMLElement) {
-      content.style.width = '1144px';
-    }
-    await expect.poll(() => (scroller?.scrollWidth ?? 0) - (scroller?.clientWidth ?? 0)).toBe(0);
-    // Five boxes (four stages and Won) in the card, on one line.
-    expect(
-      page.getByRole('list', { name: 'Deal progress' }).element().getBoundingClientRect().height,
-    ).toBe(36);
+    // The card's track and its stage's name on one line.
+    const track = page.getByRole('list', { name: 'Stage 1 of 4: Qualification' }).element();
+    expect(track.parentElement?.getBoundingClientRect().height).toBeLessThanOrEqual(20);
+  });
+
+  it('scrolls sideways from a fifth open stage at that width', async () => {
+    await page.viewport(1440, 900);
+    const open = (id: number, name: string) => ({
+      stage: stage(id, name, 'OPEN'),
+      count: 0,
+      totals: [],
+      deals: [],
+    });
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <div style={{ width: 1088 }}>
+          <DealBoard
+            workspaceId={1}
+            columns={[
+              open(11, 'Qualification'),
+              open(12, 'Needs analysis'),
+              open(15, 'Proposal'),
+              open(16, 'Negotiation'),
+              open(17, 'Contract'),
+              { stage: WON, count: 0, totals: [], deals: [] },
+              { stage: LOST, count: 0, totals: [], deals: [] },
+            ]}
+            me={1}
+            permissions={[]}
+            path="/app/1/deals"
+            query={{ params: {} }}
+            now={NOW}
+            timeZone="UTC"
+          />
+        </div>
+      </NextIntlClientProvider>,
+    );
+    const scroller = document.querySelector('.board-scroll');
+
+    expect(scroller?.scrollWidth).toBeGreaterThan(scroller?.clientWidth ?? 0);
+    await expect.poll(fadeOpacity).toBe('1');
   });
 
   it('scrolls sideways when the stages do not fit, with a fade at the edge until the end is in view', async () => {
     await page.viewport(1440, 900);
     await render(
       <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-        <div style={{ width: 640 }}>
+        <div style={{ width: 480 }}>
           <DealBoard
             workspaceId={1}
             columns={COLUMNS}
@@ -315,6 +411,7 @@ describe(DealBoard, () => {
             path="/app/1/deals"
             query={{ params: {} }}
             now={NOW}
+            timeZone="UTC"
           />
         </div>
       </NextIntlClientProvider>,
@@ -330,21 +427,26 @@ describe(DealBoard, () => {
     await expect.poll(fadeOpacity).toBe('0');
   });
 
-  it('draws the columns with the hairline only, no tinted fill', async () => {
+  it('draws the columns on the sidebar’s ground, each headed by its stage’s pill', async () => {
     await renderBoard();
 
-    expect(getComputedStyle(column('Qualification').element()).backgroundColor).toBe(
-      'rgba(0, 0, 0, 0)',
-    );
-    expect(getComputedStyle(column('Qualification').element()).borderTopWidth).toBe('1px');
+    const qualification = column('Qualification').element();
+    const heading = page.getByRole('heading', { name: 'Qualification', exact: true }).element();
+
+    // #f7f7fa, with no border: the white cards stand on it.
+    expect(getComputedStyle(qualification).backgroundColor).toBe('rgb(247, 247, 250)');
+    expect(getComputedStyle(qualification).borderTopWidth).toBe('0px');
+    // The first open stage is blue: the pill on its tint, in its ink.
+    expect(getComputedStyle(heading).backgroundColor).toBe('rgb(228, 238, 251)');
+    expect(getComputedStyle(heading).color).toBe('rgb(39, 105, 189)');
   });
 
-  it('signs a card’s reached stages with the seal of whoever moved the deal there', async () => {
+  it('names on a card’s track whoever moved the deal into each stage, or a former member', async () => {
     const signed = deal({
       id: 103,
       name: 'Signed deal',
       stage: { id: 12, name: 'Proposal', kind: 'OPEN' },
-      signatures: [{ stageId: 11, by: RILEY }],
+      signatures: [{ stageId: 11, by: RILEY }, { stageId: 12 }],
     });
     await renderBoard({}, [
       { ...FIRST_COLUMN, count: 0, deals: [] },
@@ -352,14 +454,21 @@ describe(DealBoard, () => {
       ...COLUMNS.slice(2),
     ]);
 
-    const box = column('Proposal').getByRole('listitem').first().element().querySelector('.size-9');
+    const track = column('Proposal').getByRole('list', { name: 'Stage 2 of 2: Proposal' });
 
-    // Riley moved it into Qualification: her seal, with its words on hover; Mia, the owner, signed nothing.
-    expect(box?.textContent).toContain('RR');
-    expect(box).toHaveAttribute('title', 'Moved here by Riley Rep');
+    // Riley moved it into Qualification; whoever moved it into Proposal has left since.
     await expect
-      .element(column('Proposal').getByText('Qualification: reached, moved here by Riley Rep'))
+      .element(track.getByText('Qualification: reached, moved here by Riley Rep'))
       .toBeInTheDocument();
+    await expect
+      .element(
+        track.getByText('Proposal: current, 8 days, moved here by a former member on Oct 10, 2026'),
+      )
+      .toBeInTheDocument();
+    await userEvent.hover(track.getByRole('listitem').first());
+    await expect
+      .element(page.getByRole('tooltip'))
+      .toHaveTextContent('Qualification: reached, moved here by Riley Rep');
   });
 
   it('shows a card with its number, company, amount and owner', async () => {
@@ -372,8 +481,33 @@ describe(DealBoard, () => {
     await expect
       .element(qualification.getByRole('img', { name: 'Mia Manager' }).first())
       .toBeVisible();
-    // The compact stamp row on the card.
+    // The status track on the card, its stage and days written beside it.
+    await expect
+      .element(qualification.getByRole('list', { name: 'Stage 1 of 2: Qualification' }).first())
+      .toBeVisible();
     await expect.element(qualification.getByText('8d').first()).toBeVisible();
+  });
+
+  it('writes a past close date of an open deal in red, with an icon and words', async () => {
+    await renderBoard({}, [
+      {
+        ...FIRST_COLUMN,
+        deals: [
+          { ...MINE, expectedCloseDate: '2026-10-01' },
+          { ...RILEYS, expectedCloseDate: '2026-10-30' },
+        ],
+      },
+      ...COLUMNS.slice(1),
+    ]);
+
+    const past = column('Qualification').getByText('Close date passed: Oct 1, 2026');
+    const coming = column('Qualification').getByText('Closes Oct 30, 2026');
+
+    await expect.element(past).toBeVisible();
+    await expect.element(coming).toBeVisible();
+    expect(getComputedStyle(past.element()).color).toBe('rgb(188, 58, 50)');
+    expect(past.element().querySelector('svg')).not.toBeNull();
+    expect(getComputedStyle(coming.element()).color).not.toBe('rgb(188, 58, 50)');
   });
 
   it('moves a dropped card at once and keeps it there once the move is saved', async () => {
@@ -490,7 +624,7 @@ describe(DealBoard, () => {
     await page.getByLabelText('Reason').fill('Went with a rival');
     await page.getByRole('button', { name: 'Mark as lost' }).click();
 
-    // Lost is a slim column: the card has left Qualification and shows nowhere.
+    // Lost is a strip: the card has left Qualification and shows nowhere.
     await expect
       .element(column('Qualification').getByRole('link', { name: 'Mine to move' }))
       .not.toBeInTheDocument();
@@ -613,7 +747,7 @@ describe(DealBoard, () => {
       .toBeVisible();
   });
 
-  it('closes a deal as won with a drop on Won: the card leaves for the slim column, which takes the focus', async () => {
+  it('closes a deal as won with a drop on Won: the card leaves for the strip, which takes the focus', async () => {
     vi.mocked(DealActions.moveDeal).mockResolvedValue({ ok: true, version: 4 });
     await renderBoard();
 
@@ -691,7 +825,7 @@ describe(DealBoard, () => {
       ]),
     );
 
-    // Won is slim: it counts the deal, and the card is nowhere else.
+    // Won is a strip: it counts the deal, and the card is nowhere else.
     await expect.element(column('Won').getByText('1 deal')).toBeVisible();
     expect(column('Proposal').getByRole('link', { name: 'Mine to move' }).elements()).toHaveLength(
       0,

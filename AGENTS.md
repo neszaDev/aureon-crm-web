@@ -40,7 +40,7 @@ src/libs/api/RecordSearch.ts    the list searches behind the pickers (`searchRec
 src/libs/crm/*                  CRM logic: Permissions (`can`), RecordAccess (who may edit a record), WorkspaceId,
                                 Stages, PageMetadata, OpenWorkspace (`getOpenWorkspace`: a page's workspace, 401
                                 and 404 handled), Format (money, dates, record numbers), ZonedTime (workspace-zone
-                                inputs), ListQuery (a list's state from its URL), DealHistory (stamp row signers),
+                                inputs), ListQuery (a list's state from its URL), DealHistory (the status track's movers),
                                 Reminders (the bell's count and its "20+"), PeriodQuery (a dashboard's or report's
                                 `?from&to`, read leniently, and the picker's presets), Reports (the
                                 report tabs: `?tab=`, which take a period), Audit (the trail's record types and URL state)

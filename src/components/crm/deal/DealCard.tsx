@@ -2,10 +2,10 @@
 
 import { useDraggable } from '@dnd-kit/core';
 import { cn } from 'cn';
-import { EllipsisIcon, GripVerticalIcon } from 'lucide-react';
+import { CalendarIcon, CircleAlertIcon, EllipsisIcon, GripVerticalIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { PersonAvatar } from '@/components/crm/PersonAvatar';
-import { StampRow } from '@/components/crm/StampRow';
+import { StatusTrack } from '@/components/crm/StatusTrack';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,20 +17,22 @@ import type { components } from '@/libs/api/schema';
 import { signaturesOf } from '@/libs/crm/DealHistory';
 import { formatDate, formatMoney, recordNumber } from '@/libs/crm/Format';
 import type { StageRef } from '@/libs/crm/Stages';
+import { toLocalInput } from '@/libs/crm/ZonedTime';
 import { Link } from '@/libs/I18nNavigation';
 
 type Deal = components['schemas']['DealSummary'];
 
 /**
- * What a board card shows: the deal's number in mono, its name (a link to the deal), its company,
- * its amount, its owner's avatar, a compact stamp row (each reached stage with its signer's seal)
- * and the expected close date. The dragged
- * copy shows the same, without controls.
+ * What a board card shows: the deal's number, its name (a link to the deal), its company, its
+ * amount, its owner's avatar, its status track (each segment names who moved the deal there) and
+ * its expected close date, in danger red with an icon and words once an open deal is past it. The
+ * dragged copy shows the same, without controls.
  * @param props Component props.
  * @param props.deal The deal.
  * @param props.workspaceId The workspace.
- * @param props.stages The pipeline's stages, in order, for the stamp row.
- * @param props.now The current time, for the days in the stage.
+ * @param props.stages The pipeline's stages, in order, for the status track.
+ * @param props.now The current time, for the days in the stage and the past close date.
+ * @param props.timeZone The workspace's time zone, for the dates.
  * @param props.controls The drag handle and the menu, when the caller may move the deal.
  * @param props.className Extra classes, such as the lifted look of the dragged copy.
  * @returns The card's body.
@@ -40,39 +42,45 @@ export const DealCardBody = (props: {
   workspaceId: number;
   stages: StageRef[];
   now: Date;
+  timeZone: string;
   controls?: React.ReactNode;
   className?: string;
 }) => {
   const t = useTranslations('DealCard');
   const locale = useLocale();
+  const close = props.deal.expectedCloseDate;
+  const today = toLocalInput(props.now.toISOString(), props.timeZone).slice(0, 10);
+  const past = close !== undefined && props.deal.status === 'OPEN' && close < today;
 
   return (
     <div
       className={cn(
-        'flex flex-col gap-2.5 rounded-md border border-rule bg-card px-2.5 py-2.5',
+        'flex flex-col gap-2 rounded-lg border border-rule bg-card p-3 pt-2 transition-shadow duration-150 hover:shadow-float motion-reduce:transition-none',
         props.className,
       )}
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-0.5">
         {/* The controls share the number's line, so the name has the card's whole width. */}
-        <div className="flex items-center justify-between gap-2">
-          <span className="font-mono text-[0.8125rem] text-muted-foreground tabular-nums">
+        <div className="flex h-6 items-center justify-between gap-2">
+          <span className="font-mono text-xs text-muted-foreground tabular-nums">
             {recordNumber('deal', props.deal.id)}
           </span>
           {props.controls}
         </div>
         <Link
           href={`/app/${props.workspaceId}/deals/${props.deal.id}`}
-          className="text-[0.9375rem] font-medium break-words text-foreground"
+          className="text-sm leading-5 font-medium break-words text-foreground"
         >
           {props.deal.name}
         </Link>
+        {props.deal.company && (
+          <span className="text-[0.8125rem] break-words text-muted-foreground">
+            {props.deal.company.name}
+          </span>
+        )}
       </div>
-      {props.deal.company && (
-        <span className="text-sm break-words text-muted-foreground">{props.deal.company.name}</span>
-      )}
       <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold tabular-nums">
+        <span className="text-sm font-semibold tabular-nums">
           {formatMoney(props.deal.amount, props.deal.currency, locale)}
         </span>
         {props.deal.owner && (
@@ -83,20 +91,29 @@ export const DealCardBody = (props: {
           />
         )}
       </div>
-      <StampRow
+      <StatusTrack
         stages={props.stages}
-        current={{
-          stageId: props.deal.stage.id,
-          kind: props.deal.stage.kind,
-          enteredAt: props.deal.stageEnteredAt,
-        }}
+        stage={props.deal.stage}
+        enteredAt={props.deal.stageEnteredAt}
         signatures={signaturesOf(props.deal.signatures)}
         now={props.now}
-        size="compact"
+        timeZone={props.timeZone}
       />
-      {props.deal.expectedCloseDate && (
-        <span className="text-sm text-muted-foreground tabular-nums">
-          {t('close', { date: formatDate(props.deal.expectedCloseDate, locale) })}
+      {close && (
+        <span
+          className={cn(
+            'flex items-center gap-1.5 text-xs tabular-nums',
+            past ? 'font-medium text-danger' : 'text-muted-foreground',
+          )}
+        >
+          {past ? (
+            <CircleAlertIcon aria-hidden="true" className="size-3.5 shrink-0" />
+          ) : (
+            <CalendarIcon aria-hidden="true" className="size-3.5 shrink-0" />
+          )}
+          {past
+            ? t('close_past', { date: formatDate(close, locale) })
+            : t('close', { date: formatDate(close, locale) })}
         </span>
       )}
     </div>
@@ -112,8 +129,9 @@ export const DealCardBody = (props: {
  * @param props Component props.
  * @param props.deal The deal.
  * @param props.workspaceId The workspace.
- * @param props.stages The pipeline's stages, in order, for the stamp row.
- * @param props.now The current time, for the days in the stage.
+ * @param props.stages The pipeline's stages, in order, for the status track.
+ * @param props.now The current time, for the days in the stage and the past close date.
+ * @param props.timeZone The workspace's time zone, for the dates.
  * @param props.movable Whether the caller may move the deal.
  * @param props.busy Whether a move of it is on its way.
  * @param props.onMoveTo Opens the "Move to…" dialog.
@@ -124,6 +142,7 @@ export const DealCard = (props: {
   workspaceId: number;
   stages: StageRef[];
   now: Date;
+  timeZone: string;
   movable: boolean;
   busy: boolean;
   onMoveTo: () => void;
@@ -143,6 +162,7 @@ export const DealCard = (props: {
         workspaceId={props.workspaceId}
         stages={props.stages}
         now={props.now}
+        timeZone={props.timeZone}
         className={cn(isDragging && 'opacity-40', props.busy && 'opacity-70')}
         controls={
           props.movable && (

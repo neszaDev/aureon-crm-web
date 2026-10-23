@@ -97,6 +97,9 @@ server, and keep all of it in the address, so a view can be bookmarked or shared
 - Deals: on the board, search, owner and company; in the list view also contact, stage, status,
   the expected close range, and active or archived.
 
+The rarely used ones (a deal's contact, source and expected close range; a lead's source and
+follow-up day) wait behind **More**, which counts those that are on.
+
 - Tasks: search (title), when they are due (overdue, today, the next 7 days, later, no due date,
   completed or cancelled), assignee.
 
@@ -140,8 +143,10 @@ a retry) makes nothing new.
 
 ## The pipeline
 
-**Deals** opens on the **board**: one column per stage with its count and total value per
-currency. Move a deal to another stage:
+**Deals** opens on the **board**: one column per stage, headed by its coloured pill with its
+count and total value per currency, ending with **Add deal** (the form, in that stage). Each card
+shows the deal's status track, one segment per open stage filled up to its own; hover a segment to
+see who moved the deal there and when. Move a deal to another stage:
 
 - **drag** its card by the handle;
 - with the **keyboard**: focus the handle, press Space, move with the arrow keys, Space to drop
@@ -150,14 +155,14 @@ currency. Move a deal to another stage:
 - or, in the **List** view, its stage pill.
 
 Dropping on **Lost** asks for the reason first; cancelling leaves the deal where it was. **Won**
-and **Lost** close the deal and take it off the board (their columns count it and link to the
-list); a closed deal can be moved back to an open stage later. A move the server refuses puts the
+and **Lost** close the deal and take it off the board: they start as narrow strips that count it
+and link to the list, and expand into whole columns with a click; a closed deal can be moved back
+to an open stage later. A move the server refuses puts the
 card back and says why. On a phone the board shows one stage at a time, and the menu moves cards.
 
-The **List** view filters and sorts all deals, open and closed. A deal's page shows the **stamp
-row**: a box per stage, each reached stage sealed with the initials of whoever moved the deal into
-it, the current stage with its days, then the closing box (Won, or Lost), and the **stage
-history** with every move, by whom and when. A lost deal's page also says why it was lost.
+The **List** view filters and sorts all deals, open and closed. A deal's page shows its **status
+track** (whoever moved the deal into each stage, and when; the current stage with its days; a
+closed deal's Won or Lost) and the **stage history** with every move, by whom and when. A lost deal's page also says why it was lost.
 
 Only a deal's owner, or a manager, admin or owner, gets the handle, the menu and the Move button.
 

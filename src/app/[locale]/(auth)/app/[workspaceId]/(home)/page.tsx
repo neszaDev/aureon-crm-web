@@ -145,6 +145,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
           workspaceId={workspace.id}
           me={user.id}
           now={new Date()}
+          timeZone={workspace.timezone}
         />
         <FollowUps
           workspace={workspace}

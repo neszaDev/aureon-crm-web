@@ -7,6 +7,7 @@ import { FilterChip, OptionsChip } from '@/components/crm/list/FilterChip';
 import { GroupMenu } from '@/components/crm/list/GroupMenu';
 import { ListToolbar } from '@/components/crm/list/ListToolbar';
 import { MeToggle } from '@/components/crm/list/MeToggle';
+import { MoreFilters } from '@/components/crm/list/MoreFilters';
 import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
 import { SearchBox } from '@/components/crm/list/SearchBox';
 import { SortMenu } from '@/components/crm/list/SortMenu';
@@ -19,8 +20,8 @@ import type { Permission } from '@/libs/crm/Permissions';
 import { LEAD_PRIORITIES } from '@/validations/crm/LeadValidation';
 
 /**
- * The lead list's toolbar: the text search; the status (any number), owner, source, priority and
- * "follow-up on or before" chips; the grouping (status by default, owner, or none), the sort,
+ * The lead list's toolbar, one line from 1440 px: the text search; the status (any number), owner
+ * and priority chips, and "More" (source, "follow-up on or before"); the grouping (status by default, owner, or none), the sort,
  * "Me" and the archived view; the export.
  * @param props Component props.
  * @param props.workspace The workspace, with the caller's permissions (the export needs `EXPORT`).
@@ -49,7 +50,7 @@ export const LeadFilters = (props: {
   const tList = useTranslations('ListToolbar');
   const format = useFormatter();
   const locale = useLocale();
-  const { status, followUpBefore } = props.query.filters;
+  const { status, sourceId, followUpBefore } = props.query.filters;
 
   return (
     <ListToolbar
@@ -64,7 +65,8 @@ export const LeadFilters = (props: {
           path={props.path}
           query={props.query}
           hideLabel
-          className="min-w-40 basis-60 md:max-w-56 md:flex-none"
+          // The line breaks by its 160 px; it grows into the room the line leaves.
+          className="min-w-40 basis-60 md:max-w-56 md:basis-40"
         />
       }
       end={
@@ -92,18 +94,6 @@ export const LeadFilters = (props: {
         query={props.query}
       />
       <OptionsChip
-        label={t('source_label')}
-        anyLabel={t('source_any')}
-        missingLabel={t('source_unknown')}
-        param="sourceId"
-        options={props.sources.map((source) => ({
-          value: String(source.id),
-          label: source.archived ? tSource('archived', { name: source.name }) : source.name,
-        }))}
-        path={props.path}
-        query={props.query}
-      />
-      <OptionsChip
         label={t('priority_label')}
         anyLabel={t('priority_any')}
         // The URL holds only a valid priority, which the options list.
@@ -116,20 +106,34 @@ export const LeadFilters = (props: {
         path={props.path}
         query={props.query}
       />
-      <FilterChip
-        label={t('follow_up_label')}
-        value={followUpBefore && formatDate(followUpBefore, locale)}
-        clearHref={listHref(props.path, props.query, { followUpBefore: undefined })}
-      >
-        <DateFilter
-          id="leads-follow-up-before"
-          label={t('follow_up_label')}
-          param="followUpBefore"
+      <MoreFilters count={[sourceId, followUpBefore].filter((value) => value !== undefined).length}>
+        <OptionsChip
+          label={t('source_label')}
+          anyLabel={t('source_any')}
+          missingLabel={t('source_unknown')}
+          param="sourceId"
+          options={props.sources.map((source) => ({
+            value: String(source.id),
+            label: source.archived ? tSource('archived', { name: source.name }) : source.name,
+          }))}
           path={props.path}
           query={props.query}
-          timeZone={props.timeZone}
         />
-      </FilterChip>
+        <FilterChip
+          label={t('follow_up_label')}
+          value={followUpBefore && formatDate(followUpBefore, locale)}
+          clearHref={listHref(props.path, props.query, { followUpBefore: undefined })}
+        >
+          <DateFilter
+            id="leads-follow-up-before"
+            label={t('follow_up_label')}
+            param="followUpBefore"
+            path={props.path}
+            query={props.query}
+            timeZone={props.timeZone}
+          />
+        </FilterChip>
+      </MoreFilters>
       <GroupMenu
         options={[
           { group: 'status', label: tList('group_status') },

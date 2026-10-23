@@ -21,9 +21,9 @@ import {
   waitForHydration,
 } from './helpers';
 
-// The default pipeline's six columns fit the content column of a 1536 px screen beside the
-// expanded rail and sidebar (296 px), in one frame.
-test.use({ viewport: { width: 1536, height: 900 } });
+// The default pipeline's four open stages and the Won and Lost strips fit the content column of a
+// 1440 px screen beside the rail and the expanded sidebar (296 px), in one frame.
+test.use({ viewport: { width: 1440, height: 900 } });
 
 /**
  * The vertical middle of a box, to tell which line it sits on.
@@ -32,6 +32,22 @@ test.use({ viewport: { width: 1536, height: 900 } });
  */
 const middle = (box: { y: number; height: number } | null) =>
   Math.round((box?.y ?? 0) + (box?.height ?? 0) / 2);
+
+/**
+ * Opens a list and checks that its toolbar holds one line.
+ * @param page Playwright page, signed in.
+ * @param url The list.
+ * @param name The toolbar's name.
+ */
+const expectToolbarOnOneLine = async (page: Page, url: string, name: string) => {
+  await page.goto(url);
+  const toolbar = page.getByRole('search', { name });
+  await expect(toolbar.getByRole('button', { name: 'Me', exact: true })).toBeVisible();
+  const box = await toolbar.boundingBox();
+
+  // One line of 32 px controls; a second line would add 38 px.
+  expect(box?.height, url).toBeLessThan(48);
+};
 
 /**
  * Opens the board, signed in as `member`, once its cards can be dragged.
@@ -87,7 +103,7 @@ test.describe('Pipeline', () => {
     await expect(column(page, 'Qualification')).toContainText('1 deal');
     await expect(column(page, 'Qualification')).toContainText('€1,250.00');
     await expect(column(page, 'Needs analysis')).toContainText('No deals');
-    // Won and Lost are slim: their name, count and a link to the list, no room for cards.
+    // Won and Lost are strips: their pill, count and a link to the list, no room for cards.
     await expect(column(page, 'Won')).toContainText('0 deals');
     await expect(
       column(page, 'Lost').getByRole('link', { name: 'View in list: Lost' }),
@@ -104,6 +120,10 @@ test.describe('Pipeline', () => {
       }));
     expect(board).toStrictEqual({ fits: true, fade: '0', page: true });
     await expectNoA11yViolations(page);
+    // Each open stage ends with "Add deal", the create form in that stage.
+    await expect(
+      column(page, 'Proposal').getByRole('link', { name: 'Add deal in Proposal' }),
+    ).toHaveAttribute('href', /\/deals\/new\?stageId=\d+$/u);
 
     await dragAndSave(page, handleOf(page, DEALS.tablets), column(page, 'Needs analysis'));
     await expect(
@@ -120,8 +140,8 @@ test.describe('Pipeline', () => {
     await dragAndSave(page, handleOf(page, DEALS.tablets), column(page, 'Proposal'));
     await expect(column(page, 'Proposal').getByRole('link', { name: DEALS.tablets })).toBeVisible();
 
-    // The history holds both moves, each by Olivia, and the creation by Mia; the row is signed
-    // by whoever moved the deal into each stage, the open one by nobody yet.
+    // The history holds both moves, each by Olivia, and the creation by Mia; the track names
+    // whoever moved the deal into each stage, and when.
     await page.reload();
     await page.getByRole('link', { name: DEALS.tablets }).click();
     await expect(page.getByRole('heading', { level: 1, name: DEALS.tablets })).toBeVisible();
@@ -135,14 +155,16 @@ test.describe('Pipeline', () => {
     await expect(history.getByRole('listitem').nth(1)).toContainText(PEOPLE.owner);
     await expect(history.getByRole('listitem').nth(2)).toContainText('Created in Qualification');
     await expect(history.getByRole('listitem').nth(2)).toContainText(PEOPLE.manager);
-    const row = page.getByRole('list', { name: 'Deal progress' });
+    const row = page.getByRole('list', { name: 'Stage 3 of 4: Proposal' });
     await expect(
-      row.getByText(`Qualification: reached, moved here by ${PEOPLE.manager}`),
+      row.getByText(`Qualification: reached, moved here by ${PEOPLE.manager} on `),
     ).toBeVisible();
     await expect(
-      row.getByText(`Needs analysis: reached, moved here by ${PEOPLE.owner}`),
+      row.getByText(`Needs analysis: reached, moved here by ${PEOPLE.owner} on `),
     ).toBeVisible();
-    await expect(row.getByText('Proposal: current, 0 days')).toBeVisible();
+    await expect(
+      row.getByText(`Proposal: current, 0 days, moved here by ${PEOPLE.owner} on `),
+    ).toBeVisible();
     await expectNoA11yViolations(page);
   });
 
@@ -180,8 +202,17 @@ test.describe('Pipeline', () => {
     await expect(dialog.getByText('Moving it here closes the deal as won.')).toBeVisible();
     await dialog.getByRole('button', { name: 'Move deal' }).click();
     await expect(page.getByText(`${DEALS.tablets} moved to Won`)).toBeVisible();
-    // Won is slim: it counts the deal, and the card is no longer on the board.
+    // Won is a strip: it counts the deal, and the card is no longer on the board.
     await expect(column(page, 'Won')).toContainText('1 deal');
+    await expect(page.getByRole('link', { name: DEALS.tablets, exact: true })).toHaveCount(0);
+
+    // Expanded, the strip is a whole column with the card, its track closed as won.
+    await column(page, 'Won').getByRole('button', { name: 'Expand Won' }).click();
+    await expect(column(page, 'Won').getByRole('link', { name: DEALS.tablets })).toBeVisible();
+    await expect(
+      column(page, 'Won').getByRole('list', { name: 'Won: closed as won' }),
+    ).toBeVisible();
+    await column(page, 'Won').getByRole('button', { name: 'Collapse Won' }).click();
     await expect(page.getByRole('link', { name: DEALS.tablets, exact: true })).toHaveCount(0);
   });
 
@@ -210,7 +241,7 @@ test.describe('Pipeline', () => {
     await untilSaved(page, async () => {
       await dialog.getByRole('button', { name: 'Mark as lost' }).click();
     });
-    // Lost is slim: the card leaves the board, the column counts it and links to the list of it.
+    // Lost is a strip: the card leaves the board, the strip counts it and links to the list of it.
     await expect(column(page, 'Lost')).toContainText('1 deal');
     await expect(stays).toHaveCount(0);
     await page.reload();
@@ -369,6 +400,8 @@ test.describe('Pipeline', () => {
     await expect(page.getByRole('heading', { name: '2 deals', exact: true })).toBeVisible();
     await waitForHydration(page.getByRole('main'));
 
+    // Source is one of the rarely used filters, behind "More".
+    await page.getByRole('button', { name: 'More filters' }).click();
     await page.getByRole('button', { name: 'Source', exact: true }).click();
     await page.getByRole('option', { name: 'Trade show' }).click();
 
@@ -376,6 +409,21 @@ test.describe('Pipeline', () => {
     await expect(page.getByRole('link', { name: DEALS.starterKit })).toBeVisible();
     await expect(page.getByRole('link', { name: DEALS.tablets })).toHaveCount(0);
     await expect(page).toHaveURL(new RegExp(`sourceId=${source.id}`, 'u'));
+    // "More" counts it, and still lists it with its value and its ×.
+    await page.getByRole('button', { name: 'More filters, 1 on' }).click();
+    await expect(page.getByRole('button', { name: 'Source: Trade show' })).toBeVisible();
+  });
+
+  test('holds the deal list’s, the board’s and the lead list’s toolbars on one line at 1440 px', async ({
+    page,
+    request,
+  }) => {
+    const { owner } = await seedBoard(request);
+    await signIn(page, { email: owner.email, password: PASSWORD });
+
+    await expectToolbarOnOneLine(page, `${owner.path}/deals?view=list`, 'Search deals');
+    await expectToolbarOnOneLine(page, `${owner.path}/deals`, 'Search deals');
+    await expectToolbarOnOneLine(page, `${owner.path}/leads`, 'Search leads');
   });
 
   test('groups the deal list by stage, moves a deal from its pill, and asks why before Lost', async ({

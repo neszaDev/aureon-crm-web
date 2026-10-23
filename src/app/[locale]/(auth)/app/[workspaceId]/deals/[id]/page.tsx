@@ -12,7 +12,7 @@ import { ArchiveButton } from '@/components/crm/record/ArchiveButton';
 import { RecordHeader } from '@/components/crm/record/RecordHeader';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { RecordWork } from '@/components/crm/record/RecordWork';
-import { StampRow } from '@/components/crm/StampRow';
+import { StatusTrack } from '@/components/crm/StatusTrack';
 import { Button } from '@/components/ui/button';
 import { getDeal, getDealHistory, getStages } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
@@ -125,16 +125,14 @@ export default async function DealPage(props: DealPageProps) {
         aria-label={t('progress')}
         className="rounded-lg border border-rule bg-card px-5 py-4"
       >
-        <StampRow
+        <StatusTrack
           stages={stageRefs}
-          current={{
-            stageId: deal.stage.id,
-            kind: deal.stage.kind,
-            enteredAt: deal.stageEnteredAt,
-          }}
+          stage={deal.stage}
+          enteredAt={deal.stageEnteredAt}
           signatures={stageSignatures(history.history)}
           now={new Date()}
-          size="full"
+          timeZone={workspace.timezone}
+          className="max-w-xl"
         />
       </section>
       <DealFacts deal={deal} workspaceId={workspace.id} timeZone={workspace.timezone} />

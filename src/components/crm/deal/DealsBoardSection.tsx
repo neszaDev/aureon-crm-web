@@ -53,6 +53,7 @@ export const DealsBoardSection = async (props: {
         path={props.path}
         query={props.query}
         now={new Date()}
+        timeZone={props.workspace.timezone}
       />
     );
   }

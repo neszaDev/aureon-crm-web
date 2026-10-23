@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ListQuery } from '@/libs/crm/ListQuery';
 import { listHref } from '@/libs/crm/ListQuery';
 import type { Permission } from '@/libs/crm/Permissions';
@@ -30,7 +31,8 @@ const save = (file: Blob, name: string) => {
 };
 
 /**
- * "Export CSV" on a list: downloads the records of the list's current search and filters. It asks
+ * "Export CSV" on a list (from 768 px its icon, the words in its name and its tooltip, so the
+ * toolbar holds one line): downloads the records of the list's current search and filters. It asks
  * our own route (`/api/crm/{workspace}/export/{list}`), never the backend, and saves the file
  * only once all of it has arrived, so a failure half way leaves no broken file. The file's name is
  * the server's (`Content-Disposition`). A refusal (a file over the cap, a role without the
@@ -99,23 +101,30 @@ export const ExportButton = (props: {
   }
 
   return (
-    <Button
-      variant="outline"
-      // aria-disabled, not disabled: a disabled button drops the focus to the page.
-      aria-disabled={isPending || undefined}
-      onClick={() => {
-        if (isPending) {
-          return;
-        }
-        startTransition(download);
-      }}
-    >
-      {isPending ? (
-        <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />
-      ) : (
-        <DownloadIcon data-icon="inline-start" />
-      )}
-      {t('label')}
-    </Button>
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            // aria-disabled, not disabled: a disabled button drops the focus to the page.
+            aria-disabled={isPending || undefined}
+            onClick={() => {
+              if (isPending) {
+                return;
+              }
+              startTransition(download);
+            }}
+          >
+            {isPending ? (
+              <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <DownloadIcon data-icon="inline-start" />
+            )}
+            <span className="md:sr-only">{t('label')}</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent className="max-md:hidden">{t('label')}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };

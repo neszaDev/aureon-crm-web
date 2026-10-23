@@ -444,7 +444,8 @@ export const changeStatus = async (page: Page, status: string) => {
  */
 export const column = (page: Page, stage: string) =>
   page.locator('section[aria-labelledby^="board-stage-"]', {
-    has: page.locator(`h2:text-is("${stage}")`),
+    // The heading's pill writes the name in a span of its own, beside the colour dot.
+    has: page.locator(`h2 :text-is("${stage}")`),
   });
 
 /**

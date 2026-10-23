@@ -8,7 +8,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { StatusTone } from '@/libs/crm/StatusColors';
 
-const PILL =
+/** A status pill's look, for what draws one without the component (a board column's heading). */
+export const PILL =
   'inline-flex h-6 max-w-full min-w-0 items-center gap-1.5 rounded-full border border-transparent bg-(--tone-tint) px-2.5 text-xs font-semibold whitespace-nowrap text-(--tone-ink)';
 
 // The keys that open a menu button's menu.

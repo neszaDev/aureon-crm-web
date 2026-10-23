@@ -1,3 +1,4 @@
+import { cn } from 'cn';
 import { PlusIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -71,7 +72,8 @@ export default async function DealsPage(props: DealsPageProps) {
   );
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4">
+    // The board takes the whole width: its columns are what a wide screen is for.
+    <div className={cn('mx-auto flex flex-col gap-4', view === 'list' && 'max-w-6xl')}>
       <ListHeader
         title={t('title')}
         action={newDeal}

@@ -26,6 +26,7 @@ import type { components } from '@/libs/api/schema';
 import type { ListQuery } from '@/libs/crm/ListQuery';
 import type { Permission } from '@/libs/crm/Permissions';
 import { canEditRecord } from '@/libs/crm/RecordAccess';
+import { stageTone } from '@/libs/crm/StatusColors';
 import { toastActionFailure } from '@/utils/ActionToast';
 import { useSettle } from '@/utils/SettleAction';
 
@@ -94,8 +95,8 @@ const columnCoordinates: KeyboardCoordinateGetter = (event, args) => {
 };
 
 /**
- * Puts the focus on a column's heading once the drop has been drawn: from 768 px Won and Lost are
- * slim, so a card dropped there has left the screen and its handle can't take the focus.
+ * Puts the focus on a column's heading once the drop has been drawn: from 768 px Won and Lost start
+ * as strips, so a card dropped there may have left the screen and its handle can't take the focus.
  * @param stage The column's stage.
  */
 const focusColumn = (stage: Stage) => {
@@ -128,17 +129,17 @@ const collideColumns: typeof closestCenter = (args) =>
   args.pointerCoordinates ? pointerWithin(args) : closestCenter(args);
 
 /**
- * The deal board: one column per stage, in order, each with its count, totals per currency and
- * cards. A card the caller may move is dragged to another column with the pointer or the keyboard
+ * The deal board: one column per stage, in order, each headed by its stage's pill with its count,
+ * totals per currency and cards. A card the caller may move is dragged to another column with the pointer or the keyboard
  * (Space to pick up, Left and Right to cross columns, Space to drop), or moved from its menu.
  * A drop moves the card at once and asks the backend (`moveDeal`); a refusal or a failed request
  * puts the card back and says why in a toast (a stale version with a reload), and the focus
  * back on its handle from a Won or Lost heading. A drop on Lost asks
  * for the reason first: the card stays where it was until it is given, and cancelling moves
  * nothing. Once saved, the server's refresh brings the counts, totals and cards as they are.
- * From 768 px the Won and Lost columns are slim (name, count, totals, a link to the list) so the
- * default pipeline fits one screen; wider pipelines scroll sideways, with a fade at the edge while
- * more is there. Below 768 px one column shows at a time, in full, chosen with a select, and the
+ * From 768 px Won and Lost start as strips that expand (`BoardColumn`), so four open stages fit
+ * beside the expanded sidebar at 1440 px; a fifth, or an expanded strip, scrolls sideways, with a
+ * fade at the edge while more is there. Below 768 px one column shows at a time, in full, chosen with a select, and the
  * menu moves cards.
  * @param props Component props.
  * @param props.workspaceId The workspace.
@@ -147,7 +148,8 @@ const collideColumns: typeof closestCenter = (args) =>
  * @param props.permissions The caller's permissions, which decide whose deals they may move.
  * @param props.path The deals page's path.
  * @param props.query The board's search and filters, which the link to the list keeps.
- * @param props.now The current time, for the days in each stage.
+ * @param props.now The current time, for the days in each stage and the past close dates.
+ * @param props.timeZone The workspace's time zone, for the dates.
  * @returns The board.
  */
 export const DealBoard = (props: {
@@ -158,6 +160,7 @@ export const DealBoard = (props: {
   path: string;
   query: Pick<ListQuery, 'params'>;
   now: Date;
+  timeZone: string;
 }) => {
   const t = useTranslations('DealBoard');
   const tError = useTranslations('ActionError');
@@ -343,6 +346,7 @@ export const DealBoard = (props: {
                 column={column}
                 shown={cards.length}
                 selected={column.stage.id === shownColumn}
+                tone={stageTone(stageRefs, column.stage.id)}
                 path={props.path}
                 query={props.query}
               >
@@ -353,6 +357,7 @@ export const DealBoard = (props: {
                     workspaceId={props.workspaceId}
                     stages={stageRefs}
                     now={props.now}
+                    timeZone={props.timeZone}
                     movable={canEditRecord(
                       { permissions: props.permissions },
                       props.me,
@@ -382,6 +387,7 @@ export const DealBoard = (props: {
               workspaceId={props.workspaceId}
               stages={stageRefs}
               now={props.now}
+              timeZone={props.timeZone}
               className="shadow-float"
             />
           )}
@@ -396,7 +402,7 @@ export const DealBoard = (props: {
         }}
         dealName={asking?.deal.name ?? ''}
         returnFocus={() => {
-          // Moved to Lost, the card has left the screen (a slim column): the focus goes to the
+          // Moved to Lost, the card has left the screen (folded into its strip): the focus goes to the
           // column. Cancelled, it goes back to the card's handle.
           const moved = asking && moves[asking.deal.id]?.stageId === asking.stage.id;
           return document.querySelector<HTMLElement>(

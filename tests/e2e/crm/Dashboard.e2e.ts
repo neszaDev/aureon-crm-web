@@ -365,8 +365,9 @@ test.describe('Dashboard', () => {
     const mine = page.getByRole('region', { name: 'My deals' });
     await expect(mine).toContainText('Riley deal');
     await expect(mine).not.toContainText('Olivia deal');
-    // The stamp row is signed by Riley, who created and so entered the deal's first stage.
-    await expect(mine.getByRole('list', { name: 'Deal progress' })).toBeVisible();
+    // The status track names Riley, who created and so entered the deal's first stage.
+    const track = mine.getByRole('list', { name: 'Stage 1 of 4: Qualification' });
+    await expect(track.getByText(`moved here by ${PEOPLE.rep} on `)).toBeVisible();
     const followUps = page.getByRole('region', { name: 'Follow-ups' });
     await expect(followUps).toContainText('Riley task');
     await expect(followUps).not.toContainText('Olivia task');

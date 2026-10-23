@@ -893,7 +893,9 @@
     "group_due": "กำหนดเสร็จ",
     "sort_follow_up": "การติดตาม",
     "sort_priority": "ความสำคัญ",
-    "sort_due": "กำหนดเสร็จ"
+    "sort_due": "กำหนดเสร็จ",
+    "more": "เพิ่มเติม",
+    "more_label": "ตัวกรองเพิ่มเติม{count, plural, =0 {} other { เปิดอยู่ # รายการ}}"
   },
   "ExportButton": {
     "label": "ส่งออก CSV",
@@ -3408,16 +3410,13 @@
     "hint": "ลีดเดินจากใหม่ไปติดต่อแล้วและผ่านเกณฑ์ หรือถูกทำเครื่องหมายว่าไม่ผ่านเกณฑ์พร้อมเหตุผล แปลงลีดที่ผ่านเกณฑ์เพื่อสร้างผู้ติดต่อ พร้อมบริษัทและดีลหากต้องการ"
   },
   "StampRow": {
-    "label": "ความคืบหน้าของดีล",
-    "state_reached": "{name}: ผ่านแล้ว",
-    "state_signed": "{name}: ผ่านแล้ว ย้ายมาที่นี่โดย {signer}",
-    "moved_by": "ย้ายมาที่นี่โดย {signer}",
-    "state_current": "{name}: ขั้นปัจจุบัน {count, plural, other {# วัน}}",
-    "state_blank": "{name}: ยังไม่ถึง",
-    "state_unknown": "{name}: ไม่แสดง",
-    "state_lost": "{name}: ปิดเป็นดีลที่เสียไป",
-    "days_short": "{count}วัน",
-    "lost_word": "แพ้"
+    "days_short": "{count}วัน"
+  },
+  "StatusTrack": {
+    "open": "ขั้นที่ {index} จาก {count}: {name}",
+    "closed": "{name}: {kind, select, WON {ปิดเป็นดีลที่ชนะ} other {ปิดเป็นดีลที่เสียไป}}",
+    "segment": "{name}: {state, select, current {ขั้นปัจจุบัน {days, plural, other {# วัน}}} blank {ยังไม่ถึง} unknown {ไม่มีบันทึกการย้าย} won {ปิดเป็นดีลที่ชนะ} lost {ปิดเป็นดีลที่เสียไป} other {ผ่านแล้ว}}{mover, select, member { ย้ายมาที่นี่โดย {signer}{when, select, none {} other { เมื่อ {when}}}} left { ย้ายมาที่นี่โดยอดีตสมาชิก{when, select, none {} other { เมื่อ {when}}}} other {{when, select, none {} other { เข้าขั้นนี้เมื่อ {when}}}}}",
+    "days_short": "{count}วัน"
   },
   "DealBoard": {
     "stage_select": "ขั้นตอนที่แสดง",
@@ -3436,14 +3435,17 @@
     "empty": "ยังไม่มีดีล",
     "more": "แสดง {shown} จาก {count} ดีล — <link>เปิดรายการ</link>",
     "view_list": "ดูในรายการ",
-    "view_list_label": "ดูในรายการ: {name}"
+    "view_list_label": "ดูในรายการ: {name}",
+    "expand": "ขยาย {name}",
+    "collapse": "ย่อ {name}"
   },
   "DealCard": {
     "close": "คาดว่าจะปิด {date}",
     "drag_role": "ดีลที่ลากได้",
     "drag": "ลาก {number} {name}",
     "actions": "การทำงานสำหรับ {name}",
-    "move_to": "ย้ายไปที่…"
+    "move_to": "ย้ายไปที่…",
+    "close_past": "เลยวันที่คาดว่าจะปิดแล้ว: {date}"
   },
   "MoveDealDialog": {
     "close": "ปิด",
