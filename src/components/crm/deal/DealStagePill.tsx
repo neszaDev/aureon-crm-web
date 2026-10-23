@@ -36,10 +36,10 @@ export const DealStagePill = (props: {
   const t = useTranslations('MoveDealDialog');
   const tTable = useTranslations('DealTable');
   const tBoard = useTranslations('DealBoard');
-  const change = useStatusChange();
   const [losing, setLosing] = useState<StageRef>();
   const key = `deal-${props.deal.id}`;
-  const [cell, markUsed] = useKeptFocus(key);
+  const [cell, markUsed, release] = useKeptFocus(key);
+  const change = useStatusChange(release);
   const move = (stage: StageRef, lostReason?: string) => {
     change.run(
       async () =>
@@ -95,6 +95,7 @@ export const DealStagePill = (props: {
         }}
         dealName={props.deal.name}
         returnFocus={() => cell.current?.querySelector('button')}
+        onCancel={release}
         onConfirm={(reason) => {
           if (losing) {
             move(losing, reason);

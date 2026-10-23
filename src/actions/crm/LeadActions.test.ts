@@ -177,7 +177,7 @@ describe(addLead, () => {
     expect(result.fieldErrors).toStrictEqual({ name: 'Too long' });
   });
 
-  it('says it was added as New when the move is refused', async () => {
+  it('says it was added as New when the move is refused, as a success: the lead exists', async () => {
     const POST = vi
       .fn<Call>()
       .mockResolvedValueOnce({ data: { id: 9, version: 0 }, response: new Response(null) })
@@ -189,8 +189,19 @@ describe(addLead, () => {
 
     const result = await addLead(1, { status: 'QUALIFIED', ownerId: null }, 'Noa');
 
-    expect(result).toStrictEqual({ ok: false, message: 'added_as_new' });
+    expect(result).toStrictEqual({ ok: true, message: 'added_as_new' });
     expect(refresh).toHaveBeenCalledWith();
+  });
+
+  it('refuses a status the inline add cannot start in, making nothing', async () => {
+    const { POST } = backend(200, { id: 9, version: 0 });
+
+    // The preset is bound in the page, but it reaches the action from the browser.
+    // @ts-expect-error -- a forged preset
+    const result = await addLead(1, { status: 'CONVERTED', ownerId: null }, 'Noa');
+
+    expect(result).toStrictEqual({ ok: false, message: 'error_invalid_input' });
+    expect(POST).not.toHaveBeenCalled();
   });
 });
 

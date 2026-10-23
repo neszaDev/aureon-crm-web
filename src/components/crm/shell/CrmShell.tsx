@@ -71,7 +71,11 @@ export const CrmShell = (props: {
               </div>
             </MobileCrmNav>
             <CrmLocation workspace={props.workspace} />
-            <CrmBarTools workspace={props.workspace} reminders={props.reminders} />
+            <CrmBarTools
+              workspace={props.workspace}
+              me={props.user.id}
+              reminders={props.reminders}
+            />
           </header>
           {/* Focusable so the skip link moves focus here in Safari too; a container needs no ring. */}
           <main

@@ -81,6 +81,7 @@ const Bell = (props: { reminders?: Reminders; path?: string }) => (
       <PathContext value={props.path ?? '/app/1'}>
         <RemindersBell
           workspaceId={1}
+          me={3}
           timeZone="Asia/Bangkok"
           reminders={props.reminders}
           side="right"
@@ -160,7 +161,7 @@ describe(RemindersBell, () => {
       .toBeVisible();
     await expect
       .element(popover.getByRole('link', { name: 'All tasks' }))
-      .toHaveAttribute('href', expect.stringContaining('/app/1/tasks?view=mine'));
+      .toHaveAttribute('href', expect.stringContaining('/app/1/tasks?assigneeId=3'));
   });
 
   it('says reminders appear in the app, and promises nothing else', async () => {

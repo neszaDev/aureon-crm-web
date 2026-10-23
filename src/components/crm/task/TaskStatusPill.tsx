@@ -37,10 +37,10 @@ export const TaskStatusPill = (props: {
   headingId: string;
 }) => {
   const t = useTranslations('TaskRow');
-  const change = useStatusChange();
   const [cancelling, setCancelling] = useState(false);
   const key = `task-${props.task.id}`;
-  const [cell, markUsed] = useKeptFocus(key);
+  const [cell, markUsed, release] = useKeptFocus(key);
+  const change = useStatusChange(release);
   const { status, title } = props.task;
   const run = (action: typeof completeTask, done: string) => {
     change.run(

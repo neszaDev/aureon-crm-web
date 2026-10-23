@@ -3,7 +3,8 @@ import { Link } from '@/libs/I18nNavigation';
 
 /**
  * A list's 36 px row: the record's name as the link that opens it, its number dimmed beside it,
- * the row's own cells, then its "…" menu. On a phone the number yields its room to the name. A long name is cut short, whole in its tooltip.
+ * the row's own cells, then its "…" menu. On a phone the number yields its room to the name. A
+ * long name is cut short, whole in its tooltip.
  * @param props Component props.
  * @param props.name The record's name.
  * @param props.href Its page.

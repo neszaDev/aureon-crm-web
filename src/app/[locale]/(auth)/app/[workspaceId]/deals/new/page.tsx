@@ -7,6 +7,7 @@ import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { getDealPrefill, getLeadSources, getMembers, getStages } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
+import { dealPreset } from '@/libs/crm/DealPreset';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign } from '@/libs/crm/RecordAccess';
@@ -52,13 +53,14 @@ export default async function NewDealPage(props: NewDealPageProps) {
   }
   const path = `/app/${workspace.id}/deals`;
   const open = stages.stages.filter((stage) => stage.kind === 'OPEN');
-  // An open stage of the pipeline, else the first; another member only for a role that may give
-  // it to them, else the caller.
-  const stage = open.find((item) => item.id === stageId) ?? open[0];
-  const owner =
-    canAssign(workspace) && members.members.some((member) => member.userId === ownerId)
-      ? ownerId
-      : undefined;
+  const preset = dealPreset({
+    stages: stages.stages,
+    stageId,
+    ownerId,
+    members: members.members,
+    mayAssign: canAssign(workspace),
+    me: user.id,
+  });
   const { company, contact } = linked;
   const origin = company
     ? `/app/${workspace.id}/companies/${company.id}`
@@ -79,10 +81,10 @@ export default async function NewDealPage(props: NewDealPageProps) {
             name: '',
             amount: '',
             currency: '',
-            stageId: stage?.id ?? null,
+            stageId: preset.stageId,
             probability: '',
             expectedCloseDate: '',
-            ownerId: owner ?? user.id,
+            ownerId: preset.ownerId,
             companyId: company?.id ?? null,
             contactId: contact?.id ?? null,
             sourceId: null,

@@ -132,20 +132,24 @@ export const TaskRow = (props: {
   );
 
   // Before the row leaves the page (a layout cleanup runs while it is still there): the focus
-  // in it would fall to the page's start. Unless the row's pill took it back in the task's new
-  // section, the list's heading takes it.
+  // in it would fall to the page's start. The task's pill takes it in its new section (this runs
+  // before the pill's own hand-back), else the list's heading.
   useLayoutEffect(() => {
     const node = row.current;
     return () => {
       if (node?.contains(document.activeElement)) {
         setTimeout(() => {
           if (document.activeElement === document.body) {
-            document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)?.focus();
+            (
+              document.querySelector<HTMLElement>(
+                `[data-pill="${CSS.escape(`task-${props.task.id}`)}"] button`,
+              ) ?? document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
+            )?.focus();
           }
         }, 0);
       }
     };
-  }, [props.headingId]);
+  }, [props.headingId, props.task.id]);
 
   const run = (action: StatusAction, tick = false) => {
     startTransition(async () => {

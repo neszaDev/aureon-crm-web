@@ -71,7 +71,7 @@ export const LeadTable = (props: {
             sort="PRIORITY"
             path={props.path}
             query={props.query}
-            className="w-20 truncate max-md:hidden"
+            className="w-24 truncate max-md:hidden"
           />
           <SortHeader
             label={t('follow_up')}

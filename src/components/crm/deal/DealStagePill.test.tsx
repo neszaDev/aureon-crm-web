@@ -37,6 +37,8 @@ const renderPill = async (canEdit = true) => {
 };
 
 const pill = () => page.getByRole('button', { name: 'Stage: Qualification' });
+// Marked while a move is on its way, so a refresh that redraws the row keeps the focus.
+const used = () => document.querySelector<HTMLElement>('[data-pill="deal-101"]')?.dataset.used;
 
 describe(DealStagePill, () => {
   beforeEach(() => {
@@ -91,6 +93,25 @@ describe(DealStagePill, () => {
       .element(page.getByRole('alert'))
       .toHaveTextContent("Your role doesn't allow this.");
     await expect.element(pill()).toBeVisible();
+  });
+
+  it('forgets the pill was used when the move is refused or the Lost dialog is cancelled', async () => {
+    vi.mocked(DealActions.moveDeal).mockResolvedValue({
+      ok: false,
+      message: "Your role doesn't allow this.",
+    });
+    await renderPill();
+
+    await pill().click();
+    await page.getByRole('menuitem', { name: 'Proposal' }).click();
+    await expect.element(page.getByRole('alert')).toBeVisible();
+    expect(used()).toBeUndefined();
+
+    await pill().click();
+    await page.getByRole('menuitem', { name: 'Lost' }).click();
+    expect(used()).toBe('true');
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    expect(used()).toBeUndefined();
   });
 
   it('is the pill alone for a deal the caller may not move', async () => {

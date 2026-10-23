@@ -126,6 +126,6 @@ describe(FollowUps, () => {
 
     await expect
       .element(page.getByRole('link', { name: 'All my tasks' }))
-      .toHaveAttribute('href', '/app/1/tasks?view=mine');
+      .toHaveAttribute('href', '/app/1/tasks?assigneeId=3');
   });
 });

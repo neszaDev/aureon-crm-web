@@ -137,7 +137,7 @@ export const FollowUps = (props: {
       )}
       <div className="mt-auto border-t border-rule px-4 py-3 sm:px-5">
         <Link
-          href={`/app/${props.workspace.id}/tasks?view=mine`}
+          href={`/app/${props.workspace.id}/tasks?assigneeId=${props.me}`}
           className="font-medium text-seal-ink"
         >
           {t('all_tasks')}

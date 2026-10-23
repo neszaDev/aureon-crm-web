@@ -81,8 +81,13 @@ export const InlineAddRow = (
         if (result.ok) {
           setName('');
           setExtra('');
-          // Said aloud too, and seen when the new row lands off the page or the group.
-          toast.success(t('added', { name: typed }));
+          // Made, with something to say (a lead added in New, not its group's status), or said
+          // aloud and seen when the new row lands off the page or the group.
+          if (result.message) {
+            setError(result.message);
+          } else {
+            toast.success(t('added', { name: typed }));
+          }
         } else {
           setError(result.fieldErrors?.name ?? result.message ?? t('add_failed'));
         }
@@ -124,6 +129,8 @@ export const InlineAddRow = (
             value={extra}
             placeholder={props.extra.placeholder}
             maxLength={200}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? errorId : undefined}
             className={`${FIELD} flex-1 border-l border-rule pl-2`}
             onChange={(event) => {
               setExtra(event.target.value);

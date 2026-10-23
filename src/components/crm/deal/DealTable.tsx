@@ -65,7 +65,7 @@ export const DealTable = (props: {
           <TableHead title={t('company')} className="w-[15%] truncate max-md:hidden">
             {t('company')}
           </TableHead>
-          <TableHead title={t('stage')} className="w-40 truncate max-sm:w-32">
+          <TableHead title={t('stage')} className="w-44 truncate max-sm:w-32">
             {t('stage')}
           </TableHead>
           <SortHeader
@@ -80,7 +80,7 @@ export const DealTable = (props: {
             sort="EXPECTED_CLOSE_DATE"
             path={props.path}
             query={props.query}
-            className="w-[11%] truncate max-lg:hidden"
+            className="w-[13%] truncate max-lg:hidden"
           />
           <TableHead title={t('owner')} className="w-[14%] truncate max-lg:hidden">
             {t('owner')}

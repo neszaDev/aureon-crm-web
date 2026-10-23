@@ -69,6 +69,7 @@ export const CrmRail = (props: {
         <>
           <RemindersBell
             workspaceId={props.workspace.id}
+            me={props.user.id}
             timeZone={props.workspace.timeZone}
             reminders={props.reminders}
             side="right"
@@ -101,11 +102,13 @@ export const CrmRail = (props: {
  * @param props.workspace The open workspace.
  * @param props.workspace.id Its id.
  * @param props.workspace.timeZone Its time zone, for the reminders' due times.
+ * @param props.me The caller's user id, for the link to their tasks.
  * @param props.reminders The caller's reminders as the layout read them.
  * @returns The two buttons.
  */
 export const CrmBarTools = (props: {
   workspace: { id: number; timeZone: string };
+  me: number;
   reminders?: BellReminders;
 }) => {
   const railShown = useRailShown();
@@ -118,6 +121,7 @@ export const CrmBarTools = (props: {
       <RecordSearch workspaceId={props.workspace.id} side="bottom" />
       <RemindersBell
         workspaceId={props.workspace.id}
+        me={props.me}
         timeZone={props.workspace.timeZone}
         reminders={props.reminders}
         side="bottom"

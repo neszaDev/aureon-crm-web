@@ -115,4 +115,44 @@ describe(InlineAddRow, () => {
     expect(action).toHaveBeenCalledExactlyOnceWith('Noa Park', 'Acme');
     await expect.element(page.getByRole('textbox', { name: 'Company' })).toHaveValue('');
   });
+
+  it('marks the second field with a refusal too', async () => {
+    const action = vi
+      .fn<(name: string, extra?: string) => Promise<ActionResult>>()
+      .mockResolvedValue({ ok: false, message: 'Company name too long.' });
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <InlineAddRow
+          label="Add lead"
+          placeholder="Name"
+          extra={{ label: 'Company', placeholder: 'Company (optional)' }}
+          action={action}
+        />
+      </NextIntlClientProvider>,
+    );
+    const company = page.getByRole('textbox', { name: 'Company' });
+
+    await userEvent.type(page.getByRole('textbox', { name: 'Add lead' }), 'Noa');
+    await userEvent.type(company, 'Acme{Enter}');
+
+    await expect.element(company).toHaveAttribute('aria-invalid', 'true');
+    await expect.element(company).toHaveAccessibleDescription('Company name too long.');
+  });
+
+  it('clears for the next one and says what it has to say when it was made with a caveat', async () => {
+    const action = vi
+      .fn<(name: string) => Promise<ActionResult>>()
+      .mockResolvedValue({ ok: true, message: 'Added as New: the move was refused.' });
+    const field = await renderRow(action);
+
+    await userEvent.type(field, 'Noa{Enter}');
+
+    await expect.element(field).toHaveValue('');
+    await expect
+      .element(page.getByRole('alert'))
+      .toHaveTextContent('Added as New: the move was refused.');
+    // Enter again sends nothing: the field is empty, not a second copy of the lead.
+    await userEvent.keyboard('{Enter}');
+    expect(action).toHaveBeenCalledOnce();
+  });
 });

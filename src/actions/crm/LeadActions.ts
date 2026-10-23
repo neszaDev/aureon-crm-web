@@ -78,11 +78,16 @@ export async function createLead(workspaceId: number, values: LeadValues): Promi
   });
 }
 
+// The statuses a list's inline add puts a new lead in.
+const INLINE_STATUSES = new Set<string>(['NEW', 'CONTACTED', 'QUALIFIED']);
+
 /**
  * Adds a lead from a list (its inline add): its name, split into first and last at the first
  * space, and its company, owned by the list's group or filter (none: the caller), then moved to
  * the group's status, from its first version. The list refreshes. A refused name is the `name`
- * field's error; a move refused after the lead was made says that it was added as New.
+ * field's error; a move refused after the lead was made is still a success (the lead exists, so
+ * the field clears), whose message says that it was added as New. A status the inline add can't
+ * start in (the preset comes from the browser) is refused before anything is made.
  * @param workspaceId The workspace.
  * @param preset What the list's group or filter gives it.
  * @param preset.status The status it lands in (New is where every lead starts).
@@ -98,6 +103,9 @@ export async function addLead(
   company = '',
 ): Promise<ActionResult> {
   const t = await getTranslations('LeadForm');
+  if (!INLINE_STATUSES.has(preset.status)) {
+    return { ok: false, message: t('error_invalid_input') };
+  }
   const [firstName = '', ...rest] = name.trim().split(/\s+/u);
   const parsed = LeadValidation.safeParse({
     firstName,
@@ -136,7 +144,7 @@ export async function addLead(
     if (!moved.response.ok) {
       const failure = await actionFailure(moved.response, moved.error);
       refresh();
-      return { ok: false, message: t('added_as_new', { reason: failure.message ?? '' }) };
+      return { ok: true, message: t('added_as_new', { reason: failure.message ?? '' }) };
     }
   }
 

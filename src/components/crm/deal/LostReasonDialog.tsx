@@ -82,6 +82,7 @@ const LostReasonForm = (props: { dealName: string; onConfirm: (reason: string) =
  * @param props.onOpenChange Called when it opens or closes.
  * @param props.dealName The deal's name, for the title.
  * @param props.onConfirm Called with the reason; the dialog closes.
+ * @param props.onCancel Called when it is closed without a reason (Cancel, Escape, outside).
  * @param props.returnFocus The element that takes the focus back on close (the card's handle,
  *   which the keyboard drag came from).
  * @returns The dialog.
@@ -91,12 +92,22 @@ export const LostReasonDialog = (props: {
   onOpenChange: (open: boolean) => void;
   dealName: string;
   onConfirm: (reason: string) => void;
+  onCancel?: () => void;
   returnFocus?: () => HTMLElement | null | undefined;
 }) => {
   const t = useTranslations('LostReasonDialog');
 
   return (
-    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+    <Dialog
+      open={props.open}
+      onOpenChange={(open) => {
+        props.onOpenChange(open);
+        // Only a dismissal comes this way: a confirmed reason closes it from the form.
+        if (!open) {
+          props.onCancel?.();
+        }
+      }}
+    >
       <DialogContent
         closeLabel={t('close')}
         onCloseAutoFocus={(event) => {

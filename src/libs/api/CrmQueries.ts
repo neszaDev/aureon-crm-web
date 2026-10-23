@@ -657,6 +657,7 @@ export const getTasks = async (segment: string, query: TaskQuery) => {
  */
 export const getUndatedTasks = async (segment: string, query: TaskQuery, split: string) => {
   const size = query.size ?? 20;
+  // Due-time order puts the undated last; so under sort=Priority "No due date" stays in id order.
   const open: TaskQuery = { ...query, status: ['OPEN'], sort: 'DUE_AT', direction: 'ASC' };
   const counts = await Promise.all([
     getTasks(segment, { ...open, dueTo: split, page: 0, size: 1 }),

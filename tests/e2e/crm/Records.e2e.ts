@@ -198,6 +198,19 @@ test.describe('Records', () => {
     await completed.click();
     await expect(page.getByRole('row', { name: /Send proposal/u })).toContainText('Completed');
 
+    // Reopened from its pill, it goes back to its due section, and its new pill keeps the focus.
+    const donePill = page.getByRole('button', { name: 'Status: Completed', exact: true });
+    await waitForHydration(donePill);
+    await donePill.click();
+    await page.getByRole('menuitem', { name: 'Open' }).click();
+    await expect(page.getByText('“Send proposal” reopened')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Status: Open', exact: true })).toBeFocused();
+    // Completed again, for the Due chip below: its section is back, folded.
+    await page.getByRole('checkbox', { name: 'Complete Send proposal' }).click();
+    await expect(completed).toHaveAttribute('aria-expanded', 'false');
+    await completed.click();
+    await expect(page.getByRole('row', { name: /Send proposal/u })).toContainText('Completed');
+
     // The old Completed tab is the Due chip's.
     await waitForHydration(page.getByRole('button', { name: 'Due', exact: true }));
     await page.getByRole('button', { name: 'Due', exact: true }).click();

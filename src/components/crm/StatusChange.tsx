@@ -14,10 +14,11 @@ import { useSettle } from '@/utils/SettleAction';
  * A status pill's change, sent as it is: pending until the server answers (its refresh drawn),
  * then a toast for a change made, or the refusal kept for `StatusRefusal` with the old value still
  * shown. Never ahead of the server.
+ * @param onRefused Called when a change is refused (`useKeptFocus`'s `release`).
  * @returns Whether a change is on its way, the last refusal, and `run`, which sends one (unless
  *   one is on its way) and toasts `done` once it is made.
  */
-export const useStatusChange = () => {
+export const useStatusChange = (onRefused?: () => void) => {
   const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const [isPending, startTransition] = useTransition();
@@ -31,6 +32,7 @@ export const useStatusChange = () => {
       if (result.ok) {
         toast.success(done);
       } else {
+        onRefused?.();
         setFailure(result);
       }
     });
@@ -43,9 +45,11 @@ export const useStatusChange = () => {
  * Keeps the focus on a record's pill when a new status moves its row to another section: the row
  * is drawn anew there, in the same commit that closes the pill's menu, so the focus falls to the
  * page; the new pill takes it back. Only for a pill whose menu was used (`markUsed`) or that held
- * the focus, and only while nothing else has it. Its cell carries `data-pill`.
+ * the focus, and only while nothing else has it. Its cell carries `data-pill`. A change that
+ * doesn't happen (refused, or its dialog cancelled) calls `release`, so a later redraw leaves the
+ * focus alone.
  * @param key The record, such as `lead-42`.
- * @returns The ref for the pill's cell, and `markUsed`, for its menu's choices.
+ * @returns The ref for the pill's cell, `markUsed`, for its menu's choices, and `release`.
  */
 export const useKeptFocus = (key: string) => {
   const cell = useRef<HTMLDivElement>(null);
@@ -67,8 +71,13 @@ export const useKeptFocus = (key: string) => {
       cell.current.dataset.used = 'true';
     }
   };
+  const release = () => {
+    if (cell.current) {
+      delete cell.current.dataset.used;
+    }
+  };
 
-  return [cell, markUsed] as const;
+  return [cell, markUsed, release] as const;
 };
 
 /**

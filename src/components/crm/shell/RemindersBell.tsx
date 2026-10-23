@@ -156,6 +156,7 @@ const Group = (props: { heading: string; length: number; children: React.ReactNo
  * they carry, so it turns late with the next read past midnight, not when the bell rendered.
  * @param props Component props.
  * @param props.workspaceId The workspace.
+ * @param props.me The caller's user id, for the link to their tasks.
  * @param props.timeZone The workspace's time zone, for due times and the day a read is on.
  * @param props.reminders What the layout read; undefined when it could not be.
  * @param props.side Where it opens: `right` of the rail, or `bottom` from the phone's top bar.
@@ -164,6 +165,7 @@ const Group = (props: { heading: string; length: number; children: React.ReactNo
  */
 export const RemindersBell = (props: {
   workspaceId: number;
+  me: number;
   timeZone: string;
   reminders?: BellReminders;
   side: 'right' | 'bottom';
@@ -315,7 +317,10 @@ export const RemindersBell = (props: {
         </div>
         <div className="flex flex-col gap-2 border-t border-rule p-3">
           <Button asChild variant="outline" size="sm">
-            <Link href={`/app/${props.workspaceId}/tasks?view=mine`} onNavigate={close}>
+            <Link
+              href={`/app/${props.workspaceId}/tasks?assigneeId=${props.me}`}
+              onNavigate={close}
+            >
               {t('all_tasks')}
             </Link>
           </Button>

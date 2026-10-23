@@ -118,6 +118,7 @@ const UnqualifyForm = (
  * @param props Component props.
  * @param props.open Whether it is open.
  * @param props.onOpenChange Called when it opens or closes.
+ * @param props.onCancel Called when it is closed without saving (Cancel, Escape, outside).
  * @param props.workspaceId The workspace.
  * @param props.leadId The lead.
  * @param props.version The version the page was read at.
@@ -127,7 +128,11 @@ const UnqualifyForm = (
  * @returns The dialog.
  */
 export const UnqualifyDialog = (
-  props: UnqualifyProps & { open: boolean; onOpenChange: (open: boolean) => void },
+  props: UnqualifyProps & {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onCancel?: () => void;
+  },
 ) => {
   const t = useTranslations('UnqualifyDialog');
   const inFlight = useInFlight();
@@ -139,6 +144,10 @@ export const UnqualifyDialog = (
         // Closing would lose the answer: a refusal, or a status that has landed.
         if (next || !inFlight.busy()) {
           props.onOpenChange(next);
+          // Only a dismissal comes this way: a save closes it from the form.
+          if (!next) {
+            props.onCancel?.();
+          }
         }
       }}
     >

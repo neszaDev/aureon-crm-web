@@ -56,6 +56,24 @@ const checkbox = () => page.getByRole('checkbox', { name: 'Complete Send the pro
 const menu = () => page.getByRole('button', { name: 'More actions for Send the proposal' });
 const pill = (status: string) => page.getByRole('button', { name: `Status: ${status}` });
 
+// Two sections of one list: the row is drawn anew in the other once the refresh lands.
+const twoSections = (task: Task, section: 'open' | 'completed') => (
+  <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+    <h2 id="tasks-heading" tabIndex={-1}>
+      Tasks
+    </h2>
+    {(['open', 'completed'] as const).map((key) => (
+      <Table key={key}>
+        <TableBody>
+          {key === section && (
+            <TaskRow task={task} workspaceId={1} canEdit timeZone="UTC" headingId="tasks-heading" />
+          )}
+        </TableBody>
+      </Table>
+    ))}
+  </NextIntlClientProvider>
+);
+
 describe(TaskRow, () => {
   it('completes an open task with the version it was read at, ticked at once', async () => {
     const answer = Promise.withResolvers<{ ok: boolean }>();
@@ -143,6 +161,19 @@ describe(TaskRow, () => {
     await expect.element(pill('Completed')).toHaveAttribute('aria-busy', 'true');
     answer.resolve({ ok: true });
     await expect.element(page.getByText('“Send the proposal” reopened')).toBeVisible();
+  });
+
+  it('hands the focus to the task’s pill in its new section, not the list’s heading', async () => {
+    vi.mocked(TaskActions.reopenTask).mockResolvedValue({ ok: true });
+    const done: Task = { ...TASK, status: 'COMPLETED', completedAt: '2026-10-19T00:00:00Z' };
+    const screen = await render(twoSections(done, 'completed'));
+
+    await pill('Completed').click();
+    await page.getByRole('menuitem', { name: 'Open' }).click();
+    await expect.element(pill('Completed')).not.toHaveAttribute('aria-busy');
+    await screen.rerender(twoSections({ ...TASK, version: 4 }, 'open'));
+
+    await expect.element(pill('Open')).toHaveFocus();
   });
 
   it('keeps the old status and says why under the pill when the server refuses', async () => {

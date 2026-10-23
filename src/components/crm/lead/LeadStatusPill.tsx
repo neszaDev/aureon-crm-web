@@ -36,10 +36,10 @@ export const LeadStatusPill = (props: {
 }) => {
   const t = useTranslations('LeadStatusMenu');
   const tStatus = useTranslations('LeadStatus');
-  const change = useStatusChange();
   const [unqualifying, setUnqualifying] = useState(false);
   const key = `lead-${props.lead.id}`;
-  const [cell, markUsed] = useKeptFocus(key);
+  const [cell, markUsed, release] = useKeptFocus(key);
+  const change = useStatusChange(release);
   const label = tStatus(`status_${props.lead.status}`);
   const targets = LEAD_TARGETS.filter((status) => status !== props.lead.status);
 
@@ -85,6 +85,7 @@ export const LeadStatusPill = (props: {
         version={props.lead.version}
         name={props.name}
         returnFocus={() => cell.current?.querySelector('button')}
+        onCancel={release}
       />
     </div>
   );
