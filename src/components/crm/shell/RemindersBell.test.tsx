@@ -7,6 +7,7 @@ import { loadReminders } from '@/actions/crm/ReminderActions';
 import type { cancelTask, completeTask, reopenTask } from '@/actions/crm/TaskActions';
 import * as TaskActions from '@/actions/crm/TaskActions';
 import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import type { components } from '@/libs/api/schema';
 import type { BellReminders } from '@/libs/crm/Reminders';
 import messages from '@/locales/en.json';
@@ -76,9 +77,16 @@ const NONE: Reminders = {
 
 const Bell = (props: { reminders?: Reminders; path?: string }) => (
   <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-    <PathContext value={props.path ?? '/app/1'}>
-      <RemindersBell workspaceId={1} timeZone="Asia/Bangkok" reminders={props.reminders} />
-    </PathContext>
+    <TooltipProvider>
+      <PathContext value={props.path ?? '/app/1'}>
+        <RemindersBell
+          workspaceId={1}
+          timeZone="Asia/Bangkok"
+          reminders={props.reminders}
+          side="right"
+        />
+      </PathContext>
+    </TooltipProvider>
     <Toaster />
   </NextIntlClientProvider>
 );

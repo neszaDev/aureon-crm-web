@@ -101,7 +101,7 @@ Run `make` to list them all. Against the API repo on 8081, regenerate the types 
 src/app/[locale]/   pages: (marketing) public, (auth) sign-in/up, invite links, app/** (the CRM)
                     and dashboard/** (the boilerplate's demos)
 src/app/api/crm/    the CSV export route (streams a list's file from the backend)
-src/components/crm/ the CRM: shell/ (rail, switcher, search, reminders bell, account menu),
+src/components/crm/ the CRM: shell/ (rail, sidebar, location, search, reminders, + New, account),
                     dashboard/, reports/, audit/, settings/, a folder per record, the list kit
 src/actions/        server actions (auth; crm/: every CRM write, and the reads client components need)
 src/libs/api/       typed backend client, read queries (CrmQueries.ts), error mapping, schema

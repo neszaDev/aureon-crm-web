@@ -21,8 +21,9 @@ import {
   waitForHydration,
 } from './helpers';
 
-// The default pipeline's six columns fit the content column of a 1440 px screen, in one frame.
-test.use({ viewport: { width: 1440, height: 900 } });
+// The default pipeline's six columns fit the content column of a 1536 px screen beside the
+// expanded rail and sidebar (296 px), in one frame.
+test.use({ viewport: { width: 1536, height: 900 } });
 
 /**
  * Opens the board, signed in as `member`, once its cards can be dragged.

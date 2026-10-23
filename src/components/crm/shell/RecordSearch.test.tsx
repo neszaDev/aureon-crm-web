@@ -4,6 +4,7 @@ import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { SearchGroups } from '@/actions/crm/SearchActions';
 import { searchAll } from '@/actions/crm/SearchActions';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import * as Navigation from '@/libs/I18nNavigation';
 import messages from '@/locales/en.json';
 import { RecordSearch } from './RecordSearch';
@@ -42,8 +43,10 @@ const renderSearch = async () => {
   vi.mocked(Navigation.useRouter).mockReturnValue({ push });
   await render(
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-      <button type="button">Notes</button>
-      <RecordSearch workspaceId={1} />
+      <TooltipProvider>
+        <button type="button">Notes</button>
+        <RecordSearch workspaceId={1} side="right" />
+      </TooltipProvider>
     </NextIntlClientProvider>,
   );
 };
@@ -68,11 +71,12 @@ const press = (key: string) =>
   );
 
 describe(RecordSearch, () => {
-  it('opens from its button, which shows the shortcut, and from Ctrl+K and Cmd+K', async () => {
+  it('opens from its button, whose tooltip shows the shortcut, and from Ctrl+K and Cmd+K', async () => {
     await renderSearch();
 
     await expect.element(trigger()).toHaveAttribute('aria-keyshortcuts', 'Control+K Meta+K');
-    await expect.element(trigger()).toHaveTextContent(/⌘K|Ctrl K/u);
+    await trigger().hover();
+    await expect.element(page.getByRole('tooltip')).toHaveTextContent(/Search records(⌘K|Ctrl K)/u);
     await open();
     await userEvent.keyboard('{Escape}');
     await expect.element(field()).not.toBeInTheDocument();

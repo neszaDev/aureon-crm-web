@@ -1,27 +1,23 @@
 import { useTranslations } from 'next-intl';
-import { AccountMenu } from '@/components/crm/shell/AccountMenu';
+import { CrmLocation } from '@/components/crm/shell/CrmLocation';
 import { CrmNav } from '@/components/crm/shell/CrmNav';
+import { CrmBarTools, CrmRail } from '@/components/crm/shell/CrmRail';
+import { CrmSidebar } from '@/components/crm/shell/CrmSidebar';
 import { MobileCrmNav } from '@/components/crm/shell/MobileCrmNav';
-import { RecordSearch } from '@/components/crm/shell/RecordSearch';
-import { RemindersBell } from '@/components/crm/shell/RemindersBell';
 import { WorkspaceSwitcher } from '@/components/crm/shell/WorkspaceSwitcher';
-import { WorkspaceMark } from '@/components/crm/WorkspaceMark';
 import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import type { components } from '@/libs/api/schema';
 import type { BellReminders } from '@/libs/crm/Reminders';
 
 type Schemas = components['schemas'];
 
-// The top bar's icon buttons: on the ink-violet bar (below lg) in its white; from lg the bar is
-// paper, and they take the page's colours and ring.
-const BAR_BUTTON =
-  'text-on-seal hover:bg-rail-raised hover:text-white focus-visible:ring-on-seal focus-visible:ring-offset-seal aria-expanded:bg-rail-raised lg:text-foreground lg:hover:bg-accent lg:hover:text-foreground lg:focus-visible:ring-ring lg:focus-visible:ring-offset-background lg:aria-expanded:bg-accent';
-
 /**
- * The CRM's frame: the ink-violet rail (workspace switcher, sections) on large screens, a
- * ink-violet bar opening the rail as a drawer below that, and in the top bar's one row the record
- * search, the reminders bell and your seal for the account menu. A skip link, first in the tab
- * order, jumps past the rail to the page.
+ * The CRM's frame, a work OS: from 768 px the ink-violet rail (Home, the reminders, search,
+ * "+ New", your account) beside the workspace sidebar (switcher, spaces, insights, settings),
+ * which collapses to an icon strip; above the page, a 48 px top bar with where you are. Below
+ * 768 px the rail and the sidebar are one drawer behind the top bar's menu button, and the
+ * reminders and search sit in the bar. A skip link, first in the tab order, jumps to the page.
  * @param props Component props.
  * @param props.workspace The open workspace.
  * @param props.workspace.id Its id.
@@ -42,63 +38,52 @@ export const CrmShell = (props: {
   children: React.ReactNode;
 }) => {
   const t = useTranslations('CrmShell');
-  const rail = (
-    <div className="flex h-full flex-col gap-6 px-2.5 py-4">
-      <WorkspaceSwitcher current={props.workspace} workspaces={props.workspaces} />
-      <div className="-mx-2.5 min-h-0 flex-1 [scrollbar-color:rgb(255_255_255/25%)_transparent] overflow-y-auto px-2.5">
-        <CrmNav workspaceId={props.workspace.id} />
-      </div>
-    </div>
-  );
 
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[14.5rem_minmax(0,1fr)]">
-      <a
-        href="#crm-main"
-        className="sr-only rounded-md bg-field text-sm font-semibold text-foreground shadow-float focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus-visible:outline-on-seal"
-      >
-        {t('skip_to_content')}
-      </a>
-      <aside className="hidden bg-seal text-on-seal lg:block">
-        <div className="sticky top-0 h-dvh">{rail}</div>
-      </aside>
-
-      <div className="flex min-w-0 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-1 bg-seal px-2 text-on-seal md:gap-2 lg:static lg:bg-transparent lg:px-7 lg:pt-3">
-          {/* The page title's place. A page's own heading names it (never twice), so from lg this
-              is the open space the title would fill; below lg it holds the menu and workspace. */}
-          <div className="min-w-0 flex-1">
-            <div className="flex min-w-0 items-center gap-2 lg:hidden">
-              <MobileCrmNav>{rail}</MobileCrmNav>
-              <WorkspaceMark name={props.workspace.name} tone="rail" className="size-7" />
-              <span className="truncate text-[0.9375rem] font-bold">{props.workspace.name}</span>
-            </div>
-          </div>
-          <RecordSearch workspaceId={props.workspace.id} className={BAR_BUTTON} />
-          <RemindersBell
-            workspaceId={props.workspace.id}
-            timeZone={props.workspace.timeZone}
-            reminders={props.reminders}
-            className={BAR_BUTTON}
-          />
-          <AccountMenu
-            userId={props.user.id}
-            email={props.user.email}
-            displayName={props.user.displayName}
-            workspaceId={props.workspace.id}
-            className="focus-visible:outline-on-seal lg:focus-visible:outline-ring"
-          />
-        </header>
-        {/* Focusable so the skip link moves focus here in Safari too; a container needs no ring. */}
-        <main
-          id="crm-main"
-          tabIndex={-1}
-          className="min-w-0 flex-1 scroll-mt-14 px-4 pt-5 pb-12 outline-none sm:px-7 lg:scroll-mt-0 lg:pt-1"
+    <TooltipProvider delayDuration={400}>
+      <div className="flex min-h-dvh">
+        <a
+          href="#crm-main"
+          className="sr-only rounded-md bg-field text-sm font-semibold text-foreground shadow-float focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus-visible:outline-on-rail"
         >
-          {props.children}
-        </main>
-        <Toaster position="bottom-right" />
+          {t('skip_to_content')}
+        </a>
+        <div className="sticky top-0 hidden h-dvh md:block">
+          <CrmRail workspace={props.workspace} user={props.user} reminders={props.reminders} />
+        </div>
+        <CrmSidebar workspace={props.workspace} workspaces={props.workspaces} />
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-1 border-b border-rule bg-background px-2 md:px-5">
+            <MobileCrmNav>
+              <CrmRail
+                workspace={props.workspace}
+                user={props.user}
+                reminders={props.reminders}
+                drawer
+              />
+              <div className="flex min-w-0 flex-1 flex-col">
+                {/* Clear of the drawer's close button. */}
+                <div className="flex h-12 shrink-0 items-center pr-12 pl-2">
+                  <WorkspaceSwitcher current={props.workspace} workspaces={props.workspaces} />
+                </div>
+                <CrmNav workspaceId={props.workspace.id} />
+              </div>
+            </MobileCrmNav>
+            <CrmLocation workspace={props.workspace} />
+            <CrmBarTools workspace={props.workspace} reminders={props.reminders} />
+          </header>
+          {/* Focusable so the skip link moves focus here in Safari too; a container needs no ring. */}
+          <main
+            id="crm-main"
+            tabIndex={-1}
+            className="min-w-0 flex-1 scroll-mt-12 px-4 pt-5 pb-12 outline-none sm:px-7"
+          >
+            {props.children}
+          </main>
+          <Toaster position="bottom-right" />
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };

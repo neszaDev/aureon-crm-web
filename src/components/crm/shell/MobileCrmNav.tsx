@@ -7,9 +7,10 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/s
 import { usePathname } from '@/libs/I18nNavigation';
 
 /**
- * The rail as a drawer below `lg`. Keyed by path, so it closes on navigation.
+ * Below 768 px, the rail and the sidebar as one drawer behind the top bar's menu button. Keyed by
+ * path, so it closes on navigation.
  * @param props Component props.
- * @param props.children The rail content.
+ * @param props.children The rail and the sidebar.
  * @returns The menu button and its drawer.
  */
 export const MobileCrmNav = (props: { children: React.ReactNode }) => {
@@ -19,19 +20,21 @@ export const MobileCrmNav = (props: { children: React.ReactNode }) => {
   return (
     <Sheet key={pathname}>
       <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={t('open_menu')}
-          className="text-on-seal hover:bg-rail-raised hover:text-white focus-visible:ring-on-seal focus-visible:ring-offset-seal aria-expanded:bg-rail-raised"
-        >
+        <Button variant="ghost" size="icon" aria-label={t('open_menu')} className="md:hidden">
           <MenuIcon />
         </Button>
       </SheetTrigger>
       <SheetContent
         side="left"
         closeLabel={t('close_menu')}
-        className="w-72 border-none bg-seal p-0 pt-10 text-on-seal [&>[data-slot=sheet-close]]:text-on-seal [&>[data-slot=sheet-close]]:hover:bg-rail-raised [&>[data-slot=sheet-close]]:focus-visible:ring-on-seal [&>[data-slot=sheet-close]]:focus-visible:ring-offset-seal"
+        // The drawer itself takes the focus, as a dialog: its first button would open its tooltip.
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          if (event.currentTarget instanceof HTMLElement) {
+            event.currentTarget.focus();
+          }
+        }}
+        className="w-[min(18.5rem,calc(100vw-2.5rem))] flex-row gap-0 border-none bg-sidebar p-0 outline-none"
       >
         <SheetTitle className="sr-only">{t('nav_label')}</SheetTitle>
         {props.children}

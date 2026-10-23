@@ -104,10 +104,13 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
 - `app/layout.tsx` loads the signed-in user; a 401 ends the session (`/api/session/expired`), a
   5xx throws to the error boundary.
 - `app/[workspaceId]/layout.tsx` loads the workspace (`GET /workspaces/{id}`, with the caller's
-  role and `permissions`) and the caller's workspaces, then renders `CrmShell`: the vermilion
-  seal rail (workspace switcher, sections from `CrmNav`) on large screens, a vermilion bar that
-  opens the rail as a drawer below `lg`, your seal for the account menu (profile, theme,
-  language, the demo gallery, sign out) and a skip link. A 404 (unknown workspace, or not a
+  role and `permissions`) and the caller's workspaces, then renders `CrmShell`: from `md` the
+  ink-violet rail (Home, the reminders, record search, "+ New", your avatar for the account menu:
+  profile, theme, language, the demo gallery, sign out) beside the workspace sidebar (switcher,
+  sections from `CrmNav`), which collapses to an icon strip (`Sidebar.ts`: the viewer's choice in
+  localStorage, put on `<html>` before the first paint; by default the strip from 768 to 1279 px);
+  a top bar with where you are (`CrmLocation`, from the URL alone); below `md` the rail and the
+  sidebar are one drawer and the reminders and search sit in the top bar; and a skip link. A 404 (unknown workspace, or not a
   member) is `notFound()`, "Workspace not found"; a 403 shows `ForbiddenNotice`.
 - Pages read the same cached calls (`CrmQueries.ts`), hide what `can(workspace, permission)`
   (`src/libs/crm/Permissions.ts`) says the caller can't do, and still handle the backend's 403.
@@ -144,7 +147,8 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
   keeps only real days, `from` ≤ `to`, at most 366 days apart, and drops anything else for the
   API's default (the last 30 days in the workspace's time zone). Every chart (recharts, through
   `components/ui/chart.tsx`, colours `--chart-1..5`, never colour alone) has its data in a table.
-- **Record search** (`RecordSearch`, ⌘K) and **the reminders bell** live in the shell's top bar.
+- **Record search** (`RecordSearch`, ⌘K) and **the reminders bell** live on the shell's rail (in
+  the top bar on a phone; one of each is ever mounted, `useRailShown`).
   The search asks the four lists (`q`, 5 each) through a server action; the bell's count comes from
   `GET /reminders`, read by the workspace layout and again by the bell on every navigation.
   Reminders are in-app only.

@@ -261,7 +261,22 @@
     "nav_tasks": "งาน",
     "nav_leads": "ลีด",
     "nav_deals": "ดีล",
-    "nav_reports": "รายงาน"
+    "nav_reports": "รายงาน",
+    "rail_label": "เข้าถึงด่วน",
+    "nav_home": "หน้าแรก",
+    "section_spaces": "ระเบียน",
+    "section_insights": "ข้อมูลเชิงลึก",
+    "collapse_sidebar": "ย่อแถบด้านข้าง",
+    "expand_sidebar": "ขยายแถบด้านข้าง",
+    "new_label": "สร้างใหม่",
+    "new_menu": "สร้าง",
+    "new_companies": "บริษัท",
+    "new_contacts": "ผู้ติดต่อ",
+    "new_leads": "ลีด",
+    "new_deals": "ดีล",
+    "new_tasks": "งาน",
+    "location_label": "ตำแหน่งปัจจุบัน",
+    "location_new": "สร้างใหม่"
   },
   "RecordSearch": {
     "open": "ค้นหาระเบียน",

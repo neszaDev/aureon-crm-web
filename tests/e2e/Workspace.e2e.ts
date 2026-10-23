@@ -72,7 +72,7 @@ test.describe('Workspaces', () => {
     });
   });
 
-  test('switches between workspaces from the rail', async ({ page }) => {
+  test('switches between workspaces from the sidebar', async ({ page }) => {
     await signUp(page);
     await createWorkspace(page, TEAMS.default.name);
 

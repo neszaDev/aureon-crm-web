@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
-import { COMPANIES, CONTACTS, DEALS, PEOPLE, TASKS } from '../mockData';
+import { COMPANIES, CONTACTS, DEALS, PEOPLE, TASKS, TEAMS } from '../mockData';
 import {
   apiCall,
   expectNoA11yViolations,
@@ -11,6 +12,128 @@ import {
 } from './helpers';
 
 const HOUR = 60 * 60 * 1000;
+
+const sidebarWidth = async (page: Page) =>
+  await page.locator('#crm-sidebar').evaluate((sidebar) => sidebar.getBoundingClientRect().width);
+
+test.describe('Shell', () => {
+  test('goes home, creates and climbs the location from the rail and the top bar, in both themes', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const company = await seed(request, owner, 'companies', { name: COMPANIES.kestrel.name });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(`${owner.path}/companies/${company.id}`);
+
+    // Where you are: the workspace, the section, the record by its number.
+    const location = page.getByRole('navigation', { name: 'Location' });
+    await expect(location.getByRole('link', { name: TEAMS.default.name })).toBeVisible();
+    await expect(location.getByText(/^C-\d{4,}$/u)).toHaveAttribute('aria-current', 'page');
+    const nav = page.getByRole('navigation', { name: 'Workspace navigation' });
+    await expect(nav.getByRole('link', { name: 'Companies' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await expectNoA11yViolations(page);
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expectNoA11yViolations(page);
+    await page.emulateMedia({ colorScheme: 'light' });
+
+    await location.getByRole('link', { name: 'Companies' }).click();
+    await expect(page).toHaveURL(new RegExp(`${owner.path}/companies$`, 'u'));
+    await expect(location.getByText('Companies')).toHaveAttribute('aria-current', 'page');
+
+    // Each icon on the rail is named in a tooltip.
+    const rail = page.getByRole('navigation', { name: 'Quick access' });
+    const home = rail.getByRole('link', { name: 'Home' });
+    await waitForHydration(home);
+    await home.hover();
+    await expect(page.getByRole('tooltip', { name: 'Home' })).toBeVisible();
+    await home.click();
+    await expect(page).toHaveURL(new RegExp(`${owner.path}$`, 'u'));
+    await expect(home).toHaveAttribute('aria-current', 'page');
+
+    // "+ New" offers the five kinds, each to its form.
+    await rail.getByRole('button', { name: 'New', exact: true }).click();
+    const menu = page.getByRole('menu', { name: 'New' });
+    await expect(menu.getByRole('menuitem')).toHaveText([
+      'Company',
+      'Contact',
+      'Lead',
+      'Deal',
+      'Task',
+    ]);
+    await menu.getByRole('menuitem', { name: 'Deal' }).click();
+    await expect(page).toHaveURL(new RegExp(`${owner.path}/deals/new$`, 'u'));
+    await expect(location.getByText('New', { exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  });
+
+  test('collapses the sidebar to its icon strip, keeps it on reload, and expands it again', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request);
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(owner.path);
+    const collapse = page.getByRole('button', { name: 'Collapse sidebar' });
+    const expand = page.getByRole('button', { name: 'Expand sidebar' });
+    await waitForHydration(collapse);
+    expect(await sidebarWidth(page)).toBe(240);
+
+    await collapse.click();
+    await expect(expand).toHaveAttribute('aria-expanded', 'false');
+    await expect.poll(async () => await sidebarWidth(page)).toBe(56);
+    await expectNoA11yViolations(page);
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expectNoA11yViolations(page);
+    await page.emulateMedia({ colorScheme: 'light' });
+
+    // The width it is drawn at from the first frame the sidebar is on screen: no jump.
+    await page.addInitScript(() => {
+      const widths: number[] = [];
+      Reflect.set(window, 'sidebarWidths', widths);
+      const look = () => {
+        const sidebar = document.querySelector('#crm-sidebar');
+        if (sidebar) {
+          widths.push(sidebar.getBoundingClientRect().width);
+        }
+        if (widths.length < 3) {
+          requestAnimationFrame(look);
+        }
+      };
+      requestAnimationFrame(look);
+    });
+    await page.reload();
+    await expect(expand).toBeVisible();
+    expect(await page.evaluate((): unknown => Reflect.get(window, 'sidebarWidths'))).toStrictEqual([
+      56, 56, 56,
+    ]);
+
+    // A strip icon is named in its tooltip and goes to its section.
+    const contacts = page
+      .getByRole('navigation', { name: 'Workspace navigation' })
+      .getByRole('link', { name: 'Contacts' });
+    await waitForHydration(contacts);
+    await contacts.hover();
+    await expect(page.getByRole('tooltip', { name: 'Contacts' })).toBeVisible();
+    await contacts.click();
+    await expect(page).toHaveURL(new RegExp(`${owner.path}/contacts$`, 'u'));
+    await expect(contacts).toHaveAttribute('aria-current', 'page');
+
+    // Ctrl+\ expands it, outside a field.
+    await page.locator('body').click({ position: { x: 700, y: 300 } });
+    await page.keyboard.press('Control+Backslash');
+    await expect(collapse).toHaveAttribute('aria-expanded', 'true');
+    await expect.poll(async () => await sidebarWidth(page)).toBe(240);
+    await page.reload();
+    await expect(collapse).toBeVisible();
+    expect(await sidebarWidth(page)).toBe(240);
+  });
+});
 
 test.describe('Top bar', () => {
   test('finds a record by what you type from ⌘K, and opens it on Enter', async ({
@@ -222,6 +345,29 @@ test.describe('Top bar', () => {
 
   test.describe('on a phone, in Thai', () => {
     test.use({ viewport: { width: 390, height: 844 } });
+
+    test('opens the rail and the sidebar as one drawer, which a navigation closes', async ({
+      page,
+      request,
+    }) => {
+      const owner = await seedWorkspace(request);
+      await signIn(page, { email: owner.email, password: PASSWORD });
+      await page.goto(owner.path.replace('/app/', '/th/app/'));
+      const open = page.getByRole('button', { name: 'เปิดเมนู' });
+      await waitForHydration(open);
+
+      await open.click();
+      const drawer = page.getByRole('dialog', { name: 'เมนูพื้นที่ทำงาน' });
+      await expect(drawer.getByRole('link', { name: 'หน้าแรก' })).toBeVisible();
+      await expect(drawer.getByRole('button', { name: 'สร้างใหม่', exact: true })).toBeVisible();
+      await expect(drawer.getByRole('button', { name: 'บัญชีของคุณ' })).toBeVisible();
+      await expect(drawer.getByRole('button', { name: /^สลับพื้นที่ทำงาน/u })).toBeVisible();
+      await expectNoA11yViolations(page);
+
+      await drawer.getByRole('link', { name: 'ดีล' }).click();
+      await expect(page).toHaveURL(/\/th\/app\/\d+\/deals$/u);
+      await expect(drawer).toHaveCount(0);
+    });
 
     test('fits the bar with search as an icon, and wraps long Thai names in the palette and the bell', async ({
       page,

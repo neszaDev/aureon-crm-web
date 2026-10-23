@@ -261,7 +261,22 @@
     "nav_tasks": "Tasks",
     "nav_leads": "Leads",
     "nav_deals": "Deals",
-    "nav_reports": "Reports"
+    "nav_reports": "Reports",
+    "rail_label": "Quick access",
+    "nav_home": "Home",
+    "section_spaces": "Spaces",
+    "section_insights": "Insights",
+    "collapse_sidebar": "Collapse sidebar",
+    "expand_sidebar": "Expand sidebar",
+    "new_label": "New",
+    "new_menu": "Create",
+    "new_companies": "Company",
+    "new_contacts": "Contact",
+    "new_leads": "Lead",
+    "new_deals": "Deal",
+    "new_tasks": "Task",
+    "location_label": "Location",
+    "location_new": "New"
   },
   "RecordSearch": {
     "open": "Search records",

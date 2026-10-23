@@ -3,9 +3,10 @@
 import { cn } from 'cn';
 import { SearchIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import type { SearchGroups } from '@/actions/crm/SearchActions';
 import { searchAll } from '@/actions/crm/SearchActions';
+import { ShellTip } from '@/components/crm/shell/ShellTip';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -22,6 +23,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useRouter } from '@/libs/I18nNavigation';
+import { useIsApple } from '@/utils/Platform';
 
 const TYPING_PAUSE_MS = 250;
 // The search needs this many characters (the action holds the same rule).
@@ -30,12 +32,6 @@ const GROUPS = ['companies', 'contacts', 'leads', 'deals'] as const;
 
 type Status = 'idle' | 'searching' | 'done' | 'failed';
 
-// The platform tells which shortcut to show. On the server (and while hydrating) it is the Ctrl one.
-const subscribe = () => () => {
-  // Nothing changes while the page lives: nothing to listen to.
-};
-const isApple = () => /Mac|iPhone|iPad/u.test(navigator.userAgent);
-
 // The K key: its letter, or, on a layout whose keys give other characters (Thai, Cyrillic), the
 // key in that place. A Latin letter that is not k is the layout's own (Ctrl+T on Dvorak's K).
 const isKKey = (event: KeyboardEvent) =>
@@ -43,16 +39,21 @@ const isKKey = (event: KeyboardEvent) =>
 
 /**
  * Finds a company, contact, lead or deal by what you type (at least 2 characters, after a short
- * pause), from any page: a button in the top bar, and ⌘K or Ctrl+K, open a palette of the first 5
- * of each kind. Arrow keys move through the hits and Enter opens the highlighted one. A hit shows
+ * pause), from any page: its icon (on the rail, or in the phone's top bar) and ⌘K or Ctrl+K open a
+ * palette of the first 5 of each kind. Arrow keys move through the hits and Enter opens the highlighted one. A hit shows
  * while a newer search is on its way, dimmed and out of reach, so Enter never opens a record the
  * text no longer matches. Closed, it gives the focus back to what had it when the shortcut opened it.
  * @param props Component props.
  * @param props.workspaceId The workspace searched.
- * @param props.className Extra classes for the button (its colours on the ink-violet bar).
+ * @param props.side Where its tooltip shows: `right` on the rail, `bottom` in the top bar.
+ * @param props.className Extra classes for the button (its colours on the rail).
  * @returns The button and its palette.
  */
-export const RecordSearch = (props: { workspaceId: number; className?: string }) => {
+export const RecordSearch = (props: {
+  workspaceId: number;
+  side: 'right' | 'bottom';
+  className?: string;
+}) => {
   const t = useTranslations('RecordSearch');
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -63,7 +64,7 @@ export const RecordSearch = (props: { workspaceId: number; className?: string })
   // The text whose answer may show: an earlier search answering late is dropped.
   const latest = useRef('');
   const timer = useRef(0);
-  const apple = useSyncExternalStore(subscribe, isApple, () => false);
+  const apple = useIsApple();
   // What had the focus when the shortcut opened the palette, to give it back on closing; none
   // when its button did, which keeps the focus.
   const opener = useRef<HTMLElement | null>(null);
@@ -147,30 +148,29 @@ export const RecordSearch = (props: { workspaceId: number; className?: string })
         }
       }}
     >
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          aria-label={t('open')}
-          aria-keyshortcuts="Control+K Meta+K"
-          // From md the button is a field: translucent on the bar, paper from lg.
-          className={cn(
-            'size-9',
-            props.className,
-            'md:w-52 md:justify-start md:bg-white/10 md:px-3 md:hover:bg-white/15 lg:w-64 lg:border-input lg:bg-field lg:font-normal lg:text-muted-foreground lg:shadow-ply lg:hover:border-muted-foreground lg:hover:bg-accent',
-          )}
-        >
-          <SearchIcon />
-          <span aria-hidden="true" className="hidden min-w-0 flex-1 truncate text-left md:block">
+      <ShellTip
+        side={props.side}
+        label={
+          <>
             {t('open')}
-          </span>
-          <kbd
-            aria-hidden="true"
-            className="hidden rounded-sm border border-current/30 px-1.5 font-mono text-xs font-normal md:block"
+            <kbd data-slot="kbd" className="font-sans opacity-75">
+              {apple ? '⌘K' : 'Ctrl K'}
+            </kbd>
+          </>
+        }
+      >
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={t('open')}
+            aria-keyshortcuts="Control+K Meta+K"
+            className={props.className}
           >
-            {apple ? '⌘K' : 'Ctrl K'}
-          </kbd>
-        </Button>
-      </DialogTrigger>
+            <SearchIcon />
+          </Button>
+        </DialogTrigger>
+      </ShellTip>
       <DialogContent
         showCloseButton={false}
         onCloseAutoFocus={(event) => {

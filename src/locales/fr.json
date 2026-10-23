@@ -261,7 +261,22 @@
     "nav_tasks": "Tâches",
     "nav_leads": "Prospects",
     "nav_deals": "Affaires",
-    "nav_reports": "Rapports"
+    "nav_reports": "Rapports",
+    "rail_label": "Accès rapide",
+    "nav_home": "Accueil",
+    "section_spaces": "Espaces",
+    "section_insights": "Analyses",
+    "collapse_sidebar": "Réduire la barre latérale",
+    "expand_sidebar": "Déplier la barre latérale",
+    "new_label": "Nouveau",
+    "new_menu": "Créer",
+    "new_companies": "Entreprise",
+    "new_contacts": "Contact",
+    "new_leads": "Prospect",
+    "new_deals": "Affaire",
+    "new_tasks": "Tâche",
+    "location_label": "Emplacement",
+    "location_new": "Création"
   },
   "RecordSearch": {
     "open": "Rechercher des fiches",

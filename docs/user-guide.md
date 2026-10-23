@@ -16,15 +16,22 @@ checks every action against the same rules, so a button you don't see is one you
 3. The workspace opens on its **dashboard**. A new one offers to create your first records and to
    invite your team.
 
-The rail on the left (a drawer behind the menu button on a phone) has the workspace switcher and
-the sections: Dashboard, Companies, Contacts, Leads, Deals, Tasks, Reports and Settings. The top
-bar has:
+The dark rail on the far left has:
 
+- **Home**: the workspace's dashboard.
+- **Reminders**: see [Reminders](#reminders).
 - **Search records** (`⌘K` or `Ctrl+K`): type at least 2 characters to find active companies,
   contacts, leads and deals; Enter opens the highlighted one.
-- **The reminders bell**: see [Reminders](#reminders).
-- **Your seal**: your profile, the theme (light, dark or the system's), the language, and sign
-  out.
+- **+ New**: a company, contact, lead or deal (its form), or a task (the task list).
+- **Your avatar**, at the foot: your profile, the theme (light, dark or the system's), the
+  language, and sign out.
+
+Beside it, the sidebar has the workspace switcher and the sections: Companies, Contacts, Leads,
+Deals and Tasks, then Dashboard and Reports, and Settings at the foot. Its « button (or `⌘\` /
+`Ctrl+\`) collapses it to a strip of icons and back; your browser remembers which. The bar above
+the page says where you are: the workspace, the section and the record's number. On a phone the
+rail and the sidebar are one drawer behind the menu button, and search and reminders are in the
+bar.
 
 ## Workspace and members
 
@@ -144,7 +151,7 @@ never deleted. A task can be changed by its assignee, its creator, or a manager,
 
 ### Reminders
 
-The **bell** in the top bar counts what needs you now: your open tasks that are overdue, those due
+The **reminders** icon on the rail (in the top bar on a phone) counts what needs you now: your open tasks that are overdue, those due
 in the next 24 hours, and your open leads whose follow-up day has come. Its popover lists them,
 completes a task in place, and links to **All tasks**. The count is refreshed on every page you
 open. Reminders appear in the app only: nothing is sent by email, push notification or calendar.

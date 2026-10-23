@@ -4,6 +4,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { Anuphan, Inter } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { ThemeClass } from '@/components/ThemeClass';
+import { SIDEBAR_SCRIPT } from '@/libs/crm/Sidebar';
 import { routing } from '@/libs/I18nRouting';
 import { THEME_GROUNDS, THEME_SCRIPT } from '@/libs/Theme';
 import { getBaseUrl } from '@/utils/Helpers';
@@ -80,7 +81,9 @@ export default async function RootLayout(props: {
   const { ErrorPage, LocaleSwitcher, Brand } = await getMessages();
 
   // The theme class comes from the cookie in the browser (THEME_SCRIPT, before the first paint),
-  // so pages stay static; the server renders none, hence suppressHydrationWarning.
+  // so pages stay static; the server renders none, hence suppressHydrationWarning. The CRM
+  // sidebar's stored width is put there the same way (SIDEBAR_SCRIPT), on every page, so a
+  // client navigation into a workspace finds it too.
   return (
     <html
       lang={locale}
@@ -103,6 +106,11 @@ export default async function RootLayout(props: {
           // A constant script with no user input; Theme.test.ts proves it applies only light|dark.
           // oxlint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
+        />
+        <script
+          // A constant script with no user input: it puts only `collapsed` or `expanded` on <html>.
+          // oxlint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: SIDEBAR_SCRIPT }}
         />
       </head>
       <body>

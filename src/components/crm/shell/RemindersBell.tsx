@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from 'cn';
-import { BellIcon } from 'lucide-react';
+import { InboxIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
   useEffect,
@@ -16,6 +16,7 @@ import {
 import { loadReminders } from '@/actions/crm/ReminderActions';
 import { completeTask } from '@/actions/crm/TaskActions';
 import { LeadFollowUp, isFollowUpOverdue } from '@/components/crm/lead/LeadFollowUp';
+import { ShellTip } from '@/components/crm/shell/ShellTip';
 import { TaskDue } from '@/components/crm/task/TaskRow';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -143,7 +144,7 @@ const Group = (props: { heading: string; length: number; children: React.ReactNo
 };
 
 /**
- * The reminders bell: a badge with how many reminders you have (hidden at none) and a popover
+ * The reminders (the rail's inbox): a badge with how many you have (hidden at none) and a popover
  * with them, in three groups: your overdue tasks, your tasks due in the next 24 hours, and the
  * leads whose follow-up is due. Reminders live in the app only; the popover says so. The layout
  * reads them when it renders (a full load, and after every action that refreshes the page, so
@@ -157,13 +158,15 @@ const Group = (props: { heading: string; length: number; children: React.ReactNo
  * @param props.workspaceId The workspace.
  * @param props.timeZone The workspace's time zone, for due times and the day a read is on.
  * @param props.reminders What the layout read; undefined when it could not be.
- * @param props.className Extra classes for the trigger (colours on the ink-violet bar).
+ * @param props.side Where it opens: `right` of the rail, or `bottom` from the phone's top bar.
+ * @param props.className Extra classes for the trigger (its colours on the rail).
  * @returns The bell and its popover.
  */
 export const RemindersBell = (props: {
   workspaceId: number;
   timeZone: string;
   reminders?: BellReminders;
+  side: 'right' | 'bottom';
   className?: string;
 }) => {
   const t = useTranslations('RemindersBell');
@@ -230,27 +233,34 @@ export const RemindersBell = (props: {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={reminders ? t('label', { count: reminderBadge(reminders) }) : t('title')}
-          className={cn('relative', props.className)}
-        >
-          <BellIcon />
-          {count > 0 && reminders && (
-            <span
-              aria-hidden="true"
-              className="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-field px-1 text-[0.6875rem] leading-none font-bold text-seal-ink tabular-nums lg:bg-foreground lg:text-background"
-            >
-              {reminderBadge(reminders)}
-            </span>
-          )}
-        </Button>
-      </PopoverTrigger>
+      <ShellTip side={props.side} label={t('title')}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={reminders ? t('label', { count: reminderBadge(reminders) }) : t('title')}
+            className={cn('relative', props.className)}
+          >
+            <InboxIcon />
+            {count > 0 && reminders && (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'absolute -top-1 -right-1 grid h-4 min-w-4 place-items-center rounded-full bg-violet px-1 text-[0.6875rem] leading-none font-semibold text-white tabular-nums ring-2',
+                  props.side === 'right' ? 'ring-rail' : 'ring-background',
+                )}
+              >
+                {reminderBadge(reminders)}
+              </span>
+            )}
+          </Button>
+        </PopoverTrigger>
+      </ShellTip>
       <PopoverContent
         aria-label={t('title')}
-        align="end"
+        side={props.side}
+        align={props.side === 'right' ? 'start' : 'end'}
+        sideOffset={props.side === 'right' ? 10 : 4}
         className="w-[min(22rem,calc(100vw-1rem))] gap-0 p-0"
       >
         <PopoverTitle

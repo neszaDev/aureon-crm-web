@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { signOut } from '@/actions/AuthActions';
 import { PersonAvatar } from '@/components/crm/PersonAvatar';
+import { ShellTip } from '@/components/crm/shell/ShellTip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,7 +88,9 @@ const ThemeChoices = () => {
  * @param props.email Email of the signed-in user.
  * @param props.displayName Their display name, if set.
  * @param props.workspaceId The open workspace, for the profile link (none outside one).
- * @param props.className Extra classes for the trigger (focus colour on the ink-violet bar).
+ * @param props.side `right` at the foot of the CRM's rail: the menu opens beside it, and a
+ *   tooltip names it. Without it the menu opens below.
+ * @param props.className Extra classes for the trigger (focus colour on the rail).
  * @returns The menu.
  */
 export const AccountMenu = (props: {
@@ -95,6 +98,7 @@ export const AccountMenu = (props: {
   email: string;
   displayName?: string;
   workspaceId?: number;
+  side?: 'right';
   className?: string;
 }) => {
   const t = useTranslations('AccountMenu');
@@ -105,18 +109,33 @@ export const AccountMenu = (props: {
   const router = useRouter();
   const settle = useSettle();
 
+  const trigger = (
+    <DropdownMenuTrigger
+      aria-label={t('label')}
+      className={cn(
+        'grid size-10 shrink-0 place-items-center rounded-full transition-transform duration-150 motion-safe:active:scale-95',
+        props.className,
+      )}
+    >
+      <PersonAvatar person={person} />
+    </DropdownMenuTrigger>
+  );
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        aria-label={t('label')}
-        className={cn(
-          'grid size-10 shrink-0 place-items-center rounded-full transition-transform duration-150 motion-safe:active:scale-95',
-          props.className,
-        )}
+      {props.side ? (
+        <ShellTip side={props.side} label={t('label')}>
+          {trigger}
+        </ShellTip>
+      ) : (
+        trigger
+      )}
+      <DropdownMenuContent
+        side={props.side}
+        align="end"
+        sideOffset={props.side ? 10 : 4}
+        className="w-64"
       >
-        <PersonAvatar person={person} />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="flex items-center gap-3 py-2 font-normal text-foreground">
           <PersonAvatar person={person} />
           <span className="flex min-w-0 flex-col">

@@ -44,8 +44,9 @@ type WonLost = {
 type Funnel = { created: number; stages: { stage: { name: string }; reached: number }[] };
 type Reminders = Record<'overdueTasks' | 'dueSoonTasks' | 'followUpLeads', unknown[]>;
 
-// The board's six columns fit a 1440 px screen, so every drop target is in view.
-test.use({ viewport: { width: 1440, height: 900 } });
+// The board's six columns fit a 1536 px screen beside the expanded rail and sidebar (296 px), so
+// every drop target is in view.
+test.use({ viewport: { width: 1536, height: 900 } });
 
 /**
  * The id at the end of a link to a record.

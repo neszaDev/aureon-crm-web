@@ -2,24 +2,18 @@ import { cn } from 'cn';
 import { initialsOf } from '@/components/crm/PersonAvatar';
 
 /**
- * A workspace as a square chop with its initials: the seal's shape for organisations, the
- * circle being for people. Decorative: the name is always written next to it.
+ * A workspace as its avatar: a violet square with its initials (people's avatars are round).
+ * Decorative: the name is always written next to it.
  * @param props Component props.
  * @param props.name Workspace name.
- * @param props.tone `rail` on the ink-violet rail, `paper` (default) on paper and menus.
  * @param props.className Extra classes (size).
  * @returns The mark.
  */
-export const WorkspaceMark = (props: {
-  name: string;
-  tone?: 'rail' | 'paper';
-  className?: string;
-}) => (
+export const WorkspaceMark = (props: { name: string; className?: string }) => (
   <span
     aria-hidden="true"
     className={cn(
-      'inline-grid size-8 shrink-0 place-items-center rounded-md border-2 text-xs leading-none font-bold select-none',
-      props.tone === 'rail' ? 'border-on-seal text-on-seal' : 'border-seal-ink text-seal-ink',
+      'inline-grid size-8 shrink-0 place-items-center rounded-md bg-violet text-xs leading-none font-semibold text-white select-none',
       props.className,
     )}
   >

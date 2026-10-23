@@ -50,7 +50,7 @@ src/validations/                zod schemas mirroring the backend's request rule
 src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx shadcn add`)
 src/components/report/          Marksheet domain UI: marks, totals, results table (demos only)
 src/components/marketing/       the public landing page: hero capture, section row and developer note, capture sheet
-src/components/crm/**           the CRM: shell/ (rail, switcher, account menu, record search, reminders bell), settings/, seals, dashboard/
+src/components/crm/**           the CRM: shell/ (rail, collapsible sidebar, location, + New, switcher, account menu, record search, reminders bell), settings/, seals, dashboard/
                                 (the home: KPI strip, my deals, follow-ups, pipeline, won and lost, stages, recent activity and changes),
                                 audit/ (`AuditEventItem`, `AuditTrail`, `RecordHistory`), reports/ (the tabs and a panel per report, `ChartTable`),
                                 PeriodPicker, and per record:
