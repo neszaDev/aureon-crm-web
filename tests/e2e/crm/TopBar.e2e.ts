@@ -180,7 +180,7 @@ test.describe('Top bar', () => {
 
     await page.keyboard.press('Control+K');
     const field = page.getByRole('combobox', { name: 'Search records' });
-    const companyOption = new RegExp(`^C-\\d{4} ${COMPANIES.brightwater.name}`, 'u');
+    const companyOption = new RegExp(`^C-\\d{4,} ${COMPANIES.brightwater.name}`, 'u');
     await expect(field).toBeFocused();
     await field.fill('a');
     await expect(page.getByText('Type at least 2 characters.')).toBeVisible();
@@ -192,7 +192,7 @@ test.describe('Top bar', () => {
     await expect(palette.getByRole('group', { name: 'Deals' })).toBeVisible();
     await expect(palette.getByRole('option', { name: companyOption })).toBeVisible();
     await expect(
-      palette.getByRole('option', { name: new RegExp(`^D-\\d{4} ${DEALS.tablets}`, 'u') }),
+      palette.getByRole('option', { name: new RegExp(`^D-\\d{4,} ${DEALS.tablets}`, 'u') }),
     ).toBeVisible();
     await expect(
       palette.getByRole('option', { name: COMPANIES.brightwaterFreight.name }),

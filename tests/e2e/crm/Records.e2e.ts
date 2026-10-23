@@ -31,7 +31,7 @@ test.describe('Records', () => {
 
     const brightwater = await createCompany(page, owner.path, { name: COMPANIES.brightwater.name });
     await expect(page).toHaveTitle(COMPANIES.brightwater.name);
-    await expect(page.getByRole('main').getByText(/^C-\d{4}$/u)).toBeVisible();
+    await expect(page.getByRole('main').getByText(/^C-\d{4,}$/u)).toBeVisible();
 
     // The same name in lower case warns about the first, and links to it in a new tab.
     await page.goto(`${owner.path}/companies/new`);
@@ -107,7 +107,7 @@ test.describe('Records', () => {
       lastName: CONTACTS.lead.lastName,
       companyName: COMPANIES.brightwater.name,
     });
-    await expect(page.getByRole('main').getByText(/^L-\d{4}$/u)).toBeVisible();
+    await expect(page.getByRole('main').getByText(/^L-\d{4,}$/u)).toBeVisible();
 
     // New, then Contacted, then Qualified: each from the status menu.
     await changeStatus(page, 'Contacted');

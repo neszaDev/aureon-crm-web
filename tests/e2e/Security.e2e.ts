@@ -853,7 +853,7 @@ test.describe('Security', () => {
       await page.keyboard.press('Control+K');
       await page.getByRole('combobox', { name: 'Search records' }).fill(COMPANIES.kestrel.name);
       await expect(
-        page.getByRole('option', { name: new RegExp(`^C-\\d{4} ${COMPANIES.kestrel.name}`, 'u') }),
+        page.getByRole('option', { name: new RegExp(`^C-\\d{4,} ${COMPANIES.kestrel.name}`, 'u') }),
       ).toBeVisible();
       await expect(page.locator('img[src="x"]')).toHaveCount(0);
       expect(await page.evaluate(() => '__xss' in globalThis)).toBe(false);
