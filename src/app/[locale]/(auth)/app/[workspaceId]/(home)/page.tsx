@@ -106,7 +106,7 @@ export default async function HomePage(props: HomePageProps) {
         <h1 className="text-[1.25rem] leading-7 font-semibold tracking-[-0.01em] break-words">
           {t('greeting', {
             part: partOfDay(workspace.timezone),
-            name: user.displayName ?? user.email,
+            name: user.displayName ?? user.email.split('@')[0] ?? user.email,
           })}
         </h1>
         <p className="text-sm break-words text-muted-foreground">

@@ -41,7 +41,8 @@ export const ReportTabs = (props: { current: ReportTab; path: string; period: Pe
               aria-current={tab === props.current ? 'page' : undefined}
               scroll={false}
               className={cn(
-                'flex h-9 items-center gap-1.5 border-b-2 px-2 text-[0.8125rem] font-medium whitespace-nowrap no-underline transition-colors duration-150',
+                // Its outline drawn inside: the nav's scroll box would clip it.
+                'flex h-9 items-center gap-1.5 border-b-2 px-2 text-[0.8125rem] font-medium whitespace-nowrap no-underline transition-colors duration-150 focus-visible:-outline-offset-2',
                 tab === props.current
                   ? 'border-violet-ink text-foreground'
                   : 'border-transparent text-muted-foreground hover:text-foreground',

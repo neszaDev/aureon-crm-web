@@ -103,7 +103,8 @@ const DAY = 24 * 60 * 60 * 1000;
  * The reminders by when they are due, as the inbox groups them, on the workspace's day they were
  * read: overdue (the overdue tasks, then the leads whose follow-up day has passed), today (the
  * tasks due before the workspace's midnight, then the leads due today) and upcoming (the rest of
- * the next 24 hours). A group fed by a list at the API's cap may hold more than it shows.
+ * the next 24 hours). A list at the API's cap may hold more than it shows: past its last item, so
+ * only the group that item falls in is marked.
  * @param reminders The caller's reminders.
  * @param timeZone The workspace's time zone, where its midnight falls.
  * @returns The groups in `INBOX_GROUPS`' order: their items, and whether they may be a cut.
@@ -115,27 +116,29 @@ export const inboxGroups = (reminders: BellReminders, timeZone: string) => {
   // A real instant for any real day (a midnight the clocks skip moves forward by the gap).
   const midnight = toInstant(`${next}T00:00`, timeZone);
   const tomorrow = midnight ? Date.parse(midnight) : Number.POSITIVE_INFINITY;
-  const isToday = (task: BellTask) => !task.dueAt || Date.parse(task.dueAt) < tomorrow;
-  const isLate = (lead: BellLead) =>
-    lead.followUpDate !== undefined && lead.followUpDate < reminders.today;
+  const isToday = (task?: BellTask) => !task?.dueAt || Date.parse(task.dueAt) < tomorrow;
+  const isLate = (lead?: BellLead) =>
+    lead?.followUpDate !== undefined && lead.followUpDate < reminders.today;
   const cut = (list: readonly unknown[]) => list.length >= REMINDER_CAP;
+  const { dueSoonTasks, followUpLeads } = reminders;
   const tasks = (list: BellTask[]) => list.map((task): InboxItem => ({ task }));
   const leads = (list: BellLead[]) => list.map((lead): InboxItem => ({ lead }));
   const groups: Record<(typeof INBOX_GROUPS)[number]['key'], [InboxItem[], boolean]> = {
     overdue: [
       [...tasks(reminders.overdueTasks), ...leads(reminders.followUpLeads.filter(isLate))],
-      cut(reminders.overdueTasks) || cut(reminders.followUpLeads),
+      cut(reminders.overdueTasks) || (cut(followUpLeads) && isLate(followUpLeads.at(-1))),
     ],
     today: [
       [
         ...tasks(reminders.dueSoonTasks.filter(isToday)),
         ...leads(reminders.followUpLeads.filter((lead) => !isLate(lead))),
       ],
-      cut(reminders.dueSoonTasks) || cut(reminders.followUpLeads),
+      (cut(dueSoonTasks) && isToday(dueSoonTasks.at(-1))) ||
+        (cut(followUpLeads) && !isLate(followUpLeads.at(-1))),
     ],
     upcoming: [
       tasks(reminders.dueSoonTasks.filter((task) => !isToday(task))),
-      cut(reminders.dueSoonTasks),
+      cut(dueSoonTasks) && !isToday(dueSoonTasks.at(-1)),
     ],
   };
 

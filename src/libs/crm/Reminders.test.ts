@@ -144,6 +144,6 @@ describe(inboxGroups, () => {
     const full = Array.from({ length: 20 }, (_, id) => bellTask(100 + id, '2026-10-19T03:00:00Z'));
     const groups = inboxGroups({ ...reminders, dueSoonTasks: full }, 'Asia/Bangkok');
 
-    expect(groups.map((group) => group.capped)).toStrictEqual([false, true, true]);
+    expect(groups.map((group) => group.capped)).toStrictEqual([false, true, false]);
   });
 });

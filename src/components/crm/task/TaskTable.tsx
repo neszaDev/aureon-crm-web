@@ -21,8 +21,8 @@ import type { ActivityLink } from '@/validations/crm/ActivityValidation';
  * @param props.timeZone The workspace's time zone.
  * @param props.viewed The record whose page this is, left out of the linked records.
  * @param props.headingId The heading of the list, which takes the focus when a row leaves.
- * @param props.compact A narrow list (the home's): without the status, priority and assignee
- *   columns, its head read out but not drawn.
+ * @param props.compact A narrow list (the home's and a record's tasks): without the status,
+ *   priority and assignee columns, its head read out but not drawn.
  * @param props.bounds Where the due sections part: an open task's due time takes its section's
  *   colour.
  * @param props.fixed Fixed columns, so the groups of a grouped list line up.
