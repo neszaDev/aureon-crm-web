@@ -110,6 +110,12 @@ describe(CompanyForm, () => {
 
     await page.getByRole('button', { name: 'Save changes' }).click();
 
+    // On its chip, named, and in its field once the chip is open.
+    const chip = page.getByRole('button', { name: /^Owner:/u });
+    await expect
+      .element(chip)
+      .toHaveAccessibleDescription('Owner: is not a member of this workspace');
+    await chip.click();
     await expect
       .element(page.getByRole('combobox', { name: 'Owner' }))
       .toHaveAccessibleDescription('is not a member of this workspace');
@@ -137,8 +143,9 @@ describe(CompanyForm, () => {
     const action = vi.fn<Action>().mockResolvedValue({ ok: true });
     await renderForm({ action, canAssign: false });
 
+    await page.getByRole('button', { name: 'Owner: Riley Rep' }).click();
+    await expect.element(page.getByText("Your role can't give it to someone else.")).toBeVisible();
     expect(page.getByRole('combobox', { name: 'Owner' }).elements()).toHaveLength(0);
-    await expect.element(page.getByText('Riley Rep')).toBeVisible();
 
     await page.getByRole('button', { name: 'Save changes' }).click();
 

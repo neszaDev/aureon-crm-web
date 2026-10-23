@@ -34,12 +34,14 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ActionAlert } from '@/components/crm/ActionAlert';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
-import { StampBox } from '@/components/crm/StampBox';
+import { PILL } from '@/components/crm/StatusPill';
 import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { Stage } from '@/libs/crm/Stages';
+import type { StatusTone } from '@/libs/crm/StatusColors';
+import { stageTone } from '@/libs/crm/StatusColors';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import { focusOnMount } from '@/utils/Focus';
 import { useSettle } from '@/utils/SettleAction';
@@ -165,11 +167,13 @@ const StageForm = (props: {
 };
 
 /**
- * One stage: its stamp box with its place, name, probability and, for managers, its tools. An
- * open stage has a drag handle, move up and down buttons and delete; Won and Lost have none. An
- * editor replaces the name and probability while it is open.
+ * One stage, a 36 px row: its place, its name in its colour's pill (as deals show it), its
+ * probability and, for managers, its tools. An open stage has a drag handle, move up and down
+ * buttons and delete; Won and Lost have none. An editor replaces the name and probability while
+ * it is open.
  * @param props Component props.
  * @param props.stage The stage.
+ * @param props.tone Its colour, by its place in the pipeline.
  * @param props.position Its place in the pipeline, from 1.
  * @param props.openCount How many open stages there are.
  * @param props.canManage Whether the caller may change the pipeline.
@@ -182,6 +186,7 @@ const StageForm = (props: {
  */
 const StageItem = (props: {
   stage: Stage;
+  tone: StatusTone;
   position: number;
   openCount: number;
   canManage: boolean;
@@ -253,7 +258,7 @@ const StageItem = (props: {
         transition,
       }}
       className={cn(
-        'flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-rule bg-card px-4 py-2.5 motion-reduce:transition-none! sm:px-5',
+        'flex min-h-9 flex-wrap items-center gap-x-3 gap-y-2 border-b border-rule bg-background px-1 py-1 motion-reduce:transition-none!',
         isDragging && 'relative z-10 shadow-float',
       )}
     >
@@ -275,13 +280,12 @@ const StageItem = (props: {
             <LockIcon aria-hidden="true" className="size-4" />
           </span>
         ))}
-      {/* The stage box of the stamp row (36 px, as on a deal), numbered with the stage's place:
-          Won filled with the seal, Lost in ink. */}
-      <StampBox won={props.stage.kind === 'WON'} lost={props.stage.kind === 'LOST'}>
-        <span aria-hidden="true" className="font-mono text-[0.8125rem] tabular-nums">
-          {props.position}
-        </span>
-      </StampBox>
+      <span
+        aria-hidden="true"
+        className="w-5 shrink-0 text-right text-[0.8125rem] text-muted-foreground tabular-nums"
+      >
+        {props.position}
+      </span>
       {editing ? (
         <StageForm
           id={`stage-${props.stage.id}`}
@@ -296,9 +300,12 @@ const StageItem = (props: {
         />
       ) : (
         <>
-          <span className="flex min-w-0 flex-1 basis-36 flex-col">
-            <span data-stage-name className="font-medium break-words">
-              {props.stage.name}
+          <span className="flex min-w-0 flex-1 basis-36 flex-wrap items-center gap-x-2.5 gap-y-0.5">
+            <span data-tone={props.tone} className={PILL}>
+              <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-(--tone)" />
+              <span data-stage-name title={props.stage.name} className="truncate">
+                {props.stage.name}
+              </span>
             </span>
             {!isOpen && (
               <span className="text-[0.8125rem] text-muted-foreground">
@@ -306,7 +313,7 @@ const StageItem = (props: {
               </span>
             )}
           </span>
-          <span className="w-12 shrink-0 text-right text-muted-foreground tabular-nums">
+          <span className="w-12 shrink-0 text-right text-[0.8125rem] text-muted-foreground tabular-nums">
             {format.number(props.stage.probability / 100, { style: 'percent' })}
           </span>
           {props.canManage && (
@@ -417,7 +424,7 @@ export const StageList = (props: {
   return (
     <div className="flex flex-col">
       {props.canManage && (
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 pb-3 sm:px-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 pb-3">
           <p className="text-sm text-muted-foreground">{t('reorder_hint')}</p>
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
             <output
@@ -488,13 +495,14 @@ export const StageList = (props: {
           items={open.map((stage) => stage.id)}
           strategy={verticalListSortingStrategy}
         >
-          <ol aria-label={t('label')}>
+          <ol aria-label={t('label')} className="border-t border-rule">
             {/* The server lists the open stages first, so an open stage's index is its index
                 among them too. */}
             {stages.map((stage, index) => (
               <StageItem
                 key={stage.id}
                 stage={stage}
+                tone={stageTone(stages, stage.id)}
                 position={index + 1}
                 openCount={open.length}
                 canManage={props.canManage}
@@ -518,8 +526,8 @@ export const StageList = (props: {
         </SortableContext>
       </DndContext>
       {props.canManage && (
-        <div className="flex flex-col gap-3 border-t border-rule bg-muted/40 px-4 py-4 sm:px-5">
-          <h3 className="font-semibold">{t('add_title')}</h3>
+        <div className="flex flex-col gap-3 pt-5">
+          <h3 className="text-sm font-semibold">{t('add_title')}</h3>
           <StageForm
             id="new-stage"
             defaults={{ name: '', probability: 50 }}

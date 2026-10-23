@@ -6,7 +6,7 @@ import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { InviteDialog } from '@/components/crm/settings/InviteDialog';
 import { MembersTable } from '@/components/crm/settings/MembersTable';
 import { PendingInvitations } from '@/components/crm/settings/PendingInvitations';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { SettingsHeader, SettingsSection } from '@/components/crm/settings/SettingsHeader';
 import { getInvitations, getMembers } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import type { components } from '@/libs/api/schema';
@@ -138,17 +138,10 @@ export default async function MembersPage(props: MembersPageProps) {
         }
       />
 
-      <section
-        aria-labelledby="members-heading"
-        className="overflow-hidden rounded-lg border border-rule bg-card"
+      <SettingsSection
+        headingId="members-heading"
+        title={t('members_heading', { count: rows.length })}
       >
-        <h2
-          id="members-heading"
-          tabIndex={-1}
-          className="px-5 pt-4 pb-2 font-semibold focus-visible:-outline-offset-2"
-        >
-          {t('members_heading', { count: rows.length })}
-        </h2>
         <MembersTable
           members={rows}
           me={user.id}
@@ -161,20 +154,10 @@ export default async function MembersPage(props: MembersPageProps) {
             remove: removeMember.bind(null, workspace.id),
           }}
         />
-      </section>
+      </SettingsSection>
 
       {canManage && (
-        <section
-          aria-labelledby="invitations-heading"
-          className="overflow-hidden rounded-lg border border-rule bg-card"
-        >
-          <h2
-            id="invitations-heading"
-            tabIndex={-1}
-            className="px-5 pt-4 pb-3 font-semibold focus-visible:-outline-offset-2"
-          >
-            {t('invitations_heading')}
-          </h2>
+        <SettingsSection headingId="invitations-heading" title={t('invitations_heading')}>
           {pending ? (
             <PendingInvitations
               invitations={pending}
@@ -182,11 +165,9 @@ export default async function MembersPage(props: MembersPageProps) {
               headingId="invitations-heading"
             />
           ) : (
-            <div className="border-t border-rule p-4">
-              <ForbiddenNotice />
-            </div>
+            <ForbiddenNotice />
           )}
-        </section>
+        </SettingsSection>
       )}
     </>
   );

@@ -1,16 +1,33 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoaderCircleIcon } from 'lucide-react';
+import {
+  Building2Icon,
+  CalendarIcon,
+  ContactRoundIcon,
+  FlagIcon,
+  HandshakeIcon,
+  LoaderCircleIcon,
+  UserPlusIcon,
+  UserRoundIcon,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { createTask, updateTask } from '@/actions/crm/TaskActions';
 import { ActionAlert } from '@/components/crm/ActionAlert';
 import { DateTimeField } from '@/components/crm/fields/DateTimeField';
 import { OwnerField } from '@/components/crm/fields/OwnerField';
 import { RecordPicker } from '@/components/crm/fields/RecordPicker';
+import {
+  CHIP_ROW,
+  DateValue,
+  PersonValue,
+  PropertyChip,
+  TITLE_INPUT,
+  TitleField,
+} from '@/components/crm/record/RecordForm';
 import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import {
@@ -40,10 +57,10 @@ type Task = components['schemas']['TaskResponse'];
 
 // The links a picker sets, by the backend's field.
 const LINKS = [
-  { field: 'company', id: 'companyId', kind: 'company' },
-  { field: 'contact', id: 'contactId', kind: 'contact' },
-  { field: 'lead', id: 'leadId', kind: 'lead' },
-  { field: 'deal', id: 'dealId', kind: 'deal' },
+  { field: 'company', id: 'companyId', kind: 'company', icon: Building2Icon },
+  { field: 'contact', id: 'contactId', kind: 'contact', icon: ContactRoundIcon },
+  { field: 'lead', id: 'leadId', kind: 'lead', icon: UserPlusIcon },
+  { field: 'deal', id: 'dealId', kind: 'deal', icon: HandshakeIcon },
 ] as const;
 
 const isFormField = (field: string): field is keyof TaskFormValues =>
@@ -147,6 +164,14 @@ const TaskForm = (
     defaultValues: startingValues(props),
   });
   const { errors, isSubmitting } = form.formState;
+  // What the priority's chip shows.
+  const priority = useWatch({ control: form.control, name: 'priority' });
+  // A link's own error (the backend's refusal of the record), typed as an object's by
+  // react-hook-form.
+  const linkError = (field: (typeof LINKS)[number]['field']) => {
+    const message = errors[field]?.message;
+    return message === undefined ? undefined : { type: 'server', message };
+  };
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFailure(undefined);
@@ -195,15 +220,141 @@ const TaskForm = (
         </DialogDescription>
       </DialogHeader>
       <ActionAlert result={failure} />
-      <FormField htmlFor="task-title" label={t('title_label')} error={errors.title}>
-        <Input
-          id="task-title"
-          autoComplete="off"
-          aria-invalid={errors.title ? true : undefined}
-          aria-describedby={describedBy('task-title')}
-          {...form.register('title')}
-        />
-      </FormField>
+      <div className="flex flex-col gap-3">
+        <TitleField id="task-title" label={t('title_label')} error={errors.title}>
+          <Input
+            id="task-title"
+            autoComplete="off"
+            placeholder={t('title_label')}
+            className={TITLE_INPUT}
+            aria-invalid={errors.title ? true : undefined}
+            aria-describedby={describedBy('task-title')}
+            {...form.register('title')}
+          />
+        </TitleField>
+        <div className={CHIP_ROW}>
+          <Controller
+            control={form.control}
+            name="assigneeId"
+            render={(controller) => (
+              <PropertyChip
+                id="task-assignee-chip"
+                label={t('assignee_label')}
+                icon={UserRoundIcon}
+                value={
+                  <PersonValue
+                    members={props.members}
+                    me={props.me}
+                    userId={controller.field.value}
+                  />
+                }
+                error={errors.assigneeId}
+              >
+                <OwnerField
+                  id="task-assignee"
+                  label={t('assignee_label')}
+                  value={controller.field.value}
+                  onChange={(value) => {
+                    controller.field.onChange(value);
+                  }}
+                  members={props.members}
+                  me={props.me}
+                  canAssign={props.canAssign}
+                  allowUnassigned={props.task !== undefined}
+                  error={errors.assigneeId}
+                />
+              </PropertyChip>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="dueAt"
+            render={(controller) => (
+              <PropertyChip
+                id="task-due-chip"
+                label={t('due_label')}
+                icon={CalendarIcon}
+                value={
+                  controller.field.value ? <DateValue value={controller.field.value} /> : undefined
+                }
+                error={errors.dueAt}
+              >
+                <DateTimeField
+                  id="task-due"
+                  label={t('due_label')}
+                  value={controller.field.value}
+                  onChange={(value) => {
+                    controller.field.onChange(value);
+                  }}
+                  timeZone={props.timeZone}
+                  clearable
+                  error={errors.dueAt}
+                />
+              </PropertyChip>
+            )}
+          />
+          <PropertyChip
+            id="task-priority-chip"
+            label={t('priority_label')}
+            icon={FlagIcon}
+            value={<span className="truncate">{tRow(`priority_${priority}`)}</span>}
+            error={errors.priority}
+          >
+            <FormField htmlFor="task-priority" label={t('priority_label')} error={errors.priority}>
+              <NativeSelect
+                id="task-priority"
+                defaultValue={priority}
+                aria-invalid={errors.priority ? true : undefined}
+                aria-describedby={describedBy('task-priority')}
+                {...form.register('priority')}
+              >
+                {TASK_PRIORITIES.map((item) => (
+                  <NativeSelectOption key={item} value={item}>
+                    {tRow(`priority_${item}`)}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
+            </FormField>
+          </PropertyChip>
+          {/* Added from a record, the task is on it; from the Tasks page, on what is picked. */}
+          {!props.link &&
+            LINKS.map((link) => (
+              <Controller
+                key={link.field}
+                control={form.control}
+                name={link.field}
+                render={(controller) => (
+                  <PropertyChip
+                    id={`task-${link.field}-chip`}
+                    label={t(`${link.field}_label`)}
+                    icon={link.icon}
+                    value={
+                      controller.field.value ? (
+                        <span className="truncate">{controller.field.value.label}</span>
+                      ) : undefined
+                    }
+                    error={linkError(link.field)}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor={`task-${link.field}`}>{t(`${link.field}_label`)}</Label>
+                      <RecordPicker
+                        id={`task-${link.field}`}
+                        workspaceId={props.workspaceId}
+                        kind={link.kind}
+                        value={controller.field.value}
+                        onChange={(value) => {
+                          controller.field.onChange(value);
+                        }}
+                        invalid={errors[link.field] !== undefined}
+                      />
+                    </div>
+                  </PropertyChip>
+                )}
+              />
+            ))}
+        </div>
+        {!props.link && <p className="text-[0.8125rem] text-muted-foreground">{t('links_hint')}</p>}
+      </div>
       <FormField
         htmlFor="task-description"
         label={t('description_label')}
@@ -216,86 +367,6 @@ const TaskForm = (
           {...form.register('description')}
         />
       </FormField>
-      <Controller
-        control={form.control}
-        name="dueAt"
-        render={(controller) => (
-          <DateTimeField
-            id="task-due"
-            label={t('due_label')}
-            value={controller.field.value}
-            onChange={(value) => {
-              controller.field.onChange(value);
-            }}
-            timeZone={props.timeZone}
-            clearable
-            error={errors.dueAt}
-          />
-        )}
-      />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <FormField htmlFor="task-priority" label={t('priority_label')} error={errors.priority}>
-          <NativeSelect
-            id="task-priority"
-            aria-invalid={errors.priority ? true : undefined}
-            aria-describedby={describedBy('task-priority')}
-            {...form.register('priority')}
-          >
-            {TASK_PRIORITIES.map((priority) => (
-              <NativeSelectOption key={priority} value={priority}>
-                {tRow(`priority_${priority}`)}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-        </FormField>
-        <Controller
-          control={form.control}
-          name="assigneeId"
-          render={(controller) => (
-            <OwnerField
-              id="task-assignee"
-              label={t('assignee_label')}
-              value={controller.field.value}
-              onChange={(value) => {
-                controller.field.onChange(value);
-              }}
-              members={props.members}
-              me={props.me}
-              canAssign={props.canAssign}
-              allowUnassigned={props.task !== undefined}
-              error={errors.assigneeId}
-            />
-          )}
-        />
-      </div>
-      {/* Added from a record, the task is on it; from the Tasks page, on what is picked. */}
-      {!props.link && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {LINKS.map((link) => (
-            <Controller
-              key={link.field}
-              control={form.control}
-              name={link.field}
-              render={(controller) => (
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor={`task-${link.field}`}>{t(`${link.field}_label`)}</Label>
-                  <RecordPicker
-                    id={`task-${link.field}`}
-                    workspaceId={props.workspaceId}
-                    kind={link.kind}
-                    value={controller.field.value}
-                    onChange={(value) => {
-                      controller.field.onChange(value);
-                    }}
-                    invalid={errors[link.field] !== undefined}
-                  />
-                </div>
-              )}
-            />
-          ))}
-          <p className="text-[0.8125rem] text-muted-foreground sm:col-span-2">{t('links_hint')}</p>
-        </div>
-      )}
       <DialogFooter>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}

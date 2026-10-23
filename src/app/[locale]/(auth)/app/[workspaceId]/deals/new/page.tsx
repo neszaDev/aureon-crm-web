@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { createDeal } from '@/actions/crm/DealActions';
 import { currencyOptions } from '@/components/crm/CreateWorkspaceForm';
 import { DealForm } from '@/components/crm/deal/DealForm';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { RecordFormPage } from '@/components/crm/record/RecordLayout';
 import { getDealPrefill, getLeadSources, getMembers, getStages } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
@@ -67,44 +67,43 @@ export default async function NewDealPage(props: NewDealPageProps) {
     : contact && `/app/${workspace.id}/contacts/${contact.id}`;
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title')} description={t('description')} />
-      <section
-        aria-label={t('title')}
-        className="max-w-3xl rounded-lg border border-rule bg-card p-5 sm:p-6"
-      >
-        <DealForm
-          action={createDeal.bind(null, workspace.id)}
-          // A new deal is the caller's unless they give it to someone else, in the first open
-          // stage unless another is chosen (or the list's group named them).
-          defaults={{
-            name: '',
-            amount: '',
-            currency: '',
-            stageId: preset.stageId,
-            probability: '',
-            expectedCloseDate: '',
-            ownerId: preset.ownerId,
-            companyId: company?.id ?? null,
-            contactId: contact?.id ?? null,
-            sourceId: null,
-            notes: '',
-          }}
-          workspaceId={workspace.id}
-          company={company}
-          contact={contact}
-          members={members.members}
-          me={user.id}
-          canAssign={canAssign(workspace)}
-          sources={sources.sources}
-          stages={open}
-          defaultCurrency={workspace.defaultCurrency}
-          currencies={currencyOptions(locale)}
-          timeZone={workspace.timezone}
-          cancelHref={origin ?? path}
-          submitLabel={t('submit')}
-        />
-      </section>
-    </div>
+    <RecordFormPage
+      title={t('title')}
+      headingId="deal-heading"
+      description={t('description')}
+      label={t('title')}
+    >
+      <DealForm
+        action={createDeal.bind(null, workspace.id)}
+        // A new deal is the caller's unless they give it to someone else, in the first open
+        // stage unless another is chosen (or the list's group named them).
+        defaults={{
+          name: '',
+          amount: '',
+          currency: '',
+          stageId: preset.stageId,
+          probability: '',
+          expectedCloseDate: '',
+          ownerId: preset.ownerId,
+          companyId: company?.id ?? null,
+          contactId: contact?.id ?? null,
+          sourceId: null,
+          notes: '',
+        }}
+        workspaceId={workspace.id}
+        company={company}
+        contact={contact}
+        members={members.members}
+        me={user.id}
+        canAssign={canAssign(workspace)}
+        sources={sources.sources}
+        stages={open}
+        defaultCurrency={workspace.defaultCurrency}
+        currencies={currencyOptions(locale)}
+        timeZone={workspace.timezone}
+        cancelHref={origin ?? path}
+        submitLabel={t('submit')}
+      />
+    </RecordFormPage>
   );
 }

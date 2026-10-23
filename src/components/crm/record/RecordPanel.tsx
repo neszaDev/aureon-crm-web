@@ -2,17 +2,18 @@
 
 import { Maximize2Icon, XIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { createContext, useEffect, useRef, useState } from 'react';
 import { ShellTip } from '@/components/crm/shell/ShellTip';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { leaveEscapeToForm } from '@/utils/Focus';
 
-// A record's URL (any locale prefix): its list, and the kind of record, which names its heading.
-const RECORD_PATH = /^(.*\/(companies|contacts|leads|deals|tasks))\/\d+$/u;
-// A new record's form, which the panel's routes take for a record (`(.)deals/[id]` with `new`).
-const NEW_FORM = /\/(?:companies|contacts|leads|deals|tasks)\/new$/u;
+// A record's URL, or a new record's form (any locale prefix): its list, and the kind of record,
+// which names its heading.
+const RECORD_PATH = /^(.*\/(companies|contacts|leads|deals|tasks))\/(?:\d+|new)$/u;
+// A new record's form as a full page (loaded at its address), which a record must not open over.
+const NEW_FORM = /\/(?:companies|contacts|leads|deals)\/new$/u;
 const KINDS = {
   companies: 'company',
   contacts: 'contact',
@@ -22,13 +23,30 @@ const KINDS = {
 } as const;
 
 /**
+ * What takes the focus in a record panel: a new record's first field, else the record's name.
+ * @param node The panel.
+ * @param kind The kind of record, which names its heading.
+ * @returns The element, once drawn.
+ */
+const focusTarget = (node: Element, kind: string) =>
+  node.querySelector<HTMLElement>('[data-autofocus]') ??
+  node.querySelector<HTMLElement>(`#${kind}-heading`);
+
+/**
+ * Whether the component is in a record panel: a form there (a new record's) cancels by closing it
+ * (`SheetClose`, as its × does) rather than leave for another page.
+ */
+export const InRecordPanel = createContext(false);
+
+/**
  * A record opened from inside the app, in a wide panel over the page it was opened from (an
  * intercepted route: a full load of its URL renders its full page instead). It is named by the
  * record's heading and its kind. ×, Escape (unless a form in it takes the key) and a click on the
  * backdrop close it: back to the page behind, whose link to the record takes the focus again (found anew
  * when a refresh redrew it; the page itself without one, after a search); with nothing to go
  * back to, to the record's list. Its other link opens the full page. A write in it refreshes the
- * page behind too (the action's refresh renders both).
+ * page behind too (the action's refresh renders both). A new record's form opens in it the same
+ * way (`(.)<kind>/new`), its first field focused, and once saved it shows the new record.
  * @param props Component props.
  * @param props.children The record's page.
  * @returns The panel.
@@ -37,31 +55,35 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
   const t = useTranslations('RecordPanel');
   const router = useRouter();
   const pathname = usePathname();
+  const search = useSearchParams().toString();
   // What had the focus as it opened: the row's link, or the search that opened it.
   const opener = useRef<Element>(null);
   const [closing, setClosing] = useState(false);
   const [shown, setShown] = useState(pathname);
-  // Opened from its own edit page (its Cancel, the location's link): that page would stay behind
-  // the panel. The address bar still names the page behind while the panel first renders.
-  const [fromEdit, setFromEdit] = useState(
-    () => typeof window !== 'undefined' && window.location.pathname === `${pathname}/edit`,
+  // Opened from its own edit page (its Cancel, the location's link), or from a new record's form
+  // loaded as its page: that page would stay behind the panel. The address bar still names the
+  // page behind while the panel first renders.
+  const [fromForm, setFromForm] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      (window.location.pathname === `${pathname}/edit` || NEW_FORM.test(window.location.pathname)),
   );
   // Another record opened from this one is open again, even after a close that went back to it.
   if (pathname !== shown && RECORD_PATH.test(pathname)) {
     setShown(pathname);
     setClosing(false);
-    setFromEdit(false);
+    setFromForm(false);
   }
   const [, list = '/app', section = ''] = RECORD_PATH.exec(shown) ?? [];
   const kind = Object.entries(KINDS).find(([key]) => key === section)?.[1] ?? 'company';
-  // That record, and a new record's form, load as the full page they are, which only a full load
-  // gives (a soft navigation to them is intercepted again).
-  const fullPage = fromEdit || NEW_FORM.test(pathname);
+  const creating = shown.endsWith('/new');
+  // That record loads as the full page it is, which only a full load gives (a soft navigation to
+  // it is intercepted again).
   useEffect(() => {
-    if (fullPage) {
+    if (fromForm) {
       window.location.replace(window.location.href);
     }
-  }, [fullPage]);
+  }, [fromForm]);
   // The panel's node, once its portal has drawn it.
   const [node, setNode] = useState<HTMLDivElement | null>(null);
   // A record's name takes the focus once it is drawn whenever the focus was lost meanwhile: the
@@ -71,7 +93,7 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
     const take = () => {
       const lost = document.activeElement === document.body || document.activeElement === node;
       if (node && lost) {
-        node.querySelector<HTMLElement>(`#${kind}-heading`)?.focus();
+        focusTarget(node, kind)?.focus();
       }
     };
     const observer = new MutationObserver(take);
@@ -104,7 +126,7 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
     }
   };
 
-  if (fullPage) {
+  if (fromForm) {
     return null;
   }
 
@@ -122,17 +144,18 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
         side="right"
         showCloseButton={false}
         closeLabel={t('close')}
-        // Its record's name, then what kind of record it is (alone when there is no record).
-        aria-labelledby={`${kind}-heading record-panel-kind`}
+        // Its record's name, then what kind of record it is (alone when there is no record); a new
+        // record's form by its title ("New deal").
+        aria-labelledby={creating ? `${kind}-heading` : `${kind}-heading record-panel-kind`}
         aria-describedby={undefined}
-        // The record's name takes the focus (the panel itself while it loads): a first button would
-        // open its tooltip.
+        // The record's name, or a new record's first field, takes the focus (the panel itself while
+        // it loads): a first button would open its tooltip.
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           opener.current = document.activeElement;
           const target = event.currentTarget;
           if (target instanceof HTMLElement) {
-            (target.querySelector<HTMLElement>(`#${kind}-heading`) ?? target).focus();
+            (focusTarget(target, kind) ?? target).focus();
           }
         }}
         // What takes Escape itself (`onEscape`: the activity composer closes on it) has it first;
@@ -168,7 +191,7 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
           <ShellTip label={t('full_page')} side="bottom">
             <Button asChild variant="ghost" size="icon-sm">
               {/* A full load: a soft one would open this panel again. */}
-              <a href={shown} aria-label={t('full_page')}>
+              <a href={search ? `${shown}?${search}` : shown} aria-label={t('full_page')}>
                 <Maximize2Icon />
               </a>
             </Button>
@@ -180,7 +203,7 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
           </ShellTip>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-5 pb-12 sm:px-7">
-          {props.children}
+          <InRecordPanel value>{props.children}</InRecordPanel>
         </div>
       </SheetContent>
     </Sheet>

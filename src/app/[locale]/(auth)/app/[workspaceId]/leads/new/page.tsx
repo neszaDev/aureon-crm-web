@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { createLead } from '@/actions/crm/LeadActions';
 import { currencyOptions } from '@/components/crm/CreateWorkspaceForm';
 import { LeadForm } from '@/components/crm/lead/LeadForm';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { RecordFormPage } from '@/components/crm/record/RecordLayout';
 import { getLeadSources, getMembers } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
@@ -43,41 +43,40 @@ export default async function NewLeadPage(props: NewLeadPageProps) {
   const path = `/app/${workspace.id}/leads`;
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title')} description={t('description')} />
-      <section
-        aria-label={t('title')}
-        className="max-w-3xl rounded-lg border border-rule bg-card p-5 sm:p-6"
-      >
-        <LeadForm
-          action={createLead.bind(null, workspace.id)}
-          // A new lead is the caller's unless they give it to someone else.
-          defaults={{
-            firstName: '',
-            lastName: '',
-            companyName: '',
-            email: '',
-            phone: '',
-            jobTitle: '',
-            sourceId: null,
-            ownerId: user.id,
-            priority: 'MEDIUM',
-            followUpDate: '',
-            estimatedValue: '',
-            currency: '',
-            notes: '',
-          }}
-          members={members.members}
-          me={user.id}
-          canAssign={canAssign(workspace)}
-          sources={sources.sources}
-          defaultCurrency={workspace.defaultCurrency}
-          currencies={currencyOptions(locale)}
-          timeZone={workspace.timezone}
-          cancelHref={path}
-          submitLabel={t('submit')}
-        />
-      </section>
-    </div>
+    <RecordFormPage
+      title={t('title')}
+      headingId="lead-heading"
+      description={t('description')}
+      label={t('title')}
+    >
+      <LeadForm
+        action={createLead.bind(null, workspace.id)}
+        // A new lead is the caller's unless they give it to someone else.
+        defaults={{
+          firstName: '',
+          lastName: '',
+          companyName: '',
+          email: '',
+          phone: '',
+          jobTitle: '',
+          sourceId: null,
+          ownerId: user.id,
+          priority: 'MEDIUM',
+          followUpDate: '',
+          estimatedValue: '',
+          currency: '',
+          notes: '',
+        }}
+        members={members.members}
+        me={user.id}
+        canAssign={canAssign(workspace)}
+        sources={sources.sources}
+        defaultCurrency={workspace.defaultCurrency}
+        currencies={currencyOptions(locale)}
+        timeZone={workspace.timezone}
+        cancelHref={path}
+        submitLabel={t('submit')}
+      />
+    </RecordFormPage>
   );
 }

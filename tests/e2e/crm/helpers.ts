@@ -359,6 +359,8 @@ export const createContact = async (
     await page.getByLabel('Email', { exact: true }).fill(values.email);
   }
   if (values.company) {
+    // A property chip under the name, which opens its picker.
+    await page.getByRole('button', { name: 'Company', exact: true }).click();
     await page.getByRole('combobox', { name: 'Company' }).click();
     await page.getByRole('option', { name: values.company }).click();
   }
@@ -394,6 +396,7 @@ export const createLead = async (
     await page.getByLabel('Company', { exact: true }).fill(values.companyName);
   }
   if (values.estimatedValue) {
+    await page.getByRole('button', { name: 'Estimated value', exact: true }).click();
     await page.getByLabel('Estimated value').fill(values.estimatedValue);
   }
   await page.getByRole('button', { name: 'Create lead' }).click();

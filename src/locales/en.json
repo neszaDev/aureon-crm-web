@@ -631,7 +631,8 @@
     "title": "Workspace",
     "description": "The name your team sees, the currency new deals start in, and the time zone for due dates and reminders.",
     "save": "Save changes",
-    "read_only": "Only owners and admins can change these settings."
+    "read_only": "Only owners and admins can change these settings.",
+    "details_heading": "General"
   },
   "MembersPage": {
     "title": "Members",
@@ -946,6 +947,9 @@
     "kind_lead": "Lead",
     "kind_deal": "Deal",
     "kind_task": "Task"
+  },
+  "RecordForm": {
+    "details": "Details"
   },
   "RecordActions": {
     "archive": "Archive",

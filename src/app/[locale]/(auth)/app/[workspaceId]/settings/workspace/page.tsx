@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { updateWorkspace } from '@/actions/crm/WorkspaceActions';
 import { currencyOptions } from '@/components/crm/CreateWorkspaceForm';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { SettingsHeader, SettingsSection } from '@/components/crm/settings/SettingsHeader';
 import { WorkspaceForm } from '@/components/crm/WorkspaceForm';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
@@ -43,41 +43,40 @@ export default async function WorkspaceSettingsPage(props: WorkspaceSettingsPage
   return (
     <>
       <SettingsHeader title={t('title')} description={t('description')} />
-      <section
-        aria-label={t('title')}
-        className="max-w-2xl rounded-lg border border-rule bg-card p-5 sm:p-6"
-      >
-        {can(workspace, 'WORKSPACE_MANAGE') ? (
-          <WorkspaceForm
-            action={updateWorkspace.bind(null, workspace.id, workspace.version)}
-            currencies={currencyOptions(locale)}
-            timeZones={TIME_ZONES}
-            defaults={values}
-            submitLabel={t('save')}
-          />
-        ) : (
-          <div className="flex flex-col gap-4">
-            <dl className="flex flex-col gap-4">
-              {[
-                { label: tForm('name_label'), value: values.name },
-                {
-                  label: tForm('currency_label'),
-                  value: `${values.defaultCurrency} · ${currencyName ?? values.defaultCurrency}`,
-                },
-                { label: tForm('timezone_label'), value: values.timezone.replaceAll('_', ' ') },
-              ].map((fact) => (
-                <div key={fact.label} className="grid gap-0.5 sm:grid-cols-[10rem_minmax(0,1fr)]">
-                  <dt className="text-[0.8125rem] text-muted-foreground sm:pt-0.5">{fact.label}</dt>
-                  <dd className="font-semibold break-words">{fact.value}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="border-t border-rule pt-4 text-sm text-muted-foreground">
-              {t('read_only')}
-            </p>
-          </div>
-        )}
-      </section>
+      <SettingsSection headingId="workspace-heading" title={t('details_heading')}>
+        <div className="max-w-2xl">
+          {can(workspace, 'WORKSPACE_MANAGE') ? (
+            <WorkspaceForm
+              action={updateWorkspace.bind(null, workspace.id, workspace.version)}
+              currencies={currencyOptions(locale)}
+              timeZones={TIME_ZONES}
+              defaults={values}
+              submitLabel={t('save')}
+            />
+          ) : (
+            <div className="flex flex-col gap-4">
+              <dl className="flex flex-col gap-4">
+                {[
+                  { label: tForm('name_label'), value: values.name },
+                  {
+                    label: tForm('currency_label'),
+                    value: `${values.defaultCurrency} · ${currencyName ?? values.defaultCurrency}`,
+                  },
+                  { label: tForm('timezone_label'), value: values.timezone.replaceAll('_', ' ') },
+                ].map((fact) => (
+                  <div key={fact.label} className="grid gap-0.5 sm:grid-cols-[10rem_minmax(0,1fr)]">
+                    <dt className="text-[0.8125rem] text-muted-foreground sm:pt-0.5">
+                      {fact.label}
+                    </dt>
+                    <dd className="font-semibold break-words">{fact.value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="text-sm text-muted-foreground">{t('read_only')}</p>
+            </div>
+          )}
+        </div>
+      </SettingsSection>
     </>
   );
 }

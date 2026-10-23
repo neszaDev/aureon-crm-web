@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { findContactDuplicates, updateContact } from '@/actions/crm/ContactActions';
 import { ContactForm } from '@/components/crm/contact/ContactForm';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
-import { RecordEditPage } from '@/components/crm/record/RecordLayout';
+import { RecordFormPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import {
   getContact,
@@ -101,7 +101,7 @@ export default async function EditContactPage(props: EditContactPageProps) {
   }
 
   return (
-    <RecordEditPage
+    <RecordFormPage
       number={recordNumber('contact', contact.id)}
       title={t('title', { name: contact.fullName })}
       description={t('description')}
@@ -123,6 +123,6 @@ export default async function EditContactPage(props: EditContactPageProps) {
         cancelHref={`${path}/${contact.id}`}
         submitLabel={t('submit')}
       />
-    </RecordEditPage>
+    </RecordFormPage>
   );
 }

@@ -141,12 +141,13 @@ test.describe('Export and the audit trail', () => {
     await expect(trail).toContainText(`${PEOPLE.otherManager} created Noa Park`);
     await expectNoA11yViolations(page);
 
-    await page.getByRole('combobox', { name: 'Record type' }).click();
+    // The toolbar's chips.
+    await page.getByRole('button', { name: 'Record type', exact: true }).click();
     await page.getByRole('option', { name: 'Companies' }).click();
     await expect(page).toHaveURL(/\?entityType=COMPANY$/u);
     await expect(page.getByRole('heading', { name: '2 events' })).toBeVisible();
 
-    await page.getByRole('combobox', { name: 'Done by' }).click();
+    await page.getByRole('button', { name: 'Done by', exact: true }).click();
     await page.getByRole('option', { name: PEOPLE.otherManager }).click();
     await expect(page).toHaveURL(
       new RegExp(`\\?entityType=COMPANY&actorId=${manager.userId}$`, 'u'),
@@ -160,7 +161,7 @@ test.describe('Export and the audit trail', () => {
       'GET',
       `/workspaces/${owner.workspaceId}/audit-events?actorId=${manager.userId}`,
     );
-    await page.getByRole('combobox', { name: 'Record type' }).click();
+    await page.getByRole('button', { name: 'Record type: Companies' }).click();
     await page.getByRole('option', { name: 'Any type' }).click();
     await expect(page).toHaveURL(new RegExp(`\\?actorId=${manager.userId}$`, 'u'));
     await expect(

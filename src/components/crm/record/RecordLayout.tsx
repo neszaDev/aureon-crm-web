@@ -17,27 +17,39 @@ export const RecordPage = (props: { header: React.ReactNode; children: React.Rea
 );
 
 /**
- * A record's edit page, in its record's frame: its number and "Edit …" over a hairline, what the
- * page is for, then the form, on the page's own ground.
+ * A record's form page, a new record's or an edit (in its record's frame): its number when it has
+ * one, its title on a small scale (the form's large name input leads) and what the page is for
+ * over a hairline, then the form, on the page's own ground. The same in the record panel (a new record opened from inside the workspace) and on its
+ * full page.
  * @param props Component props.
- * @param props.number The record number, such as `C-0042`.
+ * @param props.number The record number, such as `C-0042`, when it is saved.
  * @param props.title The page's title, its `h1`.
+ * @param props.headingId The title's id: a new record's `<kind>-heading` names the record panel.
  * @param props.description What the page is for.
- * @param props.label The form's region name: the record's name.
+ * @param props.label The form's region name: the record's name, or the page's title.
  * @param props.children The form.
  * @returns The page.
  */
-export const RecordEditPage = (props: {
-  number: string;
+export const RecordFormPage = (props: {
+  number?: string;
   title: string;
+  headingId?: string;
   description: string;
   label: string;
   children: React.ReactNode;
 }) => (
   <div className="mx-auto flex max-w-3xl flex-col gap-6">
-    <header className="flex flex-col gap-1 border-b border-rule pb-5">
-      <p className="font-mono text-[0.75rem] text-muted-foreground tabular-nums">{props.number}</p>
-      <h1 className="text-[1.5rem] leading-tight font-semibold tracking-[-0.01em] break-words">
+    <header className="flex flex-col gap-0.5 border-b border-rule pb-4">
+      {props.number && (
+        <p className="font-mono text-[0.75rem] text-muted-foreground tabular-nums">
+          {props.number}
+        </p>
+      )}
+      <h1
+        id={props.headingId}
+        tabIndex={props.headingId ? -1 : undefined}
+        className="rounded-sm text-base leading-6 font-semibold break-words"
+      >
         {props.title}
       </h1>
       <p className="max-w-[65ch] text-[0.8125rem] text-muted-foreground">{props.description}</p>

@@ -13,15 +13,19 @@ const isValidationKey = (value: string): value is ValidationKey => value in mess
  * @param props Component props.
  * @param props.error The react-hook-form error for the field, if any.
  * @param props.id Id for `aria-describedby` on the field.
+ * @param props.label The field's name, written first: for an error shown away from its field (a
+ *   record form's property chip).
  * @returns The error message, or nothing when the field is valid.
  */
-export const FieldError = (props: { error?: HookFormFieldError; id?: string }) => {
+export const FieldError = (props: { error?: HookFormFieldError; id?: string; label?: string }) => {
   const t = useTranslations('Validation');
+  const tChip = useTranslations('ListToolbar');
   const message = props.error?.message;
 
   if (!message) {
     return null;
   }
+  const text = isValidationKey(message) ? t(message) : message;
 
   return (
     <p
@@ -30,7 +34,13 @@ export const FieldError = (props: { error?: HookFormFieldError; id?: string }) =
       role="alert"
     >
       <CircleAlertIcon aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
-      {isValidationKey(message) ? t(message) : message}
+      {props.label ? (
+        <span>
+          <span className="font-semibold">{tChip('chip_on', { label: props.label })}</span> {text}
+        </span>
+      ) : (
+        text
+      )}
     </p>
   );
 };

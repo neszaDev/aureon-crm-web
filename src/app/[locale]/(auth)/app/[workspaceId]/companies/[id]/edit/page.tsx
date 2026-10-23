@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { findCompanyDuplicates, updateCompany } from '@/actions/crm/CompanyActions';
 import { CompanyForm } from '@/components/crm/company/CompanyForm';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
-import { RecordEditPage } from '@/components/crm/record/RecordLayout';
+import { RecordFormPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { getCompany, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
@@ -91,7 +91,7 @@ export default async function EditCompanyPage(props: EditCompanyPageProps) {
   }
 
   return (
-    <RecordEditPage
+    <RecordFormPage
       number={recordNumber('company', company.id)}
       title={t('title', { name: company.name })}
       description={t('description')}
@@ -109,6 +109,6 @@ export default async function EditCompanyPage(props: EditCompanyPageProps) {
         cancelHref={`${path}/${company.id}`}
         submitLabel={t('submit')}
       />
-    </RecordEditPage>
+    </RecordFormPage>
   );
 }

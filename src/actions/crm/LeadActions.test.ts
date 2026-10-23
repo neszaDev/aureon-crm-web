@@ -64,7 +64,8 @@ describe(createLead, () => {
         lastName: undefined,
       },
     });
-    expect(redirect).toHaveBeenCalledWith({ href: '/app/1/leads/5', locale: 'en' });
+    // In place of the form: Back skips it.
+    expect(redirect).toHaveBeenCalledWith({ href: '/app/1/leads/5', locale: 'en' }, 'replace');
   });
 
   it('sends the value with its currency, and neither when there is no value', async () => {

@@ -88,6 +88,7 @@ describe(TaskDialog, () => {
     vi.mocked(RecordSearchActions.searchRecords).mockResolvedValue([{ id: 8, label: 'Globex' }]);
     await openDialog(TASK);
 
+    await page.getByRole('button', { name: 'Company: Acme' }).click();
     await page.getByRole('combobox', { name: 'Company' }).click();
     await userEvent.keyboard('glo');
     await page.getByRole('option', { name: /Globex/u }).click();
@@ -107,6 +108,9 @@ describe(TaskDialog, () => {
 
     await save();
 
+    const chip = page.getByRole('button', { name: 'Contact: Pat Buyer' });
+    await expect.element(chip).toHaveAccessibleDescription('Contact: is not in this workspace');
+    await chip.click();
     await expect
       .element(page.getByRole('combobox', { name: 'Contact' }))
       .toHaveAttribute('aria-invalid', 'true');

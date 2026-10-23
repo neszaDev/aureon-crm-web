@@ -473,7 +473,9 @@ test.describe('Pipeline', () => {
     // The section's add row opens the form in that stage.
     await page.getByRole('link', { name: 'Add deal in Proposal' }).click();
     await expect(page).toHaveURL(/\/deals\/new\?stageId=\d+$/u);
-    await expect(page.getByLabel('Stage')).toHaveValue(
+    const form = page.getByRole('dialog', { name: 'New deal' });
+    await form.getByRole('button', { name: 'Stage: Proposal' }).click();
+    await expect(page.getByLabel('Stage', { exact: true })).toHaveValue(
       String(stages.find((item) => item.name === 'Proposal')?.id),
     );
   });

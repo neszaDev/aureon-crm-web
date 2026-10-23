@@ -169,7 +169,9 @@ test.describe('Records', () => {
     const dialog = page.getByRole('dialog', { name: 'New task' });
     await expect(dialog.getByText(`On ${DEALS.tablets}.`)).toBeVisible();
     await dialog.getByLabel('Title').fill('Send proposal');
-    await dialog.getByRole('button', { name: 'Due Pick a date' }).click();
+    // The Due chip opens its field.
+    await dialog.getByRole('button', { name: 'Due', exact: true }).click();
+    await page.getByRole('button', { name: 'Due Pick a date' }).click();
     const calendar = page.getByRole('dialog', { name: 'Due' });
     if (inParis({ day: 'numeric' }) === '1') {
       await calendar.getByRole('button', { name: /next month/iu }).click();
@@ -744,10 +746,12 @@ test.describe('Records', () => {
     await expect(page).toHaveURL(
       `${owner.path}/contacts/new?companyId=${brightwater.id}&ownerId=${mia.userId}`,
     );
-    await expect(page.getByRole('combobox', { name: 'Company' })).toHaveText(
-      COMPANIES.brightwater.name,
-    );
-    await expect(page.getByRole('combobox', { name: 'Owner' })).toContainText(PEOPLE.manager);
+    // The form opens in the panel over the list, its chips filled in.
+    const form = page.getByRole('dialog', { name: 'New contact' });
+    await expect(
+      form.getByRole('button', { name: `Company: ${COMPANIES.brightwater.name}` }),
+    ).toBeVisible();
+    await expect(form.getByRole('button', { name: `Owner: ${PEOPLE.manager}` })).toBeVisible();
   });
 
   test.describe('on a phone', () => {

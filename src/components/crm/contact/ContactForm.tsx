@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoaderCircleIcon } from 'lucide-react';
+import { Building2Icon, SignpostIcon, UserRoundIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -12,14 +12,22 @@ import type { PickedRecord } from '@/components/crm/fields/RecordPicker';
 import { RecordPicker } from '@/components/crm/fields/RecordPicker';
 import { SourceField } from '@/components/crm/fields/SourceField';
 import { DuplicateWarning } from '@/components/crm/record/DuplicateWarning';
+import {
+  CHIP_ROW,
+  FormActions,
+  FormDetails,
+  PersonValue,
+  PropertyChip,
+  sourceValue,
+  TITLE_INPUT,
+  TitleField,
+} from '@/components/crm/record/RecordForm';
 import { describedBy, FormField } from '@/components/FormField';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
-import { Link } from '@/libs/I18nNavigation';
 import { useSettle } from '@/utils/SettleAction';
 import type { ContactDuplicateValues, ContactValues } from '@/validations/crm/ContactValidation';
 import { ContactValidation } from '@/validations/crm/ContactValidation';
@@ -30,9 +38,11 @@ const isFormField = (field: string): field is keyof ContactValues =>
   field in ContactValidation.shape;
 
 /**
- * A contact's fields, to create one or edit it. After the email or phone loses focus, contacts
- * that look the same are listed (a hint: saving stays possible). Creating redirects to the new
- * contact; editing says "Saved" until the next change.
+ * A contact's fields, to create one or edit it, in the work-OS way: their name large first, their
+ * owner, company and source as chips under it, then their details. After the email or phone
+ * loses focus, contacts that look the same are listed (a hint: saving stays possible). Creating
+ * redirects to the new contact (in a record panel, the panel shows it); editing says "Saved"
+ * until the next change.
  * @param props Component props.
  * @param props.action Saves the values (`createContact`, or `updateContact` with the version).
  * @param props.findDuplicates Finds look-alikes (`findContactDuplicates` bound to the workspace).
@@ -80,6 +90,7 @@ export const ContactForm = (props: {
     defaultValues: props.defaults,
   });
   const { errors, isSubmitting } = form.formState;
+  const creating = props.recordId === undefined;
   // The tags' own error (the 20-tag cap, a tag's length), typed as an array's by react-hook-form.
   const tagsError =
     errors.tags?.message === undefined
@@ -142,140 +153,185 @@ export const ContactForm = (props: {
     >
       <ActionAlert result={failure} />
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <FormField
-          htmlFor="contact-first-name"
-          label={t('first_name_label')}
-          error={errors.firstName}
-        >
-          <Input autoComplete="given-name" {...field('firstName', 'contact-first-name')} />
-        </FormField>
-        <FormField htmlFor="contact-last-name" label={t('last_name_label')} error={errors.lastName}>
-          <Input autoComplete="family-name" {...field('lastName', 'contact-last-name')} />
-        </FormField>
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <FormField htmlFor="contact-email" label={t('email_label')} error={errors.email}>
-          <Input type="email" autoComplete="email" {...field('email', 'contact-email')} />
-        </FormField>
-        <FormField htmlFor="contact-phone" label={t('phone_label')} error={errors.phone}>
-          <Input type="tel" autoComplete="tel" {...field('phone', 'contact-phone')} />
-        </FormField>
-      </div>
-
-      <DuplicateWarning
-        items={duplicates.map((contact) => ({
-          id: contact.id,
-          label: contact.fullName,
-          detail: contact.email ?? contact.phone,
-          href: `${props.listPath}/${contact.id}`,
-        }))}
-      />
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <FormField htmlFor="contact-job-title" label={t('job_title_label')} error={errors.jobTitle}>
-          <Input autoComplete="organization-title" {...field('jobTitle', 'contact-job-title')} />
-        </FormField>
-        <FormField htmlFor="contact-company" label={t('company_label')} error={errors.companyId}>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap gap-x-6 gap-y-1 *:basis-48">
+          <TitleField
+            id="contact-first-name"
+            label={t('first_name_label')}
+            error={errors.firstName}
+          >
+            <Input
+              autoComplete="given-name"
+              // A new contact starts with their name (in a record panel too, `data-autofocus`).
+              autoFocus={creating}
+              data-autofocus={creating ? '' : undefined}
+              placeholder={t('first_name_label')}
+              className={TITLE_INPUT}
+              {...field('firstName', 'contact-first-name')}
+            />
+          </TitleField>
+          <TitleField id="contact-last-name" label={t('last_name_label')} error={errors.lastName}>
+            <Input
+              autoComplete="family-name"
+              placeholder={t('last_name_label')}
+              className={TITLE_INPUT}
+              {...field('lastName', 'contact-last-name')}
+            />
+          </TitleField>
+        </div>
+        <div className={CHIP_ROW}>
+          <Controller
+            control={form.control}
+            name="ownerId"
+            render={(controller) => (
+              <PropertyChip
+                id="contact-owner-chip"
+                label={t('owner_label')}
+                icon={UserRoundIcon}
+                value={
+                  <PersonValue
+                    members={props.members}
+                    me={props.me}
+                    userId={controller.field.value}
+                  />
+                }
+                error={errors.ownerId}
+              >
+                <OwnerField
+                  id="contact-owner"
+                  label={t('owner_label')}
+                  value={controller.field.value}
+                  onChange={(value) => {
+                    controller.field.onChange(value);
+                    setSaved(false);
+                  }}
+                  members={props.members}
+                  me={props.me}
+                  canAssign={props.canAssign}
+                  allowUnassigned={!creating}
+                  error={errors.ownerId}
+                />
+              </PropertyChip>
+            )}
+          />
           <Controller
             control={form.control}
             name="companyId"
             render={(controller) => (
-              <RecordPicker
-                id="contact-company"
-                workspaceId={props.workspaceId}
-                kind="company"
-                value={company}
-                invalid={Boolean(errors.companyId)}
-                describedBy={errors.companyId ? describedBy('contact-company') : undefined}
-                onChange={(next) => {
-                  setCompany(next);
-                  controller.field.onChange(next?.id ?? null);
+              <PropertyChip
+                id="contact-company-chip"
+                label={t('company_label')}
+                icon={Building2Icon}
+                value={company ? <span className="truncate">{company.label}</span> : undefined}
+                error={errors.companyId}
+              >
+                <FormField
+                  htmlFor="contact-company"
+                  label={t('company_label')}
+                  error={errors.companyId}
+                >
+                  <RecordPicker
+                    id="contact-company"
+                    workspaceId={props.workspaceId}
+                    kind="company"
+                    value={company}
+                    invalid={Boolean(errors.companyId)}
+                    describedBy={errors.companyId ? describedBy('contact-company') : undefined}
+                    onChange={(next) => {
+                      setCompany(next);
+                      controller.field.onChange(next?.id ?? null);
+                      setSaved(false);
+                    }}
+                  />
+                </FormField>
+              </PropertyChip>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="sourceId"
+            render={(controller) => (
+              <PropertyChip
+                id="contact-source-chip"
+                label={t('source_label')}
+                icon={SignpostIcon}
+                value={sourceValue(props.sources, controller.field.value)}
+                error={errors.sourceId}
+              >
+                <SourceField
+                  id="contact-source"
+                  label={t('source_label')}
+                  value={controller.field.value}
+                  onChange={(value) => {
+                    controller.field.onChange(value);
+                    setSaved(false);
+                  }}
+                  sources={props.sources}
+                  error={errors.sourceId}
+                />
+              </PropertyChip>
+            )}
+          />
+        </div>
+      </div>
+
+      <FormDetails id="contact-details">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <FormField htmlFor="contact-email" label={t('email_label')} error={errors.email}>
+            <Input type="email" autoComplete="email" {...field('email', 'contact-email')} />
+          </FormField>
+          <FormField htmlFor="contact-phone" label={t('phone_label')} error={errors.phone}>
+            <Input type="tel" autoComplete="tel" {...field('phone', 'contact-phone')} />
+          </FormField>
+        </div>
+
+        <DuplicateWarning
+          items={duplicates.map((contact) => ({
+            id: contact.id,
+            label: contact.fullName,
+            detail: contact.email ?? contact.phone,
+            href: `${props.listPath}/${contact.id}`,
+          }))}
+        />
+
+        <FormField htmlFor="contact-job-title" label={t('job_title_label')} error={errors.jobTitle}>
+          <Input autoComplete="organization-title" {...field('jobTitle', 'contact-job-title')} />
+        </FormField>
+
+        <FormField htmlFor="contact-tags" label={t('tags_label')} error={tagsError}>
+          <Controller
+            control={form.control}
+            name="tags"
+            render={(controller) => (
+              <TagInput
+                id="contact-tags"
+                value={controller.field.value}
+                onChange={(tags) => {
+                  controller.field.onChange(tags);
                   setSaved(false);
+                  // A tag that is too long says so as it goes in, not at submit.
+                  void form.trigger('tags');
                 }}
+                suggestions={props.tags}
+                invalid={Boolean(tagsError)}
+                errorId={tagsError ? describedBy('contact-tags') : undefined}
               />
             )}
           />
         </FormField>
-      </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Controller
-          control={form.control}
-          name="ownerId"
-          render={(controller) => (
-            <OwnerField
-              id="contact-owner"
-              label={t('owner_label')}
-              value={controller.field.value}
-              onChange={(value) => {
-                controller.field.onChange(value);
-                setSaved(false);
-              }}
-              members={props.members}
-              me={props.me}
-              canAssign={props.canAssign}
-              allowUnassigned={props.recordId !== undefined}
-              error={errors.ownerId}
-            />
-          )}
-        />
-        <Controller
-          control={form.control}
-          name="sourceId"
-          render={(controller) => (
-            <SourceField
-              id="contact-source"
-              label={t('source_label')}
-              value={controller.field.value}
-              onChange={(value) => {
-                controller.field.onChange(value);
-                setSaved(false);
-              }}
-              sources={props.sources}
-              error={errors.sourceId}
-            />
-          )}
-        />
-      </div>
+        <FormField htmlFor="contact-notes" label={t('notes_label')} error={errors.notes}>
+          <Textarea className="min-h-28" {...field('notes', 'contact-notes')} />
+        </FormField>
+      </FormDetails>
 
-      <FormField htmlFor="contact-tags" label={t('tags_label')} error={tagsError}>
-        <Controller
-          control={form.control}
-          name="tags"
-          render={(controller) => (
-            <TagInput
-              id="contact-tags"
-              value={controller.field.value}
-              onChange={(tags) => {
-                controller.field.onChange(tags);
-                setSaved(false);
-                // A tag that is too long says so as it goes in, not at submit.
-                void form.trigger('tags');
-              }}
-              suggestions={props.tags}
-              invalid={Boolean(tagsError)}
-              errorId={tagsError ? describedBy('contact-tags') : undefined}
-            />
-          )}
-        />
-      </FormField>
-
-      <FormField htmlFor="contact-notes" label={t('notes_label')} error={errors.notes}>
-        <Textarea className="min-h-28" {...field('notes', 'contact-notes')} />
-      </FormField>
-
-      <div className="flex flex-wrap items-center gap-4">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting && <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />}
-          {props.submitLabel}
-        </Button>
-        <Button asChild variant="ghost">
-          <Link href={props.cancelHref}>{t('cancel')}</Link>
-        </Button>
-        <output className="text-sm font-medium text-success">{saved && t('saved')}</output>
-      </div>
+      <FormActions
+        submitLabel={props.submitLabel}
+        cancelLabel={t('cancel')}
+        cancelHref={props.cancelHref}
+        submitting={isSubmitting}
+        saved={saved ? t('saved') : undefined}
+      />
     </form>
   );
 };

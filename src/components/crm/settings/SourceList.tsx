@@ -150,7 +150,7 @@ const SourceItem = (props: {
   };
 
   return (
-    <li className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-rule px-4 py-2.5 sm:px-5">
+    <li className="flex min-h-9 flex-wrap items-center gap-x-3 gap-y-2 border-b border-rule px-1 py-1">
       {editing ? (
         <SourceForm
           id={`source-${props.source.id}-name`}
@@ -286,7 +286,7 @@ export const SourceList = (props: {
   return (
     <div className="flex flex-col">
       {props.sources.length > 0 ? (
-        <ul aria-label={t('label')}>
+        <ul aria-label={t('label')} className="border-t border-rule">
           {props.sources.map((source) => (
             <SourceItem
               key={source.id}
@@ -298,11 +298,11 @@ export const SourceList = (props: {
           ))}
         </ul>
       ) : (
-        <p className="border-t border-rule px-4 py-4 text-muted-foreground sm:px-5">{t('empty')}</p>
+        <p className="border-y border-rule py-3 text-sm text-muted-foreground">{t('empty')}</p>
       )}
       {props.canManage && (
-        <div className="flex flex-col gap-3 border-t border-rule bg-muted/40 px-4 py-4 sm:px-5">
-          <h3 className="font-semibold">{t('add_title')}</h3>
+        <div className="flex flex-col gap-3 pt-5">
+          <h3 className="text-sm font-semibold">{t('add_title')}</h3>
           <SourceForm
             id="new-source-name"
             defaults={{ name: '' }}

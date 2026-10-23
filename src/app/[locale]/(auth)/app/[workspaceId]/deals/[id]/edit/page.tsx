@@ -4,7 +4,7 @@ import { updateDeal } from '@/actions/crm/DealActions';
 import { currencyOptions } from '@/components/crm/CreateWorkspaceForm';
 import { DealForm } from '@/components/crm/deal/DealForm';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
-import { RecordEditPage } from '@/components/crm/record/RecordLayout';
+import { RecordFormPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { getDeal, getLeadSources, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
@@ -97,7 +97,7 @@ export default async function EditDealPage(props: EditDealPageProps) {
   }
 
   return (
-    <RecordEditPage
+    <RecordFormPage
       number={recordNumber('deal', deal.id)}
       title={t('title', { name: deal.name })}
       description={t('description')}
@@ -122,6 +122,6 @@ export default async function EditDealPage(props: EditDealPageProps) {
         cancelHref={`${path}/${deal.id}`}
         submitLabel={t('submit')}
       />
-    </RecordEditPage>
+    </RecordFormPage>
   );
 }

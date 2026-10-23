@@ -42,15 +42,15 @@ export const RolesMatrix = (props: { current?: WorkspaceRole }) => {
 
   return (
     <>
-      <ul className="sm:hidden">
+      <ul className="border-t border-rule sm:hidden">
         {MATRIX.map((row) => (
-          <li key={row.key} className="border-t border-rule px-5 py-3">
+          <li key={row.key} className="border-b border-rule px-1 py-2.5 text-sm">
             <p>{t(`row_${row.key}`)}</p>
             <p className="mt-1 text-[0.8125rem] text-muted-foreground">
               {row.roles.map((role, index) => (
                 <span key={role}>
                   {index > 0 && ' · '}
-                  <span className={cn(role === props.current && 'font-semibold text-seal-ink')}>
+                  <span className={cn(role === props.current && 'font-semibold text-violet-ink')}>
                     {tRole(`role_${role}`)}
                   </span>
                   {row.key === 'members' && role === 'ADMIN' && ` (${t('not_owners')})`}
@@ -72,7 +72,7 @@ export const RolesMatrix = (props: { current?: WorkspaceRole }) => {
                   key={role}
                   className={cn(
                     'px-3 text-center text-[0.8125rem] whitespace-normal',
-                    role === props.current && 'bg-seal-tint text-seal-ink',
+                    role === props.current && 'bg-violet-tint text-violet-ink',
                   )}
                 >
                   {tRole(`role_${role}`)}
@@ -100,11 +100,11 @@ export const RolesMatrix = (props: { current?: WorkspaceRole }) => {
                       key={role}
                       className={cn(
                         'px-3 text-center',
-                        role === props.current && 'bg-seal-tint/50',
+                        role === props.current && 'bg-violet-tint/50',
                       )}
                     >
                       {allowed ? (
-                        <CheckIcon aria-hidden="true" className="mx-auto size-4 text-seal-ink" />
+                        <CheckIcon aria-hidden="true" className="mx-auto size-4 text-violet-ink" />
                       ) : (
                         <MinusIcon
                           aria-hidden="true"

@@ -38,7 +38,7 @@ const CLOSED_ICONS = {
   unknown: Link2OffIcon,
 } satisfies Record<string, LucideIcon>;
 
-const PANEL = 'flex flex-col gap-5 rounded-lg border border-rule bg-card p-6 shadow-sheet sm:p-7';
+const PANEL = 'flex flex-col gap-5 rounded-lg border border-rule bg-card p-6 sm:p-7';
 
 /**
  * The page heading: the workspace's chop (or an icon), the title and one line under it.
@@ -65,7 +65,7 @@ const Heading = (props: {
         <WorkspaceMark name={props.workspaceName ?? ''} className="size-12 text-base" />
       )}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-balance break-words">
+        <h1 className="text-[1.5rem] leading-tight font-semibold tracking-[-0.01em] text-balance break-words">
           {props.title}
         </h1>
         <p className="text-[0.9375rem] leading-relaxed text-muted-foreground">{props.children}</p>
@@ -258,7 +258,7 @@ export const InvitationCard = (props: {
           {t('have_account')}{' '}
           <Link
             href={{ pathname: '/sign-in', query: { next: `/invite/${props.token}` } }}
-            className="font-semibold text-seal-ink underline decoration-seal-ink/40 underline-offset-4 hover:decoration-seal-ink"
+            className="font-semibold text-violet-ink underline decoration-violet-ink/40 underline-offset-4 hover:decoration-violet-ink"
           >
             {t('sign_in_link')}
           </Link>

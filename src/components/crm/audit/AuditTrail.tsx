@@ -1,23 +1,23 @@
 import { useTranslations } from 'next-intl';
 import { AuditEventItem } from '@/components/crm/audit/AuditEventItem';
-import { FilterRow } from '@/components/crm/list/FilterRow';
-import { FilterSelect } from '@/components/crm/list/FilterSelect';
+import { OptionsChip } from '@/components/crm/list/FilterChip';
 import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
 import { ListEmpty } from '@/components/crm/list/ListEmpty';
 import { ListPager } from '@/components/crm/list/ListPager';
+import { ListToolbar } from '@/components/crm/list/ListToolbar';
 import type { components } from '@/libs/api/schema';
 import type { AUDIT_LIST } from '@/libs/crm/Audit';
 import { AUDIT_ENTITY_TYPES } from '@/libs/crm/Audit';
 import type { ListQuery } from '@/libs/crm/ListQuery';
-import { isFiltered } from '@/libs/crm/ListQuery';
+import { filterCount, isFiltered } from '@/libs/crm/ListQuery';
 
 type Schemas = components['schemas'];
 
 /**
- * The workspace's audit trail (Settings → Audit): the filters, by the kind of record and by who
- * did it (a member, or "Former member" for someone who left), then a page of events, newest
- * first, each a sentence with what changed, and the pager. The filters and the paging are in the
- * URL.
+ * The workspace's audit trail (Settings → Audit): a list's toolbar with its filters as chips, by
+ * the kind of record and by who did it (a member, or "Former member" for someone who left), then
+ * a page of events under their count, newest first, each a sentence with what changed, and the
+ * pager. The filters and the paging are in the URL.
  * @param props Component props.
  * @param props.events The page of events, or undefined when the backend refused the filters.
  * @param props.workspace The workspace: its id, for the links, and its time zone.
@@ -46,7 +46,7 @@ export const AuditTrail = (props: {
       rows = (
         <>
           {/* oxlint-disable-next-line jsx-a11y/no-redundant-roles -- Safari drops the list role */}
-          <ul role="list">
+          <ul role="list" className="border-b border-rule">
             {events.content.map((event) => (
               <AuditEventItem key={event.id} event={event} workspace={props.workspace} />
             ))}
@@ -56,11 +56,8 @@ export const AuditTrail = (props: {
       );
     }
     list = (
-      <section
-        aria-labelledby="audit-heading"
-        className="overflow-hidden rounded-lg border border-rule bg-card"
-      >
-        <h2 id="audit-heading" className="px-4 pt-4 pb-3 font-semibold sm:px-5">
+      <section aria-labelledby="audit-heading" className="flex flex-col">
+        <h2 id="audit-heading" className="pb-2 text-[0.9375rem] font-semibold">
           {t('heading', { count: events.totalElements })}
         </h2>
         {rows}
@@ -70,9 +67,8 @@ export const AuditTrail = (props: {
 
   return (
     <>
-      <FilterRow label={t('toolbar_label')}>
-        <FilterSelect
-          id="audit-entity"
+      <ListToolbar label={t('toolbar_label')} search={null} filters={filterCount(props.query)}>
+        <OptionsChip
           label={t('entity_label')}
           anyLabel={t('entity_any')}
           // Every valid type is an option: the URL can't hold one this misses.
@@ -85,8 +81,7 @@ export const AuditTrail = (props: {
           path={props.path}
           query={props.query}
         />
-        <FilterSelect
-          id="audit-actor"
+        <OptionsChip
           label={t('actor_label')}
           anyLabel={t('actor_any')}
           missingLabel={t('actor_former')}
@@ -99,7 +94,7 @@ export const AuditTrail = (props: {
           path={props.path}
           query={props.query}
         />
-      </FilterRow>
+      </ListToolbar>
       {list}
     </>
   );

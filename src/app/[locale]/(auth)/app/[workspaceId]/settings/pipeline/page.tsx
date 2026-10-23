@@ -7,7 +7,7 @@ import {
   updateStage,
 } from '@/actions/crm/PipelineActions';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { SettingsHeader, SettingsSection } from '@/components/crm/settings/SettingsHeader';
 import { StageList } from '@/components/crm/settings/StageList';
 import { getStages } from '@/libs/api/CrmQueries';
 import { endRejectedSession } from '@/libs/api/Session';
@@ -52,20 +52,11 @@ export default async function PipelinePage(props: PipelinePageProps) {
   return (
     <>
       <SettingsHeader title={t('title')} description={t('description')} />
-      <section
-        aria-labelledby="stages-heading"
-        className="overflow-hidden rounded-lg border border-rule bg-card"
+      <SettingsSection
+        headingId="stages-heading"
+        title={t('stages_heading')}
+        description={canManage ? undefined : t('read_only')}
       >
-        <h2
-          id="stages-heading"
-          tabIndex={-1}
-          className="px-4 pt-4 pb-2 font-semibold focus-visible:-outline-offset-2 sm:px-5"
-        >
-          {t('stages_heading')}
-        </h2>
-        {!canManage && (
-          <p className="px-4 pb-3 text-sm text-muted-foreground sm:px-5">{t('read_only')}</p>
-        )}
         <StageList
           stages={toStages(stages.stages)}
           canManage={canManage}
@@ -77,7 +68,7 @@ export default async function PipelinePage(props: PipelinePageProps) {
             remove: deleteStage.bind(null, workspace.id),
           }}
         />
-      </section>
+      </SettingsSection>
     </>
   );
 }

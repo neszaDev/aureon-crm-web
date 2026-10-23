@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
-import { COMPANIES, CONTACTS, MORE_LEADS, PEOPLE } from '../mockData';
+import { COMPANIES, CONTACTS, DEALS, MORE_LEADS, PEOPLE } from '../mockData';
 import { expectNoA11yViolations, seed, seedWorkspace, waitForHydration } from './helpers';
 
 const AMARA = `${MORE_LEADS[0]?.firstName} ${MORE_LEADS[0]?.lastName}`;
@@ -210,6 +210,83 @@ test.describe('Record panel', () => {
     ).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.locator('form')).toHaveCount(0);
+  });
+
+  test('creates a deal in the panel, its chip saying what is wrong first, then shows it there', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+
+    await page.goto(`${owner.path}/deals`);
+    const add = page.getByRole('main').getByRole('link', { name: 'Add deal', exact: true }).first();
+    await waitForHydration(add);
+    await add.click();
+
+    // The form, at its own address, in the panel over the board: its name first, focused. No
+    // record page is drawn for "new".
+    await expect(page).toHaveURL(`${owner.path}/deals/new`);
+    const form = page.getByRole('dialog', { name: 'New deal' });
+    await expect(form.getByLabel('Deal name')).toBeFocused();
+    await expect(page.getByText("This record can't be found")).toHaveCount(0);
+    await expectNoA11yViolations(page);
+
+    await form.getByLabel('Deal name').fill(DEALS.tablets);
+    await form.getByRole('button', { name: 'Amount', exact: true }).click();
+    await page.getByLabel('Amount', { exact: true }).fill('12,5');
+    await form.getByRole('button', { name: 'Create deal' }).click();
+    const amount = form.getByRole('button', { name: /^Amount:/u });
+    await expect(amount).toHaveAccessibleDescription(/^Amount: Enter an amount like 1250\.50/u);
+    await expect(page.getByRole('alert').filter({ hasText: 'Amount:' })).toBeVisible();
+
+    await amount.click();
+    await page.getByLabel('Amount', { exact: true }).fill('1250.00');
+    await form.getByRole('button', { name: 'Create deal' }).click();
+
+    // Saved: the panel shows the new deal at its address, and the board behind has it.
+    const deal = page.getByRole('dialog', { name: DEALS.tablets });
+    await expect(deal.getByRole('heading', { level: 1, name: DEALS.tablets })).toBeFocused();
+    await expect(page).toHaveURL(new RegExp(`${owner.path}/deals/\\d+$`, 'u'));
+    await expect(page.locator('#crm-main')).toContainText(DEALS.tablets);
+
+    // Closed, it goes back to the board, not to the form.
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page).toHaveURL(`${owner.path}/deals`);
+  });
+
+  test('cancels a new company in the panel, and renders the form as its page at its address', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+
+    await page.goto(`${owner.path}/companies`);
+    const add = page.getByRole('main').getByRole('link', { name: 'Add company' }).first();
+    await waitForHydration(add);
+    await add.click();
+    const form = page.getByRole('dialog', { name: 'New company' });
+    await expect(form.getByLabel('Company name')).toBeFocused();
+    await form.getByLabel('Company name').fill(COMPANIES.brightwater.name);
+    // Escape is the panel's, though a field has the focus.
+    await page.keyboard.press('Escape');
+    await expect(form).toHaveCount(0);
+    await expect(page).toHaveURL(`${owner.path}/companies`);
+    await expect(add).toBeFocused();
+
+    await add.click();
+    await form.getByRole('button', { name: 'Cancel' }).click();
+    await expect(form).toHaveCount(0);
+    await expect(page).toHaveURL(`${owner.path}/companies`);
+    await expect(page.getByText('No companies yet')).toBeVisible();
+
+    // Loaded at its address, the form is its full page, its name focused.
+    await page.goto(`${owner.path}/companies/new`);
+    await expect(page.getByRole('heading', { level: 1, name: 'New company' })).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.getByLabel('Company name')).toBeFocused();
   });
 
   test.describe('on a phone', () => {

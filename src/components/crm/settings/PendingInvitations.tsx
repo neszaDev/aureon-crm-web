@@ -35,16 +35,16 @@ export const PendingInvitations = (props: {
   const tRole = useTranslations('Roles');
 
   if (props.invitations.length === 0) {
-    return <p className="border-t border-rule px-5 py-4 text-muted-foreground">{t('empty')}</p>;
+    return <p className="border-y border-rule py-3 text-sm text-muted-foreground">{t('empty')}</p>;
   }
 
   return (
-    <ul>
+    <ul className="border-t border-rule">
       {props.invitations.map((invitation) => (
         // Below sm the row stacks like a member's: the whole email and details, then revoke.
         <li
           key={invitation.id}
-          className="flex items-center gap-x-3 gap-y-2 border-t border-rule px-5 py-3 max-sm:grid max-sm:grid-cols-[auto_minmax(0,1fr)] max-sm:items-start"
+          className="flex min-h-9 items-center gap-x-3 gap-y-2 border-b border-rule px-3 py-1.5 max-sm:grid max-sm:grid-cols-[auto_minmax(0,1fr)] max-sm:items-start"
         >
           <MailIcon
             aria-hidden="true"

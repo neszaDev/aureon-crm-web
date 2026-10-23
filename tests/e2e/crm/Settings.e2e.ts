@@ -229,6 +229,14 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'Drag Demo' }).focus();
     await page.keyboard.press('Space');
     await expect(page.getByText('Picked up Demo.')).toBeAttached();
+    // dnd-kit listens for the arrows from a timer it sets as the drag starts, which can come after
+    // the announcement: one more timer runs after it.
+    await page.evaluate(async () => {
+      // oxlint-disable-next-line promise/avoid-new -- a browser timer has no promise form
+      await new Promise((resolve) => {
+        setTimeout(resolve, 0);
+      });
+    });
     await page.keyboard.press('ArrowUp');
     await expect(page.getByText('Demo is over Proposal.')).toBeAttached();
     await page.keyboard.press('Space');

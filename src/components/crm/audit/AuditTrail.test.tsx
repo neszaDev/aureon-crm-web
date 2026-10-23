@@ -125,8 +125,9 @@ describe(AuditTrail, () => {
 
   it('filters by the kind of record, keeping the other filters in the URL', async () => {
     await renderTrail(pageOf(EVENTS), { actorId: '2' });
-    const type = page.getByRole('combobox', { name: 'Record type' });
-    await expect.element(type).toHaveTextContent('Any type');
+    // A chip, off: any type.
+    const type = page.getByRole('button', { name: 'Record type', exact: true });
+    await expect.element(type).toBeVisible();
 
     await type.click();
     await page.getByRole('option', { name: 'Pipeline stages' }).click();
@@ -139,11 +140,9 @@ describe(AuditTrail, () => {
   it("filters by who did it, among the members; someone who left reads 'Former member'", async () => {
     await renderTrail(pageOf(EVENTS), { entityType: 'MEMBER', actorId: '99' });
 
-    await expect
-      .element(page.getByRole('combobox', { name: 'Record type' }))
-      .toHaveTextContent('Members');
-    const actor = page.getByRole('combobox', { name: 'Done by' });
-    await expect.element(actor).toHaveTextContent('Former member');
+    await expect.element(page.getByRole('button', { name: 'Record type: Members' })).toBeVisible();
+    const actor = page.getByRole('button', { name: 'Done by: Former member' });
+    await expect.element(actor).toBeVisible();
 
     await actor.click();
     await page.getByRole('option', { name: 'Riley Rep' }).click();

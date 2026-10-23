@@ -41,15 +41,14 @@ const shownOrder = () =>
   [...document.querySelectorAll('[data-stage-name]')].map((node) => node.textContent);
 
 /**
- * Finds a stage's 36 px box.
+ * Finds a stage's pill.
  * @param name The stage's name.
- * @returns The box.
+ * @returns The pill.
  */
-const boxOf = (name: string) =>
+const pillOf = (name: string) =>
   [...document.querySelectorAll('[data-stage-name]')]
     .find((node) => node.textContent === name)
-    ?.closest('li')
-    ?.querySelector('.size-9');
+    ?.closest<HTMLElement>('[data-tone]');
 
 describe(StageList, () => {
   it('moves a stage with the buttons and shows the order the server saved', async () => {
@@ -128,14 +127,12 @@ describe(StageList, () => {
     window.removeEventListener('unhandledrejection', record);
   });
 
-  it('draws the stage boxes 36 px: Won filled with the seal, Lost in ink, the rest blank', async () => {
+  it("draws each stage's name in its colour's pill: open ones blue to amber, Won green, Lost red", async () => {
     await renderList(vi.fn<Reorder>());
 
-    expect(boxOf('Won')).toHaveClass('bg-seal');
-    expect(boxOf('Lost')).toHaveClass('bg-foreground');
-    expect(boxOf('Lost')?.outerHTML).not.toMatch(/seal/u);
-    expect(boxOf('Qualified')).toHaveClass('bg-field');
-    expect(boxOf('Qualified')?.outerHTML).not.toMatch(/bg-seal(?!-)/u);
+    expect(
+      ['New', 'Qualified', 'Proposal', 'Won', 'Lost'].map((name) => pillOf(name)?.dataset.tone),
+    ).toStrictEqual(['blue', 'violet', 'amber', 'green', 'red']);
   });
 
   it('pins Won and Lost at the end, where they move and delete no more', async () => {

@@ -6,7 +6,7 @@ import {
   updateLeadSource,
 } from '@/actions/crm/LeadSourceActions';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { SettingsHeader, SettingsSection } from '@/components/crm/settings/SettingsHeader';
 import { SourceList } from '@/components/crm/settings/SourceList';
 import { getLeadSources } from '@/libs/api/CrmQueries';
 import { endRejectedSession } from '@/libs/api/Session';
@@ -51,20 +51,11 @@ export default async function SourcesPage(props: SourcesPageProps) {
   return (
     <>
       <SettingsHeader title={t('title')} description={t('description')} />
-      <section
-        aria-labelledby="sources-heading"
-        className="overflow-hidden rounded-lg border border-rule bg-card"
+      <SettingsSection
+        headingId="sources-heading"
+        title={t('sources_heading', { count: rows.length })}
+        description={canManage ? undefined : t('read_only')}
       >
-        <h2
-          id="sources-heading"
-          tabIndex={-1}
-          className="px-4 pt-4 pb-3 font-semibold focus-visible:-outline-offset-2 sm:px-5"
-        >
-          {t('sources_heading', { count: rows.length })}
-        </h2>
-        {!canManage && (
-          <p className="px-4 pb-3 text-sm text-muted-foreground sm:px-5">{t('read_only')}</p>
-        )}
         <SourceList
           sources={rows}
           canManage={canManage}
@@ -75,7 +66,7 @@ export default async function SourcesPage(props: SourcesPageProps) {
             remove: deleteLeadSource.bind(null, workspace.id),
           }}
         />
-      </section>
+      </SettingsSection>
     </>
   );
 }

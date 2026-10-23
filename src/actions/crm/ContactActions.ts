@@ -2,6 +2,7 @@
 
 import { getLocale, getTranslations } from 'next-intl/server';
 import { refresh } from 'next/cache';
+import { RedirectType } from 'next/navigation';
 import { actionFailure } from '@/libs/api/ActionFailure';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { authedBackend } from '@/libs/api/Backend';
@@ -57,10 +58,11 @@ export async function createContact(
     return { ok: false, message: t('error_generic') };
   }
 
-  return redirect({
-    href: `/app/${workspaceId}/contacts/${data.id}`,
-    locale: await getLocale(),
-  });
+  // In place of the form: Back (and a record panel's close) skips it.
+  return redirect(
+    { href: `/app/${workspaceId}/contacts/${data.id}`, locale: await getLocale() },
+    RedirectType.replace,
+  );
 }
 
 /**

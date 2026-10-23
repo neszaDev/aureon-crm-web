@@ -4,7 +4,7 @@ import { updateLead } from '@/actions/crm/LeadActions';
 import { currencyOptions } from '@/components/crm/CreateWorkspaceForm';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { LeadForm } from '@/components/crm/lead/LeadForm';
-import { RecordEditPage } from '@/components/crm/record/RecordLayout';
+import { RecordFormPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { getLead, getLeadSources, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
@@ -103,7 +103,7 @@ export default async function EditLeadPage(props: EditLeadPageProps) {
   }
 
   return (
-    <RecordEditPage
+    <RecordFormPage
       number={recordNumber('lead', lead.id)}
       title={t('title', { name: fullName(lead) })}
       description={t('description')}
@@ -123,6 +123,6 @@ export default async function EditLeadPage(props: EditLeadPageProps) {
         cancelHref={`${path}/${lead.id}`}
         submitLabel={t('submit')}
       />
-    </RecordEditPage>
+    </RecordFormPage>
   );
 }

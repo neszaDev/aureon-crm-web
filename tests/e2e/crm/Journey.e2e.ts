@@ -284,7 +284,8 @@ test('the CRM journey: from signing in to the reports, the permissions and the l
     await dialog.getByLabel('Title').fill('Send the contract');
     // A time without a day is today's in the workspace's zone: 9:00 there is overdue or due
     // within the next 24 hours, a reminder either way.
-    await dialog.getByRole('textbox', { name: 'Due time' }).fill('09:00');
+    await dialog.getByRole('button', { name: 'Due', exact: true }).click();
+    await page.getByRole('textbox', { name: 'Due time' }).fill('09:00');
     await dialog.getByRole('button', { name: 'Add task' }).click();
     await expect(page.getByText('Task added')).toBeVisible();
     ids.task = await linkedId(page.getByRole('region', { name: /^Tasks/u }), 'Send the contract');

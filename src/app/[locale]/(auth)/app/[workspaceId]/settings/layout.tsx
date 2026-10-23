@@ -13,12 +13,12 @@ export default async function SettingsLayout(props: {
   const { workspace } = await getOpenWorkspace(locale, workspaceId);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 xl:grid xl:grid-cols-[12rem_minmax(0,1fr)] xl:items-start xl:gap-10">
+    <div className="mx-auto flex max-w-6xl flex-col gap-5 lg:grid lg:grid-cols-[12rem_minmax(0,1fr)] lg:items-start lg:gap-10">
       <SettingsNav
         workspaceId={workspaceId}
         audit={workspace !== undefined && can(workspace, 'AUDIT_READ')}
       />
-      <div className="flex min-w-0 flex-col gap-5">{props.children}</div>
+      <div className="flex min-w-0 flex-col gap-6">{props.children}</div>
     </div>
   );
 }

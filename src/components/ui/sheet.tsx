@@ -14,6 +14,10 @@ function SheetTrigger({ ...props }: React.ComponentProps<typeof SheetPrimitive.T
   return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />;
 }
 
+function SheetClose({ ...props }: React.ComponentProps<typeof SheetPrimitive.Close>) {
+  return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
+}
+
 function SheetPortal({ ...props }: React.ComponentProps<typeof SheetPrimitive.Portal>) {
   return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />;
 }
@@ -82,4 +86,4 @@ function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPr
   );
 }
 
-export { Sheet, SheetTrigger, SheetContent, SheetTitle };
+export { Sheet, SheetClose, SheetTrigger, SheetContent, SheetTitle };

@@ -62,8 +62,11 @@ describe(ContactForm, () => {
     const action = vi.fn<Action>().mockResolvedValue({ ok: true });
     await renderForm({ action });
 
+    // The company's chip opens its picker.
+    await page.getByRole('button', { name: 'Company: Acme' }).click();
     await page.getByRole('combobox', { name: 'Company' }).click();
     await page.getByRole('option', { name: /Globex/u }).click();
+    await expect.element(page.getByRole('button', { name: 'Company: Globex' })).toBeVisible();
     await userEvent.type(page.getByLabelText('Tags', { exact: true }), 'VIP{Enter}');
     expect(action).not.toHaveBeenCalled();
     await page.getByRole('button', { name: 'Save changes' }).click();

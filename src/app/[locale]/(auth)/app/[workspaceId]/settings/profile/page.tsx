@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { changePassword, updateProfile } from '@/actions/ProfileActions';
 import { PasswordForm } from '@/components/crm/settings/PasswordForm';
 import { ProfileForm } from '@/components/crm/settings/ProfileForm';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { SettingsHeader, SettingsSection } from '@/components/crm/settings/SettingsHeader';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 
@@ -32,31 +32,27 @@ export default async function ProfilePage(props: ProfilePageProps) {
   return (
     <>
       <SettingsHeader title={t('title')} description={t('description')} />
-      <div className="grid items-start gap-5 xl:grid-cols-2">
-        <section
-          aria-labelledby="profile-heading"
-          className="rounded-lg border border-rule bg-card p-5 sm:p-6"
+      {/* Side by side on wide screens: two short forms, the page in one view. */}
+      <div className="grid items-start gap-x-10 gap-y-6 xl:grid-cols-2">
+        <SettingsSection headingId="profile-heading" title={t('profile_heading')}>
+          <div className="max-w-xl">
+            <ProfileForm
+              userId={user.id}
+              email={user.email}
+              displayName={user.displayName}
+              action={updateProfile}
+            />
+          </div>
+        </SettingsSection>
+        <SettingsSection
+          headingId="password-heading"
+          title={t('password_heading')}
+          description={t('password_text')}
         >
-          <h2 id="profile-heading" className="mb-4 font-semibold">
-            {t('profile_heading')}
-          </h2>
-          <ProfileForm
-            userId={user.id}
-            email={user.email}
-            displayName={user.displayName}
-            action={updateProfile}
-          />
-        </section>
-        <section
-          aria-labelledby="password-heading"
-          className="rounded-lg border border-rule bg-card p-5 sm:p-6"
-        >
-          <h2 id="password-heading" className="font-semibold">
-            {t('password_heading')}
-          </h2>
-          <p className="mt-1 mb-4 text-sm text-muted-foreground">{t('password_text')}</p>
-          <PasswordForm action={changePassword} />
-        </section>
+          <div className="max-w-xl">
+            <PasswordForm action={changePassword} />
+          </div>
+        </SettingsSection>
       </div>
     </>
   );

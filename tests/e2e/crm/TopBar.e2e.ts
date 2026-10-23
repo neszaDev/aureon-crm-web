@@ -66,10 +66,14 @@ test.describe('Shell', () => {
     ]);
     await menu.getByRole('menuitem', { name: 'Deal' }).click();
     await expect(page).toHaveURL(new RegExp(`${owner.path}/deals/new$`, 'u'));
-    await expect(location.getByText('New', { exact: true })).toHaveAttribute(
-      'aria-current',
-      'page',
-    );
+    // The form opens in the record panel over the page (which hides the rest from assistive
+    // technology); the location under it names the form.
+    await expect(page.getByRole('dialog', { name: 'New deal' })).toBeVisible();
+    await expect(
+      page.locator('nav[aria-label="Location"]').getByText('New', { exact: true }),
+    ).toHaveAttribute('aria-current', 'page');
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
   });
 
   test('collapses the sidebar to its icon strip, keeps it on reload, and expands it again', async ({

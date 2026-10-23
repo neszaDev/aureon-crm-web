@@ -631,7 +631,8 @@
     "title": "Espace de travail",
     "description": "Le nom que voit votre équipe, la devise des nouvelles affaires et le fuseau horaire des échéances et des rappels.",
     "save": "Enregistrer les modifications",
-    "read_only": "Seuls les propriétaires et les administrateurs peuvent modifier ces paramètres."
+    "read_only": "Seuls les propriétaires et les administrateurs peuvent modifier ces paramètres.",
+    "details_heading": "Général"
   },
   "MembersPage": {
     "title": "Membres",
@@ -946,6 +947,9 @@
     "kind_lead": "Prospect",
     "kind_deal": "Affaire",
     "kind_task": "Tâche"
+  },
+  "RecordForm": {
+    "details": "Détails"
   },
   "RecordActions": {
     "archive": "Archiver",

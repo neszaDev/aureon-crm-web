@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { createContact, findContactDuplicates } from '@/actions/crm/ContactActions';
 import { ContactForm } from '@/components/crm/contact/ContactForm';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { RecordFormPage } from '@/components/crm/record/RecordLayout';
 import { getCompany, getContactTags, getLeadSources, getMembers } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
@@ -57,40 +57,39 @@ export default async function NewContactPage(props: NewContactPageProps) {
       : undefined;
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title')} description={t('description')} />
-      <section
-        aria-label={t('title')}
-        className="max-w-3xl rounded-lg border border-rule bg-card p-5 sm:p-6"
-      >
-        <ContactForm
-          action={createContact.bind(null, workspace.id)}
-          findDuplicates={findContactDuplicates.bind(null, workspace.id)}
-          // A new contact is the caller's unless they give it to someone else.
-          defaults={{
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            jobTitle: '',
-            companyId: company?.id ?? null,
-            ownerId: owner ?? user.id,
-            sourceId: null,
-            tags: [],
-            notes: '',
-          }}
-          company={company}
-          workspaceId={workspace.id}
-          members={members.members}
-          me={user.id}
-          canAssign={canAssign(workspace)}
-          sources={sources.sources}
-          tags={tags.tags}
-          listPath={path}
-          cancelHref={company ? `/app/${workspace.id}/companies/${company.id}` : path}
-          submitLabel={t('submit')}
-        />
-      </section>
-    </div>
+    <RecordFormPage
+      title={t('title')}
+      headingId="contact-heading"
+      description={t('description')}
+      label={t('title')}
+    >
+      <ContactForm
+        action={createContact.bind(null, workspace.id)}
+        findDuplicates={findContactDuplicates.bind(null, workspace.id)}
+        // A new contact is the caller's unless they give it to someone else.
+        defaults={{
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          jobTitle: '',
+          companyId: company?.id ?? null,
+          ownerId: owner ?? user.id,
+          sourceId: null,
+          tags: [],
+          notes: '',
+        }}
+        company={company}
+        workspaceId={workspace.id}
+        members={members.members}
+        me={user.id}
+        canAssign={canAssign(workspace)}
+        sources={sources.sources}
+        tags={tags.tags}
+        listPath={path}
+        cancelHref={company ? `/app/${workspace.id}/companies/${company.id}` : path}
+        submitLabel={t('submit')}
+      />
+    </RecordFormPage>
   );
 }

@@ -25,8 +25,9 @@ const settingsNavItems = [
 ] as const;
 
 /**
- * The settings pages: a column beside the page on large screens, a wrapping row of links above
- * it on smaller ones. The current page is filled with the seal tint.
+ * The settings pages, inside the canvas: a column of links beside the page from 1024 px, the
+ * sidebar's way (the current one on the violet tint); a row of tabs above it on smaller screens,
+ * which scrolls sideways rather than wrap (the current one underlined in violet).
  * @param props Component props.
  * @param props.workspaceId The `[workspaceId]` route segment.
  * @param props.audit Whether the caller may read the audit trail (`AUDIT_READ`): its link shows.
@@ -38,8 +39,8 @@ export const SettingsNav = (props: { workspaceId: string; audit: boolean }) => {
   const page = usePathname().slice(base.length).split('/')[1] ?? '';
 
   return (
-    <nav aria-label={t('label')} className="xl:sticky xl:top-6">
-      <ul className="flex flex-wrap gap-1.5 xl:flex-col xl:gap-0.5">
+    <nav aria-label={t('label')} className="lg:sticky lg:top-6">
+      <ul className="-mx-1 flex gap-1 overflow-x-auto border-b border-rule px-1 lg:mx-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:border-0 lg:px-0">
         {settingsNavItems.map((item) => {
           if (item.key === 'audit' && !props.audit) {
             return null;
@@ -49,19 +50,23 @@ export const SettingsNav = (props: { workspaceId: string; audit: boolean }) => {
           return (
             <li
               key={item.key}
-              className={cn(item.key === 'profile' && 'xl:mt-3 xl:border-t xl:border-rule xl:pt-3')}
+              className={cn(
+                'shrink-0',
+                item.key === 'profile' && 'lg:mt-3 lg:border-t lg:border-rule lg:pt-3',
+              )}
             >
               <Link
                 href={`${base}/${item.key}`}
                 aria-current={current ? 'page' : undefined}
                 className={cn(
-                  'flex min-h-9 items-center gap-2 rounded-md border px-3 py-1.5 text-[0.9375rem] font-medium no-underline transition-colors duration-150 xl:border-transparent xl:px-2.5',
+                  // Its outline drawn inside: the row's scroll box would clip it.
+                  'flex h-9 items-center gap-2.5 border-b-2 px-2 text-[0.8125rem] font-medium whitespace-nowrap no-underline transition-colors duration-150 focus-visible:-outline-offset-2 lg:h-8 lg:rounded-md lg:border-b-0 lg:px-2.5 lg:text-sm',
                   current
-                    ? 'border-seal-ink/25 bg-seal-tint font-semibold text-seal-ink'
-                    : 'border-rule bg-card text-foreground hover:bg-muted xl:bg-transparent',
+                    ? 'border-violet-ink text-foreground lg:bg-violet-tint lg:font-semibold lg:text-violet-ink'
+                    : 'border-transparent text-muted-foreground hover:text-foreground lg:text-ink-2 lg:hover:bg-ink/6',
                 )}
               >
-                <item.icon aria-hidden="true" className="size-4 shrink-0" />
+                <item.icon aria-hidden="true" className="size-4 shrink-0 max-lg:hidden" />
                 {t(`nav_${item.key}`)}
               </Link>
             </li>

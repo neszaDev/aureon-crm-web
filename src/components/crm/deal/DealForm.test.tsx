@@ -86,11 +86,16 @@ describe(DealForm, () => {
       const action = vi.fn<Action>().mockResolvedValue({ ok: true });
       await render(form({ action }));
 
+      await page.getByRole('button', { name: 'Amount', exact: true }).click();
       await page.getByLabelText('Amount').fill(amount);
       await page.getByRole('button', { name: 'Create deal' }).click();
 
-      await expect.element(page.getByLabelText('Amount')).toHaveAttribute('aria-invalid', 'true');
+      // Said under the chips and on the chip, and on the field once the chip is open again.
       await expect.element(page.getByText(/Enter an amount like 1250\.50/u).first()).toBeVisible();
+      const chip = page.getByRole('button', { name: /^Amount:/u });
+      await expect.element(chip).toHaveAccessibleDescription(/Enter an amount like 1250\.50/u);
+      await chip.click();
+      await expect.element(page.getByLabelText('Amount')).toHaveAttribute('aria-invalid', 'true');
       expect(action).not.toHaveBeenCalled();
     },
   );
@@ -99,8 +104,11 @@ describe(DealForm, () => {
     const action = vi.fn<Action>().mockResolvedValue({ ok: true });
     await render(form({ action }));
 
+    await page.getByRole('button', { name: 'Amount', exact: true }).click();
     await page.getByLabelText('Amount').fill('1250.50');
+    await page.getByRole('button', { name: 'Stage: Qualification' }).click();
     await page.getByLabelText('Stage').selectOptions('12');
+    await expect.element(page.getByRole('button', { name: 'Stage: Proposal' })).toBeVisible();
     await page.getByRole('button', { name: 'Create deal' }).click();
 
     await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
@@ -121,6 +129,11 @@ describe(DealForm, () => {
 
     await page.getByRole('button', { name: 'Create deal' }).click();
 
+    const chip = page.getByRole('button', { name: 'Company', exact: true });
+    await expect
+      .element(chip)
+      .toHaveAccessibleDescription('Company: is not a company of this workspace');
+    await chip.click();
     await expect
       .element(page.getByRole('combobox', { name: 'Company' }))
       .toHaveAccessibleDescription('is not a company of this workspace');
@@ -150,32 +163,35 @@ describe(DealForm, () => {
       form({ action: vi.fn<Action>(), isEdit: true, defaults: { ...NEW, stageId: null } }),
     );
 
+    await page.getByRole('button', { name: 'Stage: Proposal' }).click();
     expect(page.getByLabelText('Stage').elements()).toHaveLength(0);
-    await expect.element(page.getByText('Proposal', { exact: true })).toBeVisible();
+    await expect.element(page.getByText('Proposal', { exact: true }).last()).toBeVisible();
     await expect.element(page.getByText("Change it with Move on the deal's page.")).toBeVisible();
   });
 
-  it('server-renders the stage and the currency as the selected options', () => {
+  it('server-renders the stage and the amount with its currency in their chips', () => {
     const html = renderToString(
-      form({ action: vi.fn<Action>(), defaults: { ...NEW, stageId: 12, currency: 'USD' } }),
+      form({
+        action: vi.fn<Action>(),
+        defaults: { ...NEW, stageId: 12, amount: '10', currency: 'USD' },
+      }),
     );
-    const selected = (id: string) =>
-      new DOMParser()
-        .parseFromString(html, 'text/html')
-        .querySelector(`#${id} option[selected]`)
-        ?.getAttribute('value');
+    const chip = (id: string) =>
+      new DOMParser().parseFromString(html, 'text/html').querySelector(`#${id}`)?.textContent;
 
-    expect(selected('deal-stage')).toBe('12');
-    expect(selected('deal-currency')).toBe('USD');
+    expect(chip('deal-stage-chip')).toBe('Stage: Proposal');
+    expect(chip('deal-amount-chip')).toBe('Amount: 10 USD');
   });
 
   it('sends what was typed since the last save, not the values saved before', async () => {
     const action = vi.fn<Action>().mockResolvedValue({ ok: true });
     await render(form({ action }));
 
+    await page.getByRole('button', { name: 'Amount', exact: true }).click();
     await page.getByLabelText('Amount').fill('100.00');
     await page.getByRole('button', { name: 'Create deal' }).click();
     await expect.element(page.getByText('Saved', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Amount: 100.00 EUR' }).click();
     await page.getByLabelText('Amount').fill('200.00');
     await page.getByRole('button', { name: 'Create deal' }).click();
 

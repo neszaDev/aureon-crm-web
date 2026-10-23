@@ -1,5 +1,6 @@
 /**
- * The top of a settings page: its title (the page's `h1`), what it is for, and its main action.
+ * The top of a settings page: its title (the page's `h1`, on a list's scale), what it is for, and
+ * its main action. Its sections follow (`SettingsSection`).
  * @param props Component props.
  * @param props.title The title.
  * @param props.description One or two sentences under it.
@@ -14,8 +15,10 @@ export const SettingsHeader = (props: {
 }) => (
   <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
     <div className="flex min-w-0 flex-col gap-1">
-      <h1 className="text-2xl font-bold tracking-[-0.01em] break-words">{props.title}</h1>
-      <p className="max-w-[65ch] text-muted-foreground">{props.description}</p>
+      <h1 className="text-[1.25rem] leading-7 font-semibold tracking-[-0.01em] break-words">
+        {props.title}
+      </h1>
+      <p className="max-w-[65ch] text-sm text-muted-foreground">{props.description}</p>
     </div>
     {/* The actions keep their width (never squeezed onto the description), up to half the
         header: a wider group (the dashboard's five) wraps there rather than squeeze the title
@@ -26,4 +29,46 @@ export const SettingsHeader = (props: {
       </div>
     )}
   </header>
+);
+
+/**
+ * A part of a settings page: its heading (focusable, for the focus to land on after a row goes)
+ * over a hairline that parts it from what comes before, an optional line on what it holds and an
+ * action on the right, then its rows or form on the page's own ground (no card).
+ * @param props Component props.
+ * @param props.headingId The heading's id.
+ * @param props.title The heading.
+ * @param props.description A line under it.
+ * @param props.action A button on its right, such as "Invite member".
+ * @param props.children What it holds.
+ * @returns The section.
+ */
+export const SettingsSection = (props: {
+  headingId: string;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <section
+    aria-labelledby={props.headingId}
+    className="flex flex-col gap-3 border-t border-rule pt-5"
+  >
+    <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+      <div className="flex min-w-0 flex-col gap-1">
+        <h2
+          id={props.headingId}
+          tabIndex={-1}
+          className="rounded-sm text-[0.9375rem] font-semibold break-words"
+        >
+          {props.title}
+        </h2>
+        {props.description && (
+          <p className="max-w-[65ch] text-sm text-muted-foreground">{props.description}</p>
+        )}
+      </div>
+      {props.action}
+    </div>
+    {props.children}
+  </section>
 );

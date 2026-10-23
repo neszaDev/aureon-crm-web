@@ -1,5 +1,6 @@
 import { ArrowRightIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useId } from 'react';
 import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import type { components } from '@/libs/api/schema';
 import { formatInstant } from '@/libs/crm/Format';
@@ -10,7 +11,7 @@ type StageRef = components['schemas']['HistoryStageRef'];
 /**
  * A deal's stage history, newest first: from one stage to the next (the first entry says where
  * the deal began), who moved it, as their avatar and name, and when. Each stage shows the name it
- * had then; one that has since been deleted says so, and signs nothing on the stamp row. A
+ * had then; one that has since been deleted says so, and signs nothing on the track. A
  * member who left reads "Former member", with no avatar: an avatar is only ever someone's.
  * @param props Component props.
  * @param props.history The entries, newest first, as the API lists them.
@@ -20,12 +21,14 @@ type StageRef = components['schemas']['HistoryStageRef'];
 export const StageHistory = (props: { history: Change[]; timeZone: string }) => {
   const t = useTranslations('StageHistory');
   const locale = useLocale();
+  // Its own: a deal's page and its record panel over it show one each.
+  const headingId = useId();
   const stageName = (stage: StageRef) =>
     stage.id === undefined ? t('stage_deleted', { name: stage.name }) : stage.name;
 
   return (
-    <section aria-labelledby="stage-history-heading">
-      <h2 id="stage-history-heading" className="px-5 pt-4 pb-3 text-sm font-semibold">
+    <section aria-labelledby={headingId}>
+      <h2 id={headingId} className="px-5 pt-4 pb-3 text-sm font-semibold">
         {t('title')}
       </h2>
       {props.history.length === 0 ? (

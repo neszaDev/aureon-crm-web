@@ -1,10 +1,11 @@
+import { cn } from 'cn';
 import { InboxIcon, SearchXIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/libs/I18nNavigation';
 
 /**
- * What a list shows without rows: `none`, nothing recorded yet (with the create action when
- * the caller may create); `archived`, an empty archive (with a link back to the active records;
+ * What a list shows without rows, teaching what to do next: `none`, nothing recorded yet (on the
+ * violet tint, with the create action when the caller may create); `archived`, an empty archive (with a link back to the active records;
  * the list's heading already says it is empty); or `filtered`, nothing matching the search and
  * filters (with a link that clears them).
  * @param props Component props.
@@ -23,7 +24,7 @@ export const ListEmpty = (
     | { variant: 'filtered'; clearHref: string },
 ) => {
   const t = useTranslations('RecordList');
-  const linkClass = 'font-medium text-seal-ink';
+  const linkClass = 'text-sm font-medium text-violet-ink';
   let title: string | undefined;
   let text: string;
   let action: React.ReactNode;
@@ -48,11 +49,21 @@ export const ListEmpty = (
   const Icon = props.variant === 'filtered' ? SearchXIcon : InboxIcon;
 
   return (
-    <div className="flex flex-col items-start gap-3 border-t border-rule px-4 py-8 sm:px-5">
-      <Icon aria-hidden="true" className="size-6 text-muted-foreground" />
+    <div className="flex flex-col items-start gap-4 border-t border-rule px-4 py-10 sm:px-5">
+      <span
+        aria-hidden="true"
+        className={cn(
+          'grid size-10 place-items-center rounded-lg',
+          props.variant === 'none'
+            ? 'bg-violet-tint text-violet-ink'
+            : 'bg-muted text-muted-foreground',
+        )}
+      >
+        <Icon className="size-5" />
+      </span>
       <div className="flex flex-col gap-1">
-        {title && <p className="font-semibold">{title}</p>}
-        <p className="max-w-[65ch] text-muted-foreground">{text}</p>
+        {title && <p className="text-[0.9375rem] font-semibold">{title}</p>}
+        <p className="max-w-[65ch] text-sm text-muted-foreground">{text}</p>
       </div>
       {action}
     </div>

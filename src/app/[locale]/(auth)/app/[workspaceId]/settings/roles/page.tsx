@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RolesMatrix } from '@/components/crm/settings/RolesMatrix';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { SettingsHeader, SettingsSection } from '@/components/crm/settings/SettingsHeader';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 
@@ -28,28 +28,16 @@ export default async function RolesPage(props: RolesPageProps) {
   return (
     <>
       <SettingsHeader title={t('title')} description={t('description')} />
-      <section
-        aria-labelledby="matrix-heading"
-        className="overflow-hidden rounded-lg border border-rule bg-card"
-      >
-        <h2 id="matrix-heading" className="px-5 pt-4 pb-2 font-semibold">
-          {t('matrix_heading')}
-        </h2>
+      <SettingsSection headingId="matrix-heading" title={t('matrix_heading')}>
         <RolesMatrix current={workspace?.role} />
-      </section>
-      <section
-        aria-labelledby="rules-heading"
-        className="rounded-lg border border-rule bg-card px-5 py-4"
-      >
-        <h2 id="rules-heading" className="font-semibold">
-          {t('rules_heading')}
-        </h2>
-        <ul className="mt-2 flex max-w-[70ch] list-disc flex-col gap-1.5 pl-5 text-[0.9375rem] marker:text-seal-ink">
+      </SettingsSection>
+      <SettingsSection headingId="rules-heading" title={t('rules_heading')}>
+        <ul className="flex max-w-[70ch] list-disc flex-col gap-1.5 pl-5 text-sm marker:text-violet-ink">
           {RULES.map((rule) => (
             <li key={rule}>{t(`rule_${rule}`)}</li>
           ))}
         </ul>
-      </section>
+      </SettingsSection>
     </>
   );
 }

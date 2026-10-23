@@ -54,6 +54,7 @@ describe(LeadForm, () => {
     const action = vi.fn<Action>().mockResolvedValue({ ok: true });
     await render(form({ action }));
 
+    await page.getByRole('button', { name: 'Estimated value: 1250.00 EUR' }).click();
     await page.getByLabelText('Estimated value').fill('');
     await page.getByRole('button', { name: 'Save changes' }).click();
 
@@ -61,6 +62,8 @@ describe(LeadForm, () => {
     expect(action).toHaveBeenCalledWith(
       expect.objectContaining({ estimatedValue: '', currency: '' }),
     );
+    // Its chip is empty again, and so is the currency in it.
+    await page.getByRole('button', { name: 'Estimated value', exact: true }).click();
     await expect.element(page.getByLabelText('Currency')).toHaveValue('');
   });
 
@@ -80,18 +83,15 @@ describe(LeadForm, () => {
     await expect.element(page.getByLabelText('First name')).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it('server-renders the saved priority and currency as the selected options', () => {
+  it('server-renders the saved priority and value with its currency in their chips', () => {
     const html = renderToString(
       form({ action: vi.fn<Action>(), defaults: { ...SAVED, currency: 'USD' } }),
     );
-    const selected = (id: string) =>
-      new DOMParser()
-        .parseFromString(html, 'text/html')
-        .querySelector(`#${id} option[selected]`)
-        ?.getAttribute('value');
+    const chip = (id: string) =>
+      new DOMParser().parseFromString(html, 'text/html').querySelector(`#${id}`)?.textContent;
 
-    expect(selected('lead-priority')).toBe('HIGH');
-    expect(selected('lead-currency')).toBe('USD');
+    expect(chip('lead-priority-chip')).toBe('Priority: High');
+    expect(chip('lead-value-chip')).toBe('Estimated value: 1250.00 USD');
   });
 
   it('sends what was typed since the last save, not the values saved before', async () => {

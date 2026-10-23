@@ -1,5 +1,6 @@
 import { ArrowLeftIcon, SearchXIcon } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
+import { CrmState } from '@/components/crm/CrmState';
 import { PickerFrame } from '@/components/crm/shell/PickerFrame';
 import { Button } from '@/components/ui/button';
 import { getCurrentUser } from '@/libs/api/Queries';
@@ -15,19 +16,14 @@ export default async function WorkspaceNotFoundPage() {
   return (
     <PickerFrame user={user}>
       <title>{t('meta_title')}</title>
-      <div className="flex flex-col items-start gap-4 rounded-lg border border-rule bg-card p-6 shadow-sheet sm:p-8">
-        <SearchXIcon aria-hidden="true" className="size-7 text-muted-foreground" />
-        <div className="flex flex-col gap-1.5">
-          <h1 className="text-xl font-bold">{t('title')}</h1>
-          <p className="text-muted-foreground">{t('text')}</p>
-        </div>
+      <CrmState icon={SearchXIcon} heading title={t('title')} text={t('text')}>
         <Button asChild>
           <Link href="/app">
             <ArrowLeftIcon data-icon="inline-start" />
             {t('back')}
           </Link>
         </Button>
-      </div>
+      </CrmState>
     </PickerFrame>
   );
 }
