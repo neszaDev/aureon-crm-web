@@ -330,9 +330,12 @@ test.describe('Records', () => {
     await expect(page.getByRole('menuitem')).toHaveText(['Contacted', 'Qualified', 'Unqualified']);
     await page.getByRole('menuitem', { name: 'Qualified', exact: true }).click();
     await expect(page.getByText('Status changed to Qualified')).toBeVisible();
-    await expect(section('Qualified').getByRole('row', { name: /Amara Diallo/u })).toBeVisible();
-    const moved = await apiCall<{ status: string }>(request, owner, 'GET', `${leads}/${amara?.id}`);
-    expect(moved.status).toBe('QUALIFIED');
+    const moved = section('Qualified').getByRole('row', { name: /Amara Diallo/u });
+    await expect(moved).toBeVisible();
+    // Her row is drawn anew in its section, and its pill keeps the focus.
+    await expect(moved.getByRole('button', { name: 'Status: Qualified' })).toBeFocused();
+    const saved = await apiCall<{ status: string }>(request, owner, 'GET', `${leads}/${amara?.id}`);
+    expect(saved.status).toBe('QUALIFIED');
 
     // Someone else moves Bruno meanwhile: his pill keeps Contacted and says why.
     const current = await apiCall<{ version: number }>(

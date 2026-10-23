@@ -2,7 +2,7 @@
 
 import { RotateCwIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState, useTransition } from 'react';
+import { useLayoutEffect, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -37,6 +37,38 @@ export const useStatusChange = () => {
   };
 
   return { isPending, failure, run };
+};
+
+/**
+ * Keeps the focus on a record's pill when a new status moves its row to another section: the row
+ * is drawn anew there, in the same commit that closes the pill's menu, so the focus falls to the
+ * page; the new pill takes it back. Only for a pill whose menu was used (`markUsed`) or that held
+ * the focus, and only while nothing else has it. Its cell carries `data-pill`.
+ * @param key The record, such as `lead-42`.
+ * @returns The ref for the pill's cell, and `markUsed`, for its menu's choices.
+ */
+export const useKeptFocus = (key: string) => {
+  const cell = useRef<HTMLDivElement>(null);
+  // A layout cleanup runs while the old pill is still on the page.
+  useLayoutEffect(() => {
+    const node = cell.current;
+    return () => {
+      if (node?.dataset.used === 'true' || node?.contains(document.activeElement)) {
+        setTimeout(() => {
+          if (document.activeElement === document.body) {
+            document.querySelector<HTMLElement>(`[data-pill="${CSS.escape(key)}"] button`)?.focus();
+          }
+        }, 0);
+      }
+    };
+  }, [key]);
+  const markUsed = () => {
+    if (cell.current) {
+      cell.current.dataset.used = 'true';
+    }
+  };
+
+  return [cell, markUsed] as const;
 };
 
 /**

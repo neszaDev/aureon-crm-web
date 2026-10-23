@@ -1,10 +1,15 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { changeLeadStatus } from '@/actions/crm/LeadActions';
 import { UnqualifyDialog } from '@/components/crm/lead/UnqualifyDialog';
-import { StatusOption, StatusRefusal, useStatusChange } from '@/components/crm/StatusChange';
+import {
+  StatusOption,
+  StatusRefusal,
+  useKeptFocus,
+  useStatusChange,
+} from '@/components/crm/StatusChange';
 import { StatusPill } from '@/components/crm/StatusPill';
 import type { components } from '@/libs/api/schema';
 import { LEAD_STATUS_TONES } from '@/libs/crm/StatusColors';
@@ -33,7 +38,8 @@ export const LeadStatusPill = (props: {
   const tStatus = useTranslations('LeadStatus');
   const change = useStatusChange();
   const [unqualifying, setUnqualifying] = useState(false);
-  const cell = useRef<HTMLDivElement>(null);
+  const key = `lead-${props.lead.id}`;
+  const [cell, markUsed] = useKeptFocus(key);
   const label = tStatus(`status_${props.lead.status}`);
   const targets = LEAD_TARGETS.filter((status) => status !== props.lead.status);
 
@@ -42,7 +48,7 @@ export const LeadStatusPill = (props: {
   }
 
   return (
-    <div ref={cell} className="flex min-w-0 flex-col items-start">
+    <div ref={cell} data-pill={key} className="flex min-w-0 flex-col items-start">
       <StatusPill
         tone={LEAD_STATUS_TONES[props.lead.status]}
         label={label}
@@ -53,6 +59,7 @@ export const LeadStatusPill = (props: {
             tone={LEAD_STATUS_TONES[status]}
             label={tStatus(`status_${status}`)}
             onSelect={() => {
+              markUsed();
               if (status === 'UNQUALIFIED') {
                 setUnqualifying(true);
                 return;

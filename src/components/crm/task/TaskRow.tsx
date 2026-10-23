@@ -132,13 +132,16 @@ export const TaskRow = (props: {
   );
 
   // Before the row leaves the page (a layout cleanup runs while it is still there): the focus
-  // in it would fall to the page's start.
+  // in it would fall to the page's start. Unless the row's pill took it back in the task's new
+  // section, the list's heading takes it.
   useLayoutEffect(() => {
     const node = row.current;
     return () => {
       if (node?.contains(document.activeElement)) {
         setTimeout(() => {
-          document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)?.focus();
+          if (document.activeElement === document.body) {
+            document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)?.focus();
+          }
         }, 0);
       }
     };

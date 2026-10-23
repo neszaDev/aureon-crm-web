@@ -1,10 +1,15 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { moveDeal } from '@/actions/crm/DealActions';
 import { LostReasonDialog } from '@/components/crm/deal/LostReasonDialog';
-import { StatusOption, StatusRefusal, useStatusChange } from '@/components/crm/StatusChange';
+import {
+  StatusOption,
+  StatusRefusal,
+  useKeptFocus,
+  useStatusChange,
+} from '@/components/crm/StatusChange';
 import { StatusPill } from '@/components/crm/StatusPill';
 import type { StageRef } from '@/libs/crm/Stages';
 import { stageTone } from '@/libs/crm/StatusColors';
@@ -33,7 +38,8 @@ export const DealStagePill = (props: {
   const tBoard = useTranslations('DealBoard');
   const change = useStatusChange();
   const [losing, setLosing] = useState<StageRef>();
-  const cell = useRef<HTMLDivElement>(null);
+  const key = `deal-${props.deal.id}`;
+  const [cell, markUsed] = useKeptFocus(key);
   const move = (stage: StageRef, lostReason?: string) => {
     change.run(
       async () =>
@@ -56,7 +62,7 @@ export const DealStagePill = (props: {
   }
 
   return (
-    <div ref={cell} className="flex min-w-0 flex-col items-start">
+    <div ref={cell} data-pill={key} className="flex min-w-0 flex-col items-start">
       <StatusPill
         {...pill}
         pending={change.isPending}
@@ -68,6 +74,7 @@ export const DealStagePill = (props: {
               tone={stageTone(props.stages, stage.id)}
               label={stage.name}
               onSelect={() => {
+                markUsed();
                 if (stage.kind === 'LOST') {
                   // Not moved yet: the reason comes first.
                   setLosing(stage);

@@ -3264,7 +3264,7 @@
     "empty_text": "Ajoutez les personnes à qui vous pourriez vendre. Faites passer chacune de Nouveau à Qualifié, puis convertissez-la en contact, en entreprise et en affaire.",
     "archived_empty_text": "Les prospects archivés s'affichent ici, prêts à être restaurés.",
     "add_for": "Ajouter un prospect à {name}",
-    "add_in": "Ajouter un prospect en {status}",
+    "add_in": "Ajouter un prospect au statut {status}",
     "add_company": "Entreprise",
     "add_company_placeholder": "Entreprise (facultatif)"
   },
@@ -3517,7 +3517,7 @@
     "empty_text": "Ajoutez une affaire, ou convertissez un prospect qualifié. Chaque affaire passe d'étape en étape, et chaque passage est signé.",
     "archived_empty_text": "Les affaires que vous archivez apparaissent ici, prêtes à être restaurées.",
     "add_for": "Ajouter une affaire à {name}",
-    "add_in": "Ajouter une affaire en {stage}"
+    "add_in": "Ajouter une affaire à l'étape {stage}"
   },
   "NewDealPage": {
     "title": "Nouvelle affaire",

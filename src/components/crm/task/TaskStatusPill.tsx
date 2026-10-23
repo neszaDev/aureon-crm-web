@@ -1,11 +1,16 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { cancelTask, completeTask, reopenTask } from '@/actions/crm/TaskActions';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
-import { StatusOption, StatusRefusal, useStatusChange } from '@/components/crm/StatusChange';
+import {
+  StatusOption,
+  StatusRefusal,
+  useKeptFocus,
+  useStatusChange,
+} from '@/components/crm/StatusChange';
 import { StatusPill } from '@/components/crm/StatusPill';
 import type { components } from '@/libs/api/schema';
 import { TASK_STATUS_TONES } from '@/libs/crm/StatusColors';
@@ -34,7 +39,8 @@ export const TaskStatusPill = (props: {
   const t = useTranslations('TaskRow');
   const change = useStatusChange();
   const [cancelling, setCancelling] = useState(false);
-  const cell = useRef<HTMLDivElement>(null);
+  const key = `task-${props.task.id}`;
+  const [cell, markUsed] = useKeptFocus(key);
   const { status, title } = props.task;
   const run = (action: typeof completeTask, done: string) => {
     change.run(
@@ -47,12 +53,15 @@ export const TaskStatusPill = (props: {
       key={target}
       tone={TASK_STATUS_TONES[target]}
       label={t(`status_${target}`)}
-      onSelect={onSelect}
+      onSelect={() => {
+        markUsed();
+        onSelect();
+      }}
     />
   );
 
   return (
-    <div ref={cell} className="flex min-w-0 flex-col items-start">
+    <div ref={cell} data-pill={key} className="flex min-w-0 flex-col items-start">
       <StatusPill
         tone={TASK_STATUS_TONES[status]}
         label={t(`status_${status}`)}
