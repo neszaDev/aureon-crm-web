@@ -17,8 +17,8 @@ import { Link } from '@/libs/I18nNavigation';
 /**
  * The rail's "+ New": a menu of what to create, each on its space's colour. Every member may
  * create all five (the API's permission matrix), so none is hidden. A company, contact, lead or
- * deal opens its form page; a task, which has no page of its own, opens the task list, whose
- * "New task" asks for it.
+ * deal opens its form page; a task, which has no page of its own, opens the task list with its
+ * dialog open (`?new=1`).
  * @param props Component props.
  * @param props.workspaceId The workspace the records go in.
  * @param props.className Extra classes for the trigger (its colours on the rail).
@@ -41,7 +41,7 @@ export const NewMenu = (props: { workspaceId: number; className?: string }) => {
         <DropdownMenuLabel>{t('new_menu')}</DropdownMenuLabel>
         {SPACES.map((space) => (
           <DropdownMenuItem key={space.key} asChild>
-            <Link href={space.key === 'tasks' ? `${base}/tasks` : `${base}/${space.key}/new`}>
+            <Link href={space.key === 'tasks' ? `${base}/tasks?new=1` : `${base}/${space.key}/new`}>
               <SpaceChip space={space} />
               {t(`new_${space.key}`)}
             </Link>

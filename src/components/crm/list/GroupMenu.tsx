@@ -21,15 +21,18 @@ const NONE = 'none';
 
 /**
  * The toolbar's grouping: None, or one of what the list can be grouped by (`group`). Keeps the
- * other params; grouped, the chip is on and names the grouping.
+ * other params; grouped, the chip is on and names the grouping. The URL leaves the list's own
+ * grouping out, so None is `group=none` on a list grouped by default.
  * @param props Component props.
  * @param props.options Each grouping and its label.
+ * @param props.defaultGroup The list's own grouping, if it has one.
  * @param props.path The list's path.
  * @param props.query The current list query.
  * @returns The menu button.
  */
 export const GroupMenu = (props: {
   options: { group: string; label: string }[];
+  defaultGroup?: string;
   path: string;
   query: ListQuery;
 }) => {
@@ -50,9 +53,12 @@ export const GroupMenu = (props: {
         <DropdownMenuRadioGroup
           value={current?.group ?? NONE}
           onValueChange={(next) => {
+            const unwritten = next === (props.defaultGroup ?? NONE);
             router.push(
-              listHref(props.path, props.query, { group: next === NONE ? undefined : next }),
-              { scroll: false },
+              listHref(props.path, props.query, { group: unwritten ? undefined : next }),
+              {
+                scroll: false,
+              },
             );
           }}
         >

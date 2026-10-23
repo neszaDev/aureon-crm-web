@@ -54,6 +54,7 @@ const renderRow = async (task: Task, compact?: boolean) => {
 
 const checkbox = () => page.getByRole('checkbox', { name: 'Complete Send the proposal' });
 const menu = () => page.getByRole('button', { name: 'More actions for Send the proposal' });
+const pill = (status: string) => page.getByRole('button', { name: `Status: ${status}` });
 
 describe(TaskRow, () => {
   it('completes an open task with the version it was read at, ticked at once', async () => {
@@ -115,20 +116,51 @@ describe(TaskRow, () => {
     await expect.element(page.getByRole('button', { name: 'Reload' })).toBeVisible();
   });
 
-  it('offers Reopen only on a completed or cancelled task, and Cancel only on an open one', async () => {
+  it('moves an open task from its pill to Completed, or to Cancelled once confirmed', async () => {
     await renderRow(TASK);
 
-    await menu().click();
-    await expect.element(page.getByRole('menuitem', { name: 'Cancel task' })).toBeVisible();
-    expect(page.getByRole('menuitem', { name: 'Reopen' }).elements()).toHaveLength(0);
+    await pill('Open').click();
+    await expect.element(page.getByRole('menuitem', { name: 'Cancelled' })).toBeVisible();
+    expect(page.getByRole('menuitem', { name: 'Open' }).elements()).toHaveLength(0);
+    await page.getByRole('menuitem', { name: 'Cancelled' }).click();
+    await expect
+      .element(page.getByRole('alertdialog', { name: 'Cancel “Send the proposal”?' }))
+      .toBeVisible();
+    expect(TaskActions.cancelTask).not.toHaveBeenCalled();
   });
 
-  it('offers Reopen on a completed task', async () => {
+  it('reopens a completed task from its pill, waiting for the server', async () => {
+    const answer = Promise.withResolvers<{ ok: boolean }>();
+    vi.mocked(TaskActions.reopenTask).mockReturnValue(answer.promise);
     await renderRow({ ...TASK, status: 'COMPLETED', completedAt: '2026-10-19T00:00:00Z' });
 
-    await menu().click();
-    await expect.element(page.getByRole('menuitem', { name: 'Reopen' })).toBeVisible();
-    expect(page.getByRole('menuitem', { name: 'Cancel task' }).elements()).toHaveLength(0);
+    await pill('Completed').click();
+    expect(page.getByRole('menuitem', { name: 'Cancelled' }).elements()).toHaveLength(0);
+    await page.getByRole('menuitem', { name: 'Open' }).click();
+
+    expect(TaskActions.reopenTask).toHaveBeenCalledWith(1, 42, 3);
+    // Still Completed, and busy, until the server answers.
+    await expect.element(pill('Completed')).toHaveAttribute('aria-busy', 'true');
+    answer.resolve({ ok: true });
+    await expect.element(page.getByText('“Send the proposal” reopened')).toBeVisible();
+  });
+
+  it('keeps the old status and says why under the pill when the server refuses', async () => {
+    vi.mocked(TaskActions.reopenTask).mockResolvedValue({
+      ok: false,
+      message: "This task's status changed meanwhile. Reload to see it.",
+      conflict: true,
+    });
+    await renderRow({ ...TASK, status: 'COMPLETED', completedAt: '2026-10-19T00:00:00Z' });
+
+    await pill('Completed').click();
+    await page.getByRole('menuitem', { name: 'Open' }).click();
+
+    await expect
+      .element(page.getByRole('alert'))
+      .toHaveTextContent("This task's status changed meanwhile. Reload to see it.");
+    await expect.element(page.getByRole('button', { name: 'Reload' })).toBeVisible();
+    await expect.element(pill('Completed')).not.toHaveAttribute('aria-busy');
   });
 
   it('keeps the due date and the due time each whole, so a narrow cell breaks only between them', async () => {
@@ -149,7 +181,9 @@ describe(TaskRow, () => {
   it('marks an overdue task in words, not colour alone', async () => {
     await renderRow({ ...TASK, overdue: true, dueAt: '2026-10-10T02:00:00Z' });
 
-    await expect.element(page.getByText('Overdue', { exact: false })).toBeVisible();
+    // The due column says so, and on a phone the title's cell (the column is hidden there).
+    await expect.element(page.getByRole('cell', { name: /^Overdue/u })).toBeVisible();
+    expect(page.getByText('Overdue', { exact: true }).elements()).toHaveLength(2);
   });
 
   it('keeps a compact row to its title, due time and menu, with the linked records under the title', async () => {

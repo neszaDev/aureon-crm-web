@@ -13,6 +13,7 @@ import { Link } from '@/libs/I18nNavigation';
  * @param props.title What heads the group: a status pill, or an owner (`OwnerTitle`).
  * @param props.count How many records the group holds (the API's total).
  * @param props.countLabel The count in words, read out, such as "3 companies".
+ * @param props.closed Whether it starts folded.
  * @param props.viewAll The link to all of the group's records, when it shows only some.
  * @param props.viewAll.href The list filtered to the group.
  * @param props.viewAll.label Its text, such as "View all 51".
@@ -23,10 +24,11 @@ export const StatusSection = (props: {
   title: React.ReactNode;
   count: number;
   countLabel: string;
+  closed?: boolean;
   viewAll?: { href: string; label: string };
   children: React.ReactNode;
 }) => (
-  <Collapsible defaultOpen className="flex flex-col">
+  <Collapsible defaultOpen={!props.closed} className="flex flex-col">
     <h3 className="flex">
       <CollapsibleTrigger className="group/section -ml-1.5 flex h-9 max-w-full min-w-0 items-center gap-2 rounded-md px-1.5 text-sm font-semibold outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
         <ChevronDownIcon

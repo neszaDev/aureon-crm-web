@@ -4,7 +4,7 @@ import { actionFailure } from '@/libs/api/ActionFailure';
 import { authedBackend } from '@/libs/api/Backend';
 import { redirect } from '@/libs/I18nNavigation';
 import type { LeadValues } from '@/validations/crm/LeadValidation';
-import { changeLeadStatus, convertLead, createLead, updateLead } from './LeadActions';
+import { addLead, changeLeadStatus, convertLead, createLead, updateLead } from './LeadActions';
 
 vi.mock(import('server-only'), () => ({}));
 // @ts-expect-error -- a translator that gives the key back
@@ -124,6 +124,73 @@ describe(changeLeadStatus, () => {
 
     expect([forged.ok, bare.ok]).toStrictEqual([false, false]);
     expect(POST).not.toHaveBeenCalled();
+  });
+});
+
+describe(addLead, () => {
+  it('splits the name at its first space, then moves the new lead to its group from its first version', async () => {
+    const { POST } = backend(200, { id: 9, version: 0 });
+
+    const result = await addLead(1, { status: 'CONTACTED', ownerId: 4 }, ' Noa  van Park ', 'Acme');
+
+    expect(result).toStrictEqual({ ok: true });
+    expect(POST.mock.calls).toMatchObject([
+      [
+        '/api/v1/workspaces/{workspaceId}/leads',
+        {
+          body: {
+            firstName: 'Noa',
+            lastName: 'van Park',
+            companyName: 'Acme',
+            ownerId: 4,
+            priority: 'MEDIUM',
+          },
+        },
+      ],
+      [
+        '/api/v1/workspaces/{workspaceId}/leads/{id}/status',
+        { params: { path: { workspaceId: 1, id: 9 } }, body: { status: 'CONTACTED', version: 0 } },
+      ],
+    ]);
+    expect(refresh).toHaveBeenCalledWith();
+  });
+
+  it('makes a New lead in one call', async () => {
+    const { POST } = backend(200, { id: 9, version: 0 });
+
+    await addLead(1, { status: 'NEW', ownerId: null }, 'Noa');
+
+    expect(POST).toHaveBeenCalledOnce();
+    expect(firstInit(POST)).toMatchObject({ body: { firstName: 'Noa', ownerId: undefined } });
+  });
+
+  it("gives the name field the backend's refusal of the first or last name", async () => {
+    backend(400);
+    vi.mocked(actionFailure).mockResolvedValueOnce({
+      ok: false,
+      message: 'Check the highlighted fields',
+      fieldErrors: { lastName: 'Too long' },
+    });
+
+    const result = await addLead(1, { status: 'NEW', ownerId: null }, 'Noa Park');
+
+    expect(result.fieldErrors).toStrictEqual({ name: 'Too long' });
+  });
+
+  it('says it was added as New when the move is refused', async () => {
+    const POST = vi
+      .fn<Call>()
+      .mockResolvedValueOnce({ data: { id: 9, version: 0 }, response: new Response(null) })
+      .mockResolvedValueOnce({ response: new Response(null, { status: 403 }) });
+    // @ts-expect-error -- only the calls this action makes
+    vi.mocked(authedBackend).mockResolvedValue({ POST });
+    vi.mocked(actionFailure).mockResolvedValueOnce({ ok: false, message: 'Not allowed' });
+    vi.mocked(refresh).mockClear();
+
+    const result = await addLead(1, { status: 'QUALIFIED', ownerId: null }, 'Noa');
+
+    expect(result).toStrictEqual({ ok: false, message: 'added_as_new' });
+    expect(refresh).toHaveBeenCalledWith();
   });
 });
 

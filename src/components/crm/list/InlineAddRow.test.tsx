@@ -92,4 +92,27 @@ describe(InlineAddRow, () => {
     await expect.element(field).not.toHaveAttribute('readonly');
     await expect.element(field).toHaveValue('');
   });
+
+  it('sends the second value with the name, from either field', async () => {
+    const action = vi
+      .fn<(name: string, extra?: string) => Promise<ActionResult>>()
+      .mockResolvedValue({ ok: true });
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <InlineAddRow
+          label="Add lead"
+          placeholder="Name"
+          extra={{ label: 'Company', placeholder: 'Company (optional)' }}
+          action={action}
+        />
+        <Toaster />
+      </NextIntlClientProvider>,
+    );
+
+    await userEvent.type(page.getByRole('textbox', { name: 'Add lead' }), 'Noa Park');
+    await userEvent.type(page.getByRole('textbox', { name: 'Company' }), ' Acme {Enter}');
+
+    expect(action).toHaveBeenCalledExactlyOnceWith('Noa Park', 'Acme');
+    await expect.element(page.getByRole('textbox', { name: 'Company' })).toHaveValue('');
+  });
 });

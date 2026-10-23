@@ -11,15 +11,54 @@ type Member = components['schemas']['MemberResponse'];
 /** Whom the row that adds a record gives it to: a group's owner, or the list's owner filter's. */
 export type AddOwner = { userId: number; name: string };
 
+/** A section of a grouped list: what heads it, and what narrows the list to it. */
+export type ListGroup = {
+  key: string;
+  /** What heads it: a status pill, or an owner (`OwnerTitle`). */
+  title: React.ReactNode;
+  /** Its filter as URL params: "View all" is the list with them. */
+  params: Record<string, string | undefined>;
+  /**
+   * Whom a record added here belongs to: its owner, none for Unassigned (no add row there: a new
+   * record is always someone's), or, left out, the list's owner filter's.
+   */
+  member?: Member | null;
+  /** Shown even without records, for its add row (the caller's own group). */
+  keep?: boolean;
+  /** Folded at first (closed tasks). */
+  closed?: boolean;
+};
+
+/**
+ * A list's groups by owner as its sections: each headed by the owner, the caller's kept when
+ * empty.
+ * @param groups The owner groups (`ownerGroups`).
+ * @param me The caller's user id.
+ * @param params What "View all" adds besides the owner: `group=none` on a list grouped by default.
+ * @returns The sections.
+ */
+export const ownerSections = (
+  groups: { member?: Member; params: { ownerId: string } }[],
+  me: number,
+  params: Record<string, string> = {},
+): ListGroup[] =>
+  groups.map((group) => ({
+    key: group.params.ownerId,
+    title: <OwnerTitle member={group.member} />,
+    params: { ...params, ...group.params },
+    member: group.member ?? null,
+    keep: group.member?.userId === me,
+  }));
+
 /**
  * A list page's records under their heading (read out, not drawn: the page header shows the
- * count). Ungrouped: the page of rows, the row that adds one, and the pager. Grouped by owner: a
- * collapsible section per group that has records, its first rows, the row that adds one, and
- * "View all N" when it holds more; the caller's own section shows even when empty, for its add row.
- * Without records, the empty state: nothing matches the search and filters (clearing them keeps
- * the grouping and the sort), the archive is empty, or nothing yet (with the create action). The add row shows only where
- * the new record lands in view: not in the archive, nor under Unassigned (a new record is always
- * someone's), nor for an owner the caller may not give records to.
+ * count). Ungrouped: the page of rows, the row that adds one, and the pager. Grouped: a
+ * collapsible section per group that has records (and the one `keep` names), its first rows, the
+ * row that adds one, and "View all N" when it holds more. Without records, the empty state:
+ * nothing matches the search and filters (clearing them keeps the grouping and the sort), the
+ * archive is empty, or nothing yet (with the create action). The add row shows only where the new
+ * record lands in view: not in the archive, nor under Unassigned, nor for an owner the caller may
+ * not give records to; `addRow` may leave out a group of its own (a status no record starts in).
  * @param props Component props.
  * @param props.id The heading's id.
  * @param props.heading The count in words, such as "3 companies".
@@ -35,8 +74,12 @@ export type AddOwner = { userId: number; name: string };
  * @param props.empty.text Nothing yet: what to do about it.
  * @param props.empty.archivedText An empty archive: what shows there.
  * @param props.empty.action Nothing yet: the create button.
+ * @param props.empty.filtered Whether the list is narrowed, when not by its query's filters alone
+ *   (the deals' `view` narrows nothing).
+ * @param props.empty.clearHref The list without its search and filters, when it keeps more than
+ *   the grouping and the sort.
  * @param props.table The rows, as the entity's table.
- * @param props.addRow The row that adds a record, for an owner (none: the caller).
+ * @param props.addRow The row that adds a record, for an owner (none: the caller) and a group.
  * @returns The list.
  */
 export const RecordList = <Row,>(props: {
@@ -45,20 +88,33 @@ export const RecordList = <Row,>(props: {
   path: string;
   query: ListQuery;
   pages: { content: Row[]; totalElements: number }[];
-  groups?: { member?: Member; params: { ownerId: string } }[];
+  groups?: ListGroup[];
   members: Member[];
   me: number;
   mayAssign: boolean;
-  empty: { title: string; text: string; archivedText: string; action: React.ReactNode };
+  empty: {
+    title: string;
+    text: string;
+    archivedText: string;
+    action: React.ReactNode;
+    filtered?: boolean;
+    clearHref?: string;
+  };
   table: (rows: Row[]) => React.ReactNode;
-  addRow: (owner?: AddOwner) => React.ReactElement;
+  addRow: (owner?: AddOwner, group?: string) => React.ReactElement | null;
 }) => {
   const t = useTranslations('ListToolbar');
   const total = props.pages.reduce((sum, page) => sum + page.totalElements, 0);
-  const add = (member?: Member) =>
+  // The owner filter's member (tasks: the assignee's).
+  const { ownerId, assigneeId, group, sort, direction } = props.query.params;
+  const filterOwner = props.members.find((item) => String(item.userId) === (ownerId ?? assigneeId));
+  const add = (member?: Member, key?: string) =>
     !props.query.archived &&
     (member === undefined || member.userId === props.me || props.mayAssign) &&
-    props.addRow(member && { userId: member.userId, name: member.displayName ?? member.email });
+    props.addRow(
+      member && { userId: member.userId, name: member.displayName ?? member.email },
+      key,
+    );
   const [page] = props.pages;
   let empty = (
     <ListEmpty
@@ -68,13 +124,14 @@ export const RecordList = <Row,>(props: {
       action={props.empty.action}
     />
   );
-  if (isFiltered(props.query)) {
-    // The search and filters go; the grouping and the sort stay.
-    const { group, sort, direction } = props.query.params;
+  if (props.empty.filtered ?? isFiltered(props.query)) {
     empty = (
       <ListEmpty
         variant="filtered"
-        clearHref={listHref(props.path, { params: {} }, { group, sort, direction })}
+        // The search and filters go; the grouping and the sort stay.
+        clearHref={
+          props.empty.clearHref ?? listHref(props.path, { params: {} }, { group, sort, direction })
+        }
       />
     );
   } else if (props.query.archived) {
@@ -89,35 +146,38 @@ export const RecordList = <Row,>(props: {
 
   return (
     <section aria-labelledby={props.id} className="flex flex-col gap-5">
-      <h2 id={props.id} className="sr-only">
+      {/* It takes the focus when a row leaves with it (a task completed out of its section). */}
+      <h2 id={props.id} tabIndex={-1} className="sr-only">
         {props.heading(total)}
       </h2>
       {total === 0 && empty}
       {!props.groups && page && page.content.length > 0 && (
         <div>
           {props.table(page.content)}
-          {!props.query.unassigned &&
-            add(props.members.find((item) => String(item.userId) === props.query.params.ownerId))}
+          {!props.query.unassigned && add(filterOwner)}
           <ListPager path={props.path} query={props.query} total={page.totalElements} />
         </div>
       )}
-      {props.groups?.map((group, index) => {
+      {props.groups?.map((item, index) => {
         const rows = props.pages[index];
-        // The caller's own group stays, empty too, for the row that adds one of theirs.
-        const addRow = group.member && add(group.member);
-        if (!rows || (!rows.totalElements && !(addRow && group.member?.userId === props.me))) {
+        const addRow =
+          item.member !== null &&
+          !(item.member === undefined && props.query.unassigned) &&
+          add(item.member ?? filterOwner, item.key);
+        if (!rows || (!rows.totalElements && !(item.keep && addRow))) {
           return null;
         }
         return (
           <StatusSection
-            key={group.params.ownerId}
-            title={<OwnerTitle member={group.member} />}
+            key={item.key}
+            title={item.title}
             count={rows.totalElements}
             countLabel={props.heading(rows.totalElements)}
+            closed={item.closed}
             viewAll={
               rows.totalElements > rows.content.length
                 ? {
-                    href: listHref(props.path, props.query, { group: undefined, ...group.params }),
+                    href: listHref(props.path, props.query, { group: undefined, ...item.params }),
                     label: t('view_all', { count: rows.totalElements }),
                   }
                 : undefined

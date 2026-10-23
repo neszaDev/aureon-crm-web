@@ -1,63 +1,76 @@
-import { cn } from 'cn';
 import { PlusIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { addTask } from '@/actions/crm/TaskActions';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
-import { FilterRow } from '@/components/crm/list/FilterRow';
+import { InlineAddRow } from '@/components/crm/list/InlineAddRow';
 import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
-import { ListEmpty } from '@/components/crm/list/ListEmpty';
-import { ListPager } from '@/components/crm/list/ListPager';
-import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
-import { SearchBox } from '@/components/crm/list/SearchBox';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { ListHeader } from '@/components/crm/list/ListHeader';
+import { RecordList } from '@/components/crm/list/RecordList';
+import { StatusPill } from '@/components/crm/StatusPill';
 import { TaskDialog } from '@/components/crm/task/TaskDialog';
+import { TaskFilters } from '@/components/crm/task/TaskFilters';
 import { TaskTable } from '@/components/crm/task/TaskTable';
 import { Button } from '@/components/ui/button';
-import type { TaskQuery, TaskView } from '@/libs/api/CrmQueries';
-import { getMembers, getTasks, TASK_LIST, TASK_VIEWS, taskViewQuery } from '@/libs/api/CrmQueries';
+import type { TaskQuery } from '@/libs/api/CrmQueries';
+import { getMembers, getTasks, getUndatedTasks, TASK_LIST } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
 import type { ListQuery } from '@/libs/crm/ListQuery';
-import { listHref, parseListQuery } from '@/libs/crm/ListQuery';
+import { groupQuery, listHref, parseListQuery, pastEndHref } from '@/libs/crm/ListQuery';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign } from '@/libs/crm/RecordAccess';
-import { Link, redirect } from '@/libs/I18nNavigation';
+import type { DueBounds, TaskView } from '@/libs/crm/TaskViews';
+import { dueBounds, SECTION_TONES, sectionsOf, viewQuery } from '@/libs/crm/TaskViews';
+import { redirect } from '@/libs/I18nNavigation';
 
 type TasksPageProps = {
   params: Promise<{ locale: string; workspaceId: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
+const MINUTE = 60 * 1000;
+
 /**
- * The task list's query for a view: "Mine" is the caller's open tasks, without the search and
- * the assignee filter, which the other views take.
- * @param view The view.
+ * Reads the Tasks page's list: grouped, each section of the view on its own (its first rows and
+ * its total), all at once; else the view's page.
+ * @param workspaceId The `[workspaceId]` route segment.
  * @param query The page's list query.
- * @returns The backend's query.
+ * @param bounds Where the due sections part.
+ * @returns The sections read (none when ungrouped) and a list per read.
  */
-const viewQuery = (view: TaskView, query: ListQuery<typeof TASK_LIST>): TaskQuery => ({
-  sort: 'DUE_AT',
-  ...taskViewQuery(view, Date.now()),
-  ...(view !== 'mine' && {
+const readTasks = async (
+  workspaceId: string,
+  query: ListQuery<typeof TASK_LIST>,
+  bounds: DueBounds,
+) => {
+  const shared: TaskQuery = {
     q: query.q,
     assigneeId: query.filters.assigneeId,
     unassigned: query.unassigned,
-  }),
-  page: query.page,
-  size: query.size,
-});
+    sort: query.sort,
+    direction: query.direction,
+  };
+  const read = async (view: TaskView | undefined, paging: Pick<TaskQuery, 'page' | 'size'>) =>
+    view === 'undated'
+      ? await getUndatedTasks(workspaceId, { ...shared, ...paging }, bounds.now)
+      : await getTasks(workspaceId, {
+          ...shared,
+          ...viewQuery(view, bounds, query.params.sort !== undefined),
+          ...paging,
+        });
+  if (!query.group) {
+    return { sections: [], lists: [await read(query.filters.view, query)] };
+  }
+  const sections = sectionsOf(query.filters.view);
+  const { page, size } = groupQuery(query, {});
 
-/**
- * Tells whether a view's list is narrowed by the search or the assignee (which "Mine" doesn't
- * take): empty, it says "Nothing matches" rather than that the view itself is empty.
- * @param view The view.
- * @param query The page's list query.
- * @returns Whether it is narrowed.
- */
-const isNarrowed = (view: TaskView, query: ListQuery<typeof TASK_LIST>) =>
-  view !== 'mine' &&
-  [query.q, query.unassigned, query.filters.assigneeId].some((value) => value !== undefined);
+  return {
+    sections,
+    lists: await Promise.all(sections.map(async (section) => await read(section, { page, size }))),
+  };
+};
 
 export async function generateMetadata(props: TasksPageProps): Promise<Metadata> {
   const { locale, workspaceId } = await props.params;
@@ -70,45 +83,64 @@ export default async function TasksPage(props: TasksPageProps) {
   const { locale, workspaceId } = await props.params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'TasksPage' });
-  const query = parseListQuery(TASK_LIST, await props.searchParams);
-  const view = query.filters.view ?? 'mine';
+  const searchParams = await props.searchParams;
+  const query = parseListQuery(TASK_LIST, searchParams);
+  const { view } = query.filters;
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
-  const [{ workspace }, { user }, list, members] = await Promise.all([
+  const [{ workspace }, { user }, members] = await Promise.all([
     getOpenWorkspace(locale, workspaceId),
     getCurrentUser(),
-    getTasks(workspaceId, viewQuery(view, query)),
     getMembers(workspaceId),
   ]);
-  if ([list, members].some((result) => result.unauthorized)) {
+  if (members.unauthorized) {
     return endRejectedSession(locale);
   }
-  if (list.forbidden) {
-    return <ForbiddenNotice page />;
-  }
-  if (!workspace || !user || (!list.tasks && !list.invalid) || !members.members) {
+  if (!workspace || !user || !members.members) {
     throw new Error('Could not load the tasks');
   }
   const path = `/app/${workspace.id}/tasks`;
-  const page = list.tasks;
-  // A page past the end (a hand-edited link, or tasks done meanwhile): the last one instead.
-  if (page && page.content.length === 0 && page.totalPages > 0) {
+  // The old tabs' links: "My tasks" is the Me toggle now, "All" the list without a view.
+  if (view === 'mine' || view === 'all') {
     return redirect({
       href: listHref(path, query, {
-        page: page.totalPages > 1 ? String(page.totalPages - 1) : undefined,
+        view: undefined,
+        ...(view === 'mine' && { assigneeId: String(user.id) }),
       }),
       locale,
     });
   }
-  const narrowed = isNarrowed(view, query);
+  const bounds = dueBounds(workspace.timezone);
+  const { sections, lists } = await readTasks(workspaceId, query, bounds);
+  if (lists.some((list) => list.unauthorized)) {
+    return endRejectedSession(locale);
+  }
+  if (lists.some((list) => list.forbidden)) {
+    return <ForbiddenNotice page />;
+  }
+  if (lists.some((list) => !list.tasks && !list.invalid)) {
+    throw new Error('Could not load the tasks');
+  }
+  const pages = lists.some((list) => list.invalid)
+    ? undefined
+    : lists.flatMap((list) => list.tasks ?? []);
+  const last = pastEndHref(path, query, query.group ? undefined : pages?.[0]);
+  if (last) {
+    return redirect({ href: last, locale });
+  }
+  // A task added for today is due at its last minute.
+  const endOfToday = new Date(Date.parse(bounds.tomorrow) - MINUTE).toISOString();
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader
+    <div className="mx-auto flex max-w-6xl flex-col gap-4">
+      <ListHeader
         title={t('title')}
-        description={t('description')}
+        count={pages?.reduce((sum, item) => sum + item.totalElements, 0)}
         action={
           <TaskDialog
+            // A fresh dialog when "+ New" asks for one on this page.
+            key={String(searchParams.new === '1')}
+            defaultOpen={searchParams.new === '1'}
             trigger={
               <Button>
                 <PlusIcon data-icon="inline-start" />
@@ -124,84 +156,81 @@ export default async function TasksPage(props: TasksPageProps) {
         }
       />
 
-      <nav aria-label={t('views_label')} className="flex flex-wrap gap-1 border-b border-rule">
-        {TASK_VIEWS.map((item) => (
-          <Link
-            key={item}
-            href={listHref(path, query, { view: item === 'mine' ? undefined : item })}
-            aria-current={item === view ? 'page' : undefined}
-            scroll={false}
-            className={cn(
-              '-mb-px flex min-h-9 items-center border-b-2 px-3 text-sm font-medium no-underline transition-colors duration-150',
-              item === view
-                ? 'border-seal-ink font-semibold text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {t(`view_${item}`)}
-          </Link>
-        ))}
-      </nav>
+      <TaskFilters path={path} query={query} me={user} members={members.members} />
 
-      {view !== 'mine' && (
-        <FilterRow label={t('toolbar_label')}>
-          <SearchBox
-            id="tasks-search"
-            label={t('search_label')}
-            placeholder={t('search_placeholder')}
-            param="q"
-            path={path}
-            query={query}
-          />
-          <OwnerFilter
-            id="tasks-assignee"
-            param="assigneeId"
-            me={user}
-            members={members.members}
-            path={path}
-            query={query}
-          />
-        </FilterRow>
-      )}
-
-      {page ? (
-        <section
-          aria-labelledby="tasks-heading"
-          className="overflow-hidden rounded-lg border border-rule bg-card"
-        >
-          <h2
-            id="tasks-heading"
-            tabIndex={-1}
-            className="rounded-sm px-4 pt-4 pb-3 font-semibold sm:px-5"
-          >
-            {t('list_heading', { count: page.totalElements })}
-          </h2>
-          {page.content.length > 0 && (
-            <>
-              <div className="border-t border-rule">
-                <TaskTable
-                  tasks={page.content}
-                  workspaceId={workspace.id}
-                  permissions={workspace.permissions}
-                  me={user.id}
-                  timeZone={workspace.timezone}
-                  headingId="tasks-heading"
-                />
-              </div>
-              <ListPager path={path} query={query} total={page.totalElements} />
-            </>
-          )}
-          {page.content.length === 0 && narrowed && (
-            <ListEmpty variant="filtered" clearHref={listHref(path, { params: {} }, { view })} />
-          )}
-          {page.content.length === 0 && !narrowed && (
-            <ListEmpty
-              variant="none"
-              title={t(`empty_title_${view}`)}
-              text={t(`empty_text_${view}`)}
+      {pages ? (
+        <RecordList
+          id="tasks-heading"
+          heading={(count) => t('list_heading', { count })}
+          path={path}
+          query={query}
+          pages={pages}
+          groups={
+            query.group
+              ? sections.map((section) => {
+                  const closed = section === 'completed' || section === 'cancelled';
+                  return {
+                    key: section,
+                    title: (
+                      <StatusPill
+                        tone={SECTION_TONES[section]}
+                        label={t(`section_${section}`)}
+                        field={closed ? undefined : t('due_label')}
+                      />
+                    ),
+                    params: { group: 'none', view: section },
+                    // Today shows even without tasks, for the row that adds one.
+                    keep: section === 'today',
+                    closed,
+                  };
+                })
+              : undefined
+          }
+          members={members.members}
+          me={user.id}
+          mayAssign={canAssign(workspace)}
+          empty={{
+            title: t('empty_title'),
+            text: t('empty_text'),
+            // Tasks aren't archived.
+            archivedText: '',
+            action: null,
+          }}
+          table={(rows) => (
+            <TaskTable
+              tasks={rows}
+              workspaceId={workspace.id}
+              permissions={workspace.permissions}
+              me={user.id}
+              timeZone={workspace.timezone}
+              headingId="tasks-heading"
+              bounds={bounds}
+              fixed
             />
           )}
-        </section>
+          // A task by its title, due today in the Today section and without a due time in its own
+          // (else none, where the list shows those), for the filter's assignee or the caller.
+          addRow={(owner, key) => {
+            const due = query.group ? key : (view ?? 'undated');
+            if (due !== 'today' && due !== 'undated') {
+              return null;
+            }
+            let label = owner ? t('add_for', { name: owner.name }) : t('new');
+            if (query.group) {
+              label = t(`add_${due}`);
+            }
+            return (
+              <InlineAddRow
+                label={label}
+                placeholder={t('new')}
+                action={addTask.bind(null, workspace.id, {
+                  assigneeId: owner?.userId ?? null,
+                  dueAt: due === 'today' ? endOfToday : null,
+                })}
+              />
+            );
+          }}
+        />
       ) : (
         <InvalidFilterNotice resetHref={path} />
       )}

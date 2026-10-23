@@ -65,6 +65,33 @@ describe(GroupMenu, () => {
   });
 });
 
+describe('GroupMenu on a list grouped by default', () => {
+  it('writes none for None, and leaves the default grouping out', async () => {
+    router.push.mockClear();
+    const spec = { ...SPEC, groups: ['status', 'owner'], defaultGroup: 'status' } as const;
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <GroupMenu
+          options={[
+            { group: 'status', label: 'Status' },
+            { group: 'owner', label: 'Owner' },
+          ]}
+          defaultGroup="status"
+          path={PATH}
+          query={parseListQuery(spec, { group: 'owner' })}
+        />
+      </NextIntlClientProvider>,
+    );
+
+    await page.getByRole('button', { name: 'Group: Owner' }).click();
+    await page.getByRole('menuitemradio', { name: 'None' }).click();
+    expect(router.push).toHaveBeenLastCalledWith(`${PATH}?group=none`, { scroll: false });
+    await page.getByRole('button', { name: 'Group: Owner' }).click();
+    await page.getByRole('menuitemradio', { name: 'Status' }).click();
+    expect(router.push).toHaveBeenLastCalledWith(PATH, { scroll: false });
+  });
+});
+
 describe(SortMenu, () => {
   it('says the sort and its direction, and takes a new sort in its own direction', async () => {
     await renderControls({ sort: 'UPDATED_AT', direction: 'ASC' });
@@ -102,5 +129,27 @@ describe(MeToggle, () => {
     await expect.element(me).toHaveAttribute('aria-pressed', 'true');
     await me.click();
     expect(router.push).toHaveBeenLastCalledWith(PATH, { scroll: false });
+  });
+
+  it('toggles the assignee on a task list', async () => {
+    router.push.mockClear();
+    await render(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <MeToggle
+          me={{ id: 7, email: 'mia@acme.test', role: 'USER', createdAt: '2026-01-01T00:00:00Z' }}
+          param="assigneeId"
+          path="/app/1/tasks"
+          query={parseListQuery(
+            { sorts: ['DUE_AT'], defaultSort: 'DUE_AT', filters: { assigneeId: 'id' } },
+            { assigneeId: '7' },
+          )}
+        />
+      </NextIntlClientProvider>,
+    );
+
+    const me = page.getByRole('button', { name: 'Me', exact: true });
+    await expect.element(me).toHaveAttribute('aria-pressed', 'true');
+    await me.click();
+    expect(router.push).toHaveBeenLastCalledWith('/app/1/tasks', { scroll: false });
   });
 });

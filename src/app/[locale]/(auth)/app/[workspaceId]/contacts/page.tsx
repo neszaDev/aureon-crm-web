@@ -7,7 +7,7 @@ import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { InlineAddRow } from '@/components/crm/list/InlineAddRow';
 import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
 import { ListHeader } from '@/components/crm/list/ListHeader';
-import { RecordList } from '@/components/crm/list/RecordList';
+import { ownerSections, RecordList } from '@/components/crm/list/RecordList';
 import { Button } from '@/components/ui/button';
 import {
   CONTACT_LIST,
@@ -148,7 +148,7 @@ export default async function ContactsPage(props: ContactsPageProps) {
           path={path}
           query={query}
           pages={pages}
-          groups={grouped ? groups : undefined}
+          groups={grouped ? ownerSections(groups, user.id) : undefined}
           members={members.members}
           me={user.id}
           mayAssign={canAssign(workspace)}

@@ -10,22 +10,26 @@ import { listHref } from '@/libs/crm/ListQuery';
 import { useRouter } from '@/libs/I18nNavigation';
 
 /**
- * "Me": a toggle of the owner filter between the caller and anyone (`ownerId`). Pressed while
- * the list shows only the caller's records. Keeps the other params, back to the first page.
+ * "Me": a toggle of the owner filter between the caller and anyone (`ownerId`; tasks: the
+ * assignee, `assigneeId`). Pressed while the list shows only the caller's records. Keeps the
+ * other params, back to the first page.
  * @param props Component props.
  * @param props.me The caller.
+ * @param props.param The URL param it sets: `ownerId` (default) or `assigneeId`.
  * @param props.path The list's path.
  * @param props.query The current list query.
  * @returns The toggle.
  */
 export const MeToggle = (props: {
   me: components['schemas']['UserResponse'];
+  param?: 'ownerId' | 'assigneeId';
   path: string;
   query: ListQuery;
 }) => {
   const t = useTranslations('ListToolbar');
   const router = useRouter();
-  const mine = props.query.params.ownerId === String(props.me.id);
+  const param = props.param ?? 'ownerId';
+  const mine = props.query.params[param] === String(props.me.id);
 
   return (
     <button
@@ -34,7 +38,7 @@ export const MeToggle = (props: {
       className={cn(toolClass(mine), TOOL_PART)}
       onClick={() => {
         router.push(
-          listHref(props.path, props.query, { ownerId: mine ? undefined : String(props.me.id) }),
+          listHref(props.path, props.query, { [param]: mine ? undefined : String(props.me.id) }),
           { scroll: false },
         );
       }}

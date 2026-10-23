@@ -1,12 +1,11 @@
-import { cn } from 'cn';
 import { PlusIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { DealFilters } from '@/components/crm/deal/DealFilters';
 import { DealsBoardSection } from '@/components/crm/deal/DealsBoardSection';
 import { DealsListSection } from '@/components/crm/deal/DealsListSection';
-import { ExportButton } from '@/components/crm/list/ExportButton';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
+import { ListHeader } from '@/components/crm/list/ListHeader';
+import { ViewTabs } from '@/components/crm/list/ViewTabs';
 import { Button } from '@/components/ui/button';
 import {
   DEAL_LIST,
@@ -72,44 +71,25 @@ export default async function DealsPage(props: DealsPageProps) {
   );
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader
+    <div className="mx-auto flex max-w-6xl flex-col gap-4">
+      <ListHeader
         title={t('title')}
-        description={t('description')}
-        action={
-          <>
-            <ExportButton
-              workspaceId={workspace.id}
-              permissions={workspace.permissions}
-              list="deals"
-              params={query.params}
-            />
-            {newDeal}
-          </>
+        action={newDeal}
+        tabs={
+          <ViewTabs
+            label={t('views_label')}
+            tabs={DEAL_VIEWS.map((item) => ({
+              key: item,
+              label: t(`view_${item}`),
+              href: listHref(path, query, { view: item === DEFAULT_DEAL_VIEW ? undefined : item }),
+              current: item === view,
+            }))}
+          />
         }
       />
 
-      <nav aria-label={t('views_label')} className="flex flex-wrap gap-1 border-b border-rule">
-        {DEAL_VIEWS.map((item) => (
-          <Link
-            key={item}
-            href={listHref(path, query, { view: item === DEFAULT_DEAL_VIEW ? undefined : item })}
-            aria-current={item === view ? 'page' : undefined}
-            scroll={false}
-            className={cn(
-              '-mb-px flex min-h-9 items-center border-b-2 px-3 text-sm font-medium no-underline transition-colors duration-150',
-              item === view
-                ? 'border-seal-ink font-semibold text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {t(`view_${item}`)}
-          </Link>
-        ))}
-      </nav>
-
       <DealFilters
-        workspaceId={workspace.id}
+        workspace={workspace}
         view={view}
         path={path}
         query={query}
@@ -131,7 +111,15 @@ export default async function DealsPage(props: DealsPageProps) {
           newDeal={newDeal}
         />
       ) : (
-        <DealsListSection workspace={workspace} query={query} path={path} newDeal={newDeal} />
+        <DealsListSection
+          workspace={workspace}
+          me={user.id}
+          members={members.members}
+          stages={stages.stages}
+          query={query}
+          path={path}
+          newDeal={newDeal}
+        />
       )}
     </div>
   );

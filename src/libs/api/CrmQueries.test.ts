@@ -15,8 +15,8 @@ import {
   getPipelineReport,
   getReminders,
   getWonLostReport,
+  getUndatedTasks,
   LEAD_LIST,
-  taskViewQuery,
 } from './CrmQueries';
 
 vi.mock(import('server-only'), () => ({}));
@@ -107,36 +107,70 @@ describe(getDeals, () => {
   });
 });
 
-describe(taskViewQuery, () => {
-  // Sunday 18 October 2026, 03:00 UTC.
-  const NOW = Date.UTC(2026, 9, 18, 3);
+const task = (id: number, dueAt?: string) => ({ id, ...(dueAt && { dueAt }) });
 
-  it('asks for the caller\'s open tasks on "mine"', () => {
-    expect(taskViewQuery('mine', NOW)).toStrictEqual({ mine: true, status: ['OPEN'] });
-  });
-
-  it('asks for overdue tasks on "overdue"', () => {
-    expect(taskViewQuery('overdue', NOW)).toStrictEqual({ overdue: true });
-  });
-
-  it('asks for the open tasks due from now to a week on, now included and the week out', () => {
-    expect(taskViewQuery('upcoming', NOW)).toStrictEqual({
-      status: ['OPEN'],
-      dueFrom: '2026-10-18T03:00:00.000Z',
-      dueTo: '2026-10-25T03:00:00.000Z',
+describe(getUndatedTasks, () => {
+  it('reads the undated tasks after the dated ones, across two pages of the open list', async () => {
+    // 3 + 2 dated tasks, then 4 undated: with pages of 2, the undated begin on page 2's second row.
+    const GET = vi.fn<
+      (path: string, init: { params: { query: Record<string, unknown> } }) => Promise<unknown>
+    >(async (_path, init) => {
+      await Promise.resolve();
+      const { dueTo, dueFrom, page } = init.params.query;
+      const ok = new Response(null, { status: 200 });
+      if (dueTo !== undefined || dueFrom !== undefined) {
+        return { data: { content: [], totalElements: dueTo ? 3 : 2 }, response: ok };
+      }
+      const pages: Record<number, unknown[]> = {
+        2: [task(5, '2026-11-01T00:00:00Z'), task(6)],
+        3: [task(7), task(8)],
+      };
+      return {
+        data: { content: pages[Number(page)] ?? [], totalElements: 9, totalPages: 5 },
+        response: ok,
+      };
     });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    const result = await getUndatedTasks(
+      '7',
+      { q: 'quote', page: 0, size: 2 },
+      '2026-10-18T03:00:00.000Z',
+    );
+
+    expect(result.tasks?.content).toStrictEqual([task(6), task(7)]);
+    expect(result.tasks?.totalElements).toBe(4);
+    expect(result.tasks?.totalPages).toBe(2);
+    expect(GET.mock.calls.map((call) => call[1].params.query)).toStrictEqual([
+      expect.objectContaining({
+        q: 'quote',
+        status: ['OPEN'],
+        dueTo: '2026-10-18T03:00:00.000Z',
+        size: 1,
+      }),
+      expect.objectContaining({
+        q: 'quote',
+        status: ['OPEN'],
+        dueFrom: '2026-10-18T03:00:00.000Z',
+        size: 1,
+      }),
+      expect.objectContaining({ q: 'quote', status: ['OPEN'], sort: 'DUE_AT', page: 2, size: 2 }),
+      expect.objectContaining({ q: 'quote', status: ['OPEN'], sort: 'DUE_AT', page: 3, size: 2 }),
+    ]);
   });
 
-  it('lists completed tasks by when they were last updated, latest first', () => {
-    expect(taskViewQuery('completed', NOW)).toStrictEqual({
-      status: ['COMPLETED'],
-      sort: 'UPDATED_AT',
-      direction: 'DESC',
-    });
-  });
+  it('passes a lost session on', async () => {
+    const GET = vi
+      .fn<() => Promise<unknown>>()
+      .mockResolvedValue({ response: new Response(null, { status: 401 }) });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
 
-  it('adds nothing on "all"', () => {
-    expect(taskViewQuery('all', NOW)).toStrictEqual({});
+    const result = await getUndatedTasks('7', { page: 0, size: 20 }, '2026-10-18T03:00:00.000Z');
+
+    expect(result.tasks).toBeUndefined();
+    expect(result.unauthorized).toBeTruthy();
   });
 });
 

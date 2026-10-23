@@ -6,7 +6,7 @@ import type { components } from '@/libs/api/schema';
 import type { ListSpec } from '@/libs/crm/ListQuery';
 import { ownerGroups, parseListQuery } from '@/libs/crm/ListQuery';
 import messages from '@/locales/en.json';
-import { RecordList } from './RecordList';
+import { ownerSections, RecordList } from './RecordList';
 
 // Plain links: the real ones need Next's runtime.
 // @ts-expect-error -- only what the list uses
@@ -43,7 +43,9 @@ const renderList = async (
   pages: { content: string[]; totalElements: number }[],
 ) => {
   const query = parseListQuery(SPEC, params);
-  const groups = query.group ? ownerGroups(query, [ME, MIA], ME.userId) : undefined;
+  const groups = query.group
+    ? ownerSections(ownerGroups(query, [ME, MIA], ME.userId), ME.userId)
+    : undefined;
   await render(
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
       <RecordList

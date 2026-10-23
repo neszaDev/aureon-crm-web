@@ -9,6 +9,7 @@ import type { components } from '@/libs/api/schema';
 import { redirect } from '@/libs/I18nNavigation';
 import type {
   ConversionValues,
+  LEAD_TARGETS,
   LeadStatusChange,
   LeadValues,
 } from '@/validations/crm/LeadValidation';
@@ -75,6 +76,72 @@ export async function createLead(workspaceId: number, values: LeadValues): Promi
     href: `/app/${workspaceId}/leads/${data.id}`,
     locale: await getLocale(),
   });
+}
+
+/**
+ * Adds a lead from a list (its inline add): its name, split into first and last at the first
+ * space, and its company, owned by the list's group or filter (none: the caller), then moved to
+ * the group's status, from its first version. The list refreshes. A refused name is the `name`
+ * field's error; a move refused after the lead was made says that it was added as New.
+ * @param workspaceId The workspace.
+ * @param preset What the list's group or filter gives it.
+ * @param preset.status The status it lands in (New is where every lead starts).
+ * @param preset.ownerId Its owner; none means the caller.
+ * @param name The name typed.
+ * @param company The company typed, or empty.
+ * @returns Success, or the refusal.
+ */
+export async function addLead(
+  workspaceId: number,
+  preset: { status: Exclude<(typeof LEAD_TARGETS)[number], 'UNQUALIFIED'>; ownerId: number | null },
+  name: string,
+  company = '',
+): Promise<ActionResult> {
+  const t = await getTranslations('LeadForm');
+  const [firstName = '', ...rest] = name.trim().split(/\s+/u);
+  const parsed = LeadValidation.safeParse({
+    firstName,
+    lastName: rest.join(' '),
+    companyName: company,
+    email: '',
+    phone: '',
+    jobTitle: '',
+    sourceId: null,
+    ownerId: preset.ownerId,
+    priority: 'MEDIUM',
+    followUpDate: '',
+    estimatedValue: '',
+    currency: '',
+    notes: '',
+  });
+  if (!parsed.success) {
+    return { ok: false, message: t('error_invalid_input') };
+  }
+
+  const api = await authedBackend();
+  const { data, error, response } = await api.POST('/api/v1/workspaces/{workspaceId}/leads', {
+    params: { path: { workspaceId } },
+    body: leadBody(parsed.data),
+  });
+  if (!response.ok) {
+    const failure = await actionFailure(response, error);
+    const nameError = failure.fieldErrors?.firstName ?? failure.fieldErrors?.lastName;
+    return nameError ? { ...failure, fieldErrors: { name: nameError } } : failure;
+  }
+  if (data && preset.status !== 'NEW') {
+    const moved = await api.POST('/api/v1/workspaces/{workspaceId}/leads/{id}/status', {
+      params: { path: { workspaceId, id: data.id } },
+      body: { status: preset.status, version: data.version },
+    });
+    if (!moved.response.ok) {
+      const failure = await actionFailure(moved.response, moved.error);
+      refresh();
+      return { ok: false, message: t('added_as_new', { reason: failure.message ?? '' }) };
+    }
+  }
+
+  refresh();
+  return { ok: true };
 }
 
 /**

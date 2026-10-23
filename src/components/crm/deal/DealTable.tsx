@@ -1,6 +1,9 @@
 import { useLocale, useTranslations } from 'next-intl';
-import { DealStatusBadge } from '@/components/crm/deal/DealStatusBadge';
+import { archiveDeal, restoreDeal } from '@/actions/crm/DealActions';
+import { DealStagePill } from '@/components/crm/deal/DealStagePill';
 import { OwnerCell } from '@/components/crm/list/OwnerCell';
+import { RecordRow } from '@/components/crm/list/RecordRow';
+import { RowMenu } from '@/components/crm/list/RowMenu';
 import { SortHeader } from '@/components/crm/list/SortHeader';
 import {
   Table,
@@ -13,21 +16,30 @@ import {
 import type { components } from '@/libs/api/schema';
 import { formatDate, formatInstant, formatMoney, recordNumber } from '@/libs/crm/Format';
 import type { ListQuery } from '@/libs/crm/ListQuery';
+import type { Permission } from '@/libs/crm/Permissions';
+import { canEditRecord } from '@/libs/crm/RecordAccess';
+import type { StageRef } from '@/libs/crm/Stages';
 import { Link } from '@/libs/I18nNavigation';
 
 const none = <span className="text-muted-foreground">—</span>;
 
 /**
- * A page of deals: name over its record number, company, stage, amount, expected close date,
- * owner, status and when it last changed. Name, amount, close date and "Updated" sort the list
- * (a deal row carries no creation date, so "Created" sorts from the toolbar). A phone shows name
- * and amount; wider screens add columns.
+ * Deals as list rows: the name with its record number, company, the stage pill (the control that
+ * moves it; won green, lost red), amount, expected close date, owner, when it last changed, and
+ * the row menu (archive, or restore) where the caller may change it. Name, amount, close date and
+ * "Updated" sort the list (a deal row carries no creation date, so "Created" sorts from the
+ * toolbar). A phone shows name and stage; wider screens add columns.
  * @param props Component props.
  * @param props.rows The deals.
  * @param props.path The deals page's path; a deal's page is under it.
  * @param props.companiesPath The companies list; a company's page is under it.
  * @param props.query The current list query.
  * @param props.timeZone The workspace's time zone, for the dates of change.
+ * @param props.stages The pipeline's stages, in order: the stage pill's colours and moves.
+ * @param props.workspace The workspace, with the caller's permissions.
+ * @param props.workspace.id Its id.
+ * @param props.workspace.permissions The caller's permissions.
+ * @param props.me The caller's user id.
  * @returns The table.
  */
 export const DealTable = (props: {
@@ -36,80 +48,109 @@ export const DealTable = (props: {
   companiesPath: string;
   query: ListQuery;
   timeZone: string;
+  stages: StageRef[];
+  workspace: { id: number; permissions: Permission[] };
+  me: number;
 }) => {
   const t = useTranslations('DealTable');
+  const tList = useTranslations('ListToolbar');
   const locale = useLocale();
 
   return (
-    <Table>
+    // Fixed columns, so the groups of a grouped list line up.
+    <Table className="table-fixed">
       <TableHeader>
         <TableRow>
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
-          <TableHead className="max-md:hidden">{t('company')}</TableHead>
-          <TableHead className="max-sm:hidden">{t('stage')}</TableHead>
-          <SortHeader label={t('amount')} sort="AMOUNT" path={props.path} query={props.query} />
+          <TableHead title={t('company')} className="w-[15%] truncate max-md:hidden">
+            {t('company')}
+          </TableHead>
+          <TableHead title={t('stage')} className="w-40 truncate max-sm:w-32">
+            {t('stage')}
+          </TableHead>
+          <SortHeader
+            label={t('amount')}
+            sort="AMOUNT"
+            path={props.path}
+            query={props.query}
+            className="w-[12%] truncate text-right max-sm:hidden"
+          />
           <SortHeader
             label={t('close')}
             sort="EXPECTED_CLOSE_DATE"
             path={props.path}
             query={props.query}
-            className="max-lg:hidden"
+            className="w-[11%] truncate max-lg:hidden"
           />
-          <TableHead className="max-lg:hidden">{t('owner')}</TableHead>
-          <TableHead className="max-lg:hidden">{t('status')}</TableHead>
+          <TableHead title={t('owner')} className="w-[14%] truncate max-lg:hidden">
+            {t('owner')}
+          </TableHead>
           <SortHeader
             label={t('updated')}
             sort="UPDATED_AT"
             path={props.path}
             query={props.query}
-            className="max-xl:hidden"
+            className="w-[11%] truncate max-2xl:hidden"
           />
+          <TableHead className="w-10">
+            <span className="sr-only">{tList('actions')}</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {props.rows.map((deal) => (
-          <TableRow key={deal.id}>
-            <TableCell className="py-2 whitespace-normal">
-              <span className="flex min-w-0 flex-col">
-                <Link
-                  href={`${props.path}/${deal.id}`}
-                  className="text-[0.9375rem] font-medium break-words text-foreground"
-                >
-                  {deal.name}
-                </Link>
-                <span className="font-mono text-[0.8125rem] text-muted-foreground tabular-nums">
-                  {recordNumber('deal', deal.id)}
-                </span>
-              </span>
-            </TableCell>
-            <TableCell className="whitespace-normal max-md:hidden">
-              {deal.company ? (
-                <Link
-                  href={`${props.companiesPath}/${deal.company.id}`}
-                  className="break-words text-foreground"
-                >
-                  {deal.company.name}
-                </Link>
-              ) : (
-                none
-              )}
-            </TableCell>
-            <TableCell className="whitespace-normal max-sm:hidden">{deal.stage.name}</TableCell>
-            <TableCell className="font-medium tabular-nums">
-              {formatMoney(deal.amount, deal.currency, locale)}
-            </TableCell>
-            <TableCell className="tabular-nums max-lg:hidden">
-              {deal.expectedCloseDate ? formatDate(deal.expectedCloseDate, locale) : none}
-            </TableCell>
-            <OwnerCell owner={deal.owner} className="max-lg:hidden" />
-            <TableCell className="max-lg:hidden">
-              <DealStatusBadge status={deal.status} />
-            </TableCell>
-            <TableCell className="text-muted-foreground tabular-nums max-xl:hidden">
-              {formatInstant(deal.updatedAt, { locale, timeZone: props.timeZone })}
-            </TableCell>
-          </TableRow>
-        ))}
+        {props.rows.map((deal) => {
+          const mayEdit = canEditRecord(props.workspace, props.me, deal.owner?.userId);
+          return (
+            <RecordRow
+              key={deal.id}
+              name={deal.name}
+              href={`${props.path}/${deal.id}`}
+              number={recordNumber('deal', deal.id)}
+              menu={
+                mayEdit && (
+                  <RowMenu
+                    name={deal.name}
+                    archived={deal.archived}
+                    archive={archiveDeal.bind(null, props.workspace.id, deal.id)}
+                    restore={restoreDeal.bind(null, props.workspace.id, deal.id)}
+                  />
+                )
+              }
+            >
+              <TableCell className="max-md:hidden">
+                {deal.company ? (
+                  <Link
+                    href={`${props.companiesPath}/${deal.company.id}`}
+                    title={deal.company.name}
+                    className="block truncate text-violet-ink"
+                  >
+                    {deal.company.name}
+                  </Link>
+                ) : (
+                  none
+                )}
+              </TableCell>
+              <TableCell className="whitespace-normal">
+                <DealStagePill
+                  workspaceId={props.workspace.id}
+                  deal={deal}
+                  stages={props.stages}
+                  canEdit={mayEdit}
+                />
+              </TableCell>
+              <TableCell className="truncate text-right font-medium tabular-nums max-sm:hidden">
+                {formatMoney(deal.amount, deal.currency, locale)}
+              </TableCell>
+              <TableCell className="truncate tabular-nums max-lg:hidden">
+                {deal.expectedCloseDate ? formatDate(deal.expectedCloseDate, locale) : none}
+              </TableCell>
+              <OwnerCell owner={deal.owner} className="max-lg:hidden" />
+              <TableCell className="truncate text-muted-foreground tabular-nums max-2xl:hidden">
+                {formatInstant(deal.updatedAt, { locale, timeZone: props.timeZone })}
+              </TableCell>
+            </RecordRow>
+          );
+        })}
       </TableBody>
     </Table>
   );

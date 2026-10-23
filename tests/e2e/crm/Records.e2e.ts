@@ -138,7 +138,7 @@ test.describe('Records', () => {
 
     // One deal, of 1,250.00 euros, on the company that was there.
     await page.goto(`${owner.path}/deals?view=list`);
-    await expect(page.getByRole('heading', { name: '1 deal' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '1 deal', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: DEALS.tablets })).toBeVisible();
     await expect(page.getByText('€1,250.00')).toBeVisible();
     await page.goto(`${owner.path}/companies`);
@@ -180,22 +180,192 @@ test.describe('Records', () => {
     await expect(page.getByText('Task added')).toBeVisible();
     await expect(page.getByRole('link', { name: 'Send proposal' })).toBeVisible();
 
-    // Mine: the open tasks assigned to the caller, with the due time in the workspace's zone.
+    // The tasks by when they are due: tomorrow is in the next 7 days, with the due time in the
+    // workspace's zone.
     await page.goto(`${owner.path}/tasks`);
+    const week = page.getByRole('button', { name: 'Due: Next 7 days 1 task' });
+    await expect(week).toHaveAttribute('aria-expanded', 'true');
     const row = page.getByRole('row', { name: /Send proposal/u });
     await expect(row).toContainText(`${inParis({ dateStyle: 'medium' })}, 9:00 AM`);
     await expect(row).toContainText(DEALS.tablets);
     await expectNoA11yViolations(page);
 
+    // Completed, it leaves the open sections for Completed, which starts folded.
     await page.getByRole('checkbox', { name: 'Complete Send proposal' }).click();
-    await expect(page.getByText('Nothing on your list')).toBeVisible();
-
-    await page
-      .getByRole('navigation', { name: 'Task views' })
-      .getByRole('link', { name: 'Completed' })
-      .click();
-    await expect(page.getByRole('heading', { name: '1 task' })).toBeVisible();
+    await expect(week).toHaveCount(0);
+    const completed = page.getByRole('button', { name: 'Status: Completed 1 task' });
+    await expect(completed).toHaveAttribute('aria-expanded', 'false');
+    await completed.click();
     await expect(page.getByRole('row', { name: /Send proposal/u })).toContainText('Completed');
+
+    // The old Completed tab is the Due chip's.
+    await waitForHydration(page.getByRole('button', { name: 'Due', exact: true }));
+    await page.getByRole('button', { name: 'Due', exact: true }).click();
+    await page.getByRole('option', { name: 'Completed' }).click();
+    await expect(page).toHaveURL(/view=completed/u);
+    await expect(page.getByRole('heading', { name: '1 task', exact: true })).toBeVisible();
+    await expect(page.getByRole('row', { name: /Send proposal/u })).toContainText('Completed');
+  });
+
+  test('sorts tasks into due sections, filters them to the caller, and adds one inline', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const mia = await addMember(request, owner, 'MANAGER', PEOPLE.manager);
+    const day = 24 * 60 * 60 * 1000;
+    await Promise.all([
+      seed(request, owner, 'tasks', {
+        title: 'Chase the invoice',
+        dueAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      }),
+      seed(request, owner, 'tasks', {
+        title: 'Plan the quarter',
+        dueAt: new Date(Date.now() + 10 * day).toISOString(),
+      }),
+      seed(request, owner, 'tasks', { title: 'Tidy the pipeline' }),
+      seed(request, mia, 'tasks', {
+        title: 'Send the samples',
+        dueAt: new Date(Date.now() + 3 * day).toISOString(),
+      }),
+    ]);
+    await signIn(page, { email: owner.email, password: PASSWORD });
+
+    await page.goto(`${owner.path}/tasks`);
+    await expect(page.getByRole('heading', { name: '4 tasks', exact: true })).toBeVisible();
+    // Each in its section, under the pill that heads it; empty sections are left out, but for
+    // Today, kept for its add row.
+    await expect(page.getByRole('heading', { level: 3 })).toHaveText([
+      /Overdue\s*1/u,
+      /Today\s*0/u,
+      /Next 7 days\s*1/u,
+      /Later\s*1/u,
+      /No due date\s*1/u,
+    ]);
+    await expect(page.getByRole('row', { name: /Chase the invoice/u })).toContainText('Overdue');
+    await expectNoA11yViolations(page);
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expectNoA11yViolations(page);
+    await page.emulateMedia({ colorScheme: 'light' });
+
+    // "Me": the caller's tasks only (the old My tasks tab).
+    const me = page.getByRole('button', { name: 'Me', exact: true });
+    await waitForHydration(me);
+    await me.click();
+    await expect(page).toHaveURL(new RegExp(`assigneeId=${owner.userId}`, 'u'));
+    await expect(page.getByRole('heading', { name: '3 tasks', exact: true })).toBeVisible();
+    await expect(page.getByRole('row', { name: /Send the samples/u })).toHaveCount(0);
+
+    // Added from the No due date section: the caller's, without a due time.
+    const add = page.getByRole('textbox', { name: 'Add task without a due date' });
+    await add.fill('Call Mia back');
+    await add.press('Enter');
+    await expect(page.getByText('Call Mia back added')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Due: No due date 2 tasks' })).toBeVisible();
+    await expect(page.getByRole('row', { name: /Call Mia back/u })).toContainText(PEOPLE.owner);
+    await expect(add).toHaveValue('');
+
+    // Added from Today: due at the day's last minute, in the workspace's zone.
+    const today = page.getByRole('textbox', { name: 'Add task due today' });
+    await today.fill('Confirm the delivery');
+    await today.press('Enter');
+    await expect(page.getByRole('button', { name: 'Due: Today 1 task' })).toBeVisible();
+    await expect(page.getByRole('row', { name: /Confirm the delivery/u })).toContainText(
+      '11:59 PM',
+    );
+
+    // An old My tasks link lands on "Me".
+    await page.goto(`${owner.path}/tasks?view=mine`);
+    await expect(page).toHaveURL(new RegExp(`/tasks\\?assigneeId=${owner.userId}$`, 'u'));
+    await expect(page.getByRole('button', { name: 'Me', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+
+    // "+ New → Task" from the rail opens the task dialog at once.
+    const rail = page.getByRole('navigation', { name: 'Quick access' });
+    await waitForHydration(rail.getByRole('button', { name: 'New', exact: true }));
+    await rail.getByRole('button', { name: 'New', exact: true }).click();
+    await page.getByRole('menu', { name: 'New' }).getByRole('menuitem', { name: 'Task' }).click();
+    await expect(page).toHaveURL(/\/tasks\?new=1$/u);
+    await expect(page.getByRole('dialog', { name: 'New task' })).toBeVisible();
+  });
+
+  test('groups leads by status, moves one from its pill, keeps one a refusal names, and adds two inline', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const [amara, bruno] = await Promise.all(
+      MORE_LEADS.slice(0, 3).map(async (lead) => await seed(request, owner, 'leads', lead)),
+    );
+    const leads = `/workspaces/${owner.workspaceId}/leads`;
+    await apiSend(request, owner, 'POST', `${leads}/${bruno?.id}/status`, {
+      status: 'CONTACTED',
+      version: bruno?.version,
+    });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+
+    await page.goto(`${owner.path}/leads`);
+    await expect(page.getByRole('heading', { name: '3 leads', exact: true })).toBeVisible();
+    // A section per status that has leads, headed by the status's own pill.
+    await expect(page.getByRole('heading', { level: 3 })).toHaveText([
+      /New\s*2/u,
+      /Contacted\s*1/u,
+    ]);
+    const section = (status: string) =>
+      page.locator('[data-slot=collapsible]').filter({
+        has: page.getByRole('button', { name: new RegExp(`^Status: ${status} \\d`, 'u') }),
+      });
+    await expectNoA11yViolations(page);
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expectNoA11yViolations(page);
+    await page.emulateMedia({ colorScheme: 'light' });
+
+    // Amara's pill moves her to Qualified once the server says so.
+    const amaraRow = page.getByRole('row', { name: /Amara Diallo/u });
+    const amaraPill = amaraRow.getByRole('button', { name: 'Status: New' });
+    await waitForHydration(amaraPill);
+    await amaraPill.click();
+    await expect(page.getByRole('menuitem')).toHaveText(['Contacted', 'Qualified', 'Unqualified']);
+    await page.getByRole('menuitem', { name: 'Qualified', exact: true }).click();
+    await expect(page.getByText('Status changed to Qualified')).toBeVisible();
+    await expect(section('Qualified').getByRole('row', { name: /Amara Diallo/u })).toBeVisible();
+    const moved = await apiCall<{ status: string }>(request, owner, 'GET', `${leads}/${amara?.id}`);
+    expect(moved.status).toBe('QUALIFIED');
+
+    // Someone else moves Bruno meanwhile: his pill keeps Contacted and says why.
+    const current = await apiCall<{ version: number }>(
+      request,
+      owner,
+      'GET',
+      `${leads}/${bruno?.id}`,
+    );
+    await apiSend(request, owner, 'POST', `${leads}/${bruno?.id}/status`, {
+      status: 'QUALIFIED',
+      version: current.version,
+    });
+    const brunoRow = page.getByRole('row', { name: /Bruno Ferreira/u });
+    await brunoRow.getByRole('button', { name: 'Status: Contacted' }).click();
+    await page.getByRole('menuitem', { name: 'New', exact: true }).click();
+    await expect(brunoRow.getByRole('alert')).toContainText('Someone else changed this');
+    await expect(brunoRow.getByRole('button', { name: 'Reload' })).toBeVisible();
+    await expect(brunoRow.getByRole('button', { name: 'Status: Contacted' })).toBeVisible();
+    await expectNoA11yViolations(page);
+
+    // Added inline with its company: in New at once, in Qualified through its move.
+    const addNew = page.getByRole('textbox', { name: 'Add lead to New' });
+    await addNew.fill('Dmitri Volkov');
+    await page.getByRole('textbox', { name: 'Company' }).first().fill(COMPANIES.kestrel.name);
+    await addNew.press('Enter');
+    await expect(page.getByText('Dmitri Volkov added')).toBeVisible();
+    await expect(section('New').getByRole('row', { name: /Dmitri Volkov/u })).toContainText(
+      COMPANIES.kestrel.name,
+    );
+    const addQualified = page.getByRole('textbox', { name: 'Add lead to Qualified' });
+    await addQualified.fill('Elena Garcia');
+    await addQualified.press('Enter');
+    await expect(section('Qualified').getByRole('row', { name: /Elena Garcia/u })).toBeVisible();
   });
 
   test('searches, sorts, filters and pages 25 companies, and finds those of a member who left', async ({

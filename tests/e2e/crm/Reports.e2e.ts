@@ -473,7 +473,7 @@ test.describe('Reports', () => {
 
     await overdue.getByRole('link', { name: 'and 2 more' }).click();
     await expect(page).toHaveURL(`${owner.path}/tasks?view=overdue`);
-    await expect(page.getByRole('heading', { name: '22 tasks' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '22 tasks', exact: true })).toBeVisible();
 
     // The leads' rest: the open leads due up to today, the oldest first.
     await page.goto(reports(owner.path, '?tab=follow-ups'));
@@ -481,7 +481,7 @@ test.describe('Reports', () => {
     await expect(page).toHaveURL(
       `${owner.path}/leads?status=NEW&status=CONTACTED&status=QUALIFIED&followUpBefore=${period.to}&sort=FOLLOW_UP_DATE&direction=ASC`,
     );
-    await expect(page.getByRole('heading', { name: '22 leads' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '22 leads', exact: true })).toBeVisible();
     await expect(page.getByRole('row').nth(1)).toContainText('Noa Park');
   });
 

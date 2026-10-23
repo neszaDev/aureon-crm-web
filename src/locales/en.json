@@ -887,7 +887,13 @@
     "add_hint": "Enter",
     "added": "{name} added",
     "add_name_required": "Type a name, then press Enter.",
-    "add_failed": "That didn't work. Try again."
+    "add_failed": "That didn't work. Try again.",
+    "group_status": "Status",
+    "group_stage": "Stage",
+    "group_due": "Due date",
+    "sort_follow_up": "Follow-up",
+    "sort_priority": "Priority",
+    "sort_due": "Due date"
   },
   "ExportButton": {
     "label": "Export CSV",
@@ -1183,7 +1189,8 @@
     "priority": "Priority",
     "assignee": "Assignee",
     "linked": "Linked to",
-    "actions": "Actions"
+    "actions": "Actions",
+    "status": "Status"
   },
   "TaskPanel": {
     "title": "Tasks",
@@ -1219,28 +1226,26 @@
   },
   "TasksPage": {
     "title": "Tasks",
-    "description": "What needs doing, by whom and when.",
-    "new": "New task",
-    "views_label": "Task views",
-    "view_mine": "My tasks",
-    "view_overdue": "Overdue",
-    "view_upcoming": "Next 7 days",
-    "view_completed": "Completed",
-    "view_all": "All",
+    "new": "Add task",
     "toolbar_label": "Search tasks",
     "search_label": "Search",
     "search_placeholder": "Title",
     "list_heading": "{count, plural, =0 {No tasks} one {# task} other {# tasks}}",
-    "empty_title_mine": "Nothing on your list",
-    "empty_text_mine": "Open tasks assigned to you show here, the soonest due first.",
-    "empty_title_overdue": "Nothing overdue",
-    "empty_text_overdue": "Open tasks past their due time show here.",
-    "empty_title_upcoming": "Nothing due in the next 7 days",
-    "empty_text_upcoming": "Open tasks due from now to a week ahead show here.",
-    "empty_title_completed": "No completed tasks yet",
-    "empty_text_completed": "Tasks show here once done, the latest first.",
-    "empty_title_all": "No tasks yet",
-    "empty_text_all": "Add a task here or from a company or contact, with a due time and someone to do it."
+    "empty_title": "No tasks yet",
+    "empty_text": "Add a task here or from a company or contact, with a due time and someone to do it.",
+    "add_for": "Add task for {name}",
+    "add_today": "Add task due today",
+    "add_undated": "Add task without a due date",
+    "due_label": "Due",
+    "due_any": "Any time",
+    "section_overdue": "Overdue",
+    "section_today": "Today",
+    "section_week": "Next 7 days",
+    "section_later": "Later",
+    "section_undated": "No due date",
+    "section_completed": "Completed",
+    "section_cancelled": "Cancelled",
+    "section_upcoming": "Today and the next 7 days"
   },
   "TaskPage": {
     "back": "Back to tasks",
@@ -3242,8 +3247,7 @@
   },
   "LeadsPage": {
     "title": "Leads",
-    "description": "People who may become customers, from first contact to conversion.",
-    "new": "New lead",
+    "new": "Add lead",
     "toolbar_label": "Search leads",
     "search_label": "Search",
     "search_placeholder": "Name, company, email or phone",
@@ -3258,7 +3262,11 @@
     "archived_heading": "{count, plural, =0 {No archived leads} one {# archived lead} other {# archived leads}}",
     "empty_title": "No leads yet",
     "empty_text": "Add the people you may sell to. Move each from New to Qualified, then convert it into a contact, a company and a deal.",
-    "archived_empty_text": "Leads you archive show here, ready to restore."
+    "archived_empty_text": "Leads you archive show here, ready to restore.",
+    "add_for": "Add lead owned by {name}",
+    "add_in": "Add lead to {status}",
+    "add_company": "Company",
+    "add_company_placeholder": "Company (optional)"
   },
   "NewLeadPage": {
     "title": "New lead",
@@ -3304,7 +3312,8 @@
     "cancel": "Cancel",
     "saved": "Saved",
     "error_invalid_input": "Check the highlighted fields",
-    "error_generic": "The lead wasn't created. Try again."
+    "error_generic": "The lead wasn't created. Try again.",
+    "added_as_new": "The lead was added as New, but not moved: {reason}"
   },
   "LeadTable": {
     "name": "Name",
@@ -3470,13 +3479,11 @@
     "amount": "Amount",
     "close": "Expected close",
     "owner": "Owner",
-    "status": "Status",
     "updated": "Updated"
   },
   "DealsPage": {
     "title": "Deals",
-    "description": "Every deal in your pipeline, by stage. Drag a card to move it, or open the list to filter and sort.",
-    "new": "New deal",
+    "new": "Add deal",
     "views_label": "View",
     "view_board": "Board",
     "view_list": "List",
@@ -3508,7 +3515,9 @@
     "archived_heading": "{count, plural, =0 {No archived deals} one {# archived deal} other {# archived deals}}",
     "empty_title": "No deals yet",
     "empty_text": "Add a deal, or convert a qualified lead into one. Each deal moves from stage to stage, and every move is signed.",
-    "archived_empty_text": "Deals you archive show here, ready to restore."
+    "archived_empty_text": "Deals you archive show here, ready to restore.",
+    "add_for": "Add deal owned by {name}",
+    "add_in": "Add deal in {stage}"
   },
   "NewDealPage": {
     "title": "New deal",
@@ -3648,5 +3657,10 @@
     "more": "and {count, number} more",
     "count": "{count, number}",
     "unassigned": "Unassigned"
+  },
+  "PriorityFlag": {
+    "level_LOW": "Low priority",
+    "level_MEDIUM": "Medium priority",
+    "level_HIGH": "High priority"
   }
 }

@@ -887,7 +887,13 @@
     "add_hint": "Entrée",
     "added": "Ajouté : {name}",
     "add_name_required": "Saisissez un nom, puis appuyez sur Entrée.",
-    "add_failed": "Ça n'a pas fonctionné. Réessayez."
+    "add_failed": "Ça n'a pas fonctionné. Réessayez.",
+    "group_status": "Statut",
+    "group_stage": "Étape",
+    "group_due": "Échéance",
+    "sort_follow_up": "Relance",
+    "sort_priority": "Priorité",
+    "sort_due": "Échéance"
   },
   "ExportButton": {
     "label": "Exporter en CSV",
@@ -1183,7 +1189,8 @@
     "priority": "Priorité",
     "assignee": "Responsable",
     "linked": "Liée à",
-    "actions": "Actions"
+    "actions": "Actions",
+    "status": "Statut"
   },
   "TaskPanel": {
     "title": "Tâches",
@@ -1219,28 +1226,26 @@
   },
   "TasksPage": {
     "title": "Tâches",
-    "description": "Ce qu'il reste à faire, par qui et pour quand.",
-    "new": "Nouvelle tâche",
-    "views_label": "Vues des tâches",
-    "view_mine": "Mes tâches",
-    "view_overdue": "En retard",
-    "view_upcoming": "7 prochains jours",
-    "view_completed": "Terminées",
-    "view_all": "Toutes",
+    "new": "Ajouter une tâche",
     "toolbar_label": "Rechercher des tâches",
     "search_label": "Rechercher",
     "search_placeholder": "Titre",
     "list_heading": "{count, plural, =0 {Aucune tâche} one {# tâche} other {# tâches}}",
-    "empty_title_mine": "Rien sur votre liste",
-    "empty_text_mine": "Les tâches ouvertes qui vous sont attribuées s'affichent ici, les plus urgentes d'abord.",
-    "empty_title_overdue": "Rien en retard",
-    "empty_text_overdue": "Les tâches ouvertes dont l'échéance est passée s'affichent ici.",
-    "empty_title_upcoming": "Rien à rendre dans les 7 prochains jours",
-    "empty_text_upcoming": "Les tâches ouvertes à rendre d'ici une semaine s'affichent ici.",
-    "empty_title_completed": "Aucune tâche terminée pour l'instant",
-    "empty_text_completed": "Les tâches s'affichent ici une fois terminées, les plus récentes d'abord.",
-    "empty_title_all": "Aucune tâche pour l'instant",
-    "empty_text_all": "Ajoutez une tâche ici ou depuis une entreprise ou un contact, avec une échéance et un responsable."
+    "empty_title": "Aucune tâche pour l'instant",
+    "empty_text": "Ajoutez une tâche ici ou depuis une entreprise ou un contact, avec une échéance et un responsable.",
+    "add_for": "Ajouter une tâche pour {name}",
+    "add_today": "Ajouter une tâche pour aujourd'hui",
+    "add_undated": "Ajouter une tâche sans échéance",
+    "due_label": "Échéance",
+    "due_any": "N'importe quand",
+    "section_overdue": "En retard",
+    "section_today": "Aujourd'hui",
+    "section_week": "7 prochains jours",
+    "section_later": "Plus tard",
+    "section_undated": "Sans échéance",
+    "section_completed": "Terminées",
+    "section_cancelled": "Annulées",
+    "section_upcoming": "Aujourd'hui et les 7 prochains jours"
   },
   "TaskPage": {
     "back": "Retour aux tâches",
@@ -3242,8 +3247,7 @@
   },
   "LeadsPage": {
     "title": "Prospects",
-    "description": "Les personnes qui pourraient devenir clientes, du premier contact à la conversion.",
-    "new": "Nouveau prospect",
+    "new": "Ajouter un prospect",
     "toolbar_label": "Rechercher des prospects",
     "search_label": "Rechercher",
     "search_placeholder": "Nom, entreprise, e-mail ou téléphone",
@@ -3258,7 +3262,11 @@
     "archived_heading": "{count, plural, =0 {Aucun prospect archivé} one {# prospect archivé} other {# prospects archivés}}",
     "empty_title": "Aucun prospect pour l'instant",
     "empty_text": "Ajoutez les personnes à qui vous pourriez vendre. Faites passer chacune de Nouveau à Qualifié, puis convertissez-la en contact, en entreprise et en affaire.",
-    "archived_empty_text": "Les prospects archivés s'affichent ici, prêts à être restaurés."
+    "archived_empty_text": "Les prospects archivés s'affichent ici, prêts à être restaurés.",
+    "add_for": "Ajouter un prospect à {name}",
+    "add_in": "Ajouter un prospect en {status}",
+    "add_company": "Entreprise",
+    "add_company_placeholder": "Entreprise (facultatif)"
   },
   "NewLeadPage": {
     "title": "Nouveau prospect",
@@ -3304,7 +3312,8 @@
     "cancel": "Annuler",
     "saved": "Enregistré",
     "error_invalid_input": "Vérifiez les champs signalés",
-    "error_generic": "Le prospect n'a pas été créé. Réessayez."
+    "error_generic": "Le prospect n'a pas été créé. Réessayez.",
+    "added_as_new": "Le prospect a été ajouté comme Nouveau, sans être déplacé : {reason}"
   },
   "LeadTable": {
     "name": "Nom",
@@ -3470,13 +3479,11 @@
     "amount": "Montant",
     "close": "Clôture prévue",
     "owner": "Propriétaire",
-    "status": "Statut",
     "updated": "Modifiée"
   },
   "DealsPage": {
     "title": "Affaires",
-    "description": "Toutes les affaires de votre pipeline, par étape. Faites glisser une carte pour la déplacer, ou ouvrez la liste pour filtrer et trier.",
-    "new": "Nouvelle affaire",
+    "new": "Ajouter une affaire",
     "views_label": "Vue",
     "view_board": "Tableau",
     "view_list": "Liste",
@@ -3508,7 +3515,9 @@
     "archived_heading": "{count, plural, =0 {Aucune affaire archivée} one {# affaire archivée} other {# affaires archivées}}",
     "empty_title": "Aucune affaire pour l'instant",
     "empty_text": "Ajoutez une affaire, ou convertissez un prospect qualifié. Chaque affaire passe d'étape en étape, et chaque passage est signé.",
-    "archived_empty_text": "Les affaires que vous archivez apparaissent ici, prêtes à être restaurées."
+    "archived_empty_text": "Les affaires que vous archivez apparaissent ici, prêtes à être restaurées.",
+    "add_for": "Ajouter une affaire à {name}",
+    "add_in": "Ajouter une affaire en {stage}"
   },
   "NewDealPage": {
     "title": "Nouvelle affaire",
@@ -3648,5 +3657,10 @@
     "more": "et {count, number} de plus",
     "count": "{count, number}",
     "unassigned": "Sans propriétaire"
+  },
+  "PriorityFlag": {
+    "level_LOW": "Priorité basse",
+    "level_MEDIUM": "Priorité moyenne",
+    "level_HIGH": "Priorité haute"
   }
 }

@@ -68,7 +68,9 @@ them on.
 **Companies** are the organisations you sell to; **contacts** are the people, each linked to a
 company if you like. Create one from its list (**Add company**, **Add contact**, or the **Add**
 row at the end of the list or of a group: a company from its name alone, on Enter; a contact
-through its form, filled in with the group's owner and the list's company) or from the dashboard's
+through its form, filled in with the group's owner and the list's company; a lead from its name and
+company, in its section's status; a deal through its form, in its section's stage; a task from its
+title, due today in Today or without a due date) or from the dashboard's
 quick actions. Once you have entered a company's name or website, or a contact's
 email or phone, the records that look like it are listed, so the same one isn't entered twice;
 saving stays possible.
@@ -95,11 +97,23 @@ server, and keep all of it in the address, so a view can be bookmarked or shared
 - Deals: on the board, search, owner and company; in the list view also contact, stage, status,
   the expected close range, and active or archived.
 
-Companies and contacts keep it on one line: the search, a chip per filter (an active one shows its
-value and an × that clears it), **Group**, the sort, **Me** (only yours) and the archived view; on a
-phone all but the search are behind **Filters**. **Group** by owner shows a section per member (you
-first) and one for the unassigned records, each with its count and at most 50 rows, then **View
-all** for the rest; a section folds away from its heading.
+- Tasks: search (title), when they are due (overdue, today, the next 7 days, later, no due date,
+  completed or cancelled), assignee.
+
+Every list keeps it on one line: the search, a chip per filter (an active one shows its value and
+an × that clears it), **Group**, the sort, **Me** (only yours; for tasks, assigned to you) and the
+archived view; on a phone all but the search are behind **Filters**. A grouped list shows a section
+per group, headed by its status pill or its owner, each with its count and at most 50 rows, then
+**View all** for the rest; a section folds away from its heading. Leads are grouped by status,
+the deal list by stage (the pipeline's order, then Won and Lost) and tasks by when they are due
+(completed and cancelled ones folded at the end), unless **Group** says otherwise (owner, or none);
+companies and contacts aren't, unless you group them by owner.
+
+On leads, deals and tasks the **status pill** in each row is also the control: click it for the
+statuses the record can move to. The pill waits for the server: if the change is refused (your role,
+or someone changed the record first), the old status stays and the reason shows under it, with a
+reload when needed. A lead moved to Unqualified asks why; a deal moved to Lost asks why; a task
+cancelled asks to confirm.
 
 Click a column heading to sort by it (again to reverse it), or use **Sort by** where a list has
 one; choose 20, 50 or 100 rows a page.
@@ -111,7 +125,8 @@ they create and can't give it to someone else.
 
 ## Leads and conversion
 
-A **lead** is someone who may become a customer. **Change status** moves it between **New**,
+A **lead** is someone who may become a customer. Its status pill in the list, or **Change status**
+on its page, moves it between **New**,
 **Contacted**, **Qualified** and **Unqualified** (which asks why; the reason stays on the lead). A
 **follow-up date** puts it in its owner's reminders from that day on, for as long as it is New,
 Contacted or Qualified (a lead without an owner is in nobody's).
@@ -131,7 +146,8 @@ currency. Move a deal to another stage:
 - **drag** its card by the handle;
 - with the **keyboard**: focus the handle, press Space, move with the arrow keys, Space to drop
   (Escape cancels);
-- or open the card's menu: **Move to…**, which is also the **Move** button on the deal's page.
+- or open the card's menu: **Move to…**, which is also the **Move** button on the deal's page;
+- or, in the **List** view, its stage pill.
 
 Dropping on **Lost** asks for the reason first; cancelling leaves the deal where it was. **Won**
 and **Lost** close the deal and take it off the board (their columns count it and link to the
@@ -147,15 +163,17 @@ Only a deal's owner, or a manager, admin or owner, gets the handle, the menu and
 
 ## Tasks and reminders
 
-Create a task from **Tasks → New task**, from the dashboard, or with **Add task** on a record (it is
+Create a task from **Tasks → Add task** (or **+ New → Task** on the rail), its list's add row, the
+dashboard, or **Add task** on a record (it is
 then linked to that record and shows on its page; a task on a contact or deal shows on its company
 too). A task has a title, a due date and time (in the workspace's time zone), a priority and an
 assignee: you, unless you choose someone else, which managers, admins and owners can.
 
-**Tasks** has five views: **My tasks** (your open tasks, soonest due first), **Overdue**, **Next 7
-days**, **Completed** and **All**; all but My tasks can be searched by title and filtered by
-assignee. Tick a task's box to **complete** it; its menu **reopens** or **cancels** it. Tasks are
-never deleted. A task can be changed by its assignee, its creator, or a manager, admin or owner.
+**Tasks** lists the workspace's tasks by when they are due: **Overdue**, **Today**, **Next 7
+days**, **Later** and **No due date**, then **Completed** and **Cancelled**, folded. **Me** keeps
+yours (what the old **My tasks** tab showed); the **Due** chip keeps one of those sections. Tick a
+task's box to **complete** it; its status pill also completes, **cancels** or **reopens** it. Tasks
+are never deleted. A task can be changed by its assignee, its creator, or a manager, admin or owner.
 
 ### Reminders
 

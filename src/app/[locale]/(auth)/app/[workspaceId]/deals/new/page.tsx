@@ -10,6 +10,7 @@ import { endRejectedSession } from '@/libs/api/Session';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign } from '@/libs/crm/RecordAccess';
+import { toRecordId } from '@/libs/crm/WorkspaceId';
 
 type NewDealPageProps = {
   params: Promise<{ locale: string; workspaceId: string }>;
@@ -27,8 +28,12 @@ export default async function NewDealPage(props: NewDealPageProps) {
   const { locale, workspaceId } = await props.params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'NewDealPage' });
-  // From a company's or contact's page (`?companyId=`, `?contactId=`): they come filled in.
+  // From a company's or contact's page (`?companyId=`, `?contactId=`), or a list's group
+  // (`?stageId=`, `?ownerId=`): they come filled in.
   const links = await props.searchParams;
+  const [stageId, ownerId] = [links.stageId, links.ownerId].map((value) =>
+    typeof value === 'string' ? toRecordId(value) : undefined,
+  );
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
   const [{ workspace }, { user }, members, sources, stages, linked] = await Promise.all([
@@ -47,6 +52,13 @@ export default async function NewDealPage(props: NewDealPageProps) {
   }
   const path = `/app/${workspace.id}/deals`;
   const open = stages.stages.filter((stage) => stage.kind === 'OPEN');
+  // An open stage of the pipeline, else the first; another member only for a role that may give
+  // it to them, else the caller.
+  const stage = open.find((item) => item.id === stageId) ?? open[0];
+  const owner =
+    canAssign(workspace) && members.members.some((member) => member.userId === ownerId)
+      ? ownerId
+      : undefined;
   const { company, contact } = linked;
   const origin = company
     ? `/app/${workspace.id}/companies/${company.id}`
@@ -62,15 +74,15 @@ export default async function NewDealPage(props: NewDealPageProps) {
         <DealForm
           action={createDeal.bind(null, workspace.id)}
           // A new deal is the caller's unless they give it to someone else, in the first open
-          // stage unless another is chosen.
+          // stage unless another is chosen (or the list's group named them).
           defaults={{
             name: '',
             amount: '',
             currency: '',
-            stageId: open[0]?.id ?? null,
+            stageId: stage?.id ?? null,
             probability: '',
             expectedCloseDate: '',
-            ownerId: user.id,
+            ownerId: owner ?? user.id,
             companyId: company?.id ?? null,
             contactId: contact?.id ?? null,
             sourceId: null,

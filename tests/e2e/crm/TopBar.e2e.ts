@@ -284,7 +284,8 @@ test.describe('Top bar', () => {
 
     // On the next navigation it is still right, and it follows a task completed from the list.
     await popover.getByRole('link', { name: 'All tasks' }).click();
-    await expect(page).toHaveURL(/\/tasks\?view=mine$/u);
+    // The old My tasks link: the list filtered to the caller ("Me").
+    await expect(page).toHaveURL(/\/tasks\?assigneeId=\d+$/u);
     await expect(popover).toHaveCount(0);
     await expect(bell(2)).toBeVisible();
     await page.getByRole('checkbox', { name: `Complete ${TASKS.call}` }).click();

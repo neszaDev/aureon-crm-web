@@ -26,6 +26,14 @@ import {
 test.use({ viewport: { width: 1536, height: 900 } });
 
 /**
+ * The vertical middle of a box, to tell which line it sits on.
+ * @param box The box, if it is drawn.
+ * @returns Its middle, in whole pixels.
+ */
+const middle = (box: { y: number; height: number } | null) =>
+  Math.round((box?.y ?? 0) + (box?.height ?? 0) / 2);
+
+/**
  * Opens the board, signed in as `member`, once its cards can be dragged.
  * @param page Playwright page.
  * @param member Who signs in.
@@ -318,7 +326,7 @@ test.describe('Pipeline', () => {
     expect(await stageOf(request, owner, mine.id)).toBe('Qualification');
   });
 
-  test('keeps the two actions side by side beside the title at 1024 px', async ({
+  test('keeps the add action beside the title, and the export at the toolbar’s end, at 1024 px', async ({
     page,
     request,
   }) => {
@@ -326,11 +334,15 @@ test.describe('Pipeline', () => {
     const { owner } = await seedBoard(request);
     await openBoard(page, owner, DEALS.tablets);
 
-    const exportCsv = await page.getByRole('button', { name: 'Export CSV' }).boundingBox();
-    const newDeal = await page.getByRole('link', { name: 'New deal' }).first().boundingBox();
-
-    expect(exportCsv?.y).toBe(newDeal?.y);
     const title = page.getByRole('heading', { level: 1, name: 'Deals' });
+    const titleBox = await title.boundingBox();
+    const addDeal = await page.getByRole('link', { name: 'Add deal' }).first().boundingBox();
+    const exportCsv = await page.getByRole('button', { name: 'Export CSV' }).boundingBox();
+    const search = await page.getByRole('searchbox', { name: 'Search' }).boundingBox();
+
+    // Each on its own line's middle: the action by the title, the export by the search.
+    expect(Math.abs(middle(addDeal) - middle(titleBox))).toBeLessThanOrEqual(2);
+    expect(Math.abs(middle(exportCsv) - middle(search))).toBeLessThanOrEqual(2);
     const { height, lineHeight } = await title.evaluate((h1) => ({
       height: h1.getBoundingClientRect().height,
       lineHeight: Number(getComputedStyle(h1).lineHeight.replace(/px$/u, '')),
@@ -354,16 +366,65 @@ test.describe('Pipeline', () => {
     });
     await signIn(page, { email: owner.email, password: PASSWORD });
     await page.goto(`${owner.path}/deals?view=list`);
-    await expect(page.getByRole('heading', { name: '2 deals' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '2 deals', exact: true })).toBeVisible();
     await waitForHydration(page.getByRole('main'));
 
-    await page.getByRole('combobox', { name: 'Source' }).click();
+    await page.getByRole('button', { name: 'Source', exact: true }).click();
     await page.getByRole('option', { name: 'Trade show' }).click();
 
     await expect(page.getByRole('heading', { name: '1 deal', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: DEALS.starterKit })).toBeVisible();
     await expect(page.getByRole('link', { name: DEALS.tablets })).toHaveCount(0);
     await expect(page).toHaveURL(new RegExp(`sourceId=${source.id}`, 'u'));
+  });
+
+  test('groups the deal list by stage, moves a deal from its pill, and asks why before Lost', async ({
+    page,
+    request,
+  }) => {
+    const { owner, mia, deal, stages } = await seedBoard(request);
+    // Won: a deal starts in an open stage, then moves.
+    const won = await seed(request, mia, 'deals', { name: DEALS.retrofit, amount: '800.00' });
+    await apiCall(request, mia, 'POST', `/workspaces/${owner.workspaceId}/deals/${won.id}/move`, {
+      stageId: stages.find((item) => item.kind === 'WON')?.id,
+      version: won.version,
+    });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(`${owner.path}/deals?view=list`);
+
+    // The view tabs, then a section per stage that has deals, in pipeline order, Won after.
+    await expect(
+      page.getByRole('navigation', { name: 'View' }).getByRole('link', { name: 'List' }),
+    ).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('heading', { level: 3 })).toHaveText([
+      /Qualification\s*1/u,
+      /Won\s*1/u,
+    ]);
+    await expectNoA11yViolations(page);
+
+    // From the pill: Lost asks why first, and cancelling moves nothing.
+    const row = page.getByRole('row', { name: new RegExp(DEALS.tablets, 'u') });
+    const pill = row.getByRole('button', { name: 'Stage: Qualification' });
+    await waitForHydration(pill);
+    await pill.click();
+    await page.getByRole('menuitem', { name: 'Lost' }).click();
+    const dialog = page.getByRole('dialog', { name: `Mark ${DEALS.tablets} as lost` });
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    expect(await stageOf(request, owner, deal.id)).toBe('Qualification');
+
+    // An open stage: moved once the server says so, into that stage's section.
+    await pill.click();
+    await page.getByRole('menuitem', { name: 'Proposal' }).click();
+    await expect(page.getByText(`${DEALS.tablets} moved to Proposal`)).toBeVisible();
+    await expect(page.getByRole('heading', { level: 3 })).toHaveText([/Proposal\s*1/u, /Won\s*1/u]);
+    expect(await stageOf(request, owner, deal.id)).toBe('Proposal');
+
+    // The section's add row opens the form in that stage.
+    await page.getByRole('link', { name: 'Add deal in Proposal' }).click();
+    await expect(page).toHaveURL(/\/deals\/new\?stageId=\d+$/u);
+    await expect(page.getByLabel('Stage')).toHaveValue(
+      String(stages.find((item) => item.name === 'Proposal')?.id),
+    );
   });
 
   test('shows a member of another workspace "Workspace not found" for a deal’s URL', async ({

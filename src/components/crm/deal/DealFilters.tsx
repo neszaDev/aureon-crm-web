@@ -1,25 +1,32 @@
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { ArchivedToggle } from '@/components/crm/list/ArchivedToggle';
 import { DateFilter } from '@/components/crm/list/DateFilter';
-import { FilterRow } from '@/components/crm/list/FilterRow';
-import type { FilterOption } from '@/components/crm/list/FilterSelect';
-import { FilterSelect } from '@/components/crm/list/FilterSelect';
+import { ExportButton } from '@/components/crm/list/ExportButton';
+import { FilterChip, OptionsChip } from '@/components/crm/list/FilterChip';
+import { GroupMenu } from '@/components/crm/list/GroupMenu';
+import { ListToolbar } from '@/components/crm/list/ListToolbar';
+import { MeToggle } from '@/components/crm/list/MeToggle';
 import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
 import { RecordFilter } from '@/components/crm/list/RecordFilter';
 import { SearchBox } from '@/components/crm/list/SearchBox';
-import { SortSelect } from '@/components/crm/list/SortSelect';
+import { SortMenu } from '@/components/crm/list/SortMenu';
 import type { DEAL_LIST } from '@/libs/api/CrmQueries';
 import type { components } from '@/libs/api/schema';
+import { formatDate } from '@/libs/crm/Format';
 import type { ListQuery } from '@/libs/crm/ListQuery';
+import { filterCount, listHref } from '@/libs/crm/ListQuery';
+import type { Permission } from '@/libs/crm/Permissions';
 import { DEAL_STATUSES } from '@/validations/crm/DealValidation';
 
 /**
- * The deals page's search and filters. The board takes the text search, the owner (Anyone, Me,
- * Unassigned, each member) and the company; the table adds the stage, the status, the contact,
- * the lead source, the expected close dates (from and until, inclusive), the sort and the
- * archived view.
+ * The deals page's toolbar. The board takes the text search, the owner and company chips and
+ * "Me"; the list adds the contact, stage, status, source and expected close (from, until, both
+ * inclusive) chips, the grouping (stage by default, owner, or none), the sort and the archived
+ * view. The export ends it in both.
  * @param props Component props.
- * @param props.workspaceId The workspace, whose companies and contacts the pickers search.
+ * @param props.workspace The workspace, with the caller's permissions (the export needs `EXPORT`).
+ * @param props.workspace.id Its id; the pickers search its companies and contacts.
+ * @param props.workspace.permissions The caller's permissions.
  * @param props.view The page's view.
  * @param props.path The page's path.
  * @param props.query The current list query.
@@ -33,7 +40,7 @@ import { DEAL_STATUSES } from '@/validations/crm/DealValidation';
  * @returns The toolbar.
  */
 export const DealFilters = (props: {
-  workspaceId: number;
+  workspace: { id: number; permissions: Permission[] };
   view: 'board' | 'list';
   path: string;
   query: ListQuery<typeof DEAL_LIST>;
@@ -48,70 +55,111 @@ export const DealFilters = (props: {
   const t = useTranslations('DealsPage');
   const tStatus = useTranslations('DealStatus');
   const tSource = useTranslations('SourceField');
-  const sourceOptions: FilterOption[] = props.sources.map((source) => ({
-    value: String(source.id),
-    label: source.archived ? tSource('archived', { name: source.name }) : source.name,
-  }));
-
-  return (
-    <FilterRow label={t('toolbar_label')}>
-      <SearchBox
-        id="deals-search"
-        label={t('search_label')}
-        placeholder={t('search_placeholder')}
-        param="q"
+  const tList = useTranslations('ListToolbar');
+  const locale = useLocale();
+  const { companyId, contactId, closeFrom, closeTo } = props.query.filters;
+  const company =
+    companyId === undefined
+      ? null
+      : { id: companyId, label: props.companyName ?? t('company_unknown') };
+  const contact =
+    contactId === undefined
+      ? null
+      : { id: contactId, label: props.contactName ?? t('contact_unknown') };
+  const closeChip = (param: 'closeFrom' | 'closeTo', label: string, value?: string) => (
+    <FilterChip
+      label={label}
+      value={value && formatDate(value, locale)}
+      clearHref={listHref(props.path, props.query, { [param]: undefined })}
+    >
+      <DateFilter
+        id={`deals-${param}`}
+        label={label}
+        param={param}
         path={props.path}
         query={props.query}
-        // A row of its own: the filters would cut its placeholder short.
-        className="basis-full"
+        timeZone={props.timeZone}
       />
+    </FilterChip>
+  );
+
+  return (
+    <ListToolbar
+      label={t('toolbar_label')}
+      // The board counts only the filters it takes.
+      filters={
+        props.view === 'list'
+          ? filterCount(props.query) - (props.query.filters.view ? 1 : 0)
+          : [props.query.unassigned, props.query.filters.ownerId, companyId].filter(
+              (value) => value !== undefined,
+            ).length
+      }
+      search={
+        <SearchBox
+          id="deals-search"
+          label={t('search_label')}
+          placeholder={t('search_placeholder')}
+          param="q"
+          path={props.path}
+          query={props.query}
+          hideLabel
+          className="min-w-40 basis-60 md:max-w-56 md:flex-none"
+        />
+      }
+      end={
+        <ExportButton
+          workspaceId={props.workspace.id}
+          permissions={props.workspace.permissions}
+          list="deals"
+          params={props.query.params}
+        />
+      }
+    >
       <OwnerFilter
         id="deals-owner"
+        chip
         me={props.me}
         members={props.members}
         path={props.path}
         query={props.query}
       />
-      <RecordFilter
-        id="deals-company"
+      <FilterChip
         label={t('company_label')}
-        placeholder={t('company_any')}
-        workspaceId={props.workspaceId}
-        kind="company"
-        param="companyId"
-        value={
-          props.query.filters.companyId === undefined
-            ? null
-            : {
-                id: props.query.filters.companyId,
-                label: props.companyName ?? t('company_unknown'),
-              }
-        }
-        path={props.path}
-        query={props.query}
-      />
+        value={company?.label}
+        clearHref={listHref(props.path, props.query, { companyId: undefined })}
+      >
+        <RecordFilter
+          id="deals-company"
+          label={t('company_label')}
+          placeholder={t('company_any')}
+          workspaceId={props.workspace.id}
+          kind="company"
+          param="companyId"
+          value={company}
+          path={props.path}
+          query={props.query}
+        />
+      </FilterChip>
       {props.view === 'list' && (
         <>
-          <RecordFilter
-            id="deals-contact"
+          <FilterChip
             label={t('contact_label')}
-            placeholder={t('contact_any')}
-            workspaceId={props.workspaceId}
-            kind="contact"
-            param="contactId"
-            value={
-              props.query.filters.contactId === undefined
-                ? null
-                : {
-                    id: props.query.filters.contactId,
-                    label: props.contactName ?? t('contact_unknown'),
-                  }
-            }
-            path={props.path}
-            query={props.query}
-          />
-          <FilterSelect
-            id="deals-stage"
+            value={contact?.label}
+            clearHref={listHref(props.path, props.query, { contactId: undefined })}
+          >
+            <RecordFilter
+              id="deals-contact"
+              label={t('contact_label')}
+              placeholder={t('contact_any')}
+              workspaceId={props.workspace.id}
+              kind="contact"
+              param="contactId"
+              value={contact}
+              path={props.path}
+              query={props.query}
+            />
+          </FilterChip>
+          <OptionsChip
             label={t('stage_label')}
             anyLabel={t('stage_any')}
             missingLabel={t('stage_unknown')}
@@ -120,8 +168,7 @@ export const DealFilters = (props: {
             path={props.path}
             query={props.query}
           />
-          <FilterSelect
-            id="deals-status"
+          <OptionsChip
             label={t('status_label')}
             anyLabel={t('status_any')}
             // The URL holds only a valid status, which the options list.
@@ -134,34 +181,30 @@ export const DealFilters = (props: {
             path={props.path}
             query={props.query}
           />
-          <FilterSelect
-            id="deals-source"
+          <OptionsChip
             label={t('source_label')}
             anyLabel={t('source_any')}
             missingLabel={t('source_unknown')}
             param="sourceId"
-            options={sourceOptions}
+            options={props.sources.map((source) => ({
+              value: String(source.id),
+              label: source.archived ? tSource('archived', { name: source.name }) : source.name,
+            }))}
             path={props.path}
             query={props.query}
           />
-          <DateFilter
-            id="deals-close-from"
-            label={t('close_from_label')}
-            param="closeFrom"
+          {closeChip('closeFrom', t('close_from_label'), closeFrom)}
+          {closeChip('closeTo', t('close_to_label'), closeTo)}
+          <GroupMenu
+            options={[
+              { group: 'stage', label: tList('group_stage') },
+              { group: 'owner', label: tList('group_owner') },
+            ]}
+            defaultGroup="stage"
             path={props.path}
             query={props.query}
-            timeZone={props.timeZone}
           />
-          <DateFilter
-            id="deals-close-to"
-            label={t('close_to_label')}
-            param="closeTo"
-            path={props.path}
-            query={props.query}
-            timeZone={props.timeZone}
-          />
-          <SortSelect
-            id="deals-sort"
+          <SortMenu
             options={[
               { sort: 'UPDATED_AT', label: t('sort_UPDATED_AT') },
               { sort: 'CREATED_AT', label: t('sort_CREATED_AT') },
@@ -172,9 +215,10 @@ export const DealFilters = (props: {
             path={props.path}
             query={props.query}
           />
-          <ArchivedToggle path={props.path} query={props.query} />
         </>
       )}
-    </FilterRow>
+      <MeToggle me={props.me} path={props.path} query={props.query} />
+      {props.view === 'list' && <ArchivedToggle path={props.path} query={props.query} />}
+    </ListToolbar>
   );
 };

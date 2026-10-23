@@ -188,6 +188,22 @@ describe('grouping', () => {
     );
   });
 
+  it('reads a default grouping, which the URL leaves out', () => {
+    const spec = { ...SPEC, groups: ['status', 'owner'], defaultGroup: 'status' } as const;
+
+    expect(parseListQuery(spec, {}).group).toBe('status');
+    expect(parseListQuery(spec, { group: 'status' }).params).toStrictEqual({});
+    expect(parseListQuery(spec, { group: 'nope' }).group).toBe('status');
+  });
+
+  it('keeps none in the URL of a list grouped by default, and another grouping', () => {
+    const spec = { ...SPEC, groups: ['status', 'owner'], defaultGroup: 'status' } as const;
+    const none = parseListQuery(spec, { group: 'none' });
+    expect(none.group).toBeUndefined();
+    expect(none.params).toStrictEqual({ group: 'none' });
+    expect(parseListQuery(spec, { group: 'owner' }).params).toStrictEqual({ group: 'owner' });
+  });
+
   it('drops none, the default, and a group the list does not offer', () => {
     for (const group of ['none', 'status', '']) {
       const query = parseListQuery(SPEC, { group });

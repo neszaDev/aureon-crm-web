@@ -59,6 +59,38 @@ export async function createTask(workspaceId: number, values: TaskValues): Promi
 }
 
 /**
+ * Adds a task by its title alone from a list (its inline add): created as `createTask` does, for
+ * the list's assignee (none: the caller), due when its group is (today's end, or never). A
+ * refused title is the `name` field's error, as the add row names it.
+ * @param workspaceId The workspace.
+ * @param preset What the list's group or filter gives it.
+ * @param preset.assigneeId Its assignee; none means the caller.
+ * @param preset.dueAt Its due time, or none.
+ * @param title The title typed.
+ * @returns Success, or the refusal.
+ */
+export async function addTask(
+  workspaceId: number,
+  preset: { assigneeId: number | null; dueAt: string | null },
+  title: string,
+): Promise<ActionResult> {
+  const result = await createTask(workspaceId, {
+    ...preset,
+    title,
+    description: '',
+    priority: 'MEDIUM',
+    companyId: null,
+    contactId: null,
+    leadId: null,
+    dealId: null,
+  });
+
+  return result.fieldErrors?.title
+    ? { ...result, fieldErrors: { name: result.fieldErrors.title } }
+    : result;
+}
+
+/**
  * Saves a task's fields (`PUT /workspaces/{id}/tasks/{id}`; its status changes only through the
  * actions below) and refreshes the page.
  * @param workspaceId The workspace.

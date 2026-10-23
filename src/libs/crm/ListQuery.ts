@@ -24,13 +24,15 @@ type FilterKind = 'id' | 'text' | 'date' | 'bool' | { enum: readonly string[]; m
 
 /**
  * What a list endpoint takes: its sorts, the default one, and its filters by param name; and
- * what the page can group it by (`group`, the page's own param; ungrouped by default).
+ * what the page can group it by (`group`, the page's own param): ungrouped by default, or by
+ * `defaultGroup`, which `group=none` turns off.
  */
 export type ListSpec = {
   sorts: readonly string[];
   defaultSort: string;
   filters: Record<string, FilterKind>;
   groups?: readonly string[];
+  defaultGroup?: string;
 };
 
 type FilterValue<K> = K extends 'id'
@@ -58,7 +60,7 @@ export type ListQuery<S extends ListSpec = ListSpec> = {
   archived?: true;
   /** Only the records without an owner (`ownerId=unassigned` in the URL). */
   unassigned?: true;
-  /** What the page groups the rows by; ungrouped without it (`group=none`, the default). */
+  /** What the page groups the rows by; ungrouped without it (`group=none`). */
   group?: S extends { groups: readonly (infer G)[] } ? G : never;
   filters: { [K in keyof S['filters']]?: FilterValue<S['filters'][K]> };
   /** The valid params, defaults left out: what `listHref` starts from. */
@@ -195,9 +197,12 @@ export const parseListQuery = <S extends ListSpec>(
   if (archived) {
     params.archived = 'true';
   }
-  const group = spec.groups?.find((item) => item === first(searchParams.group));
-  if (group) {
-    params.group = group;
+  const rawGroup = first(searchParams.group);
+  const group =
+    spec.groups?.find((item) => item === rawGroup) ??
+    (rawGroup === 'none' ? undefined : spec.defaultGroup);
+  if (group !== spec.defaultGroup) {
+    params.group = group ?? 'none';
   }
   const sort = spec.sorts.find((item) => item === first(searchParams.sort)) ?? spec.defaultSort;
   if (sort !== spec.defaultSort) {
@@ -254,6 +259,18 @@ export const isFiltered = <S extends ListSpec>(query: ListQuery<S>) =>
 export const filterCount = <S extends ListSpec>(query: ListQuery<S>) =>
   Object.keys(query.filters).length + (query.unassigned ? 1 : 0);
 
+/**
+ * What reads one group of a grouped list: the list's own search, filters and sort, from the
+ * first row, at most `GROUP_ROWS` of them, with the group's own changes.
+ * @param query The list query.
+ * @param changes What narrows it to the group, such as its filters.
+ * @returns The group's query.
+ */
+export const groupQuery = <S extends ListSpec>(
+  query: ListQuery<S>,
+  changes: Partial<ListQuery<S>>,
+): ListQuery<S> => ({ ...query, page: 0, size: GROUP_ROWS, ...changes });
+
 /** A group of a list grouped by owner: the member (none: Unassigned) and what reads its rows. */
 export type OwnerGroup<S extends ListSpec> = {
   member?: components['schemas']['MemberResponse'];
@@ -278,13 +295,11 @@ export const ownerGroups = <S extends ListSpec & { filters: { ownerId: 'id' } }>
   me: number,
 ): OwnerGroup<S>[] => {
   const only = query.params.ownerId;
-  const narrowed = (ownerId?: number): ListQuery<S> => ({
-    ...query,
-    page: 0,
-    size: GROUP_ROWS,
-    unassigned: ownerId === undefined ? true : undefined,
-    filters: { ...query.filters, ownerId },
-  });
+  const narrowed = (ownerId?: number) =>
+    groupQuery(query, {
+      unassigned: ownerId === undefined ? true : undefined,
+      filters: { ...query.filters, ownerId },
+    });
   const groups: OwnerGroup<S>[] = [
     ...members.filter((member) => member.userId === me),
     ...members.filter((member) => member.userId !== me),

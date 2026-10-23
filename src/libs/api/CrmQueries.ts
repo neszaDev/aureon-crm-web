@@ -3,6 +3,7 @@ import { cache } from 'react';
 import type { ListQuery, ListSpec } from '@/libs/crm/ListQuery';
 import { PAGE_SIZES, parseListQuery } from '@/libs/crm/ListQuery';
 import type { PeriodQuery } from '@/libs/crm/PeriodQuery';
+import { TASK_VIEWS } from '@/libs/crm/TaskViews';
 import { toRecordId, toWorkspaceId } from '@/libs/crm/WorkspaceId';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
 import { DEAL_STATUSES, DEAL_VIEWS } from '@/validations/crm/DealValidation';
@@ -76,7 +77,10 @@ export const CONTACT_LIST = {
   groups: ['owner'],
 } as const satisfies ListSpec;
 
-/** The lead list's sorts and filters (api.md, Leads): several statuses, `followUpBefore` inclusive. */
+/**
+ * The lead list's sorts and filters (api.md, Leads): several statuses, `followUpBefore` inclusive;
+ * the page groups it by status unless told otherwise.
+ */
 export const LEAD_LIST = {
   sorts: ['CREATED_AT', 'UPDATED_AT', 'FOLLOW_UP_DATE', 'PRIORITY', 'NAME'],
   defaultSort: 'CREATED_AT',
@@ -87,12 +91,14 @@ export const LEAD_LIST = {
     priority: { enum: LEAD_PRIORITIES },
     followUpBefore: 'date',
   },
+  groups: ['status', 'owner'],
+  defaultGroup: 'status',
 } as const satisfies ListSpec;
 
 /**
  * The deals page's URL state (api.md, Deals): the view, which the board and the table share with
  * the search, the owner and the company; the rest are the table's. `view` is the page's own, not
- * the backend's.
+ * the backend's; so is `group`: the table groups by stage unless told otherwise.
  */
 export const DEAL_LIST = {
   sorts: ['UPDATED_AT', 'NAME', 'AMOUNT', 'EXPECTED_CLOSE_DATE', 'CREATED_AT'],
@@ -108,45 +114,22 @@ export const DEAL_LIST = {
     closeFrom: 'date',
     closeTo: 'date',
   },
+  groups: ['stage', 'owner'],
+  defaultGroup: 'stage',
 } as const satisfies ListSpec;
 
-/** The Tasks page's views, its tabs: each a set of the task list's filters and a sort. */
-export const TASK_VIEWS = ['mine', 'overdue', 'upcoming', 'completed', 'all'] as const;
-
-export type TaskView = (typeof TASK_VIEWS)[number];
-
-const WEEK = 7 * 24 * 60 * 60 * 1000;
-
-// What each view asks the task list for. Due times run from `dueFrom` (inclusive) to `dueTo`
-// (exclusive).
-const VIEWS: Record<TaskView, (now: number) => TaskQuery> = {
-  mine: () => ({ mine: true, status: ['OPEN'] }),
-  overdue: () => ({ overdue: true }),
-  upcoming: (now) => ({
-    status: ['OPEN'],
-    dueFrom: new Date(now).toISOString(),
-    dueTo: new Date(now + WEEK).toISOString(),
-  }),
-  completed: () => ({ status: ['COMPLETED'], sort: 'UPDATED_AT', direction: 'DESC' }),
-  all: () => ({}),
-};
-
 /**
- * What a Tasks page view asks the task list for, besides the search, the assignee and the paging.
- * @param view The view.
- * @param now The current time, in milliseconds.
- * @returns The backend's filters and sort for it.
- */
-export const taskViewQuery = (view: TaskView, now: number) => VIEWS[view](now);
-
-/**
- * The Tasks page's URL state: its view, the assignee filter (`unassigned` too) and the paging.
- * The view sets the backend's filters and sort (`getTasks` takes them as the backend names them).
+ * The Tasks page's URL state: its view (a section, `TaskViews`), the assignee filter
+ * (`unassigned` too), the sort, the grouping (by due time unless told otherwise) and the paging.
+ * The view sets the backend's filters (`viewQuery`); `getTasks` takes them as the backend names
+ * them.
  */
 export const TASK_LIST = {
-  sorts: ['DUE_AT'],
+  sorts: ['DUE_AT', 'PRIORITY'],
   defaultSort: 'DUE_AT',
   filters: { view: { enum: TASK_VIEWS }, assigneeId: 'id' },
+  groups: ['due'],
+  defaultGroup: 'due',
 } as const satisfies ListSpec;
 
 /**
@@ -660,6 +643,50 @@ export const getTasks = async (segment: string, query: TaskQuery) => {
   });
 
   return { tasks: data, ...flags(response.status) };
+};
+
+/**
+ * Loads a page of the open tasks without a due time, which the task list can't filter on: they
+ * come after every dated one in its due-time order, so the page is read from there. Two reads
+ * of one row count the dated tasks (due before `split`, and from it), then the page or two of
+ * the open list that hold the wanted rows are read and cut to them.
+ * @param segment The `[workspaceId]` route segment.
+ * @param query The search and the assignee, with the page and its size, as the backend names them.
+ * @param split Any instant: the dated tasks are those due before it and from it.
+ * @returns The page (its total the undated tasks') and the outcome flags.
+ */
+export const getUndatedTasks = async (segment: string, query: TaskQuery, split: string) => {
+  const size = query.size ?? 20;
+  const open: TaskQuery = { ...query, status: ['OPEN'], sort: 'DUE_AT', direction: 'ASC' };
+  const counts = await Promise.all([
+    getTasks(segment, { ...open, dueTo: split, page: 0, size: 1 }),
+    getTasks(segment, { ...open, dueFrom: split, page: 0, size: 1 }),
+  ]);
+  const dated = counts.reduce((sum, read) => sum + (read.tasks?.totalElements ?? 0), 0);
+  const offset = dated + (query.page ?? 0) * size;
+  const first = Math.floor(offset / size);
+  const skip = offset % size;
+  const reads = await Promise.all(
+    [first, ...(skip > 0 ? [first + 1] : [])].map(
+      async (page) => await getTasks(segment, { ...open, page, size }),
+    ),
+  );
+  const failed = [...counts, ...reads].find((read) => !read.tasks);
+  const [head] = reads;
+  if (failed || !head?.tasks) {
+    return failed ?? { tasks: undefined, ...NOT_FOUND };
+  }
+  const total = Math.max(head.tasks.totalElements - dated, 0);
+  const content = reads
+    .flatMap((read) => read.tasks?.content ?? [])
+    .slice(skip, skip + size)
+    // A task given a due time between the reads isn't one.
+    .filter((task) => !task.dueAt);
+
+  return {
+    tasks: { ...head.tasks, content, totalElements: total, totalPages: Math.ceil(total / size) },
+    ...flags(200),
+  };
 };
 
 /**

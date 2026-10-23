@@ -14,7 +14,7 @@ import { ListHeader } from '@/components/crm/list/ListHeader';
 import { ListToolbar } from '@/components/crm/list/ListToolbar';
 import { MeToggle } from '@/components/crm/list/MeToggle';
 import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
-import { RecordList } from '@/components/crm/list/RecordList';
+import { ownerSections, RecordList } from '@/components/crm/list/RecordList';
 import { SearchBox } from '@/components/crm/list/SearchBox';
 import { SortMenu } from '@/components/crm/list/SortMenu';
 import { Button } from '@/components/ui/button';
@@ -179,7 +179,7 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
           path={path}
           query={query}
           pages={pages}
-          groups={grouped ? groups : undefined}
+          groups={grouped ? ownerSections(groups, user.id) : undefined}
           members={members.members}
           me={user.id}
           mayAssign={canAssign(workspace)}

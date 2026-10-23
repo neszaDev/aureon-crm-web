@@ -1,22 +1,31 @@
-import { useTranslations } from 'next-intl';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { StatusFilter } from '@/components/crm/lead/StatusFilter';
 import { ArchivedToggle } from '@/components/crm/list/ArchivedToggle';
 import { DateFilter } from '@/components/crm/list/DateFilter';
-import { FilterRow } from '@/components/crm/list/FilterRow';
-import type { FilterOption } from '@/components/crm/list/FilterSelect';
-import { FilterSelect } from '@/components/crm/list/FilterSelect';
+import { ExportButton } from '@/components/crm/list/ExportButton';
+import { FilterChip, OptionsChip } from '@/components/crm/list/FilterChip';
+import { GroupMenu } from '@/components/crm/list/GroupMenu';
+import { ListToolbar } from '@/components/crm/list/ListToolbar';
+import { MeToggle } from '@/components/crm/list/MeToggle';
 import { OwnerFilter } from '@/components/crm/list/OwnerFilter';
 import { SearchBox } from '@/components/crm/list/SearchBox';
+import { SortMenu } from '@/components/crm/list/SortMenu';
 import type { LEAD_LIST } from '@/libs/api/CrmQueries';
 import type { components } from '@/libs/api/schema';
+import { formatDate } from '@/libs/crm/Format';
 import type { ListQuery } from '@/libs/crm/ListQuery';
+import { filterCount, listHref } from '@/libs/crm/ListQuery';
+import type { Permission } from '@/libs/crm/Permissions';
 import { LEAD_PRIORITIES } from '@/validations/crm/LeadValidation';
 
 /**
- * The lead list's search and filters: the text search, the statuses (any number), the owner
- * (Anyone, Me, Unassigned, each member), the source, the priority, "follow-up before" (inclusive)
- * and the archived view.
+ * The lead list's toolbar: the text search; the status (any number), owner, source, priority and
+ * "follow-up on or before" chips; the grouping (status by default, owner, or none), the sort,
+ * "Me" and the archived view; the export.
  * @param props Component props.
+ * @param props.workspace The workspace, with the caller's permissions (the export needs `EXPORT`).
+ * @param props.workspace.id Its id.
+ * @param props.workspace.permissions The caller's permissions.
  * @param props.path The list's path.
  * @param props.query The current list query.
  * @param props.me The caller.
@@ -26,6 +35,7 @@ import { LEAD_PRIORITIES } from '@/validations/crm/LeadValidation';
  * @returns The toolbar.
  */
 export const LeadFilters = (props: {
+  workspace: { id: number; permissions: Permission[] };
   path: string;
   query: ListQuery<typeof LEAD_LIST>;
   me: components['schemas']['UserResponse'];
@@ -36,43 +46,64 @@ export const LeadFilters = (props: {
   const t = useTranslations('LeadsPage');
   const tSource = useTranslations('SourceField');
   const tStatus = useTranslations('LeadStatus');
-  const sourceOptions: FilterOption[] = props.sources.map((source) => ({
-    value: String(source.id),
-    label: source.archived ? tSource('archived', { name: source.name }) : source.name,
-  }));
+  const tList = useTranslations('ListToolbar');
+  const format = useFormatter();
+  const locale = useLocale();
+  const { status, followUpBefore } = props.query.filters;
 
   return (
-    <FilterRow label={t('toolbar_label')}>
-      <SearchBox
-        id="leads-search"
-        label={t('search_label')}
-        placeholder={t('search_placeholder')}
-        param="q"
-        path={props.path}
-        query={props.query}
-        // A row of its own: the filters would cut its placeholder short.
-        className="basis-full"
-      />
-      <StatusFilter path={props.path} query={props.query} />
+    <ListToolbar
+      label={t('toolbar_label')}
+      filters={filterCount(props.query)}
+      search={
+        <SearchBox
+          id="leads-search"
+          label={t('search_label')}
+          placeholder={t('search_placeholder')}
+          param="q"
+          path={props.path}
+          query={props.query}
+          hideLabel
+          className="min-w-40 basis-60 md:max-w-56 md:flex-none"
+        />
+      }
+      end={
+        <ExportButton
+          workspaceId={props.workspace.id}
+          permissions={props.workspace.permissions}
+          list="leads"
+          params={props.query.params}
+        />
+      }
+    >
+      <FilterChip
+        label={t('status_label')}
+        value={status && format.list(status.map((item) => tStatus(`status_${item}`)))}
+        clearHref={listHref(props.path, props.query, { status: undefined })}
+      >
+        <StatusFilter path={props.path} query={props.query} />
+      </FilterChip>
       <OwnerFilter
         id="leads-owner"
+        chip
         me={props.me}
         members={props.members}
         path={props.path}
         query={props.query}
       />
-      <FilterSelect
-        id="leads-source"
+      <OptionsChip
         label={t('source_label')}
         anyLabel={t('source_any')}
         missingLabel={t('source_unknown')}
         param="sourceId"
-        options={sourceOptions}
+        options={props.sources.map((source) => ({
+          value: String(source.id),
+          label: source.archived ? tSource('archived', { name: source.name }) : source.name,
+        }))}
         path={props.path}
         query={props.query}
       />
-      <FilterSelect
-        id="leads-priority"
+      <OptionsChip
         label={t('priority_label')}
         anyLabel={t('priority_any')}
         // The URL holds only a valid priority, which the options list.
@@ -85,15 +116,42 @@ export const LeadFilters = (props: {
         path={props.path}
         query={props.query}
       />
-      <DateFilter
-        id="leads-follow-up-before"
+      <FilterChip
         label={t('follow_up_label')}
-        param="followUpBefore"
+        value={followUpBefore && formatDate(followUpBefore, locale)}
+        clearHref={listHref(props.path, props.query, { followUpBefore: undefined })}
+      >
+        <DateFilter
+          id="leads-follow-up-before"
+          label={t('follow_up_label')}
+          param="followUpBefore"
+          path={props.path}
+          query={props.query}
+          timeZone={props.timeZone}
+        />
+      </FilterChip>
+      <GroupMenu
+        options={[
+          { group: 'status', label: tList('group_status') },
+          { group: 'owner', label: tList('group_owner') },
+        ]}
+        defaultGroup="status"
         path={props.path}
         query={props.query}
-        timeZone={props.timeZone}
       />
+      <SortMenu
+        options={[
+          { sort: 'CREATED_AT', label: tList('sort_created') },
+          { sort: 'UPDATED_AT', label: tList('sort_updated') },
+          { sort: 'FOLLOW_UP_DATE', label: tList('sort_follow_up') },
+          { sort: 'PRIORITY', label: tList('sort_priority') },
+          { sort: 'NAME', label: tList('sort_name') },
+        ]}
+        path={props.path}
+        query={props.query}
+      />
+      <MeToggle me={props.me} path={props.path} query={props.query} />
       <ArchivedToggle path={props.path} query={props.query} />
-    </FilterRow>
+    </ListToolbar>
   );
 };

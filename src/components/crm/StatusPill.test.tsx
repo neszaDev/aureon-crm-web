@@ -87,5 +87,46 @@ describe(StatusPill, () => {
 
       await expect.element(button).toHaveFocus();
     });
+
+    it('spins and stays shut while a change is on its way, keeping the focus', async () => {
+      await renderPill(
+        <StatusPill
+          tone="amber"
+          label="Qualified"
+          pending
+          menu={<DropdownMenuItem>Contacted</DropdownMenuItem>}
+        />,
+      );
+
+      const button = page.getByRole('button', { name: 'Status: Qualified' });
+      await expect.element(button).toHaveAttribute('aria-busy', 'true');
+      await expect.element(button).toHaveAttribute('aria-disabled', 'true');
+      await userEvent.keyboard('{Tab}');
+      await userEvent.keyboard('{Enter}');
+      // Forced: an aria-disabled button counts as disabled to the test's clicks.
+      await button.click({ force: true });
+
+      await expect.element(button).toHaveFocus();
+      await expect.element(button).toHaveAttribute('aria-expanded', 'false');
+      await expect.element(page.getByRole('menuitem')).not.toBeInTheDocument();
+    });
+
+    it('opens nothing when disabled, and is not busy', async () => {
+      await renderPill(
+        <StatusPill
+          tone="amber"
+          label="Qualified"
+          disabled
+          menu={<DropdownMenuItem>Contacted</DropdownMenuItem>}
+        />,
+      );
+
+      const button = page.getByRole('button', { name: 'Status: Qualified' });
+      await button.click({ force: true });
+
+      await expect.element(button).toHaveAttribute('aria-disabled', 'true');
+      await expect.element(button).not.toHaveAttribute('aria-busy');
+      await expect.element(page.getByRole('menuitem')).not.toBeInTheDocument();
+    });
   });
 });

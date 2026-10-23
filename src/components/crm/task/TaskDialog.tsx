@@ -320,11 +320,15 @@ const TaskForm = (
  * @param props.me The caller's user id.
  * @param props.canAssign Whether the caller may give it to someone else (`RECORDS_ASSIGN`).
  * @param props.timeZone The workspace's time zone, which the due time is entered in.
+ * @param props.defaultOpen Whether it opens at once (the Tasks page's `?new=1`, which the rail's
+ *   "+ New" links to).
  * @returns The trigger and its dialog.
  */
-export const TaskDialog = (props: TaskDialogProps & { trigger: React.ReactElement }) => {
+export const TaskDialog = (
+  props: TaskDialogProps & { trigger: React.ReactElement; defaultOpen?: boolean },
+) => {
   const t = useTranslations('TaskDialog');
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(props.defaultOpen ?? false);
   const inFlight = useInFlight();
 
   return (

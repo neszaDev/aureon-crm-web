@@ -1,5 +1,5 @@
 import { cn } from 'cn';
-import { ChevronDownIcon } from 'lucide-react';
+import { ChevronDownIcon, LoaderCircleIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
   DropdownMenu,
@@ -11,15 +11,32 @@ import type { StatusTone } from '@/libs/crm/StatusColors';
 const PILL =
   'inline-flex h-6 max-w-full min-w-0 items-center gap-1.5 rounded-full border border-transparent bg-(--tone-tint) px-2.5 text-xs font-semibold whitespace-nowrap text-(--tone-ink)';
 
+// The keys that open a menu button's menu.
+const OPENING_KEYS = new Set(['Enter', ' ', 'ArrowDown', 'ArrowUp']);
+
+// Stop the trigger opening its menu (its own handlers skip a prevented event); the button keeps
+// the focus, which a `disabled` one would drop, and Tab still leaves it.
+const stayShut = (event: React.PointerEvent) => {
+  event.preventDefault();
+};
+const stayShutFromKeys = (event: React.KeyboardEvent) => {
+  if (OPENING_KEYS.has(event.key)) {
+    event.preventDefault();
+  }
+};
+
 /**
  * A status as one coloured pill: a lead's status, a deal's stage, a task's state. With a menu it
- * is also the control that changes it.
+ * is also the control that changes it. While a change is on its way (`pending`) it spins in place
+ * of its dot and is busy; `pending` or `disabled`, it keeps the focus but opens nothing.
  * @param props Component props.
  * @param props.tone Its colour (`StatusColors`).
  * @param props.label The status, written in the pill.
  * @param props.field What it is the value of, for assistive technology ("Status" by default):
  *   the pill reads "Status: Qualified".
  * @param props.menu The menu's items; with them the pill is a button that opens it.
+ * @param props.pending Whether a change is on its way: the server hasn't answered yet.
+ * @param props.disabled Whether the menu is off (the caller may not change it).
  * @param props.className Extra classes.
  * @returns The pill.
  */
@@ -28,6 +45,8 @@ export const StatusPill = (props: {
   label: string;
   field?: string;
   menu?: React.ReactNode;
+  pending?: boolean;
+  disabled?: boolean;
   className?: string;
 }) => {
   const t = useTranslations('StatusPill');
@@ -50,6 +69,8 @@ export const StatusPill = (props: {
     );
   }
 
+  const off = props.pending === true || props.disabled === true;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -57,13 +78,23 @@ export const StatusPill = (props: {
           type="button"
           data-tone={props.tone}
           aria-label={name}
+          aria-busy={props.pending ? true : undefined}
+          aria-disabled={off || undefined}
+          onPointerDown={off ? stayShut : undefined}
+          onKeyDown={off ? stayShutFromKeys : undefined}
           className={cn(
             PILL,
-            'pr-1.5 transition-colors duration-150 hover:border-(--tone) aria-expanded:border-(--tone)',
+            'pr-1.5 transition-colors duration-150 aria-expanded:border-(--tone)',
+            off ? 'cursor-default' : 'hover:border-(--tone)',
+            props.disabled && 'opacity-60',
             props.className,
           )}
         >
-          {dot}
+          {props.pending ? (
+            <LoaderCircleIcon aria-hidden="true" className="size-3 shrink-0 animate-spin" />
+          ) : (
+            dot
+          )}
           {label}
           <ChevronDownIcon aria-hidden="true" className="size-3.5 shrink-0" />
         </button>
