@@ -424,12 +424,15 @@ export const stageOf = async (request: APIRequestContext, as: Member, deal: numb
 };
 
 /**
- * Moves the lead on the page to a status from its menu and waits for the page to show it.
+ * Moves the lead on the page to a status from its header's pill and waits for the page to show
+ * it.
  * @param page Playwright page, on a lead.
  * @param status The status's name.
  */
 export const changeStatus = async (page: Page, status: string) => {
-  await page.getByRole('button', { name: 'Change status' }).click();
+  const pill = page.getByRole('button', { name: /^Status: /u });
+  await waitForHydration(pill);
+  await pill.click();
   await page.getByRole('menuitem', { name: status, exact: true }).click();
   await expect(page.getByText(`Status changed to ${status}`)).toBeVisible();
   await expect(page.getByText(`${status}: current`, { exact: true })).toBeVisible();

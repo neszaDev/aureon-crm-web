@@ -203,10 +203,13 @@ test.describe('Top bar', () => {
     await expect(palette.getByRole('option', { name: companyOption })).toBeVisible();
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(new RegExp(`${owner.path}/companies/${company.id}$`, 'u'));
-    await expect(
-      page.getByRole('heading', { level: 1, name: COMPANIES.brightwater.name }),
-    ).toBeVisible();
+    // In the record panel, over the page it was found from.
+    const panel = page.getByRole('dialog', { name: COMPANIES.brightwater.name });
+    await expect(panel.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(palette).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(page).toHaveURL(owner.path);
+    await expect(panel).toHaveCount(0);
 
     // Anywhere in the CRM, and by clicking: the deal opens.
     await page.getByRole('button', { name: 'Search records' }).click();

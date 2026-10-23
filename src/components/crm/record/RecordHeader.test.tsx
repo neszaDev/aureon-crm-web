@@ -2,37 +2,59 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
-import { DealStatusBadge } from '@/components/crm/deal/DealStatusBadge';
+import { StatusPill } from '@/components/crm/StatusPill';
 import messages from '@/locales/en.json';
 import { RecordHeader } from './RecordHeader';
 
-const header = (status: React.ReactNode) => (
+const MIA = { userId: 1, email: 'mia@acme.test', displayName: 'Mia Manager' };
+
+const header = (props: Partial<Parameters<typeof RecordHeader>[0]>) => (
   <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
     <RecordHeader
       number="D-0042"
       name="Acme renewal"
       headingId="heading"
       archived={false}
-      status={status}
+      {...props}
     />
   </NextIntlClientProvider>
 );
 
 describe(RecordHeader, () => {
-  it("shows a deal's status as its DealStatusBadge, in the status's ink", async () => {
-    await render(header(<DealStatusBadge status="WON" />));
+  it('names the record in its focusable heading, under its number', async () => {
+    await render(header({ archived: true }));
 
-    await expect.element(page.getByText('Won')).toHaveClass('text-success');
-    // The badge as it is, not one wrapped in a second.
-    expect(document.querySelectorAll('[data-slot="badge"]')).toHaveLength(1);
+    const heading = page.getByRole('heading', { level: 1, name: 'Acme renewal' });
+
+    await expect.element(heading).toHaveAttribute('id', 'heading');
+    await expect.element(heading).toHaveAttribute('tabindex', '-1');
+    await expect.element(page.getByText('D-0042')).toBeVisible();
+    await expect.element(page.getByText('Archived')).toBeVisible();
   });
 
-  it('shows a status word in a plain outlined badge', async () => {
-    await render(header('Completed'));
+  it('shows its status pill beside its owner, and its track under them', async () => {
+    await render(
+      header({
+        owner: MIA,
+        status: <StatusPill tone="amber" label="Proposal" field="Stage" />,
+        track: <ol aria-label="Stage 2 of 3: Proposal" />,
+      }),
+    );
 
-    const badge = page.getByText('Completed');
+    await expect.element(page.getByText('Stage: Proposal')).toBeInTheDocument();
+    await expect.element(page.getByText('Owned by Mia Manager')).toBeVisible();
+    await expect
+      .element(page.getByRole('list', { name: 'Stage 2 of 3: Proposal' }))
+      .toBeInTheDocument();
+  });
 
-    await expect.element(badge).toBeVisible();
-    expect(badge.element().getAttribute('class')).not.toMatch(/text-(info|success)/u);
+  it('says a task is assigned, and a record without an owner unassigned', async () => {
+    const { rerender } = await render(header({ owner: MIA, assigned: true }));
+
+    await expect.element(page.getByText('Assigned to Mia Manager')).toBeVisible();
+
+    await rerender(header({}));
+
+    await expect.element(page.getByText('Unassigned')).toBeVisible();
   });
 });

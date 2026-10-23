@@ -1,3 +1,14 @@
+import {
+  AlignLeftIcon,
+  Building2Icon,
+  CalendarCheckIcon,
+  CalendarIcon,
+  CircleSlashIcon,
+  MegaphoneIcon,
+  PercentIcon,
+  UserIcon,
+  UserPlusIcon,
+} from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { RecordFacts } from '@/components/crm/record/RecordFacts';
 import type { components } from '@/libs/api/schema';
@@ -7,7 +18,7 @@ import { Link } from '@/libs/I18nNavigation';
 const linkClass = 'text-seal-ink';
 
 /**
- * A deal's details as labelled rows: why it was lost (when it is), its company, contact, source
+ * A deal's properties, icon-labelled: why it was lost (when it is), its company, contact, source
  * and lead as links, its probability (saying "from the stage" when it isn't its own), the
  * expected close date, when it closed, and the notes.
  * @param props Component props.
@@ -25,12 +36,14 @@ export const DealFacts = (props: {
   const locale = useLocale();
   const base = `/app/${props.workspaceId}`;
   const lostReason = {
+    icon: CircleSlashIcon,
     label: t('lost_reason'),
     value: props.deal.lostReason && (
       <span className="whitespace-pre-line">{props.deal.lostReason}</span>
     ),
   };
   const closedOn = {
+    icon: CalendarCheckIcon,
     label: t('closed_on'),
     value:
       props.deal.closedAt &&
@@ -46,6 +59,7 @@ export const DealFacts = (props: {
       facts={[
         ...(props.deal.status === 'LOST' ? [lostReason] : []),
         {
+          icon: Building2Icon,
           label: t('company'),
           value: props.deal.company && (
             <Link href={`${base}/companies/${props.deal.company.id}`} className={linkClass}>
@@ -54,6 +68,7 @@ export const DealFacts = (props: {
           ),
         },
         {
+          icon: UserIcon,
           label: t('contact'),
           value: props.deal.contact && (
             <Link href={`${base}/contacts/${props.deal.contact.id}`} className={linkClass}>
@@ -61,8 +76,9 @@ export const DealFacts = (props: {
             </Link>
           ),
         },
-        { label: t('source'), value: props.deal.source?.name },
+        { icon: MegaphoneIcon, label: t('source'), value: props.deal.source?.name },
         {
+          icon: UserPlusIcon,
           label: t('lead'),
           value: props.deal.lead && (
             <Link href={`${base}/leads/${props.deal.lead.id}`} className={linkClass}>
@@ -71,6 +87,7 @@ export const DealFacts = (props: {
           ),
         },
         {
+          icon: PercentIcon,
           label: t('probability'),
           // The deal's own, or else its stage's, which says so.
           value:
@@ -79,11 +96,13 @@ export const DealFacts = (props: {
               : probability,
         },
         {
+          icon: CalendarIcon,
           label: t('expected_close'),
           value: props.deal.expectedCloseDate && formatDate(props.deal.expectedCloseDate, locale),
         },
         ...(props.deal.closedAt ? [closedOn] : []),
         {
+          icon: AlignLeftIcon,
           label: t('notes'),
           value: props.deal.notes && (
             <span className="whitespace-pre-line">{props.deal.notes}</span>

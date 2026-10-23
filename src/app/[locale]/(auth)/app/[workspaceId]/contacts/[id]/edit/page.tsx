@@ -3,8 +3,8 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { findContactDuplicates, updateContact } from '@/actions/crm/ContactActions';
 import { ContactForm } from '@/components/crm/contact/ContactForm';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
+import { RecordEditPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import {
   getContact,
   getContactTags,
@@ -15,6 +15,7 @@ import {
 import { getCurrentUser } from '@/libs/api/Queries';
 import type { components } from '@/libs/api/schema';
 import { endRejectedSession } from '@/libs/api/Session';
+import { recordNumber } from '@/libs/crm/Format';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
@@ -100,32 +101,28 @@ export default async function EditContactPage(props: EditContactPageProps) {
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader
-        title={t('title', { name: contact.fullName })}
-        description={t('description')}
+    <RecordEditPage
+      number={recordNumber('contact', contact.id)}
+      title={t('title', { name: contact.fullName })}
+      description={t('description')}
+      label={contact.fullName}
+    >
+      <ContactForm
+        action={updateContact.bind(null, workspace.id, contact.id, contact.version)}
+        findDuplicates={findContactDuplicates.bind(null, workspace.id)}
+        defaults={formValues(contact)}
+        company={contact.company ? { id: contact.company.id, label: contact.company.name } : null}
+        recordId={contact.id}
+        workspaceId={workspace.id}
+        members={members.members}
+        me={user.id}
+        canAssign={canAssign(workspace)}
+        sources={sources.sources}
+        tags={tags.tags}
+        listPath={path}
+        cancelHref={`${path}/${contact.id}`}
+        submitLabel={t('submit')}
       />
-      <section
-        aria-label={contact.fullName}
-        className="max-w-3xl rounded-lg border border-rule bg-card p-5 sm:p-6"
-      >
-        <ContactForm
-          action={updateContact.bind(null, workspace.id, contact.id, contact.version)}
-          findDuplicates={findContactDuplicates.bind(null, workspace.id)}
-          defaults={formValues(contact)}
-          company={contact.company ? { id: contact.company.id, label: contact.company.name } : null}
-          recordId={contact.id}
-          workspaceId={workspace.id}
-          members={members.members}
-          me={user.id}
-          canAssign={canAssign(workspace)}
-          sources={sources.sources}
-          tags={tags.tags}
-          listPath={path}
-          cancelHref={`${path}/${contact.id}`}
-          submitLabel={t('submit')}
-        />
-      </section>
-    </div>
+    </RecordEditPage>
   );
 }

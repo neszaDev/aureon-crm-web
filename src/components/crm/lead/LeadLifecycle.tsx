@@ -1,22 +1,23 @@
-import { CheckIcon, XIcon } from 'lucide-react';
+import { cn } from 'cn';
 import { useTranslations } from 'next-intl';
-import { StampBox } from '@/components/crm/StampBox';
 import type { components } from '@/libs/api/schema';
+import { LEAD_STATUS_TONES } from '@/libs/crm/StatusColors';
 
 type Status = components['schemas']['LeadResponse']['status'];
 
 const STEPS: Status[] = ['NEW', 'CONTACTED', 'QUALIFIED', 'CONVERTED'];
 
 /**
- * A lead's lifecycle as a short stamp row: New, Contacted, Qualified, Converted, each a fixed
- * box with its name under it: the stages passed ticked, the current one outlined in ink. An
- * unqualified lead closes the row with Unqualified in place of Converted, and its reason. A
- * lead's history records no signer, so no box carries a seal. Each box says its state to
+ * A lead's lifecycle as its whole track, as a deal's stages are drawn: New, Contacted, Qualified,
+ * Converted, one segment each with its name under it, filled up to the current one in the colour
+ * of the lead's status (the current name in its ink). An unqualified lead closes the track with
+ * Unqualified in place of Converted, and its reason under it; what came before is unknown (a
+ * lead's history records no moves), so those segments stay empty. Each segment says its state to
  * assistive technology.
  * @param props Component props.
  * @param props.status The lead's status.
  * @param props.reason Why it is unqualified.
- * @returns The row, with a line on how the lifecycle runs.
+ * @returns The track.
  */
 export const LeadLifecycle = (props: { status: Status; reason?: string }) => {
   const t = useTranslations('LeadLifecycle');
@@ -26,7 +27,7 @@ export const LeadLifecycle = (props: { status: Status; reason?: string }) => {
   const current = steps.indexOf(props.status);
 
   return (
-    <section className="flex flex-col gap-4 rounded-lg border border-rule bg-card px-5 py-4">
+    <div data-tone={LEAD_STATUS_TONES[props.status]} className="flex flex-col gap-2">
       <ol aria-label={t('label')} className="flex gap-1">
         {steps.map((step, index) => {
           let state: 'reached' | 'current' | 'unknown' | 'blank' = 'blank';
@@ -35,43 +36,40 @@ export const LeadLifecycle = (props: { status: Status; reason?: string }) => {
           } else if (index === current) {
             state = 'current';
           } else if (unqualified) {
-            // Its history before is unknown: only the closing box is marked, the rest says nothing.
+            // Its history before is unknown: only the closing segment is marked.
             state = 'unknown';
           }
           const name = tStatus(`status_${step}`);
+          const filled = state === 'reached' || state === 'current';
 
           return (
-            <li key={step} className="flex w-[4.75rem] flex-col items-center gap-1.5 sm:w-24">
-              <StampBox open={state === 'current'}>
-                {state === 'reached' && (
-                  <CheckIcon aria-hidden="true" className="size-4 text-foreground" />
-                )}
-                {state === 'current' && unqualified && (
-                  <XIcon aria-hidden="true" className="size-4 text-foreground" />
-                )}
-                <span className="sr-only">{t(`state_${state}`, { name })}</span>
-              </StampBox>
+            <li key={step} className="flex min-w-0 flex-1 flex-col gap-1.5">
               <span
                 aria-hidden="true"
-                className="text-center text-[0.8125rem] leading-snug font-medium break-words"
+                className={cn('block h-1.5 rounded-full', filled ? 'bg-(--tone)' : 'bg-rule')}
+              />
+              <span
+                aria-hidden="true"
+                title={name}
+                className={cn(
+                  'text-[0.75rem] leading-snug font-medium [overflow-wrap:anywhere] sm:truncate',
+                  state === 'current' && 'font-semibold text-(--tone-ink)',
+                  !filled && 'text-muted-foreground',
+                )}
               >
                 {name}
               </span>
+              <span className="sr-only">{t(`state_${state}`, { name })}</span>
             </li>
           );
         })}
       </ol>
       {unqualified && props.reason && (
-        <p className="max-w-[65ch] break-words">
-          <span className="text-[0.8125rem] font-medium text-muted-foreground">
-            {t('reason_label')}
-          </span>{' '}
+        <p className="max-w-[65ch] text-[0.8125rem] break-words">
+          <span className="font-medium text-muted-foreground">{t('reason_label')}</span>{' '}
           <span className="whitespace-pre-line">{props.reason}</span>
         </p>
       )}
-      {props.status !== 'CONVERTED' && (
-        <p className="max-w-[65ch] text-sm text-muted-foreground">{t('hint')}</p>
-      )}
-    </section>
+    </div>
   );
 };

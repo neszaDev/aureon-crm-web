@@ -149,6 +149,25 @@ describe(StatusTrack, () => {
     expect(reached).not.toBe(unknown);
   });
 
+  it('writes it all out in full: each stage under its segment, who moved the deal there and when', async () => {
+    await renderTrack(
+      track({ full: true, signatures: { 1: {}, 2: { by: RILEY, at: '2026-10-10T09:00:00Z' } } }),
+    );
+
+    await expect.element(page.getByRole('list', { name: 'Stage 2 of 3: Proposal' })).toBeVisible();
+    // Its name, the days for the current one, then who and when; the same words for assistive
+    // technology after them.
+    expect(names()).toStrictEqual([
+      'QualificationFormer memberQualification: reached, moved here by a former member',
+      'Proposal8dRiley Rep · Oct 10, 2026Proposal: current, 8 days, moved here by Riley Rep on Oct 10, 2026',
+      'NegotiationNegotiation: not reached',
+    ]);
+    const [reached, current, blank] = bars();
+
+    expect(reached).toBe(current);
+    expect(reached).not.toBe(blank);
+  });
+
   it('translates the words, and the dates', async () => {
     await renderTrack(track({ stage: QUALIFICATION, signatures: { 1: { by: MIA } } }), 'fr');
 

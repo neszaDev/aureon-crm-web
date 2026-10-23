@@ -35,12 +35,24 @@ describe(LeadLifecycle, () => {
     ]);
   });
 
-  it('ticks a reached stage in the text colour, never in the seal ink', async () => {
+  it('fills the segments up to the current one, in the colour of its status', async () => {
     await renderRow({ status: 'CONTACTED' });
 
-    const tick = page.getByRole('listitem').first().element().querySelector('svg');
+    const bars = page
+      .getByRole('listitem')
+      .elements()
+      .map((item) => item.querySelector('span')?.className);
 
-    expect(tick).toHaveClass('text-foreground');
+    expect(bars.map((bar) => bar?.includes('bg-(--tone)'))).toStrictEqual([
+      true,
+      true,
+      false,
+      false,
+    ]);
+    expect(page.getByRole('list').element().closest('[data-tone]')).toHaveAttribute(
+      'data-tone',
+      'violet',
+    );
   });
 
   it('shows every stage reached once converted', async () => {

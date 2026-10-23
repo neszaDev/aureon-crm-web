@@ -4,13 +4,13 @@ import { updateLead } from '@/actions/crm/LeadActions';
 import { currencyOptions } from '@/components/crm/CreateWorkspaceForm';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { LeadForm } from '@/components/crm/lead/LeadForm';
+import { RecordEditPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { getLead, getLeadSources, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import type { components } from '@/libs/api/schema';
 import { endRejectedSession } from '@/libs/api/Session';
-import { fullName } from '@/libs/crm/Format';
+import { fullName, recordNumber } from '@/libs/crm/Format';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
@@ -103,27 +103,26 @@ export default async function EditLeadPage(props: EditLeadPageProps) {
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title', { name: fullName(lead) })} description={t('description')} />
-      <section
-        aria-label={fullName(lead)}
-        className="max-w-3xl rounded-lg border border-rule bg-card p-5 sm:p-6"
-      >
-        <LeadForm
-          action={updateLead.bind(null, workspace.id, lead.id, lead.version)}
-          defaults={formValues(lead)}
-          isEdit
-          members={members.members}
-          me={user.id}
-          canAssign={canAssign(workspace)}
-          sources={sources.sources}
-          defaultCurrency={workspace.defaultCurrency}
-          currencies={currencyOptions(locale)}
-          timeZone={workspace.timezone}
-          cancelHref={`${path}/${lead.id}`}
-          submitLabel={t('submit')}
-        />
-      </section>
-    </div>
+    <RecordEditPage
+      number={recordNumber('lead', lead.id)}
+      title={t('title', { name: fullName(lead) })}
+      description={t('description')}
+      label={fullName(lead)}
+    >
+      <LeadForm
+        action={updateLead.bind(null, workspace.id, lead.id, lead.version)}
+        defaults={formValues(lead)}
+        isEdit
+        members={members.members}
+        me={user.id}
+        canAssign={canAssign(workspace)}
+        sources={sources.sources}
+        defaultCurrency={workspace.defaultCurrency}
+        currencies={currencyOptions(locale)}
+        timeZone={workspace.timezone}
+        cancelHref={`${path}/${lead.id}`}
+        submitLabel={t('submit')}
+      />
+    </RecordEditPage>
   );
 }

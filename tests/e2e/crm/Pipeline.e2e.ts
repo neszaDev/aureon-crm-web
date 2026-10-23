@@ -256,18 +256,18 @@ test.describe('Pipeline', () => {
     await expect(page.getByText('Went with a competitor', { exact: true })).toBeVisible();
     await expect(page.getByText('Lost: closed as lost')).toBeVisible();
 
-    // The Move dialog on a deal's page asks the same.
+    // The stage pill in a deal's header asks the same.
     await page.goto(`${owner.path}/deals/${second.id}`);
-    await waitForHydration(page.getByRole('main'));
-    await page.getByRole('button', { name: 'Move', exact: true }).click();
-    const move = page.getByRole('dialog', { name: `Move ${DEALS.retrofit}` });
-    await move.getByLabel('Stage').selectOption('Lost');
-    await expect(move.getByText('Moving it here closes the deal as lost.')).toBeVisible();
-    await move.getByRole('button', { name: 'Move deal' }).click();
+    const pill = page.getByRole('button', { name: 'Stage: Qualification' });
+    await waitForHydration(pill);
+    await pill.click();
+    await page.getByRole('menuitem', { name: 'Lost' }).click();
+    const move = page.getByRole('dialog', { name: `Mark ${DEALS.retrofit} as lost` });
+    await move.getByRole('button', { name: 'Mark as lost' }).click();
     await expect(move.getByText('Required')).toBeVisible();
     expect(await stageOf(request, owner, second.id)).toBe('Qualification');
     await move.getByLabel('Reason').fill('Budget frozen');
-    await move.getByRole('button', { name: 'Move deal' }).click();
+    await move.getByRole('button', { name: 'Mark as lost' }).click();
     await expect(page.getByText(`${DEALS.retrofit} moved to Lost`)).toBeVisible();
     await expect(page.getByText('Budget frozen', { exact: true })).toBeVisible();
   });
@@ -313,7 +313,7 @@ test.describe('Pipeline', () => {
     // Nor does its page offer to move, edit or archive it.
     await page.getByRole('link', { name: 'Ravi deal' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Ravi deal' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Move', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /^Stage: /u })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Edit', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Archive', exact: true })).toHaveCount(0);
 

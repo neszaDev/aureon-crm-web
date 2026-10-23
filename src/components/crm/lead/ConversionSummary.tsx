@@ -1,3 +1,4 @@
+import { Building2Icon, HandshakeIcon, UserIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { RecordFacts } from '@/components/crm/record/RecordFacts';
 import type { components } from '@/libs/api/schema';
@@ -31,6 +32,7 @@ export const ConversionSummary = (props: {
       label={t('label')}
       facts={[
         {
+          icon: Building2Icon,
           label: t('company'),
           value: props.company ? (
             <Link href={`${base}/companies/${props.company.id}`} className="text-seal-ink">
@@ -41,6 +43,7 @@ export const ConversionSummary = (props: {
           ),
         },
         {
+          icon: UserIcon,
           label: t('contact'),
           value: props.contact && (
             <Link href={`${base}/contacts/${props.contact.id}`} className="text-seal-ink">
@@ -49,6 +52,7 @@ export const ConversionSummary = (props: {
           ),
         },
         {
+          icon: HandshakeIcon,
           label: t('deal'),
           value: props.deal ? (
             <span className="flex flex-wrap items-baseline gap-x-2">

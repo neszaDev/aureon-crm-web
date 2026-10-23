@@ -119,7 +119,8 @@ const expectReadOnly = async (page: Page, url: string, name: string) => {
   await expect(page.getByRole('heading', { level: 1, name })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Edit', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Archive', exact: true })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Move', exact: true })).toHaveCount(0);
+  // Its status reads as a pill, not the control that changes it.
+  await expect(page.getByRole('button', { name: /^(?:Status|Stage): /u })).toHaveCount(0);
 };
 
 /**

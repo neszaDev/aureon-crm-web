@@ -24,11 +24,8 @@ export const StageHistory = (props: { history: Change[]; timeZone: string }) => 
     stage.id === undefined ? t('stage_deleted', { name: stage.name }) : stage.name;
 
   return (
-    <section
-      aria-labelledby="stage-history-heading"
-      className="rounded-lg border border-rule bg-card"
-    >
-      <h2 id="stage-history-heading" className="px-5 py-4 font-semibold">
+    <section aria-labelledby="stage-history-heading">
+      <h2 id="stage-history-heading" className="px-5 pt-4 pb-3 text-sm font-semibold">
         {t('title')}
       </h2>
       {props.history.length === 0 ? (

@@ -9,9 +9,11 @@ import { ConversionSummary } from '@/components/crm/lead/ConversionSummary';
 import { ConvertDialog } from '@/components/crm/lead/ConvertDialog';
 import { LeadDetails } from '@/components/crm/lead/LeadDetails';
 import { LeadLifecycle } from '@/components/crm/lead/LeadLifecycle';
-import { LeadStatusMenu } from '@/components/crm/lead/LeadStatusMenu';
+import { LeadStatusPill } from '@/components/crm/lead/LeadStatusPill';
 import { ArchiveButton } from '@/components/crm/record/ArchiveButton';
+import { LogActivityButton } from '@/components/crm/record/LogActivityButton';
 import { RecordHeader } from '@/components/crm/record/RecordHeader';
+import { RecordPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { RecordWork } from '@/components/crm/record/RecordWork';
 import { Button } from '@/components/ui/button';
@@ -43,6 +45,7 @@ export async function generateMetadata(props: LeadPageProps): Promise<Metadata> 
   });
 }
 
+// Its full page, and its panel over the page it was opened from (`@panel`).
 export default async function LeadPage(props: LeadPageProps) {
   const { locale, workspaceId, id } = await props.params;
   setRequestLocale(locale);
@@ -84,61 +87,81 @@ export default async function LeadPage(props: LeadPageProps) {
   }
   const name = fullName(lead);
 
-  const actions = canEdit && (
+  const actions = (
     <>
-      {stages?.stages && (
-        <ConvertDialog
-          workspaceId={workspace.id}
-          lead={lead}
-          stages={stages.stages.filter((stage) => stage.kind === 'OPEN')}
-          defaultCurrency={workspace.defaultCurrency}
-          currencies={currencyOptions(locale)}
-          timeZone={workspace.timezone}
-          headingId={HEADING_ID}
-        />
+      {canEdit && (
+        <>
+          {stages?.stages && (
+            <ConvertDialog
+              workspaceId={workspace.id}
+              lead={lead}
+              stages={stages.stages.filter((stage) => stage.kind === 'OPEN')}
+              defaultCurrency={workspace.defaultCurrency}
+              currencies={currencyOptions(locale)}
+              timeZone={workspace.timezone}
+              headingId={HEADING_ID}
+            />
+          )}
+          {!converted && (
+            <Button asChild variant="outline">
+              <Link href={`${path}/${lead.id}/edit`}>
+                <PencilIcon data-icon="inline-start" />
+                {t('edit')}
+              </Link>
+            </Button>
+          )}
+          <ArchiveButton
+            id="lead-restore"
+            name={name}
+            archived={lead.archived}
+            archive={archiveLead.bind(null, workspace.id, lead.id)}
+            restore={restoreLead.bind(null, workspace.id, lead.id)}
+          />
+        </>
       )}
-      {!converted && <LeadStatusMenu workspaceId={workspace.id} lead={lead} name={name} />}
-      {!converted && (
-        <Button asChild variant="outline">
-          <Link href={`${path}/${lead.id}/edit`}>
-            <PencilIcon data-icon="inline-start" />
-            {t('edit')}
-          </Link>
-        </Button>
-      )}
-      <ArchiveButton
-        id="lead-restore"
-        name={name}
-        archived={lead.archived}
-        archive={archiveLead.bind(null, workspace.id, lead.id)}
-        restore={restoreLead.bind(null, workspace.id, lead.id)}
-      />
+      <LogActivityButton />
     </>
   );
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <RecordHeader
-        number={recordNumber('lead', lead.id)}
-        name={name}
-        headingId={HEADING_ID}
-        owner={lead.owner}
-        archived={lead.archived}
-        actions={actions}
-      />
-      <LeadLifecycle status={lead.status} reason={lead.unqualifiedReason} />
-      {converted && (
-        <ConversionSummary
-          workspaceId={workspace.id}
-          company={lead.convertedCompany}
-          contact={lead.convertedContact}
-          deal={lead.convertedDeal}
+    <RecordPage
+      header={
+        <RecordHeader
+          number={recordNumber('lead', lead.id)}
+          name={name}
+          headingId={HEADING_ID}
+          owner={lead.owner}
+          archived={lead.archived}
+          // The status as its pill, which moves the lead (converting has its own button).
+          status={
+            <LeadStatusPill workspaceId={workspace.id} lead={lead} name={name} canEdit={canEdit} />
+          }
+          track={<LeadLifecycle status={lead.status} reason={lead.unqualifiedReason} />}
+          actions={actions}
         />
-      )}
-      <LeadDetails lead={lead} timeZone={workspace.timezone} />
+      }
+    >
       {/* Its tasks and activity; on a converted lead they show on its contact too. */}
-      <RecordWork workspace={workspace} me={user.id} link={{ leadId: lead.id }} label={name} />
-      <RecordHistory workspace={workspace} entityType="LEAD" entityId={lead.id} />
-    </div>
+      <RecordWork
+        workspace={workspace}
+        me={user.id}
+        link={{ leadId: lead.id }}
+        label={name}
+        facts={
+          <>
+            {converted && (
+              <ConversionSummary
+                workspaceId={workspace.id}
+                company={lead.convertedCompany}
+                contact={lead.convertedContact}
+                deal={lead.convertedDeal}
+              />
+            )}
+            <LeadDetails lead={lead} timeZone={workspace.timezone} />
+          </>
+        }
+        history={<RecordHistory workspace={workspace} entityType="LEAD" entityId={lead.id} />}
+      />
+    </RecordPage>
   );
 }

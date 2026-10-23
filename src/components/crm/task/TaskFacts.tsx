@@ -1,3 +1,11 @@
+import {
+  AlignLeftIcon,
+  CalendarCheckIcon,
+  CalendarClockIcon,
+  FlagIcon,
+  LinkIcon,
+  UserPenIcon,
+} from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import { LinkedRecords } from '@/components/crm/record/LinkedRecords';
@@ -32,6 +40,7 @@ export const TaskFacts = (props: {
       label={t('details')}
       facts={[
         {
+          icon: CalendarClockIcon,
           label: t('due'),
           value: (
             <TaskDue
@@ -41,8 +50,9 @@ export const TaskFacts = (props: {
             />
           ),
         },
-        { label: t('priority'), value: tRow(`priority_${props.task.priority}`) },
+        { icon: FlagIcon, label: t('priority'), value: tRow(`priority_${props.task.priority}`) },
         {
+          icon: LinkIcon,
           label: t('linked'),
           // Undefined without one, so the row reads "Not set".
           value: linked ? (
@@ -50,6 +60,7 @@ export const TaskFacts = (props: {
           ) : undefined,
         },
         {
+          icon: UserPenIcon,
           label: t('created_by'),
           // Missing once that member left the workspace.
           value: props.task.createdBy ? (
@@ -62,6 +73,7 @@ export const TaskFacts = (props: {
           ),
         },
         {
+          icon: CalendarCheckIcon,
           label: t('completed_at'),
           value: props.task.completedAt && (
             <span className="tabular-nums">
@@ -74,6 +86,7 @@ export const TaskFacts = (props: {
           ),
         },
         {
+          icon: AlignLeftIcon,
           label: t('description'),
           value: props.task.description && (
             <span className="whitespace-pre-line">{props.task.description}</span>

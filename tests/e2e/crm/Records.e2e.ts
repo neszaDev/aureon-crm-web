@@ -59,8 +59,9 @@ test.describe('Records', () => {
     await page.goto(`${owner.path}/contacts/${buyer}`);
     // The composer is behind a button, which opens it on the Subject.
     await expect(page.getByLabel('Subject')).toBeHidden();
-    await waitForHydration(page.getByRole('button', { name: 'Log activity' }));
-    await page.getByRole('button', { name: 'Log activity' }).click();
+    const activity = page.getByRole('region', { name: /^Activity/u });
+    await waitForHydration(activity.getByRole('button', { name: 'Log activity' }));
+    await activity.getByRole('button', { name: 'Log activity' }).click();
     await expect(page.getByLabel('Subject')).toBeFocused();
     // Another type first, so choosing Call is a real change.
     await page.getByRole('radio', { name: 'Email' }).click();
@@ -69,7 +70,7 @@ test.describe('Records', () => {
     await expect(type).toBeChecked();
     await page.getByLabel('Subject').fill('Intro call');
     await page.getByRole('textbox', { name: 'Details' }).fill('Wants a quote for 40 seats.');
-    await page.getByRole('button', { name: 'Log activity' }).click();
+    await activity.getByRole('button', { name: 'Log activity' }).click();
     await expect(page.getByText('Activity logged')).toBeVisible();
     const call = page.getByRole('listitem').filter({ hasText: 'Intro call' });
     await expect(call).toContainText('Call');
@@ -77,11 +78,11 @@ test.describe('Records', () => {
     await expect(page.getByLabel('Subject')).toBeHidden();
 
     // And again: it opens empty every time, not only the first.
-    await page.getByRole('button', { name: 'Log activity' }).click();
+    await activity.getByRole('button', { name: 'Log activity' }).click();
     await expect(page.getByLabel('Subject')).toHaveValue('');
     await expect(page.getByRole('textbox', { name: 'Details' })).toHaveValue('');
     await page.getByLabel('Subject').fill('Follow-up call');
-    await page.getByRole('button', { name: 'Log activity' }).click();
+    await activity.getByRole('button', { name: 'Log activity' }).click();
     await expect(page.getByRole('listitem').filter({ hasText: 'Follow-up call' })).toBeVisible();
     await expect(page.getByLabel('Subject')).toBeHidden();
 
@@ -835,10 +836,10 @@ test.describe('Records', () => {
       // A short phone, as with the keyboard open: even the reason's dialog scrolls.
       await page.setViewportSize({ width: 390, height: 300 });
       await page.goto(`${owner.path}/leads/${unqualify.id}`);
-      await waitForHydration(page.getByRole('button', { name: 'Change status' }));
+      await waitForHydration(page.getByRole('button', { name: 'Status: New' }));
       await expectReachable(
         async () => {
-          await page.getByRole('button', { name: 'Change status' }).click();
+          await page.getByRole('button', { name: 'Status: New' }).click();
           await page.getByRole('menuitem', { name: 'Unqualified' }).click();
         },
         page.getByRole('button', { name: 'Mark as unqualified' }),

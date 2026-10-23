@@ -97,16 +97,16 @@ export const HistoryTimeline = (props: {
   };
 
   return (
-    <section aria-labelledby="history-heading" className="rounded-lg border border-rule bg-card">
+    <section aria-labelledby="history-heading">
       <h2
         id="history-heading"
         tabIndex={-1}
         // Once the last page is in, the button that had the focus is gone.
         ref={older.length > 0 && done ? focusOnMount : undefined}
-        className="flex items-baseline gap-2 rounded-sm px-5 pt-4 pb-3 font-semibold"
+        className="flex items-baseline gap-2 rounded-sm px-5 pt-4 pb-3 text-sm font-semibold"
       >
         {t('title')}
-        <span className="text-sm font-normal text-muted-foreground tabular-nums">
+        <span className="text-[0.8125rem] font-normal text-muted-foreground tabular-nums">
           {t('count', { count: props.total })}
         </span>
       </h2>

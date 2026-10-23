@@ -927,6 +927,17 @@
   "RecordFacts": {
     "not_set": "ยังไม่ระบุ"
   },
+  "RecordPanel": {
+    "close": "ปิด",
+    "close_hint": "ปิด (Esc)",
+    "full_page": "เปิดเป็นหน้าเต็ม",
+    "loading": "กำลังโหลดระเบียน",
+    "kind_company": "บริษัท",
+    "kind_contact": "ผู้ติดต่อ",
+    "kind_lead": "ลีด",
+    "kind_deal": "ดีล",
+    "kind_task": "งาน"
+  },
   "RecordActions": {
     "archive": "เก็บถาวร",
     "restore": "กู้คืน",
@@ -3346,8 +3357,6 @@
     "overdue": "เกินกำหนด"
   },
   "LeadStatusMenu": {
-    "trigger": "เปลี่ยนสถานะ",
-    "label": "ย้ายไปที่",
     "moved": "เปลี่ยนสถานะเป็น {status} แล้ว",
     "error_generic": "ไม่สำเร็จ ลองอีกครั้ง"
   },
@@ -3406,8 +3415,7 @@
     "state_current": "{name}: ขั้นปัจจุบัน",
     "state_blank": "{name}: ยังไม่ถึง",
     "state_unknown": "{name}: ไม่แสดง",
-    "reason_label": "เหตุผล:",
-    "hint": "ลีดเดินจากใหม่ไปติดต่อแล้วและผ่านเกณฑ์ หรือถูกทำเครื่องหมายว่าไม่ผ่านเกณฑ์พร้อมเหตุผล แปลงลีดที่ผ่านเกณฑ์เพื่อสร้างผู้ติดต่อ พร้อมบริษัทและดีลหากต้องการ"
+    "reason_label": "เหตุผล:"
   },
   "StampRow": {
     "days_short": "{count}วัน"
@@ -3416,7 +3424,8 @@
     "open": "ขั้นที่ {index} จาก {count}: {name}",
     "closed": "{name}: {kind, select, WON {ปิดเป็นดีลที่ชนะ} other {ปิดเป็นดีลที่เสียไป}}",
     "segment": "{name}: {state, select, current {ขั้นปัจจุบัน {days, plural, other {# วัน}}} blank {ยังไม่ถึง} unknown {ไม่มีบันทึกการย้าย} won {ปิดเป็นดีลที่ชนะ} lost {ปิดเป็นดีลที่เสียไป} other {ผ่านแล้ว}}{mover, select, member { ย้ายมาที่นี่โดย {signer}{when, select, none {} other { เมื่อ {when}}}} left { ย้ายมาที่นี่โดยอดีตสมาชิก{when, select, none {} other { เมื่อ {when}}}} other {{when, select, none {} other { เข้าขั้นนี้เมื่อ {when}}}}}",
-    "days_short": "{count}วัน"
+    "days_short": "{count}วัน",
+    "former_member": "อดีตสมาชิก"
   },
   "DealBoard": {
     "stage_select": "ขั้นตอนที่แสดง",
@@ -3533,9 +3542,7 @@
   },
   "DealPage": {
     "back": "กลับไปที่ดีล",
-    "progress": "ดีลนี้อยู่ตรงไหน",
     "details": "รายละเอียดดีล",
-    "move": "ย้าย",
     "edit": "แก้ไข",
     "lost_reason": "เหตุผลที่แพ้",
     "company": "บริษัท",

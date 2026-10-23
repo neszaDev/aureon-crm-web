@@ -927,6 +927,17 @@
   "RecordFacts": {
     "not_set": "Not set"
   },
+  "RecordPanel": {
+    "close": "Close",
+    "close_hint": "Close (Esc)",
+    "full_page": "Open as a full page",
+    "loading": "Loading the record",
+    "kind_company": "Company",
+    "kind_contact": "Contact",
+    "kind_lead": "Lead",
+    "kind_deal": "Deal",
+    "kind_task": "Task"
+  },
   "RecordActions": {
     "archive": "Archive",
     "restore": "Restore",
@@ -3346,8 +3357,6 @@
     "overdue": "Overdue"
   },
   "LeadStatusMenu": {
-    "trigger": "Change status",
-    "label": "Move to",
     "moved": "Status changed to {status}",
     "error_generic": "That didn't work. Try again."
   },
@@ -3406,8 +3415,7 @@
     "state_current": "{name}: current",
     "state_blank": "{name}: not reached",
     "state_unknown": "{name}: not shown",
-    "reason_label": "Reason:",
-    "hint": "A lead moves from New to Contacted to Qualified, or is marked Unqualified with a reason. Convert a qualified lead to make it a contact, with a company and a deal if you want them."
+    "reason_label": "Reason:"
   },
   "StampRow": {
     "days_short": "{count}d"
@@ -3416,7 +3424,8 @@
     "open": "Stage {index} of {count}: {name}",
     "closed": "{name}: {kind, select, WON {closed as won} other {closed as lost}}",
     "segment": "{name}: {state, select, current {current, {days, plural, one {# day} other {# days}}} blank {not reached} unknown {no move recorded} won {closed as won} lost {closed as lost} other {reached}}{mover, select, member {, moved here by {signer}{when, select, none {} other { on {when}}}} left {, moved here by a former member{when, select, none {} other { on {when}}}} other {{when, select, none {} other {, entered on {when}}}}}",
-    "days_short": "{count}d"
+    "days_short": "{count}d",
+    "former_member": "Former member"
   },
   "DealBoard": {
     "stage_select": "Stage shown",
@@ -3533,9 +3542,7 @@
   },
   "DealPage": {
     "back": "Back to deals",
-    "progress": "Where the deal stands",
     "details": "Deal details",
-    "move": "Move",
     "edit": "Edit",
     "lost_reason": "Why it was lost",
     "company": "Company",

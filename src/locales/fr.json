@@ -927,6 +927,17 @@
   "RecordFacts": {
     "not_set": "Non renseigné"
   },
+  "RecordPanel": {
+    "close": "Fermer",
+    "close_hint": "Fermer (Échap)",
+    "full_page": "Ouvrir en pleine page",
+    "loading": "Chargement de la fiche",
+    "kind_company": "Entreprise",
+    "kind_contact": "Contact",
+    "kind_lead": "Prospect",
+    "kind_deal": "Affaire",
+    "kind_task": "Tâche"
+  },
   "RecordActions": {
     "archive": "Archiver",
     "restore": "Restaurer",
@@ -3346,8 +3357,6 @@
     "overdue": "En retard"
   },
   "LeadStatusMenu": {
-    "trigger": "Changer le statut",
-    "label": "Passer à",
     "moved": "Statut changé : {status}",
     "error_generic": "Ça n'a pas fonctionné. Réessayez."
   },
@@ -3406,8 +3415,7 @@
     "state_current": "{name} : en cours",
     "state_blank": "{name} : pas atteint",
     "state_unknown": "{name} : non affiché",
-    "reason_label": "Motif :",
-    "hint": "Un prospect passe de Nouveau à Contacté puis à Qualifié, ou est marqué Non qualifié avec un motif. Convertissez un prospect qualifié pour en faire un contact, avec une entreprise et une affaire si vous le souhaitez."
+    "reason_label": "Motif :"
   },
   "StampRow": {
     "days_short": "{count}j"
@@ -3416,7 +3424,8 @@
     "open": "Étape {index} sur {count} : {name}",
     "closed": "{name} : {kind, select, WON {clôturée comme gagnée} other {clôturée comme perdue}}",
     "segment": "{name} : {state, select, current {en cours, {days, plural, one {# jour} other {# jours}}} blank {pas encore atteinte} unknown {aucun passage enregistré} won {clôturée comme gagnée} lost {clôturée comme perdue} other {atteinte}}{mover, select, member {, déplacée ici par {signer}{when, select, none {} other { le {when}}}} left {, déplacée ici par un ancien membre{when, select, none {} other { le {when}}}} other {{when, select, none {} other {, entrée le {when}}}}}",
-    "days_short": "{count}j"
+    "days_short": "{count}j",
+    "former_member": "Ancien membre"
   },
   "DealBoard": {
     "stage_select": "Étape affichée",
@@ -3533,9 +3542,7 @@
   },
   "DealPage": {
     "back": "Retour aux affaires",
-    "progress": "Où en est l'affaire",
     "details": "Détails de l'affaire",
-    "move": "Déplacer",
     "edit": "Modifier",
     "lost_reason": "Pourquoi elle a été perdue",
     "company": "Entreprise",

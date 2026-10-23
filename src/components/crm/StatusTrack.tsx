@@ -44,9 +44,9 @@ const stateOf = (
 };
 
 /**
- * A deal's progress as a compact segmented track: one segment per open stage, filled up to its
- * own in the colour of its stage (`stageTone`), then its stage's name and days in it written
- * beside, so the colour is never the only cue; a closed deal adds its Won or Lost segment. The
+ * A deal's progress as a segmented track: one segment per open stage, filled up to its own in the
+ * colour of its stage (`stageTone`), then its stage's name and days in it written beside (or, in
+ * full, each stage's name under its segment), so the colour is never the only cue; a closed deal adds its Won or Lost segment. The
  * track's name says it all at once ("Stage 2 of 4: Needs analysis"). Each segment's tooltip, and
  * its screen-reader text, says its state, who moved the deal there and when (the current and the
  * closing stage always know when; a reached one when `signatures` does), or that a former member
@@ -59,6 +59,9 @@ const stateOf = (
  *   `signaturesOf`).
  * @param props.now The current time, which the days run to.
  * @param props.timeZone The workspace's time zone, for the dates.
+ * @param props.full Whether to write it all out, as a record's header does: each stage's name
+ *   under its segment (the current one's days beside it), and under that who moved the deal there
+ *   and when.
  * @param props.className Extra classes.
  * @returns The track.
  */
@@ -69,6 +72,7 @@ export const StatusTrack = (props: {
   signatures?: Record<number, StageSigner>;
   now: Date;
   timeZone: string;
+  full?: boolean;
   className?: string;
 }) => {
   const t = useTranslations('StatusTrack');
@@ -88,26 +92,77 @@ export const StatusTrack = (props: {
     if (signer) {
       mover = signer.by ? 'member' : 'left';
     }
+    const by = signer?.by?.displayName ?? signer?.by?.email ?? '';
+    const when = at ? formatInstant(at, { locale, timeZone: props.timeZone }) : undefined;
     const label = t('segment', {
       name: stage.name,
       state,
       days,
       mover,
-      signer: signer?.by?.displayName ?? signer?.by?.email ?? '',
-      when: at ? formatInstant(at, { locale, timeZone: props.timeZone }) : 'none',
+      signer: by,
+      when: when ?? 'none',
     });
+    // Who and when, written under a full track's segment; a former member is said so.
+    const signed = [mover === 'left' ? t('former_member') : by, when].filter(Boolean).join(' · ');
 
-    return { stage, label, filled: state !== 'blank' && state !== 'unknown' };
+    return { stage, label, own, signed, filled: state !== 'blank' && state !== 'unknown' };
   });
   const name = closed
     ? t('closed', { name: props.stage.name, kind: props.stage.kind })
     : t('open', { index: index + 1, count: open.length, name: props.stage.name });
 
+  const tone = stageTone(props.stages, props.stage.id);
+
+  if (props.full) {
+    return (
+      <TooltipProvider delayDuration={200}>
+        <ol data-tone={tone} aria-label={name} className={cn('flex gap-1', props.className)}>
+          {segments.map((segment) => (
+            <Tooltip key={segment.stage.id}>
+              <TooltipTrigger asChild>
+                <li className="flex min-w-0 flex-1 flex-col gap-1.5">
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'block h-1.5 rounded-full',
+                      segment.filled ? 'bg-(--tone)' : 'bg-rule',
+                    )}
+                  />
+                  <span aria-hidden="true" className="flex min-w-0 flex-col text-[0.75rem]">
+                    <span className="flex min-w-0 items-baseline gap-1">
+                      <span
+                        className={cn(
+                          // A phone's segments are narrow: the name wraps there rather than cut.
+                          'leading-snug font-medium [overflow-wrap:anywhere] sm:truncate',
+                          segment.own && 'font-semibold text-(--tone-ink)',
+                          !segment.filled && 'text-muted-foreground',
+                        )}
+                      >
+                        {segment.stage.name}
+                      </span>
+                      {segment.own && !closed && (
+                        <span className="shrink-0 text-muted-foreground tabular-nums">
+                          {t('days_short', { count: days })}
+                        </span>
+                      )}
+                    </span>
+                    <span className="min-h-[1.2em] truncate text-[0.6875rem] text-muted-foreground tabular-nums max-sm:hidden">
+                      {segment.signed}
+                    </span>
+                  </span>
+                  <span className="sr-only">{segment.label}</span>
+                </li>
+              </TooltipTrigger>
+              <TooltipContent>{segment.label}</TooltipContent>
+            </Tooltip>
+          ))}
+        </ol>
+      </TooltipProvider>
+    );
+  }
+
   return (
-    <div
-      data-tone={stageTone(props.stages, props.stage.id)}
-      className={cn('flex min-w-0 items-center gap-2', props.className)}
-    >
+    <div data-tone={tone} className={cn('flex min-w-0 items-center gap-2', props.className)}>
       <TooltipProvider delayDuration={200}>
         <ol aria-label={name} className="flex min-w-14 flex-1 gap-0.5">
           {segments.map((segment) => (

@@ -4,9 +4,11 @@ import { Badge } from '@/components/ui/badge';
 import type { components } from '@/libs/api/schema';
 
 /**
- * The top of a record page: its number in mono, its name (the page's `h1`, focusable so focus
- * can land there after an action), "Archived" or its status when it is, its owner's avatar (a
- * task's assignee), a figure under the name (a deal's amount), and its actions.
+ * The top of a record, in its panel and on its full page: its number in mono ("Archived" beside
+ * it when it is), its name (the `h1`, focusable so focus can land there after an action), a
+ * figure under it (a deal's amount), its actions on the right; then its status pill (the control
+ * that changes it) beside its owner's avatar and name (a task's assignee), and its whole track
+ * (a deal's stages, a lead's lifecycle) across.
  * @param props Component props.
  * @param props.number The record number, such as `C-0042`.
  * @param props.name The record's name.
@@ -14,10 +16,10 @@ import type { components } from '@/libs/api/schema';
  * @param props.owner The owner, if any.
  * @param props.assigned Whether the owner is an assignee ("Assigned to"), as a task's.
  * @param props.archived Whether the record is archived.
- * @param props.status A status to show beside its number: its word, such as "Completed", in an
- *   outlined badge, or a badge of its own, such as a deal's `DealStatusBadge`.
+ * @param props.status Its status pill, if it has a status.
  * @param props.figure A value shown large under the name, such as a deal's amount.
- * @param props.actions Edit, archive or restore, when the caller may.
+ * @param props.track Its status track, the current step filled.
+ * @param props.actions Edit, archive or restore, log an activity, when the caller may.
  * @returns The header.
  */
 export const RecordHeader = (props: {
@@ -29,53 +31,60 @@ export const RecordHeader = (props: {
   archived: boolean;
   status?: React.ReactNode;
   figure?: React.ReactNode;
+  track?: React.ReactNode;
   actions?: React.ReactNode;
 }) => {
   const t = useTranslations('RecordHeader');
+  const owner = props.owner?.displayName ?? props.owner?.email ?? '';
 
   return (
-    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div className="flex min-w-0 flex-col gap-1.5">
-        <p className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[0.8125rem] text-muted-foreground tabular-nums">
-            {props.number}
-          </span>
-          {/* Sentence case: DESIGN.md's label rule (the primitive's uppercase is the demos'). */}
-          {props.archived && (
-            <Badge variant="outline" className="text-xs font-medium tracking-normal normal-case">
-              {t('archived')}
-            </Badge>
+    <header className="flex flex-col gap-4 border-b border-rule pb-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[0.75rem] text-muted-foreground tabular-nums">
+              {props.number}
+            </span>
+            {/* Sentence case: DESIGN.md's label rule (the primitive's uppercase is the demos'). */}
+            {props.archived && (
+              <Badge variant="outline" className="text-xs font-medium tracking-normal normal-case">
+                {t('archived')}
+              </Badge>
+            )}
+          </p>
+          <h1
+            id={props.headingId}
+            tabIndex={-1}
+            className="rounded-sm text-[1.5rem] leading-tight font-semibold tracking-[-0.01em] break-words"
+          >
+            {props.name}
+          </h1>
+          {props.figure && (
+            <p className="text-[1.0625rem] font-semibold tabular-nums">{props.figure}</p>
           )}
-          {typeof props.status === 'string' ? (
-            <Badge variant="outline" className="text-xs font-medium tracking-normal normal-case">
-              {props.status}
-            </Badge>
-          ) : (
-            props.status
-          )}
-        </p>
-        <h1
-          id={props.headingId}
-          tabIndex={-1}
-          className="rounded-sm text-2xl font-bold tracking-[-0.01em] break-words"
-        >
-          {props.name}
-        </h1>
-        {props.figure && <p className="text-lg font-semibold tabular-nums">{props.figure}</p>}
-        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+        </div>
+        {props.actions && (
+          <div className="flex shrink-0 flex-wrap gap-2 md:max-w-[60%] md:justify-end">
+            {props.actions}
+          </div>
+        )}
+      </div>
+      <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
+        {props.status}
+        <p className="flex min-h-6 min-w-0 items-center gap-2 text-[0.8125rem] text-muted-foreground">
           {props.owner ? (
             <>
               <PersonAvatar person={props.owner} size="sm" />
-              {props.assigned
-                ? t('assignee', { name: props.owner.displayName ?? props.owner.email })
-                : t('owner', { name: props.owner.displayName ?? props.owner.email })}
+              <span className="min-w-0 break-words">
+                {props.assigned ? t('assignee', { name: owner }) : t('owner', { name: owner })}
+              </span>
             </>
           ) : (
             t('unassigned')
           )}
         </p>
       </div>
-      {props.actions && <div className="flex shrink-0 flex-wrap gap-2">{props.actions}</div>}
+      {props.track}
     </header>
   );
 };

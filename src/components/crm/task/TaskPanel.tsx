@@ -3,6 +3,7 @@
 import { PlusIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { RecordSection, SECTION_NOTE } from '@/components/crm/record/RecordLayout';
 import { TaskDialog } from '@/components/crm/task/TaskDialog';
 import { TaskTable } from '@/components/crm/task/TaskTable';
 import { Button } from '@/components/ui/button';
@@ -16,8 +17,9 @@ import type { ActivityLink } from '@/validations/crm/ActivityValidation';
 type Task = components['schemas']['TaskResponse'];
 
 /**
- * A record's tasks: its open ones by due time, the completed and cancelled ones behind a switch
- * (latest first), and "Add task", which opens a task on this record, for the caller by default.
+ * A record's tasks as compact rows (tick to complete, the menu cancels or reopens): its open ones
+ * by due time, the completed and cancelled ones behind a switch (latest first), and "Add task",
+ * which opens a task on this record, for the caller by default.
  * @param props Component props.
  * @param props.workspaceId The workspace.
  * @param props.link The record, such as `{ companyId: 7 }`.
@@ -57,81 +59,66 @@ export const TaskPanel = (props: {
       timeZone={props.timeZone}
       viewed={props.link}
       headingId={headingId}
+      compact
     />
   );
 
   return (
-    <section aria-labelledby={headingId} className="rounded-lg border border-rule bg-card">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-        <h2
-          id={headingId}
-          tabIndex={-1}
-          className="flex items-baseline gap-2 rounded-sm font-semibold"
-        >
-          {t('title')}
-          <span className="text-sm font-normal text-muted-foreground tabular-nums">
-            {t('count', { count: props.openTotal })}
-          </span>
-        </h2>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-          <div className="flex items-center gap-2">
-            <Switch
-              id={`${headingId}-closed`}
-              checked={showClosed}
-              onCheckedChange={setShowClosed}
-            />
-            <Label htmlFor={`${headingId}-closed`} className="text-sm">
-              {t('show_closed')}
-            </Label>
-          </div>
-          <TaskDialog
-            trigger={
-              <Button variant="outline">
-                <PlusIcon data-icon="inline-start" />
-                {t('add')}
-              </Button>
-            }
-            workspaceId={props.workspaceId}
-            link={props.link}
-            linkLabel={props.label}
-            members={props.members}
-            me={props.me}
-            canAssign={canAssign({ permissions: props.permissions })}
-            timeZone={props.timeZone}
-          />
-        </div>
-      </div>
-      <div className="border-t border-rule">
-        {props.open.length > 0 ? (
-          table(props.open)
-        ) : (
-          <p className="px-5 py-4 text-muted-foreground">{t('empty')}</p>
-        )}
-        {props.openTotal > props.open.length && (
-          <p className="border-t border-rule px-5 py-3 text-sm text-muted-foreground">
-            {t('more', { shown: props.open.length, total: props.openTotal })}
-          </p>
-        )}
+    <RecordSection
+      headingId={headingId}
+      title={t('title')}
+      count={t('count', { count: props.openTotal })}
+      action={
+        <TaskDialog
+          trigger={
+            <Button variant="ghost" size="sm">
+              <PlusIcon data-icon="inline-start" />
+              {t('add')}
+            </Button>
+          }
+          workspaceId={props.workspaceId}
+          link={props.link}
+          linkLabel={props.label}
+          members={props.members}
+          me={props.me}
+          canAssign={canAssign({ permissions: props.permissions })}
+          timeZone={props.timeZone}
+        />
+      }
+    >
+      {props.open.length > 0 ? (
+        <div className="border-b border-rule">{table(props.open)}</div>
+      ) : (
+        <p className={SECTION_NOTE}>{t('empty')}</p>
+      )}
+      {props.openTotal > props.open.length && (
+        <p className={SECTION_NOTE}>
+          {t('more', { shown: props.open.length, total: props.openTotal })}
+        </p>
+      )}
+      <div className="flex min-h-9 items-center gap-2 py-1.5">
+        <Switch id={`${headingId}-closed`} checked={showClosed} onCheckedChange={setShowClosed} />
+        <Label htmlFor={`${headingId}-closed`} className="text-[0.8125rem] font-normal">
+          {t('show_closed')}
+        </Label>
       </div>
       {showClosed && (
-        <div className="border-t border-rule">
-          <h3 className="px-5 pt-4 pb-3 text-sm font-semibold">
+        <div className="flex flex-col">
+          <h3 className="border-b border-rule py-2 text-[0.8125rem] font-semibold">
             {t('closed_title', { count: props.closedTotal })}
           </h3>
           {props.closed.length > 0 ? (
-            <div className="border-t border-rule">{table(props.closed)}</div>
+            <div className="border-b border-rule">{table(props.closed)}</div>
           ) : (
-            <p className="border-t border-rule px-5 py-4 text-muted-foreground">
-              {t('closed_empty')}
-            </p>
+            <p className={SECTION_NOTE}>{t('closed_empty')}</p>
           )}
           {props.closedTotal > props.closed.length && (
-            <p className="border-t border-rule px-5 py-3 text-sm text-muted-foreground">
+            <p className={SECTION_NOTE}>
               {t('more', { shown: props.closed.length, total: props.closedTotal })}
             </p>
           )}
         </div>
       )}
-    </section>
+    </RecordSection>
   );
 };

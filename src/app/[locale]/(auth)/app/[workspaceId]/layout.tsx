@@ -11,6 +11,8 @@ import { todayIn } from '@/libs/crm/ZonedTime';
 
 export default async function WorkspaceLayout(props: {
   children: React.ReactNode;
+  // A record opened from inside the workspace, over the page (`@panel`): empty on a full load.
+  panel: React.ReactNode;
   params: Promise<{ locale: string; workspaceId: string }>;
 }) {
   const { locale, workspaceId } = await props.params;
@@ -55,6 +57,7 @@ export default async function WorkspaceLayout(props: {
       }
     >
       {props.children}
+      {props.panel}
     </CrmShell>
   );
 }

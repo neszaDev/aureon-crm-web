@@ -23,7 +23,8 @@ Architecture: [docs/architecture.md](docs/architecture.md). Guides:
 
 ```
 src/app/[locale]/(marketing)/   public pages (home, about)
-src/app/[locale]/(auth)/        (center)/ sign-in, sign-up, invite/[token]; app/** (the CRM);
+src/app/[locale]/(auth)/        (center)/ sign-in, sign-up, invite/[token]; app/** (the CRM; app/[workspaceId]/@panel
+                                opens a record from inside the workspace in a side panel: intercepted routes);
                                 dashboard/** (the boilerplate's demos)
 src/actions/                    server actions: the only place that mutates via the backend
 src/app/api/                    route handlers: session/expired (ends a rejected session), crm/[workspaceId]/export/[list]
@@ -55,7 +56,7 @@ src/components/crm/**           the CRM: shell/ (rail, collapsible sidebar, loca
                                 audit/ (`AuditEventItem`, `AuditTrail`, `RecordHistory`), reports/ (the tabs and a panel per report, `ChartTable`),
                                 PeriodPicker, and per record:
                                 company/ contact/ lead/ deal/ task/ activity/, with the shared list/ (list kit),
-                                record/ (header, facts, archive) and fields/ (pickers, owner, date and time)
+                                record/ (the side panel, the page layout, header, facts, archive) and fields/ (pickers, owner, date and time)
 src/components/ src/templates/  UI (MarketingTemplate, AppShell); src/locales/*.json  all user-visible text
 tests/e2e/                      Playwright, always against the real backend (crm/*: the CRM specs and their helpers;
                                 Journey.e2e.ts: the brief's 10-step journey)

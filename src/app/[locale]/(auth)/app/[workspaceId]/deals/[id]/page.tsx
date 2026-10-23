@@ -1,15 +1,16 @@
-import { ArrowRightLeftIcon, PencilIcon } from 'lucide-react';
+import { PencilIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { archiveDeal, restoreDeal } from '@/actions/crm/DealActions';
 import { RecordHistory } from '@/components/crm/audit/RecordHistory';
 import { DealFacts } from '@/components/crm/deal/DealFacts';
-import { DealStatusBadge } from '@/components/crm/deal/DealStatusBadge';
-import { MoveDealDialog } from '@/components/crm/deal/MoveDealDialog';
+import { DealStagePill } from '@/components/crm/deal/DealStagePill';
 import { StageHistory } from '@/components/crm/deal/StageHistory';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { ArchiveButton } from '@/components/crm/record/ArchiveButton';
+import { LogActivityButton } from '@/components/crm/record/LogActivityButton';
 import { RecordHeader } from '@/components/crm/record/RecordHeader';
+import { RecordPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { RecordWork } from '@/components/crm/record/RecordWork';
 import { StatusTrack } from '@/components/crm/StatusTrack';
@@ -43,6 +44,7 @@ export async function generateMetadata(props: DealPageProps): Promise<Metadata> 
   });
 }
 
+// Its full page, and its panel over the page it was opened from (`@panel`).
 export default async function DealPage(props: DealPageProps) {
   const { locale, workspaceId, id } = await props.params;
   setRequestLocale(locale);
@@ -80,66 +82,77 @@ export default async function DealPage(props: DealPageProps) {
     kind,
   }));
 
-  const actions = canEdit && (
+  const actions = (
     <>
-      <MoveDealDialog
-        workspaceId={workspace.id}
-        deal={{ id: deal.id, name: deal.name, version: deal.version, stageId: deal.stage.id }}
-        stages={stageRefs}
-        trigger={
-          <Button>
-            <ArrowRightLeftIcon data-icon="inline-start" />
-            {t('move')}
+      {canEdit && (
+        <>
+          <Button asChild variant="outline">
+            <Link href={`${path}/${deal.id}/edit`}>
+              <PencilIcon data-icon="inline-start" />
+              {t('edit')}
+            </Link>
           </Button>
-        }
-      />
-      <Button asChild variant="outline">
-        <Link href={`${path}/${deal.id}/edit`}>
-          <PencilIcon data-icon="inline-start" />
-          {t('edit')}
-        </Link>
-      </Button>
-      <ArchiveButton
-        id="deal-restore"
-        name={deal.name}
-        archived={deal.archived}
-        archive={archiveDeal.bind(null, workspace.id, deal.id)}
-        restore={restoreDeal.bind(null, workspace.id, deal.id)}
-      />
+          <ArchiveButton
+            id="deal-restore"
+            name={deal.name}
+            archived={deal.archived}
+            archive={archiveDeal.bind(null, workspace.id, deal.id)}
+            restore={restoreDeal.bind(null, workspace.id, deal.id)}
+          />
+        </>
+      )}
+      <LogActivityButton />
     </>
   );
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <RecordHeader
-        number={recordNumber('deal', deal.id)}
-        name={deal.name}
-        headingId={HEADING_ID}
-        owner={deal.owner}
-        archived={deal.archived}
-        status={<DealStatusBadge status={deal.status} />}
-        figure={formatMoney(deal.amount, deal.currency, locale)}
-        actions={actions}
-      />
-      <section
-        aria-label={t('progress')}
-        className="rounded-lg border border-rule bg-card px-5 py-4"
-      >
-        <StatusTrack
-          stages={stageRefs}
-          stage={deal.stage}
-          enteredAt={deal.stageEnteredAt}
-          signatures={stageSignatures(history.history)}
-          now={new Date()}
-          timeZone={workspace.timezone}
-          className="max-w-xl"
+    <RecordPage
+      header={
+        <RecordHeader
+          number={recordNumber('deal', deal.id)}
+          name={deal.name}
+          headingId={HEADING_ID}
+          owner={deal.owner}
+          archived={deal.archived}
+          // The stage as its pill, which moves the deal (Lost asks why first).
+          status={
+            <DealStagePill
+              workspaceId={workspace.id}
+              deal={{ id: deal.id, name: deal.name, version: deal.version, stage: deal.stage }}
+              stages={stageRefs}
+              canEdit={canEdit}
+            />
+          }
+          figure={formatMoney(deal.amount, deal.currency, locale)}
+          track={
+            <StatusTrack
+              stages={stageRefs}
+              stage={deal.stage}
+              enteredAt={deal.stageEnteredAt}
+              signatures={stageSignatures(history.history)}
+              now={new Date()}
+              timeZone={workspace.timezone}
+              full
+            />
+          }
+          actions={actions}
         />
-      </section>
-      <DealFacts deal={deal} workspaceId={workspace.id} timeZone={workspace.timezone} />
-      <StageHistory history={history.history} timeZone={workspace.timezone} />
+      }
+    >
       {/* Its tasks and activity; they show on its company's page too. */}
-      <RecordWork workspace={workspace} me={user.id} link={{ dealId: deal.id }} label={deal.name} />
-      <RecordHistory workspace={workspace} entityType="DEAL" entityId={deal.id} />
-    </div>
+      <RecordWork
+        workspace={workspace}
+        me={user.id}
+        link={{ dealId: deal.id }}
+        label={deal.name}
+        facts={<DealFacts deal={deal} workspaceId={workspace.id} timeZone={workspace.timezone} />}
+        history={
+          <>
+            <StageHistory history={history.history} timeZone={workspace.timezone} />
+            <RecordHistory workspace={workspace} entityType="DEAL" entityId={deal.id} />
+          </>
+        }
+      />
+    </RecordPage>
   );
 }

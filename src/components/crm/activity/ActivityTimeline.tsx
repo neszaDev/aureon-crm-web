@@ -159,14 +159,14 @@ export const ActivityTimeline = (props: {
   };
 
   return (
-    <section aria-labelledby={headingId} className="rounded-lg border border-rule bg-card">
+    <section aria-labelledby={headingId}>
       <h2
         id={headingId}
         tabIndex={-1}
-        className="flex items-baseline gap-2 rounded-sm px-5 pt-4 pb-3 font-semibold"
+        className="flex items-baseline gap-2 rounded-sm px-5 pt-4 pb-3 text-sm font-semibold"
       >
         {t('title')}
-        <span className="text-sm font-normal text-muted-foreground tabular-nums">
+        <span className="text-[0.8125rem] font-normal text-muted-foreground tabular-nums">
           {t('count', { count: props.total })}
         </span>
       </h2>
@@ -205,6 +205,8 @@ export const ActivityTimeline = (props: {
           <Button
             ref={composed ? focusOnMount : undefined}
             variant="outline"
+            // The record header's "Log activity" opens the composer through it.
+            data-log-activity=""
             onClick={() => {
               setComposing(true);
             }}

@@ -4,10 +4,11 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RecordHistory } from '@/components/crm/audit/RecordHistory';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
 import { RecordHeader } from '@/components/crm/record/RecordHeader';
+import { RecordColumns, RecordPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { TaskDialog } from '@/components/crm/task/TaskDialog';
 import { TaskFacts } from '@/components/crm/task/TaskFacts';
-import { TaskStatusActions } from '@/components/crm/task/TaskStatusActions';
+import { TaskStatusPill } from '@/components/crm/task/TaskStatusPill';
 import { Button } from '@/components/ui/button';
 import { getMembers, getTask } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
@@ -34,11 +35,11 @@ export async function generateMetadata(props: TaskPageProps): Promise<Metadata> 
   });
 }
 
+// Its full page, and its panel over the page it was opened from (`@panel`).
 export default async function TaskPage(props: TaskPageProps) {
   const { locale, workspaceId, id } = await props.params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'TaskPage' });
-  const tRow = await getTranslations({ locale, namespace: 'TaskRow' });
 
   // The workspace (a cached call); a lost one is "not found" even on a client navigation.
   const [{ workspace }, { user }, result, members] = await Promise.all([
@@ -63,45 +64,52 @@ export default async function TaskPage(props: TaskPageProps) {
   if (!task || !user || !members.members) {
     throw new Error('Could not load the task');
   }
-  const actions = canEditRecord(
-    workspace,
-    user.id,
-    task.assignee?.userId,
-    task.createdBy?.userId,
-  ) && (
-    <>
-      <TaskDialog
-        trigger={
-          <Button variant="outline">
-            <PencilIcon data-icon="inline-start" />
-            {t('edit')}
-          </Button>
-        }
-        workspaceId={workspace.id}
-        task={task}
-        members={members.members}
-        me={user.id}
-        canAssign={canAssign(workspace)}
-        timeZone={workspace.timezone}
-      />
-      <TaskStatusActions task={task} workspaceId={workspace.id} />
-    </>
-  );
+  const canEdit = canEditRecord(workspace, user.id, task.assignee?.userId, task.createdBy?.userId);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <RecordHeader
-        number={recordNumber('task', task.id)}
-        name={task.title}
-        headingId="task-heading"
-        owner={task.assignee}
-        assigned
-        archived={false}
-        status={task.status === 'OPEN' ? undefined : tRow(`status_${task.status}`)}
-        actions={actions}
+    <RecordPage
+      header={
+        <RecordHeader
+          number={recordNumber('task', task.id)}
+          name={task.title}
+          headingId="task-heading"
+          owner={task.assignee}
+          assigned
+          archived={false}
+          // The status as its pill: completes, cancels (once confirmed) or reopens the task.
+          status={
+            <TaskStatusPill
+              task={task}
+              workspaceId={workspace.id}
+              canEdit={canEdit}
+              headingId="task-heading"
+            />
+          }
+          actions={
+            canEdit && (
+              <TaskDialog
+                trigger={
+                  <Button variant="outline">
+                    <PencilIcon data-icon="inline-start" />
+                    {t('edit')}
+                  </Button>
+                }
+                workspaceId={workspace.id}
+                task={task}
+                members={members.members}
+                me={user.id}
+                canAssign={canAssign(workspace)}
+                timeZone={workspace.timezone}
+              />
+            )
+          }
+        />
+      }
+    >
+      <RecordColumns
+        left={<TaskFacts task={task} workspaceId={workspace.id} timeZone={workspace.timezone} />}
+        right={<RecordHistory workspace={workspace} entityType="TASK" entityId={task.id} />}
       />
-      <TaskFacts task={task} workspaceId={workspace.id} timeZone={workspace.timezone} />
-      <RecordHistory workspace={workspace} entityType="TASK" entityId={task.id} />
-    </div>
+    </RecordPage>
   );
 }

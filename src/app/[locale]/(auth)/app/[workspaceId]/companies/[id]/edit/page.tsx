@@ -3,12 +3,13 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { findCompanyDuplicates, updateCompany } from '@/actions/crm/CompanyActions';
 import { CompanyForm } from '@/components/crm/company/CompanyForm';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
+import { RecordEditPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { getCompany, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import type { components } from '@/libs/api/schema';
 import { endRejectedSession } from '@/libs/api/Session';
+import { recordNumber } from '@/libs/crm/Format';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
@@ -90,25 +91,24 @@ export default async function EditCompanyPage(props: EditCompanyPageProps) {
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title', { name: company.name })} description={t('description')} />
-      <section
-        aria-label={company.name}
-        className="max-w-3xl rounded-lg border border-rule bg-card p-5 sm:p-6"
-      >
-        <CompanyForm
-          action={updateCompany.bind(null, workspace.id, company.id, company.version)}
-          findDuplicates={findCompanyDuplicates.bind(null, workspace.id)}
-          defaults={formValues(company)}
-          recordId={company.id}
-          members={members.members}
-          me={user.id}
-          canAssign={canAssign(workspace)}
-          listPath={path}
-          cancelHref={`${path}/${company.id}`}
-          submitLabel={t('submit')}
-        />
-      </section>
-    </div>
+    <RecordEditPage
+      number={recordNumber('company', company.id)}
+      title={t('title', { name: company.name })}
+      description={t('description')}
+      label={company.name}
+    >
+      <CompanyForm
+        action={updateCompany.bind(null, workspace.id, company.id, company.version)}
+        findDuplicates={findCompanyDuplicates.bind(null, workspace.id)}
+        defaults={formValues(company)}
+        recordId={company.id}
+        members={members.members}
+        me={user.id}
+        canAssign={canAssign(workspace)}
+        listPath={path}
+        cancelHref={`${path}/${company.id}`}
+        submitLabel={t('submit')}
+      />
+    </RecordEditPage>
   );
 }

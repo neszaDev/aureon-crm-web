@@ -4,12 +4,13 @@ import { updateDeal } from '@/actions/crm/DealActions';
 import { currencyOptions } from '@/components/crm/CreateWorkspaceForm';
 import { DealForm } from '@/components/crm/deal/DealForm';
 import { ForbiddenNotice } from '@/components/crm/ForbiddenNotice';
+import { RecordEditPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
-import { SettingsHeader } from '@/components/crm/settings/SettingsHeader';
 import { getDeal, getLeadSources, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import type { components } from '@/libs/api/schema';
 import { endRejectedSession } from '@/libs/api/Session';
+import { recordNumber } from '@/libs/crm/Format';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
@@ -96,32 +97,31 @@ export default async function EditDealPage(props: EditDealPageProps) {
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <SettingsHeader title={t('title', { name: deal.name })} description={t('description')} />
-      <section
-        aria-label={deal.name}
-        className="max-w-3xl rounded-lg border border-rule bg-card p-5 sm:p-6"
-      >
-        <DealForm
-          action={updateDeal.bind(null, workspace.id, deal.id, deal.version)}
-          defaults={formValues(deal)}
-          isEdit
-          workspaceId={workspace.id}
-          company={deal.company ? { id: deal.company.id, label: deal.company.name } : null}
-          contact={deal.contact ? { id: deal.contact.id, label: deal.contact.fullName } : null}
-          members={members.members}
-          me={user.id}
-          canAssign={canAssign(workspace)}
-          sources={sources.sources}
-          stages={[]}
-          stageName={deal.stage.name}
-          defaultCurrency={workspace.defaultCurrency}
-          currencies={currencyOptions(locale)}
-          timeZone={workspace.timezone}
-          cancelHref={`${path}/${deal.id}`}
-          submitLabel={t('submit')}
-        />
-      </section>
-    </div>
+    <RecordEditPage
+      number={recordNumber('deal', deal.id)}
+      title={t('title', { name: deal.name })}
+      description={t('description')}
+      label={deal.name}
+    >
+      <DealForm
+        action={updateDeal.bind(null, workspace.id, deal.id, deal.version)}
+        defaults={formValues(deal)}
+        isEdit
+        workspaceId={workspace.id}
+        company={deal.company ? { id: deal.company.id, label: deal.company.name } : null}
+        contact={deal.contact ? { id: deal.contact.id, label: deal.contact.fullName } : null}
+        members={members.members}
+        me={user.id}
+        canAssign={canAssign(workspace)}
+        sources={sources.sources}
+        stages={[]}
+        stageName={deal.stage.name}
+        defaultCurrency={workspace.defaultCurrency}
+        currencies={currencyOptions(locale)}
+        timeZone={workspace.timezone}
+        cancelHref={`${path}/${deal.id}`}
+        submitLabel={t('submit')}
+      />
+    </RecordEditPage>
   );
 }
