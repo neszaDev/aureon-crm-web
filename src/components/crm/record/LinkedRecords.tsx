@@ -1,5 +1,6 @@
 import { cn } from 'cn';
 import { useTranslations } from 'next-intl';
+import { Fragment } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { components } from '@/libs/api/schema';
 import { Link } from '@/libs/I18nNavigation';
@@ -10,7 +11,7 @@ type PersonRef = components['schemas']['PersonRef'];
 
 /**
  * The records a task or an activity is on, as links to their pages, the one being viewed left
- * out: its company, contact, lead and deal, in that order. With `more`, on one line, as a list
+ * out: its company, contact, lead and deal, in that order, a dot between each. With `more`, on one line, as a list
  * row has it: the first, cut short (whole in its tooltip), then "+N", a link to `more` whose
  * tooltip names them all (needs a `TooltipProvider`).
  * @param props Component props.
@@ -85,10 +86,16 @@ export const LinkedRecords = (props: {
     );
   }
 
+  // A dot between the records, so two names never read as one ("Acme · Acme scanners").
   return (
     <span className={cn('flex flex-wrap gap-x-2', props.className)}>
       {props.label}
-      {links.map((item) => link(item, 'break-words'))}
+      {links.map((item, index) => (
+        <Fragment key={item.key}>
+          {index > 0 && <span aria-hidden="true">·</span>}
+          {link(item, 'break-words')}
+        </Fragment>
+      ))}
     </span>
   );
 };

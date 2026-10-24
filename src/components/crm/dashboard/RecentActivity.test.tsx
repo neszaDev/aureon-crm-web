@@ -66,6 +66,14 @@ describe(RecentActivity, () => {
     expect(page.getByRole('button').elements()).toHaveLength(0);
   });
 
+  it('sets the records an entry is on apart, a dot between each', async () => {
+    await recent([activity(1, 'Sent the price list', { deal: { id: 9, name: 'Acme scanners' } })]);
+
+    await expect
+      .element(page.getByRole('listitem'))
+      .toHaveTextContent(/On\s*Acme\s*·\s*Acme scanners$/u);
+  });
+
   it('says so when nothing has been logged', async () => {
     await recent([]);
 
