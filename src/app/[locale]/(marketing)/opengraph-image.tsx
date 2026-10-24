@@ -51,8 +51,8 @@ const thaiWords = (text: string) => {
 
 /**
  * The shared image of the public pages, per language, as the landing page's band opens: the
- * orbit mark and the name, a deal of the demo workspace as its list row draws it (its stage's
- * pill, its track filled up to it, its owner), and the headline, white on Aureon violet.
+ * orbit mark and the name, a deal of the demo workspace as the app draws it (its pill, its
+ * track filled up to its stage, its owner), and the headline, white on Aureon violet.
  * @param props Route props.
  * @param props.params The locale.
  * @returns The PNG.

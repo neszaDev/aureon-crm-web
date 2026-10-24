@@ -202,8 +202,8 @@ export default async function IndexPage(props: IndexPageProps) {
       <section aria-labelledby="hero-title" className="text-white">
         <div className="bg-violet dark:bg-violet-tint">
           <div className="mx-auto max-w-[76rem] px-4 pt-8 sm:px-7 lg:pt-10">
-            {/* A deal of the demo workspace as its list row draws it, its track filling up to
-                its stage. */}
+            {/* A deal of the demo workspace as the app draws it: its pill, its track (filling up
+                to its stage), its owner. */}
             <SampleRecord
               className="max-w-[48rem]"
               description={t('track_label', {

@@ -88,8 +88,8 @@ export const SampleTrack = (props: {
 );
 
 /**
- * A record of the demo workspace as the app's lists draw a row of it, on a panel: its name and
- * amount, its status pill, its track and its owner. A picture: hidden from assistive technology,
+ * A record of the demo workspace as the app draws it, on a flat panel: its name and amount, its
+ * pill, its track, its owner. A picture: hidden from assistive technology,
  * which reads its description instead.
  * @param props Component props.
  * @param props.description What it shows, in words.
@@ -116,7 +116,7 @@ export const SampleRecord = (props: {
     <p className="sr-only">{props.description}</p>
     <div
       aria-hidden="true"
-      className="flex flex-wrap items-center gap-x-4 gap-y-2.5 rounded-lg border border-rule bg-card px-4 py-2.5 text-card-foreground shadow-float"
+      className="flex flex-wrap items-center gap-x-4 gap-y-2.5 rounded-lg border border-rule bg-card px-4 py-2.5 text-card-foreground"
     >
       <span className="flex min-w-0 items-baseline gap-2">
         <span className="truncate text-sm font-semibold">{props.name}</span>
