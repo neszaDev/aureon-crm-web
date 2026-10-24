@@ -12,7 +12,10 @@ Nothing here is drawn, mocked or edited: each file is a Playwright screenshot, c
 - **Data:** the fictional demo workspace **Northwind Supply**, signed in as its owner (`admin@e2e.test`, the
   account the e2e suite seeds it for). Every company, person, amount and date is invented by that seed; its
   members are Hana Sato, Mia Rossi, Riley Chen and Ravi Patel, and its owner has no display name, so the app
-  shows their email.
+  shows their email. The seed closes Brightwater depot rollout (Mia Rossi, €42,000) as won, the won deal of
+  the page's closing band. In the workspace these captures come from, that last move to Won was made by hand
+  by the owner on 2026-10-22, before the seed made it; no capture shows who moved that deal (they show its
+  owner), so a capture of a freshly seeded workspace shows the same deals in the same stages.
 - **Format:** reduced motion, `cwebp -q 80 -m 6`; the desktop captures at device scale 2, the narrow
   crops (`*-390*`, `tasks-inbox`) at 3. Each screen has a light (`-light`) and a dark (`-dark`) capture; the
   page shows the one matching its theme. Below 768 px the page shows the narrow crop of each section instead

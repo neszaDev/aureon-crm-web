@@ -297,7 +297,8 @@ export const seedAdminProject = async (backendUrl: string) => {
   );
 
   // Deals in two currencies, each moved stage by stage by its owner, so the history and the
-  // tracks say who moved them; one won, one lost with its reason.
+  // tracks say who moved them; two won (the depot rollout is the landing page's won deal), one
+  // lost with its reason.
   const moveThrough = async (as: Account, saved: Saved, names: string[], lostReason?: string) => {
     let current = saved;
     for (const name of names) {
@@ -324,7 +325,7 @@ export const seedAdminProject = async (backendUrl: string) => {
     contactId: warehouse.id,
     expectedCloseDate: dayFromNow(10),
   });
-  await moveThrough(mia, rollout, ['Needs analysis', 'Proposal', 'Negotiation']);
+  await moveThrough(mia, rollout, ['Needs analysis', 'Proposal', 'Negotiation', 'Won']);
   const usExpansion = await create(riley, 'deals', {
     name: DEALS.usExpansion,
     amount: '26000.00',
