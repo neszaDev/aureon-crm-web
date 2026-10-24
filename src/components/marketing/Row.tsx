@@ -2,11 +2,13 @@ import { cn } from 'cn';
 
 /**
  * One section of the landing page's two desks: the team's story in the wide column, the
- * developer's note in the hairline margin beside it (under it below 1024 px).
+ * developer's note in the hairline margin beside it (under it below 1024 px). With `wide`, a
+ * capture across both, under them, as large as the page allows (on a phone, before the note).
  * @param props Component props.
  * @param props.id The section's anchor.
  * @param props.titleId The id of its heading.
  * @param props.note The developer's note.
+ * @param props.wide The capture across the page.
  * @param props.className Extra classes.
  * @param props.children The story.
  * @returns The section.
@@ -15,6 +17,7 @@ export const Row = (props: {
   id?: string;
   titleId: string;
   note: React.ReactNode;
+  wide?: React.ReactNode;
   className?: string;
   children: React.ReactNode;
 }) => (
@@ -27,7 +30,8 @@ export const Row = (props: {
     )}
   >
     <div className="flex min-w-0 flex-col gap-5">{props.children}</div>
-    {props.note}
+    {props.wide && <div className="min-w-0 lg:col-span-2 lg:row-start-2">{props.wide}</div>}
+    <div className="flex lg:col-start-2 lg:row-start-1">{props.note}</div>
   </section>
 );
 

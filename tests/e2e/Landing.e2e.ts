@@ -27,7 +27,8 @@ test.describe('Landing', () => {
     await expect(
       page.getByRole('heading', {
         level: 1,
-        name: 'เห็นว่าทุกดี\u2060ล\u2060อยู่\u2060ขั้น\u2060ไหน และใครเป็นผู้\u2060รับ\u2060ผิด\u2060ชอบ',
+        // และ bound to what follows: the line before never ends on it.
+        name: 'เห็นว่าทุกดี\u2060ล\u2060อยู่\u2060ขั้น\u2060ไหน และ\u2060ใครเป็นผู้\u2060รับ\u2060ผิด\u2060ชอบ',
       }),
     ).toBeVisible();
     await expect(
@@ -52,6 +53,14 @@ test.describe('Landing', () => {
       'Questions',
       'Open a workspace. Move your first deal.',
     ]);
+    // Each desk under the headline names whom it is for in its own first words, with no label
+    // above it.
+    const hero = page.getByRole('region', {
+      name: 'See where every deal stands, and who owns it.',
+    });
+    await expect(hero.getByText(/^Your sales team changes a status/u)).toBeVisible();
+    await expect(hero.getByText(/^Developers get a Next\.js 16 frontend/u)).toBeVisible();
+    await expect(hero.getByText(/^For (your sales team|developers)$/u)).toHaveCount(0);
     // The hero's deal is drawn from the app's looks: assistive technology reads what it shows.
     await expect(
       page.getByText(

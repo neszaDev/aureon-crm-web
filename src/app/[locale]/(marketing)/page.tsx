@@ -66,8 +66,12 @@ type IndexPageProps = {
   params: Promise<{ locale: string }>;
 };
 
-// A capture in the main column: 800 px from 1280, the column's share of the page below.
+// A capture in the main column: 800 px from 1280, the column's share of the page below. The
+// captures there are of a 1064 px window or a 1000 px crop, so their words show at three quarters
+// of their size or more.
 const MAIN_SIZES = '(min-width: 1280px) 800px, (min-width: 1024px) calc(100vw - 24rem), 100vw';
+// A capture across the page: up to its 1160 px content (a 1440 px window at four fifths).
+const WIDE_SIZES = '(min-width: 1216px) 1160px, calc(100vw - 3.5rem)';
 
 // The demo workspace's people and deals (fictional, from its seed) as the captures show them,
 // avatars in the colours the app gives their member ids, and its deals' stages by name (a
@@ -239,18 +243,15 @@ export default async function IndexPage(props: IndexPageProps) {
             </h1>
 
             <div className="mt-8 grid border-t border-white/45 md:grid-cols-2 lg:mt-9">
+              {/* Each desk's first words name whom it is for: no label above it. */}
               <div className="flex flex-col gap-3.5 pt-5 md:pr-12">
-                {/* On a phone the desks stack under the headline: the team's needs no label. */}
-                <p className="text-[0.8125rem] font-medium max-md:hidden">{t('team_label')}</p>
                 <p className="max-w-[34ch] text-lg leading-snug font-medium lg:text-[1.375rem]">
                   {t('team_text')}
                 </p>
                 <div className="pt-1">{actions}</div>
               </div>
               <div className="mt-7 flex flex-col gap-3.5 border-t border-white/45 pt-5 md:mt-0 md:border-t-0 md:border-l md:pl-12">
-                <p className="text-[0.8125rem] font-medium">{devLabel}</p>
-                {/* On a phone the desk keeps its commands; the developers' section says the rest. */}
-                <p className="max-w-[46ch] max-md:hidden">{t('dev_text')}</p>
+                <p className="max-w-[46ch]">{t('dev_text')}</p>
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
                   <code className="flex w-max rounded-md bg-rail font-mono text-[0.8125rem] leading-normal">
                     <span className="px-3.5 py-1.5">make setup</span>
@@ -327,6 +328,7 @@ export default async function IndexPage(props: IndexPageProps) {
           <p className={CAPTION}>{t('how_caption')}</p>
         </Row>
 
+        {/* The one section whose capture spans the page: a whole list, its sections in order. */}
         <Row
           id="features"
           titleId="lists-title"
@@ -335,26 +337,28 @@ export default async function IndexPage(props: IndexPageProps) {
               {t('lists_note')}
             </Note>
           }
+          wide={
+            <figure className="flex flex-col gap-2">
+              <Shot
+                light={listLight}
+                dark={listDark}
+                narrow={
+                  thai
+                    ? { light: listPhoneThaiLight, dark: listPhoneThaiDark }
+                    : { light: listPhoneLight, dark: listPhoneDark }
+                }
+                alt={t('lists_alt')}
+                sizes={WIDE_SIZES}
+                spot={spots.lists}
+              />
+              <figcaption className={CAPTION}>{caption(t('lists_screen'))}</figcaption>
+            </figure>
+          }
         >
           <h2 id="lists-title" className={H2}>
             {t('lists_title')}
           </h2>
           <p className={LEDE}>{t('lists_text')}</p>
-          <figure className="mt-4 flex flex-col gap-2">
-            <Shot
-              light={listLight}
-              dark={listDark}
-              narrow={
-                thai
-                  ? { light: listPhoneThaiLight, dark: listPhoneThaiDark }
-                  : { light: listPhoneLight, dark: listPhoneDark }
-              }
-              alt={t('lists_alt')}
-              sizes={MAIN_SIZES}
-              spot={spots.lists}
-            />
-            <figcaption className={CAPTION}>{caption(t('lists_screen'))}</figcaption>
-          </figure>
         </Row>
 
         <Row

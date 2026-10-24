@@ -123,7 +123,13 @@ const toBoard = async (page: Page) => {
 const tableToggle = (locale: Locale) =>
   `button[aria-expanded]:text-is("${say(locale, 'ChartTable.label')}")`;
 
-// The desktop captures: the whole app at 1440 px, as a visitor would see it.
+// The desktop captures, as a visitor would see the app. The hero and the deals list (shown across
+// the page) are of a 1440 px window; the rest are of a 1064 px one (`SECTION_WIDTH`), or a crop
+// of 1000 px (`DEAL_CLIP`), so that in the page's 800 px column their words show at three quarters
+// of their size or more.
+const SECTION_WIDTH = 1064;
+// The record panel (920 px) and the edge of the list it was opened over.
+const DEAL_CLIP = { x: 440, y: 0, width: 1000, height: 900 };
 const SHOTS: Shot[] = [
   {
     // The hero: the deals board in its shell, down to the end of its columns.
@@ -145,11 +151,12 @@ const SHOTS: Shot[] = [
     width: 1440,
     height: 900,
     prepare: openDeal,
+    clip: DEAL_CLIP,
   },
   {
     name: 'tasks',
     path: '/en{ws}/tasks',
-    width: 1440,
+    width: SECTION_WIDTH,
     height: 760,
     prepare: async (page) => {
       await openInbox(page);
@@ -159,22 +166,22 @@ const SHOTS: Shot[] = [
     // Insights › Dashboard, down to the panels above its recent activity.
     name: 'dashboard',
     path: '/en{ws}/dashboard',
-    width: 1440,
+    width: SECTION_WIDTH,
     height: 900,
     clip: async (page) => {
       const activity = await panelOf(page, say('en', 'RecentActivity.title'));
-      return { x: 0, y: 0, width: 1440, height: Math.floor(activity.y) - 4 };
+      return { x: 0, y: 0, width: SECTION_WIDTH, height: Math.floor(activity.y) - 4 };
     },
   },
   {
     // Reports, Won and lost, down to the chart's edge, above its table.
     name: 'reports',
     path: '/en{ws}/reports?tab=won-lost',
-    width: 1440,
+    width: SECTION_WIDTH,
     height: 900,
     clip: async (page) => {
       const toggle = await boxOf(page, tableToggle('en'));
-      return { x: 0, y: 0, width: 1440, height: Math.floor(toggle.y) - 8 };
+      return { x: 0, y: 0, width: SECTION_WIDTH, height: Math.floor(toggle.y) - 8 };
     },
   },
   // The languages section: the deals board in Thai on a phone.
@@ -330,22 +337,23 @@ const pad = (box: Clip, by: number) => ({
 // Where each section's ring sits on its capture, in percent (public/landing/spots.json, which
 // page.tsx imports): the list's first section heading, the deal's track in the panel, the inbox.
 const spots = async (page: Page, workspace: string, deal: string) => {
-  const frame = { x: 0, y: 0, width: 1440, height: 900 };
-  await page.setViewportSize({ width: 1440, height: 900 });
+  // Each measured on the window, or the crop, its capture is of.
+  const wide = { x: 0, y: 0, width: 1440, height: 900 };
+  await page.setViewportSize(wide);
   await page.goto(`/en${workspace}/deals?view=list`);
   await settle(page);
-  const lists = percent(pad(await boxOf(page, `${SECTION} h3 > button`), 6), frame);
+  const lists = percent(pad(await boxOf(page, `${SECTION} h3 > button`), 6), wide);
 
   await openDeal(page, deal);
   await settle(page);
-  const track = percent(pad(await boxOf(page, '[role="dialog"] header ol'), 8), frame);
+  const track = percent(pad(await boxOf(page, '[role="dialog"] header ol'), 8), DEAL_CLIP);
 
-  await page.setViewportSize({ width: 1440, height: 760 });
+  const section = { x: 0, y: 0, width: SECTION_WIDTH, height: 760 };
+  await page.setViewportSize(section);
   await page.goto(`/en${workspace}/tasks`);
   await settle(page);
   await openInbox(page);
-  const inbox = await boxOf(page, '[role="dialog"]');
-  const tasks = percent(pad(inbox, 4), { ...frame, height: 760 });
+  const tasks = percent(pad(await boxOf(page, '[role="dialog"]'), 4), section);
 
   const file = path.join(OUT, 'spots.json');
   writeFileSync(file, `${JSON.stringify({ lists, deal: track, tasks }, null, 2)}\n`);
@@ -363,6 +371,12 @@ const signIn = async (page: Page) => {
   // The picker's link reads its mark's initials and the caller's role around the name.
   await page.getByRole('link').filter({ hasText: WORKSPACE }).click();
   await page.waitForURL(/\/app\/\d+$/u);
+  // The deals space open in the sidebar's tree, as a viewer would leave it: the wide captures show
+  // its saved views.
+  await page.evaluate(() => {
+    // `SPACES_KEY` (src/libs/crm/Sidebar.ts).
+    localStorage.setItem('aureon.spaces', 'deals');
+  });
 
   return new URL(page.url()).pathname.replace(/^\/(?:en|fr|th)(?=\/)/u, '');
 };

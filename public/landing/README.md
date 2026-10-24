@@ -10,14 +10,16 @@ Nothing here is drawn, mocked or edited: each file is a Playwright screenshot, c
   for each file (`impeccable embed-prompt --scan public/landing` lists any without one).
 - **Date:** 2026-10-24.
 - **Data:** the fictional demo workspace **Northwind Supply**, signed in as its owner (`admin@e2e.test`, the
-  account the e2e suite seeds it for). Every company, person, amount and date is invented by that seed; its
+  account the e2e suite seeds it for), with the Deals space open in the sidebar's tree. Every company, person, amount and date is invented by that seed; its
   members are Hana Sato, Mia Rossi, Riley Chen and Ravi Patel, and its owner has no display name, so the app
   shows their email. The seed closes Brightwater depot rollout (Mia Rossi, €42,000) as won, the won deal of
   the page's closing band. In the workspace these captures come from, that last move to Won was made by hand
   by the owner on 2026-10-22, before the seed made it; no capture shows who moved that deal (they show its
   owner), so a capture of a freshly seeded workspace shows the same deals in the same stages.
 - **Format:** reduced motion, `cwebp -q 80 -m 6`; the desktop captures at device scale 2, the narrow
-  crops (`*-390*`, `tasks-inbox`) at 3. Each screen has a light (`-light`) and a dark (`-dark`) capture; the
+  crops (`*-390*`, `tasks-inbox`) at 3. The page shows the board and the deals list across its width (a
+  1440 px window at about four fifths); the other desktop captures sit in its 800 px column, so they are of a
+  1064 px window, or a 1000 px crop, to show their words at three quarters of their size or more. Each screen has a light (`-light`) and a dark (`-dark`) capture; the
   page shows the one matching its theme. Below 768 px the page shows the narrow crop of each section instead
   of the whole screen; the Thai page shows the Thai crops (`-th`).
 - **Origin line** (in each file's `.webp.json`): `Real screenshot of the Aureon CRM app (demo workspace Northwind
@@ -27,15 +29,15 @@ Nothing here is drawn, mocked or edited: each file is a Playwright screenshot, c
 |---|---|---|
 | `board-{light,dark}.webp` | Deals board in the app's shell (hero, from 768 px) | 1440 × 900, down to the end of the columns |
 | `board-hero-390[-th]-{light,dark}.webp` | Phone deals board, its first stage from the stage picker down (hero, below 768 px) | 390 × 844, 390 × 520 from the picker |
-| `deals-list-{light,dark}.webp` | Deals list in its status sections | 1440 × 900 |
+| `deals-list-{light,dark}.webp` | Deals list in its status sections (across the page) | 1440 × 900 |
 | `deals-list-390[-th]-{light,dark}.webp` | The deals list's first status section on a phone | 390 × 844, the section |
-| `deal-{light,dark}.webp` | The open deal furthest along the pipeline, in the record panel over the deals list | 1440 × 900 |
+| `deal-{light,dark}.webp` | The open deal furthest along the pipeline, in the record panel over the deals list | 1440 × 900, the 1000 × 900 at its right: the panel and the list's edge |
 | `deal-390[-th]-{light,dark}.webp` | The same deal's header on a phone: pill, owner, track | 390 × 844, the header |
-| `tasks-{light,dark}.webp` | Tasks by due date, with the inbox open | 1440 × 760 |
+| `tasks-{light,dark}.webp` | Tasks by due date, with the inbox open | 1064 × 760 |
 | `tasks-inbox[-th]-{light,dark}.webp` | The inbox popover (its section below 768 px) | 1440 × 760, inside the popover's edge |
-| `dashboard-{light,dark}.webp` | Insights › Dashboard, down to the panels above its recent activity | 1440 × 900 |
+| `dashboard-{light,dark}.webp` | Insights › Dashboard, down to the panels above its recent activity | 1064 × 900 |
 | `dashboard-390[-th]-{light,dark}.webp` | The figures and the open deals by stage on a phone | 390 × 844 |
-| `reports-{light,dark}.webp` | Reports, Won and lost tab, down to the chart's edge above its table | 1440 × 900 |
+| `reports-{light,dark}.webp` | Reports, Won and lost tab, down to the chart's edge above its table | 1064 × 900 |
 | `reports-390[-th]-{light,dark}.webp` | The won-and-lost chart on a phone, above its table | 390 × 844 |
 | `board-390-th-{light,dark}.webp` | Deals board in Thai on a phone (the languages section) | 390 × 844 |
 
