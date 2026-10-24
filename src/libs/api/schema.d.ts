@@ -4504,6 +4504,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                ownerId?: number;
             };
             header?: never;
             path: {
@@ -4526,7 +4527,9 @@ export interface operations {
     };
     followUps: {
         parameters: {
-            query?: never;
+            query?: {
+                ownerId?: number;
+            };
             header?: never;
             path: {
                 workspaceId: number;
@@ -4551,6 +4554,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                ownerId?: number;
             };
             header?: never;
             path: {
@@ -4573,7 +4577,9 @@ export interface operations {
     };
     pipeline: {
         parameters: {
-            query?: never;
+            query?: {
+                ownerId?: number;
+            };
             header?: never;
             path: {
                 workspaceId: number;
@@ -4598,6 +4604,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                ownerId?: number;
             };
             header?: never;
             path: {
