@@ -85,9 +85,24 @@ export const BulkSection = (props: {
   </Section>
 );
 
-// Shown only while focused, as a skip link: just above the bar it leads to.
-const TO_BAR =
-  'sr-only focus:not-sr-only focus:fixed focus:bottom-20 focus:left-1/2 focus:z-40 focus:-translate-x-1/2 focus:rounded-md focus:bg-field focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:whitespace-nowrap focus:text-foreground focus:shadow-float';
+// "Go to bulk actions": the keyboard's way to the bar past the rest of the rows. Shown only while
+// focused, as a skip link, just above the bar it leads to.
+const ToBar = () => {
+  const t = useTranslations('BulkBar');
+
+  return (
+    <button
+      type="button"
+      className="sr-only focus:not-sr-only focus:fixed focus:bottom-20 focus:left-1/2 focus:z-40 focus:-translate-x-1/2 focus:rounded-md focus:bg-field focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:whitespace-nowrap focus:text-foreground focus:shadow-float"
+      onClick={() => {
+        // The toolbar hands the focus on to its current control.
+        document.querySelector<HTMLElement>('[data-bulk-bar] [role="toolbar"]')?.focus();
+      }}
+    >
+      {t('go_to_bar')}
+    </button>
+  );
+};
 
 /**
  * The select-all box at the head of a section's table: tri-state (mixed while some of the section
@@ -116,18 +131,7 @@ export const SelectAllHead = () => {
               bulk.toggleSection(section.ids);
             }}
           />
-          {bulk.chosen.length > 0 && (
-            <button
-              type="button"
-              className={TO_BAR}
-              onClick={() => {
-                // The toolbar hands the focus on to its current control.
-                document.querySelector<HTMLElement>('[data-bulk-bar] [role="toolbar"]')?.focus();
-              }}
-            >
-              {t('go_to_bar')}
-            </button>
-          )}
+          {bulk.chosen.length > 0 && <ToBar />}
         </>
       )}
     </TableHead>
@@ -135,7 +139,8 @@ export const SelectAllHead = () => {
 };
 
 /**
- * A row's box in a `BulkList`: Shift+click selects the range from the last row toggled.
+ * A row's box in a `BulkList`: Shift+click selects the range from the last row toggled. Ticked,
+ * its next Tab stop is "Go to bulk actions", as the select-all box's is.
  * @param props Component props.
  * @param props.id The record.
  * @param props.name Its name, for the box's label.
@@ -161,6 +166,7 @@ export const SelectCell = (props: { id: number; name: string }) => {
           }}
         />
       )}
+      {bulk?.keys.has(props.id) && <ToBar />}
     </TableCell>
   );
 };

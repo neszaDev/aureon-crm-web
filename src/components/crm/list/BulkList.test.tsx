@@ -115,6 +115,7 @@ const all = (section: string) =>
   page.getByRole('checkbox', { name: `Select all ${section}`, exact: true });
 const toolbar = () => page.getByRole('toolbar');
 const shortcut = () => page.getByRole('button', { name: 'Go to bulk actions' });
+const rowOf = (name: string) => page.getByRole('row').filter({ hasText: name });
 
 describe(BulkList, () => {
   it('selects rows, shows the bar with the count, and marks the section’s box mixed, then all', async () => {
@@ -214,6 +215,22 @@ describe(BulkList, () => {
     await expect.element(shortcut().first()).toHaveFocus();
     await userEvent.keyboard('{Enter}');
 
+    await expect.element(toolbar().getByRole('button', { name: 'Archive' })).toHaveFocus();
+  });
+
+  it('offers a way to the bar right after a ticked row’s own box, in one Tab', async () => {
+    await render(<List scope="a" sections={[NEW, WON]} />);
+
+    focus(box('Dunford'));
+    await userEvent.keyboard(' ');
+    await userEvent.keyboard('{Tab}');
+
+    await expect
+      .element(rowOf('Dunford').getByRole('button', { name: 'Go to bulk actions' }))
+      .toHaveFocus();
+    // Only the ticked row has one.
+    expect(rowOf('Acme').getByRole('button').elements()).toHaveLength(0);
+    await userEvent.keyboard('{Enter}');
     await expect.element(toolbar().getByRole('button', { name: 'Archive' })).toHaveFocus();
   });
 

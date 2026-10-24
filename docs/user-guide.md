@@ -147,8 +147,9 @@ cancel once confirmed), **Archive** (confirmed) or, in the archived view, **Rest
 can't change one of them, the bar says so and offers only to clear. Each record is saved on its
 own and the bar counts them; when some are refused (your role, or someone changed them first) the
 bar lists each by name with the reason, keeps them selected and shows the list as it now is; the
-list stays until you dismiss it. With the keyboard, Tab from a section's box to **Go to bulk
-actions** to reach the bar, and move along it with the arrow keys.
+list stays until you dismiss it. With the keyboard, Tab from a section's box, or from a row's
+box you just ticked, to **Go to bulk actions** to reach the bar, and move along it with the arrow
+keys.
 
 Who may change a record: its owner, or a manager, admin or owner of the workspace. A **sales rep**
 reads everything in the workspace but edits, archives and moves only the records they own (and the
