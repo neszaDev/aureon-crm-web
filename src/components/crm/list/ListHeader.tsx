@@ -39,7 +39,8 @@ export const ListHeader = (props: {
         )}
       </div>
       {props.action}
-      {props.tabs && <div className="basis-full">{props.tabs}</div>}
+      {/* Its tabs scroll inside themselves on a phone, never the page: it may shrink below them. */}
+      {props.tabs && <div className="min-w-0 basis-full">{props.tabs}</div>}
     </header>
   );
 };
