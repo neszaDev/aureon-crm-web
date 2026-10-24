@@ -14,7 +14,7 @@ import type { PasswordChangeValues, ProfileValues } from '@/validations/ProfileV
 import { PasswordChangeValidation, ProfileValidation } from '@/validations/ProfileValidation';
 
 /**
- * Sets or clears the signed-in user's display name (`PUT /users/me`); the seal follows it.
+ * Sets or clears the signed-in user's display name (`PUT /users/me`); the avatar follows it.
  * @param values Form values; an empty name clears it.
  * @returns Success, or field and form errors.
  */

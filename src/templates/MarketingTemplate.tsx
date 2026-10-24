@@ -40,7 +40,7 @@ export const MarketingTemplate = (props: { children: React.ReactNode }) => {
       </a>
       <header className="bg-violet text-white dark:bg-violet-tint">
         <div className="mx-auto flex h-16 max-w-[76rem] items-center gap-8 px-4 sm:px-7 lg:h-18">
-          <Wordmark tone="seal" />
+          <Wordmark tone="brand" />
           <nav aria-label={t('main_navigation_label')} className="flex flex-1 items-center gap-2">
             <ul className="hidden items-center gap-1 xl:flex">
               {SECTIONS.map((section) => (
@@ -57,7 +57,7 @@ export const MarketingTemplate = (props: { children: React.ReactNode }) => {
               </li>
             </ul>
             <div className="ml-auto flex items-center gap-2">
-              <LocaleSwitcher tone="seal" />
+              <LocaleSwitcher tone="brand" />
               <Button asChild variant="outline" size="sm" className={BRAND_OUTLINE_BUTTON}>
                 <Link href="/sign-in">{t('sign_in_link')}</Link>
               </Button>

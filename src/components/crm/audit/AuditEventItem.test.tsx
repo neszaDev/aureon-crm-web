@@ -75,7 +75,7 @@ describe(AuditEventItem, () => {
       .element(page.getByRole('link', { name: 'Acme Trading Co' }))
       .toHaveAttribute('href', '/app/7/companies/42');
     await expect.element(page.getByText('C-0042')).toBeVisible();
-    // The actor signs with their own seal.
+    // The actor shows with their own avatar.
     await expect.element(page.getByText('RR', { exact: true })).toBeInTheDocument();
     const time = page.getByRole('time').element();
     expect(time.getAttribute('datetime')).toBe('2026-10-18T13:00:00Z');
@@ -399,13 +399,13 @@ describe(AuditEventItem, () => {
     ]);
   });
 
-  it('names a member who left, without a seal, and a person by email when they have no name', async () => {
+  it('names a member who left, without an avatar, and a person by email when they have no name', async () => {
     const former = await item(event({ actor: undefined, changes: {} }));
 
     await expect
       .element(page.getByRole('listitem').first())
       .toHaveTextContent('Former member changed Acme Trading');
-    // Nobody signs it.
+    // No one's avatar.
     expect(page.getByText('FM', { exact: true }).elements()).toHaveLength(0);
     await former.unmount();
 

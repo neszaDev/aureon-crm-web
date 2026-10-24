@@ -123,31 +123,31 @@ describe('colour tokens', () => {
       expect(contrast(theme, `status-${tone}-ink`, `status-${tone}-tint`)).toBeGreaterThanOrEqual(
         4.5,
       );
-      expect(contrast(theme, `status-${tone}-ink`, 'ground')).toBeGreaterThanOrEqual(4.5);
-      expect(contrast(theme, `status-${tone}-ink`, 'paper')).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(theme, `status-${tone}-ink`, 'canvas')).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(theme, `status-${tone}-ink`, 'card')).toBeGreaterThanOrEqual(4.5);
     });
 
     it.each(TONES)('draws the %s hue at 3:1 or more on the canvas', (tone) => {
       // The contract's light amber (#e69a1c, 2.3:1) only ever sits beside its words.
       const floor = themeName === 'light' && tone === 'amber' ? 2.3 : 3;
 
-      expect(contrast(theme, `status-${tone}`, 'ground')).toBeGreaterThanOrEqual(floor);
+      expect(contrast(theme, `status-${tone}`, 'canvas')).toBeGreaterThanOrEqual(floor);
     });
 
-    it('keeps text at 4.5:1 on every ground it sits on', () => {
-      for (const ground of ['ground', 'paper', 'field', 'sidebar', 'muted', 'violet-tint']) {
-        expect({ ground, ink: contrast(theme, 'ink', ground) >= 4.5 }).toStrictEqual({
-          ground,
+    it('keeps text at 4.5:1 on every surface it sits on', () => {
+      for (const surface of ['canvas', 'card', 'field', 'sidebar', 'muted', 'violet-tint']) {
+        expect({ surface, ink: contrast(theme, 'ink', surface) >= 4.5 }).toStrictEqual({
+          surface,
           ink: true,
         });
-        expect({ ground, ink2: contrast(theme, 'ink-2', ground) >= 4.5 }).toStrictEqual({
-          ground,
+        expect({ surface, ink2: contrast(theme, 'ink-2', surface) >= 4.5 }).toStrictEqual({
+          surface,
           ink2: true,
         });
       }
-      expect(contrast(theme, 'violet-ink', 'ground')).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(theme, 'violet-ink', 'canvas')).toBeGreaterThanOrEqual(4.5);
       expect(contrast(theme, 'violet-ink', 'violet-tint')).toBeGreaterThanOrEqual(4.5);
-      expect(contrast(theme, 'danger', 'paper')).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(theme, 'danger', 'card')).toBeGreaterThanOrEqual(4.5);
       expect(contrast(theme, 'on-rail', 'rail')).toBeGreaterThanOrEqual(4.5);
       expect(contrast(theme, 'on-rail', 'rail-raised')).toBeGreaterThanOrEqual(4.5);
     });
@@ -169,9 +169,9 @@ describe('colour tokens', () => {
     });
 
     it('draws control borders and the focus ring at 3:1 on the canvas and panels', () => {
-      for (const ground of ['ground', 'paper', 'sidebar']) {
-        expect(contrast(theme, 'input', ground)).toBeGreaterThanOrEqual(3);
-        expect(contrast(theme, 'ring', ground)).toBeGreaterThanOrEqual(3);
+      for (const surface of ['canvas', 'card', 'sidebar']) {
+        expect(contrast(theme, 'input', surface)).toBeGreaterThanOrEqual(3);
+        expect(contrast(theme, 'ring', surface)).toBeGreaterThanOrEqual(3);
       }
     });
   });

@@ -111,7 +111,7 @@ describe(ConvertDialog, () => {
     );
   });
 
-  it('sets the footer on paper with a hairline above it, not a tinted band', async () => {
+  it('sets the footer on the panel with a hairline above it, not a tinted band', async () => {
     await page.viewport(390, 560);
     await openDialog();
     const footer = page.getByRole('dialog').element().querySelector('[data-slot="dialog-footer"]');

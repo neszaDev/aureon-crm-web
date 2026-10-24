@@ -138,7 +138,7 @@ export default async function ContactPage(props: ContactPageProps) {
                   value: contact.email && (
                     <a
                       href={`mailto:${encodeURIComponent(contact.email)}`}
-                      className="break-all text-seal-ink"
+                      className="break-all text-violet-ink"
                     >
                       {contact.email}
                     </a>
@@ -150,7 +150,7 @@ export default async function ContactPage(props: ContactPageProps) {
                   value: contact.phone && (
                     <a
                       href={`tel:${contact.phone.replaceAll(/\s/gu, '')}`}
-                      className="text-seal-ink tabular-nums"
+                      className="text-violet-ink tabular-nums"
                     >
                       {contact.phone}
                     </a>
@@ -163,7 +163,7 @@ export default async function ContactPage(props: ContactPageProps) {
                   value: contact.company && (
                     <Link
                       href={`/app/${workspace.id}/companies/${contact.company.id}`}
-                      className="text-seal-ink"
+                      className="text-violet-ink"
                     >
                       {contact.company.name}
                     </Link>

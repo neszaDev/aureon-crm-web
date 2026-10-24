@@ -7,7 +7,7 @@ import type { ListQuery } from '@/libs/crm/ListQuery';
 
 /**
  * A list's owner filter (`ownerId`; tasks: the assignee, `assigneeId`): Anyone, Me, Unassigned,
- * then every other member, by seal and name. An owner who left the workspace, or an id typed in
+ * then every other member, by avatar and name. An owner who left the workspace, or an id typed in
  * the URL, reads "Former member". A labelled select, or a toolbar chip (`chip`).
  * @param props Component props.
  * @param props.id The select's id.

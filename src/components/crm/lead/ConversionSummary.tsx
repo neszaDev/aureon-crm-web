@@ -35,7 +35,7 @@ export const ConversionSummary = (props: {
           icon: Building2Icon,
           label: t('company'),
           value: props.company ? (
-            <Link href={`${base}/companies/${props.company.id}`} className="text-seal-ink">
+            <Link href={`${base}/companies/${props.company.id}`} className="text-violet-ink">
               {props.company.name}
             </Link>
           ) : (
@@ -46,7 +46,7 @@ export const ConversionSummary = (props: {
           icon: UserIcon,
           label: t('contact'),
           value: props.contact && (
-            <Link href={`${base}/contacts/${props.contact.id}`} className="text-seal-ink">
+            <Link href={`${base}/contacts/${props.contact.id}`} className="text-violet-ink">
               {props.contact.fullName}
             </Link>
           ),
@@ -56,7 +56,7 @@ export const ConversionSummary = (props: {
           label: t('deal'),
           value: props.deal ? (
             <span className="flex flex-wrap items-baseline gap-x-2">
-              <Link href={`${base}/deals/${props.deal.id}`} className="text-seal-ink">
+              <Link href={`${base}/deals/${props.deal.id}`} className="text-violet-ink">
                 {props.deal.name}
               </Link>
               <span className="font-mono text-[0.8125rem] text-muted-foreground tabular-nums">

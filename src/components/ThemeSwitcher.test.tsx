@@ -30,7 +30,7 @@ describe(ThemeSwitcher, () => {
     expect(document.cookie).toContain('theme=system');
   });
 
-  it("tints the browser's bar with the ground of the theme shown, the OS's for system", async () => {
+  it("tints the browser's bar with the canvas of the theme shown, the OS's for system", async () => {
     // The root layout's two tags, one per OS scheme.
     const tags = (['light', 'dark'] as const).map((scheme) => {
       const meta = document.createElement('meta');

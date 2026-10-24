@@ -18,7 +18,7 @@ export const InvalidFilterNotice = (props: { resetHref: string }) => {
       <div className="flex flex-col gap-1">
         <h2 className="font-semibold">{t('invalid_title')}</h2>
         <p className="text-muted-foreground">{t('invalid_text')}</p>
-        <Link href={props.resetHref} className="mt-1 w-fit font-medium text-seal-ink">
+        <Link href={props.resetHref} className="mt-1 w-fit font-medium text-violet-ink">
           {t('invalid_reset')}
         </Link>
       </div>

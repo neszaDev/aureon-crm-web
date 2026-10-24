@@ -15,7 +15,7 @@ import type { components } from '@/libs/api/schema';
 import { formatDate, formatInstant } from '@/libs/crm/Format';
 import { Link } from '@/libs/I18nNavigation';
 
-const linkClass = 'text-seal-ink';
+const linkClass = 'text-violet-ink';
 
 /**
  * A deal's properties, icon-labelled: why it was lost (when it is), its company, contact, source

@@ -56,7 +56,7 @@ describe(InvitationCard, () => {
       // Shown, not editable: no field holds it but the hidden one for password managers.
       await expect.element(page.getByText('ana@example.com')).toBeVisible();
       expect(page.getByRole('textbox', { name: 'Email address' }).elements()).toHaveLength(0);
-      // The seal previews the initials of the name being typed.
+      // The avatar previews the initials of the name being typed.
       await expect.element(page.getByText('AN', { exact: true })).toBeVisible();
 
       await page.getByLabelText('Password').fill('123');

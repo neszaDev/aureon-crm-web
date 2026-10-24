@@ -23,14 +23,14 @@ const hex = (rgb: string) =>
     .join('')}`;
 
 describe(LocaleSwitcher, () => {
-  // The marketing header is the ink-violet seal; the boilerplate demos' rail is the folder green.
+  // The marketing header is the violet brand field; the boilerplate demos' rail is the folder green.
   it.each([
-    ['seal', 'bg-seal'],
+    ['brand', 'bg-violet'],
     ['folder', 'bg-folder'],
-  ] as const)('draws its focus outline at 3:1 or more on the %s ground', async (tone, ground) => {
+  ] as const)('draws its focus outline at 3:1 or more on the %s field', async (tone, field) => {
     await render(
       <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-        <div data-testid="ground" className={`${ground} p-4`}>
+        <div data-testid="field" className={`${field} p-4`}>
           <LocaleSwitcher tone={tone} />
         </div>
       </NextIntlClientProvider>,
@@ -40,10 +40,10 @@ describe(LocaleSwitcher, () => {
     const select = page.getByRole('combobox');
     await expect.element(select).toHaveFocus();
     const outline = getComputedStyle(select.element());
-    const groundColour = getComputedStyle(page.getByTestId('ground').element()).backgroundColor;
+    const fieldColour = getComputedStyle(page.getByTestId('field').element()).backgroundColor;
 
     expect(outline.outlineStyle).toBe('solid');
     expect(outline.outlineWidth).toBe('2px');
-    expect(contrastRatio(hex(outline.outlineColor), hex(groundColour))).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(hex(outline.outlineColor), hex(fieldColour))).toBeGreaterThanOrEqual(3);
   });
 });

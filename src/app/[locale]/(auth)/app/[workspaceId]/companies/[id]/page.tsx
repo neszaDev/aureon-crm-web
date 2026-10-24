@@ -141,7 +141,7 @@ export default async function CompanyPage(props: CompanyPageProps) {
                         href={company.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 break-all text-seal-ink"
+                        className="inline-flex items-center gap-1 break-all text-violet-ink"
                       >
                         {company.website}
                         <span className="sr-only"> {t('new_tab')}</span>
@@ -157,7 +157,7 @@ export default async function CompanyPage(props: CompanyPageProps) {
                   value: company.phone && (
                     <a
                       href={`tel:${company.phone.replaceAll(/\s/gu, '')}`}
-                      className="text-seal-ink tabular-nums"
+                      className="text-violet-ink tabular-nums"
                     >
                       {company.phone}
                     </a>

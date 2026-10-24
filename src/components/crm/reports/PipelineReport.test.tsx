@@ -58,7 +58,7 @@ const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en') =>
   );
 
 const owners = (name = 'Open deals by owner') => page.getByRole('table', { name });
-// What a cell says: the seal's initials are decoration, not part of a name.
+// What a cell says: the avatar's initials are decoration, not part of a name.
 const textOf = (cell: Element | null) => {
   const copy = cell?.cloneNode(true);
   if (!(copy instanceof Element)) {
@@ -88,11 +88,11 @@ describe(PipelineReport, () => {
     ]);
   });
 
-  it('signs each owner with a seal and the unassigned deals with none', async () => {
+  it('shows each owner with an avatar and the unassigned deals with none', async () => {
     await report(REPORT);
 
     const rows = owners().getByRole('row').elements().slice(1);
-    // The seal is decorative; the unassigned row holds a blank of its size, so the words line up.
+    // The avatar is decorative; the unassigned row holds a blank of its size, so the words line up.
     expect(rows.map((row) => row.querySelector('[aria-hidden="true"]')?.textContent)).toStrictEqual(
       ['RR', 'SA', ''],
     );

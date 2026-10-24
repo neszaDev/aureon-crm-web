@@ -42,7 +42,7 @@ const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en') =>
     </NextIntlClientProvider>,
   );
 
-// What a cell says: the seal's initials are decoration, not part of a name.
+// What a cell says: the avatar's initials are decoration, not part of a name.
 const textOf = (cell: Element | null) => {
   const copy = cell?.cloneNode(true);
   if (!(copy instanceof Element)) {
@@ -136,15 +136,15 @@ describe(ActivityReport, () => {
     ]);
   });
 
-  it('signs each member with a seal and the former members with none', async () => {
+  it('shows each member with an avatar and the former members with none', async () => {
     await report(REPORT);
 
-    const seals = page
+    const avatars = page
       .getByRole('row')
       .elements()
       .slice(1)
       .map((row) => row.querySelector('th [aria-hidden="true"]')?.textContent);
-    expect(seals).toStrictEqual(['RR', 'SA', '']);
+    expect(avatars).toStrictEqual(['RR', 'SA', '']);
   });
 
   it('adds no total row: the API gave none', async () => {

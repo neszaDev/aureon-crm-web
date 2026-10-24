@@ -270,7 +270,7 @@ export default async function IndexPage(props: IndexPageProps) {
         </div>
 
         {/* The band's edge runs through the sheet, wherever the sheet's height puts it. */}
-        <div className="bg-[linear-gradient(var(--violet)_0_45%,var(--ground)_45%)] dark:bg-[linear-gradient(var(--violet-tint)_0_45%,var(--ground)_45%)]">
+        <div className="bg-[linear-gradient(var(--violet)_0_45%,var(--canvas)_45%)] dark:bg-[linear-gradient(var(--violet-tint)_0_45%,var(--canvas)_45%)]">
           <figure className="mx-auto flex max-w-[76rem] flex-col gap-3 px-4 pt-8 pb-8 sm:px-7 md:pt-10">
             <HeroShot
               light={{ wide: boardLight, narrow: thai ? boardPhoneThaiLight : boardPhoneLight }}
@@ -456,7 +456,7 @@ export default async function IndexPage(props: IndexPageProps) {
             {t('roles_title')}
           </h2>
           <p className={LEDE}>{t('roles_text')}</p>
-          <div className="mt-4 rounded-lg border border-rule bg-paper">
+          <div className="mt-4 rounded-lg border border-rule bg-card">
             <div className="flex items-baseline justify-between gap-4 border-b border-rule px-5 py-4">
               <h3 className="font-semibold">{t('roles_heading')}</h3>
               <span className="text-sm text-ink-2">{t('roles_count')}</span>
@@ -537,7 +537,7 @@ export default async function IndexPage(props: IndexPageProps) {
               </a>
             </Button>
           </div>
-          <dl className="grid self-start rounded-lg border border-rule bg-paper sm:grid-cols-2">
+          <dl className="grid self-start rounded-lg border border-rule bg-card sm:grid-cols-2">
             {facts.map((fact) => (
               <div
                 key={fact.title}

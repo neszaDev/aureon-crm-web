@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import { ThemeClass } from '@/components/ThemeClass';
 import { SIDEBAR_SCRIPT } from '@/libs/crm/Sidebar';
 import { routing } from '@/libs/I18nRouting';
-import { THEME_GROUNDS, THEME_SCRIPT } from '@/libs/Theme';
+import { THEME_CANVAS, THEME_SCRIPT } from '@/libs/Theme';
 import { getBaseUrl } from '@/utils/Helpers';
 import '@/styles/global.css';
 
@@ -91,17 +91,13 @@ export default async function RootLayout(props: {
       suppressHydrationWarning
     >
       <head>
-        {/* The ground of each OS scheme; `applyTheme` sets both to a theme chosen in the app. */}
+        {/* The canvas of each OS scheme; `applyTheme` sets both to a theme chosen in the app. */}
         <meta
           name="theme-color"
           media="(prefers-color-scheme: light)"
-          content={THEME_GROUNDS.light}
+          content={THEME_CANVAS.light}
         />
-        <meta
-          name="theme-color"
-          media="(prefers-color-scheme: dark)"
-          content={THEME_GROUNDS.dark}
-        />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content={THEME_CANVAS.dark} />
         <script
           // A constant script with no user input; Theme.test.ts proves it applies only light|dark.
           // oxlint-disable-next-line react/no-danger

@@ -35,7 +35,7 @@ export const GetStarted = (props: {
       <QuickActions workspace={props.workspace} members={props.members} me={props.me} />
       <Link
         href={`/app/${props.workspace.id}/settings/members`}
-        className="font-medium text-seal-ink"
+        className="font-medium text-violet-ink"
       >
         {can(props.workspace, 'MEMBERS_MANAGE') ? t('members_manage') : t('members_view')}
       </Link>

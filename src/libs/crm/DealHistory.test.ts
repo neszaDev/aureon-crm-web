@@ -80,7 +80,7 @@ describe(stageSignatures, () => {
 });
 
 describe(signaturesOf, () => {
-  it('keys each stage with the member who signed it, whatever the order', () => {
+  it('keys each stage with the member who moved the deal into it, whatever the order', () => {
     expect(
       signaturesOf([
         { stageId: 2, by: RILEY },

@@ -47,7 +47,9 @@ describe(GetStarted, () => {
       .element(links('Invite your team'))
       .toHaveAttribute('href', '/app/1/settings/members');
     // A seal is only ever someone's signature: nothing here has been signed.
-    expect(document.querySelector('[class*="border-seal-ink"][class*="rounded-full"]')).toBeNull();
+    expect(
+      document.querySelector('[class*="border-violet-ink"][class*="rounded-full"]'),
+    ).toBeNull();
   });
 
   it('only offers to see the team to someone who cannot invite', async () => {

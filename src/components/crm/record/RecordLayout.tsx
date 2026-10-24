@@ -20,7 +20,7 @@ export const RecordPage = (props: { header: React.ReactNode; children: React.Rea
 /**
  * A record's form page, a new record's or an edit (in its record's frame): its number when it has
  * one, its title on a small scale (the form's large name input leads) and what the page is for
- * over a hairline, then the form, on the page's own ground. The same in the record panel (a new record opened from inside the workspace) and on its
+ * over a hairline, then the form, on the page's own canvas. The same in the record panel (a new record opened from inside the workspace) and on its
  * full page.
  * @param props Component props.
  * @param props.number The record number, such as `C-0042`, when it is saved.
@@ -52,7 +52,7 @@ export const RecordFormPage = (props: {
 
 /**
  * A record's two columns from 1024 px (one below): what it is on the left, its properties and
- * linked records; what happened on the right, on the sidebar's ground: its activity, then its
+ * linked records; what happened on the right, on the sidebar's colour: its activity, then its
  * history.
  * @param props Component props.
  * @param props.left Its properties and linked records.

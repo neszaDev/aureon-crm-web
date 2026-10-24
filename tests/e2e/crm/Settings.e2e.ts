@@ -442,7 +442,7 @@ test.describe('Settings', () => {
     await page.getByRole('menuitem', { name: 'Theme' }).click();
     await page.getByRole('menuitemradio', { name: 'Dark' }).click();
     await expect(page.locator('html')).toHaveClass(/\bdark\b/u);
-    // The browser's bar takes the lacquer ground too, though the OS is light.
+    // The browser's bar takes the dark canvas too, though the OS is light.
     await expect.poll(async () => await barColours(page)).toStrictEqual(['#17151f', '#17151f']);
     await page.keyboard.press('Escape');
     await page.reload();

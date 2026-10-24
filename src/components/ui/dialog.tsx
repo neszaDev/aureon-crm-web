@@ -22,7 +22,7 @@ function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.C
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
-// Themed for Aureon: the dialog is a lifted paper panel over a dark wash, like AlertDialog.
+// Themed for Aureon: the dialog is a lifted panel over a dark wash, like AlertDialog.
 function DialogOverlay({
   className,
   ...props

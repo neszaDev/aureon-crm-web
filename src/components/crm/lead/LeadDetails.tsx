@@ -46,7 +46,7 @@ export const LeadDetails = (props: {
           value: props.lead.email && (
             <a
               href={`mailto:${encodeURIComponent(props.lead.email)}`}
-              className="break-all text-seal-ink"
+              className="break-all text-violet-ink"
             >
               {props.lead.email}
             </a>
@@ -58,7 +58,7 @@ export const LeadDetails = (props: {
           value: props.lead.phone && (
             <a
               href={`tel:${props.lead.phone.replaceAll(/\s/gu, '')}`}
-              className="text-seal-ink tabular-nums"
+              className="text-violet-ink tabular-nums"
             >
               {props.lead.phone}
             </a>

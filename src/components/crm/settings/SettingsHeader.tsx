@@ -34,7 +34,7 @@ export const SettingsHeader = (props: {
 /**
  * A part of a settings page: its heading (focusable, for the focus to land on after a row goes)
  * over a hairline that parts it from what comes before, an optional line on what it holds and an
- * action on the right, then its rows or form on the page's own ground (no card).
+ * action on the right, then its rows or form on the page's own canvas (no card).
  * @param props Component props.
  * @param props.headingId The heading's id.
  * @param props.title The heading.

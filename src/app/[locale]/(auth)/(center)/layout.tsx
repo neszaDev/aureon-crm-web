@@ -98,7 +98,7 @@ export default async function AuthLayout(props: {
         {/* The brand side, from 1024 px: the mark, what the CRM does, and a sample of it. White
             on Aureon violet (6.25:1); in the dark theme on its deep tint. */}
         <aside className="hidden flex-col justify-between gap-12 bg-violet p-10 text-on-rail lg:flex xl:p-14 dark:bg-violet-tint">
-          <Wordmark tone="seal" className="self-start" />
+          <Wordmark tone="brand" className="self-start" />
           <div className="flex max-w-md flex-col gap-10">
             <p className="text-[1.75rem] leading-tight font-semibold tracking-[-0.02em] text-balance">
               {t('aside_text')}

@@ -75,7 +75,7 @@ const Capture = (props: {
  * @returns The sheet.
  */
 export const HeroShot = (props: { light: Pair; dark: Pair; alt: string }) => (
-  <div className="h-[26rem] overflow-hidden rounded-lg border border-rule bg-paper shadow-overlay md:aspect-[16/9] md:h-auto">
+  <div className="h-[26rem] overflow-hidden rounded-lg border border-rule bg-card shadow-overlay md:aspect-[16/9] md:h-auto">
     <Capture
       light={props.light}
       dark={props.dark}

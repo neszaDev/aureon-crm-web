@@ -174,7 +174,7 @@ export const apiCall = async <T>(
 /**
  * Registers an account through the API.
  * @param request Playwright API client.
- * @param name Its display name, which people see on seals and in history, and its email's.
+ * @param name Its display name, which people see on avatars and in history, and its email's.
  * @returns The account, with the password `PASSWORD`.
  */
 export const registerUser = async (request: APIRequestContext, name?: string) => {

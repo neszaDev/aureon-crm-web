@@ -4,7 +4,7 @@ import { cn } from 'cn';
 import { Progress as ProgressPrimitive } from 'radix-ui';
 import * as React from 'react';
 
-// Themed for Aureon: a seal fill on the hairline rule, square-cut like the panels.
+// Themed for Aureon: a violet fill on the hairline rule, square-cut like the panels.
 function Progress({
   className,
   value,

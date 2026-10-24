@@ -3,7 +3,7 @@ import type { LucideIcon } from 'lucide-react';
 
 /**
  * A state that stands in for a page or a panel's content (an error, no access, nothing found) on
- * the page's own ground, as an empty list does: its icon on a tile (the danger tint for an error),
+ * the page's own canvas, as an empty list does: its icon on a tile (the danger tint for an error),
  * its title, one or two sentences on what happened and what to do, then the ways on.
  * @param props Component props.
  * @param props.icon Its icon.

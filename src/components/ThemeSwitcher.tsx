@@ -45,7 +45,7 @@ export const ThemeSwitcher = (props: { theme: Theme }) => {
           <ToggleGroupItem
             key={item}
             value={item}
-            className="gap-1.5 px-3 data-[state=on]:border-seal-ink data-[state=on]:bg-seal-tint data-[state=on]:text-seal-ink"
+            className="gap-1.5 px-3 data-[state=on]:border-violet-ink data-[state=on]:bg-violet-tint data-[state=on]:text-violet-ink"
           >
             <Icon aria-hidden="true" />
             {t(`theme_${item}`)}

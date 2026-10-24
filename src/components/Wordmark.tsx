@@ -4,8 +4,8 @@ import { AureonMark } from '@/components/brand/AureonMark';
 import { Link } from '@/libs/I18nNavigation';
 
 const TONES = {
-  paper: { link: 'text-foreground', mark: 'text-violet-ink' },
-  seal: { link: 'text-on-seal focus-visible:outline-on-seal', mark: 'text-on-seal' },
+  canvas: { link: 'text-foreground', mark: 'text-violet-ink' },
+  brand: { link: 'text-on-rail focus-visible:outline-on-rail', mark: 'text-on-rail' },
   folder: {
     link: 'text-folder-ink focus-visible:outline-folder-ink',
     mark: 'text-folder-ink-soft',
@@ -15,8 +15,8 @@ const TONES = {
 /**
  * The brand: the orbit mark and "Aureon", linking home.
  * @param props Component props.
- * @param props.tone `paper` on the canvas and panels (default), `seal` on the ink-violet rail,
- *   `folder` on the boilerplate demo's green fields.
+ * @param props.tone `canvas` on the canvas and panels (default), `brand` on the violet fields of
+ *   the public pages, `folder` on the boilerplate demo's green fields.
  * @param props.href Where the wordmark links (home by default).
  * @param props.className Extra classes.
  * @returns The wordmark link.
@@ -27,7 +27,7 @@ export const Wordmark = (props: {
   className?: string;
 }) => {
   const t = useTranslations('Brand');
-  const tone = TONES[props.tone ?? 'paper'];
+  const tone = TONES[props.tone ?? 'canvas'];
 
   return (
     <Link

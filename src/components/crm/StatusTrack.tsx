@@ -103,9 +103,9 @@ export const StatusTrack = (props: {
       when: when ?? 'none',
     });
     // Who and when, written under a full track's segment; a former member is said so.
-    const signed = [mover === 'left' ? t('former_member') : by, when].filter(Boolean).join(' · ');
+    const byline = [mover === 'left' ? t('former_member') : by, when].filter(Boolean).join(' · ');
 
-    return { stage, label, own, signed, filled: state !== 'blank' && state !== 'unknown' };
+    return { stage, label, own, byline, filled: state !== 'blank' && state !== 'unknown' };
   });
   const name = closed
     ? t('closed', { name: props.stage.name, kind: props.stage.kind })
@@ -151,7 +151,7 @@ export const StatusTrack = (props: {
                         )}
                       </span>
                       <span className="min-h-[1.2em] truncate text-[0.6875rem] text-muted-foreground tabular-nums">
-                        {segment.signed}
+                        {segment.byline}
                       </span>
                     </span>
                     <span className="sr-only">{segment.label}</span>

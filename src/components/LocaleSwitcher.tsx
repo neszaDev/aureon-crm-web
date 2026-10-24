@@ -9,19 +9,20 @@ import { routing } from '@/libs/I18nRouting';
 
 // Each tone restyles the select and its chevron from the wrapper.
 const TONES = {
-  paper: '',
+  canvas: '',
   folder:
     '[&_select]:border-white/25 [&_select]:bg-white/10 [&_select]:text-folder-ink [&_select]:shadow-none [&_select]:hover:border-white/50 [&_select]:focus-visible:border-folder-ink [&_select]:focus-visible:outline-folder-ink [&_svg]:text-folder-ink-soft',
-  // On the seal: on-seal outline and text (4.9:1), a darker fill on hover, the focus outline in
-  // on-seal (the page's violet one would sit on the ink-violet bar).
-  seal: '[&_select]:border-on-seal [&_select]:bg-transparent [&_select]:text-on-seal [&_select]:shadow-none [&_select]:hover:border-on-seal [&_select]:hover:bg-black/10 [&_select]:focus-visible:border-on-seal [&_select]:focus-visible:outline-on-seal [&_svg]:text-on-seal',
+  // On the brand field: a white outline and text (6.25:1 on Aureon violet), a darker fill on
+  // hover, the focus outline in white (the page's violet one would sit on the violet).
+  brand:
+    '[&_select]:border-on-rail [&_select]:bg-transparent [&_select]:text-on-rail [&_select]:shadow-none [&_select]:hover:border-on-rail [&_select]:hover:bg-black/10 [&_select]:focus-visible:border-on-rail [&_select]:focus-visible:outline-on-rail [&_svg]:text-on-rail',
 };
 
 /**
  * The language picker: the UI kit's small native select (`NativeSelect`), drawn here without
  * its class merging (`cn`), whose rule tables the public pages would otherwise load for it alone.
  * @param props Component props.
- * @param props.tone `paper` (default), `seal` on the ink-violet fields of the public pages, or
+ * @param props.tone `canvas` (default), `brand` on the violet fields of the public pages, or
  *   `folder` on the boilerplate demo's green.
  * @param props.className Extra classes.
  * @returns The picker.
@@ -45,7 +46,7 @@ export const LocaleSwitcher = (props: { tone?: keyof typeof TONES; className?: s
 
   return (
     <div
-      className={`relative w-[4.75rem] font-semibold ${TONES[props.tone ?? 'paper']} ${props.className ?? ''}`}
+      className={`relative w-[4.75rem] font-semibold ${TONES[props.tone ?? 'canvas']} ${props.className ?? ''}`}
     >
       <select
         data-size="sm"

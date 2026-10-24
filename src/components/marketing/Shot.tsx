@@ -82,7 +82,7 @@ export const Shot = (props: {
 }) => (
   <div
     className={cn(
-      'relative overflow-hidden rounded-lg border border-rule bg-paper',
+      'relative overflow-hidden rounded-lg border border-rule bg-card',
       props.className,
     )}
   >

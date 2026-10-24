@@ -37,7 +37,7 @@ export const DuplicateWarning = (props: {
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-medium text-seal-ink"
+                    className="inline-flex items-center gap-1 font-medium text-violet-ink"
                   >
                     {item.label}
                     <span className="sr-only"> {t('new_tab')}</span>

@@ -11,13 +11,12 @@
  * Status tones: `--status-<tone>` is the hue, for dots and fills that sit beside their words
  * (light amber is 2.3:1 and slate 3:1 on the sidebar: never a lone bar, stripe or filled step);
  * anything that must read alone takes the `-ink` token, and charts take `--chart-*`. `-tint` is a
- * pill's ground and `-ink` the text on it or on the canvas (4.5:1 or more on both, in both
+ * pill's fill and `-ink` the text on it or on the canvas (4.5:1 or more on both, in both
  * themes). Any element with `data-tone="<tone>"` gets them as `--tone`, `--tone-tint` and
  * `--tone-ink`.
  *
- * Legacy names: some pages still read the "Seal and circular" tokens; they resolve to this
- * palette (`seal` is the rail, `seal-ink` the violet ink, `paper` a panel, `ground` the canvas,
- * `ink` the text, `rule` the hairline).
+ * The boilerplate's demos under /dashboard keep their own Marksheet tokens (`paper`, `folder`,
+ * `ink-*`, …), resolved to this palette below; the app never uses them.
  */
 
 /* Dark: the `.dark` class on <html>, or the OS preference while the theme cookie is `system`. */
@@ -58,8 +57,9 @@
   --rail-raised: #2e2a45;
   --on-rail: #ffffff;
   --sidebar: #f7f7fa;
-  --ground: #ffffff;
-  --paper: #ffffff;
+  --canvas: #ffffff;
+  /* Panels (shadcn's card). */
+  --card: #ffffff;
   /* Controls (inputs, outline buttons, menus). */
   --field: #ffffff;
   --ink: #1f2030;
@@ -114,17 +114,11 @@
   --chart-4: #c98410;
   --chart-5: var(--status-red);
 
-  --seal: var(--rail);
-  --seal-deep: var(--rail-raised);
-  --seal-tint: var(--violet-tint);
-  --seal-ink: var(--violet-ink);
-  --on-seal: var(--on-rail);
-
   /*
-   * Marksheet, the boilerplate's demo world under /dashboard. Kept so
-   * those components still render; `bg-paper` there now resolves to Aureon's paper. New UI must not
-   * use these.
+   * Marksheet, the boilerplate's demo world under /dashboard: its tokens, kept for those demos
+   * alone (their paper is Aureon's panel). New UI must not use these.
    */
+  --paper: #ffffff;
   --folder: #1f5c45;
   --folder-deep: #164433;
   --folder-ink: #f1f5ef;
@@ -144,9 +138,8 @@
   --pencil: #5f666e;
 
   /* shadcn semantic tokens, mapped onto Aureon. */
-  --background: var(--ground);
+  --background: var(--canvas);
   --foreground: var(--ink);
-  --card: var(--paper);
   --card-foreground: var(--ink);
   --popover: var(--field);
   --popover-foreground: var(--ink);
@@ -168,7 +161,7 @@
   /* Floating layers only: menus and popovers, then the side panel and dialogs. */
   --shadow-float: 0 4px 12px -2px rgb(29 26 46 / 10%), 0 12px 28px -6px rgb(29 26 46 / 14%);
   --shadow-overlay: 0 12px 32px -8px rgb(29 26 46 / 18%), 0 32px 64px -16px rgb(29 26 46 / 24%);
-  /* Panels and controls lie flat; these two stay for the pages that still name them. */
+  /* Panels and controls lie flat: the demos' ply and sheet shadows draw nothing. */
   --shadow-ply: 0 0 #0000;
   --shadow-sheet: 0 0 #0000;
   /* Marksheet's paper, for the demos. */
@@ -183,8 +176,8 @@
     --rail: #120f1f;
     --rail-raised: #262140;
     --sidebar: #1b1925;
-    --ground: #17151f;
-    --paper: #1f1c2a;
+    --canvas: #17151f;
+    --card: #1f1c2a;
     --field: #1f1c2a;
     --ink: #ecebf2;
     --ink-2: #a4a2b6;
@@ -215,6 +208,7 @@
     --chart-5: var(--status-red-ink);
 
     /* Marksheet had no dark theme: its neutrals follow Aureon's so the demos stay legible. */
+    --paper: var(--card);
     --paper-card: var(--paper);
     --ply: var(--field);
     --ink-950: var(--ink);
@@ -332,13 +326,7 @@
   --color-violet-tint: var(--violet-tint);
   --color-violet-ink: var(--violet-ink);
 
-  --color-seal: var(--seal);
-  --color-seal-deep: var(--seal-deep);
-  --color-seal-tint: var(--seal-tint);
-  --color-seal-ink: var(--seal-ink);
-  --color-on-seal: var(--on-seal);
-  --color-paper: var(--paper);
-  --color-ground: var(--ground);
+  --color-canvas: var(--canvas);
   --color-field: var(--field);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
@@ -357,6 +345,7 @@
   --color-folder-deep: var(--folder-deep);
   --color-folder-ink: var(--folder-ink);
   --color-folder-ink-soft: var(--folder-ink-soft);
+  --color-paper: var(--paper);
   --color-paper-card: var(--paper-card);
   --color-ply: var(--ply);
   --color-ink-950: var(--ink-950);
@@ -542,7 +531,7 @@
 /*
  * The deal board scrolls sideways when its stages don't fit. Its scrollbar stays in view, drawn
  * in the palette (the control stroke on the muted track). A fade at the right edge of a sideways
- * scroller (the board, a report's wide table), in the colour under it (`--fade-to`, the ground by
+ * scroller (the board, a report's wide table), in the colour under it (`--fade-to`, the canvas by
  * default), says there is more, and goes once the end is in view. Where scroll-driven animations
  * are unsupported the fade is skipped and the scrollbar says it.
  */
@@ -563,7 +552,7 @@
 
 .scroll-fade {
   opacity: 0;
-  background-image: linear-gradient(to left, var(--fade-to, var(--ground)), transparent);
+  background-image: linear-gradient(to left, var(--fade-to, var(--canvas)), transparent);
 }
 
 @supports (animation-timeline: scroll()) {

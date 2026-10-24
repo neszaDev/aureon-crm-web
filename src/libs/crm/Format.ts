@@ -157,7 +157,7 @@ export const fullName = (person: { firstName: string; lastName?: string }) =>
   [person.firstName, person.lastName].filter(Boolean).join(' ');
 
 // A Thai legal form before or after a name (company, limited partnership, partnership; limited,
-// public): "บริษัท ไทยรุ่ง จำกัด" signs as ไทยรุ่ง does.
+// public): "บริษัท ไทยรุ่ง จำกัด" takes the initials ไทยรุ่ง does.
 const THAI_LEGAL_FORM = /^(?:ห้างหุ้นส่วนจำกัด|ห้างหุ้นส่วน|บริษัท|หจก\.)\s*|\s*(?:จำกัด)?\s*(?:\(มหาชน\))?$/gu;
 
 /**
@@ -171,7 +171,7 @@ const THAI_LEGAL_FORM = /^(?:ห้างหุ้นส่วนจำกัด
  */
 export const initialsOf = (name: string | undefined, email: string) => {
   const trimmed = name?.trim() ?? '';
-  // A word is one with a letter or a digit: "Harbor & Pine" signs as HP, not H&.
+  // A word is one with a letter or a digit: "Harbor & Pine" is HP, not H&.
   const words = (trimmed.replaceAll(THAI_LEGAL_FORM, '') || trimmed)
     .split(/\s+/u)
     .filter((word) => /[\p{L}\p{N}]/u.test(word));

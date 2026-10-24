@@ -470,7 +470,7 @@ describe(DealBoard, () => {
     await expect.poll(fadeOpacity).toBe('0');
   });
 
-  it('draws the columns on the sidebar’s ground, each headed by its stage’s pill', async () => {
+  it('draws the columns on the sidebar’s colour, each headed by its stage’s pill', async () => {
     await renderBoard();
 
     const qualification = column('Qualification').element();

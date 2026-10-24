@@ -43,7 +43,7 @@ export const LinkedRecords = (props: {
         <Link
           key={item.key}
           href={`/app/${props.workspaceId}/${item.path}/${item.id}`}
-          className="break-words text-seal-ink"
+          className="break-words text-violet-ink"
         >
           {item.label}
         </Link>

@@ -17,7 +17,7 @@ function RadioGroup({
   );
 }
 
-// Themed for Aureon: a field dot that fills with the seal when chosen.
+// Themed for Aureon: a field dot that fills with violet when chosen.
 function RadioGroupItem({
   className,
   ...props

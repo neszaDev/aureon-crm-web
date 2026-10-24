@@ -71,7 +71,7 @@ export default async function AboutPage(props: AboutPageProps) {
         </p>
       </header>
 
-      <section aria-labelledby="inside-title" className="rounded-lg border border-rule bg-paper">
+      <section aria-labelledby="inside-title" className="rounded-lg border border-rule bg-card">
         <h2 id="inside-title" className="border-b border-rule px-5 py-4 font-semibold">
           {t('inside_title')}
         </h2>

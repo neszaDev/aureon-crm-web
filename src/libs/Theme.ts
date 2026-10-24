@@ -34,12 +34,12 @@ export const THEME_SCRIPT = `try{var m=document.cookie.match(${String(THEME_COOK
 export const themeFromCookie = (cookie: string) =>
   parseTheme(THEME_COOKIE_PATTERN.exec(cookie)?.[1]);
 
-/** Each theme's canvas (`--ground`): the browser's bar colour too (`themeColor`). */
-export const THEME_GROUNDS = { light: '#ffffff', dark: '#17151f' } as const;
+/** Each theme's canvas (`--canvas`): the browser's bar colour too (`themeColor`). */
+export const THEME_CANVAS = { light: '#ffffff', dark: '#17151f' } as const;
 
 /**
  * Puts the theme's class on `<html>`: `light` or `dark`, none for `system`; and tints the
- * browser's bar with that theme's ground (the layout's `theme-color` tags, one per OS scheme,
+ * browser's bar with that theme's canvas (the layout's `theme-color` tags, one per OS scheme,
  * would follow the OS). Browser only.
  * @param theme The theme to show.
  */
@@ -51,7 +51,7 @@ export const applyTheme = (theme: Theme) => {
   }
   for (const meta of document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')) {
     const scheme = meta.media.includes('dark') ? 'dark' : 'light';
-    meta.content = THEME_GROUNDS[theme === 'system' ? scheme : theme];
+    meta.content = THEME_CANVAS[theme === 'system' ? scheme : theme];
   }
 };
 

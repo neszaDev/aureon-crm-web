@@ -13,7 +13,7 @@ type StageRef = components['schemas']['HistoryStageRef'];
 /**
  * A deal's stage history, newest first: from one stage to the next (the first entry says where
  * the deal began), who moved it, as their avatar and name, and when. Each stage shows the name it
- * had then; one that has since been deleted says so, and signs nothing on the track. A
+ * had then; one that has since been deleted says so, and marks nothing on the track. A
  * member who left reads "Former member", with no avatar: an avatar is only ever someone's.
  * @param props Component props.
  * @param props.history The entries, newest first, as the API lists them.

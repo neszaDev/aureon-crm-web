@@ -55,7 +55,7 @@ const Group = (props: {
       )}
       {props.count > props.shown && (
         <div className="border-t border-rule px-4 py-3 sm:px-5">
-          <Link href={props.moreHref} className="font-medium text-seal-ink">
+          <Link href={props.moreHref} className="font-medium text-violet-ink">
             {t('more', { count: props.count - props.shown })}
           </Link>
         </div>
