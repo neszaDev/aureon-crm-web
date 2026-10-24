@@ -29,28 +29,6 @@ export const metadata: Metadata = {
   // Makes the Open Graph image's URL absolute. A Docker build runs without APP_URL (validation
   // skipped), hence the fallback.
   metadataBase: new URL(getBaseUrl() || 'http://localhost:3000'),
-  icons: [
-    {
-      rel: 'apple-touch-icon',
-      url: '/apple-touch-icon.png',
-    },
-    {
-      rel: 'icon',
-      type: 'image/png',
-      sizes: '32x32',
-      url: '/favicon-32x32.png',
-    },
-    {
-      rel: 'icon',
-      type: 'image/png',
-      sizes: '16x16',
-      url: '/favicon-16x16.png',
-    },
-    {
-      rel: 'icon',
-      url: '/favicon.ico',
-    },
-  ],
 };
 
 // The browser's bar colour (`theme-color`) is in the layout's <head>, not here: Next draws the

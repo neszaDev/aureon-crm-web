@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { getTranslations } from 'next-intl/server';
 import { ImageResponse } from 'next/og';
+import { AureonMark } from '@/components/brand/AureonMark';
 import { routing } from '@/libs/I18nRouting';
 import { AppConfig } from '@/utils/AppConfig';
 
@@ -77,11 +78,7 @@ export default async function OpenGraphImage(props: { params: Promise<{ locale: 
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 40 }}>
-        {/* The orbit mark (AureonMark): a ring open at the upper right, its satellite beyond. */}
-        <svg width="52" height="52" viewBox="0 0 24 24" fill="none">
-          <path d="M19.88 10.61A8 8 0 1 1 13.39 4.12" stroke={WHITE} strokeWidth="3" />
-          <circle cx="19" cy="5" r="2.75" fill={WHITE} />
-        </svg>
+        <AureonMark size={52} />
         {AppConfig.name}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>

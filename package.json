@@ -23,7 +23,8 @@
     "build-storybook": "storybook build",
     "api:check": "node scripts/api-types.ts --check",
     "test:visual": "playwright test --project=visual",
-    "capture:landing": "node scripts/capture-landing.ts"
+    "capture:landing": "node scripts/capture-landing.ts",
+    "favicon": "node scripts/favicon.ts"
   },
   "dependencies": {
     "@codemirror/lang-html": "6.4.12",

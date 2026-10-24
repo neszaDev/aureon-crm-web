@@ -1,18 +1,21 @@
 /**
  * Aureon's orbit mark: a ring broken at the upper right, with one satellite dot beyond the gap. It
- * draws in `currentColor`: violet on light grounds, white on the rail. Decorative: the name is
+ * draws in `currentColor`: violet on light surfaces, white on the rail. Decorative: the name is
  * always written or labelled beside it.
  * @param props Component props.
  * @param props.className Size and colour.
+ * @param props.size Its size in pixels, where no CSS sizes it (the icons and images drawn at build).
  * @returns The mark.
  */
-export const AureonMark = (props: { className?: string }) => (
+export const AureonMark = (props: { className?: string; size?: number }) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
     aria-hidden="true"
     focusable="false"
     data-slot="aureon-mark"
+    width={props.size}
+    height={props.size}
     className={props.className}
   >
     {/* A 290° arc of radius 8 around the centre, open from -80° to -10°; the satellite sits out
