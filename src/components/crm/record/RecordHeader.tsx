@@ -1,8 +1,9 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { use } from 'react';
 import { PersonAvatar } from '@/components/crm/PersonAvatar';
-import { usePanelId } from '@/components/crm/record/RecordPanel';
+import { InRecordPanel, usePanelId } from '@/components/crm/record/RecordPanel';
 import { Badge } from '@/components/ui/badge';
 import type { components } from '@/libs/api/schema';
 
@@ -11,7 +12,9 @@ import type { components } from '@/libs/api/schema';
  * it when it is), its name (the `h1`, focusable so focus can land there after an action), a
  * figure under it (a deal's amount), its actions on the right; then its status pill (the control
  * that changes it) beside its owner's avatar and name (a task's assignee), and its whole track
- * (a deal's stages, a lead's lifecycle) across.
+ * (a deal's stages, a lead's lifecycle) across. In the record panel it names the tab too, as the
+ * full page's metadata does (an intercepted route's isn't applied): React puts the `<title>` first
+ * in the head, and takes it away with the panel, which gives the page behind its own back.
  * @param props Component props.
  * @param props.number The record number, such as `C-0042`.
  * @param props.name The record's name.
@@ -40,9 +43,11 @@ export const RecordHeader = (props: {
   const t = useTranslations('RecordHeader');
   const owner = props.owner?.displayName ?? props.owner?.email ?? '';
   const headingId = usePanelId(props.headingId);
+  const inPanel = use(InRecordPanel);
 
   return (
     <header className="flex flex-col gap-4 border-b border-rule pb-5">
+      {inPanel && <title>{props.name}</title>}
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
           <p className="flex flex-wrap items-center gap-2">

@@ -91,6 +91,23 @@ export const RecordPanel = (props: { children: React.ReactNode }) => {
       (window.location.pathname === `${pathname}/edit` ||
         window.location.pathname === pathname.replace(/\d+$/u, 'new')),
   );
+  // The page behind, as the panel opened over it: its address and its title. A change made in the
+  // panel refreshes the page's metadata, which then names the record; a step back to the list
+  // doesn't name it again, so closing gives it its own title back.
+  // (A ref keeps the first render's.)
+  const behind = useRef(
+    typeof window === 'undefined'
+      ? undefined
+      : { url: `${window.location.pathname}${window.location.search}`, title: document.title },
+  );
+  useEffect(() => {
+    const page = behind.current;
+    return () => {
+      if (page && `${window.location.pathname}${window.location.search}` === page.url) {
+        document.title = page.title;
+      }
+    };
+  }, []);
   // Another record opened from this one is open again, even after a close that went back to it.
   if (pathname !== shown && RECORD_PATH.test(pathname)) {
     setShown(pathname);

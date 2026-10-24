@@ -85,4 +85,17 @@ describe(RecordHeader, () => {
       .element(page.getByRole('heading', { level: 2, name: /^Deals/u }))
       .toHaveAttribute('id', 'panel-company-deals-heading');
   });
+
+  it('names the tab after the record while it is in the panel, and gives the list its title back', async () => {
+    document.title = 'Deals';
+    const { rerender } = await render(header({}));
+    // The full page's title is its metadata's.
+    expect(document.title).toBe('Deals');
+
+    await rerender(<InRecordPanel value>{header({})}</InRecordPanel>);
+    await expect.poll(() => document.title).toBe('Acme renewal');
+
+    await rerender(<p>Closed</p>);
+    await expect.poll(() => document.title).toBe('Deals');
+  });
 });

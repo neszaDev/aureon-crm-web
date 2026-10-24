@@ -28,6 +28,8 @@ test.describe('Record panel', () => {
     await expect(panel.getByRole('heading', { level: 1, name: AMARA })).toBeVisible();
     await expect(panel.getByRole('list', { name: 'Lead lifecycle' })).toBeVisible();
     await expect(page.locator('#crm-main')).toContainText(BRUNO);
+    // The tab is named by the record, as its full page is.
+    await expect(page).toHaveTitle(AMARA);
     await expectNoA11yViolations(page);
     await page.emulateMedia({ colorScheme: 'dark' });
     await expectNoA11yViolations(page);
@@ -65,10 +67,12 @@ test.describe('Record panel', () => {
     await expect(page.getByText('Activity logged')).toBeVisible();
     await expect(activity.getByRole('listitem').filter({ hasText: 'Intro call' })).toBeVisible();
 
-    // Escape closes it: the list's address again, the lead in its new section, its link focused.
+    // Escape closes it: the list's address and title again, the lead in its new section, its
+    // link focused.
     await page.keyboard.press('Escape');
     await expect(panel).toHaveCount(0);
     await expect(page).toHaveURL(`${owner.path}/leads`);
+    await expect(page).toHaveTitle('Leads');
     await expect(page.getByRole('link', { name: AMARA })).toBeFocused();
     await expect(page.getByRole('button', { name: 'Status: Contacted 1 lead' })).toBeVisible();
   });
