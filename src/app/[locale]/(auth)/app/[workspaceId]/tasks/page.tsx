@@ -8,7 +8,7 @@ import { InvalidFilterNotice } from '@/components/crm/list/InvalidFilterNotice';
 import { ListHeader } from '@/components/crm/list/ListHeader';
 import { RecordList } from '@/components/crm/list/RecordList';
 import { StatusPill } from '@/components/crm/StatusPill';
-import { TaskDialog } from '@/components/crm/task/TaskDialog';
+import { NewTaskDialog } from '@/components/crm/task/TaskDialog';
 import { TaskFilters } from '@/components/crm/task/TaskFilters';
 import { TaskTable } from '@/components/crm/task/TaskTable';
 import { Button } from '@/components/ui/button';
@@ -137,7 +137,7 @@ export default async function TasksPage(props: TasksPageProps) {
         title={t('title')}
         count={pages?.reduce((sum, item) => sum + item.totalElements, 0)}
         action={
-          <TaskDialog
+          <NewTaskDialog
             // A fresh dialog when "+ New" asks for one on this page.
             key={String(searchParams.new === '1')}
             defaultOpen={searchParams.new === '1'}

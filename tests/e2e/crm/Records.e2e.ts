@@ -303,9 +303,30 @@ test.describe('Records', () => {
     // "+ New → Task" from the rail opens the task dialog at once.
     const rail = page.getByRole('navigation', { name: 'Quick access' });
     await waitForHydration(rail.getByRole('button', { name: 'New', exact: true }));
-    await rail.getByRole('button', { name: 'New', exact: true }).click();
-    await page.getByRole('menu', { name: 'New' }).getByRole('menuitem', { name: 'Task' }).click();
+    const newTask = async () => {
+      await rail.getByRole('button', { name: 'New', exact: true }).click();
+      await page.getByRole('menu', { name: 'New' }).getByRole('menuitem', { name: 'Task' }).click();
+    };
+    await newTask();
     await expect(page).toHaveURL(/\/tasks\?new=1$/u);
+    await expect(page.getByRole('dialog', { name: 'New task' })).toBeVisible();
+    // Closed, the list's own URL again: a reload doesn't open it, and the next "+ New" does.
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page).toHaveURL(/\/tasks$/u);
+    await page.reload();
+    await expect(page.getByRole('heading', { level: 1, name: 'Tasks' })).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await waitForHydration(rail.getByRole('button', { name: 'New', exact: true }));
+    await newTask();
+    await expect(page.getByRole('dialog', { name: 'New task' })).toBeVisible();
+    // Saved from it, the same.
+    await page.getByRole('dialog').getByLabel('Title').fill('Book the courier');
+    await page.getByRole('dialog').getByRole('button', { name: 'Add task' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page).toHaveURL(/\/tasks$/u);
+    await expect(page.getByRole('row', { name: /Book the courier/u })).toBeVisible();
+    await newTask();
     await expect(page.getByRole('dialog', { name: 'New task' })).toBeVisible();
   });
 

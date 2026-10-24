@@ -48,6 +48,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import { toInstant, toLocalInput } from '@/libs/crm/ZonedTime';
 import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { usePathname, useRouter, useSearchParams } from '@/libs/I18nNavigation';
 import { useInFlight } from '@/utils/InFlight';
 import { useSettle } from '@/utils/SettleAction';
 import type { ActivityLink } from '@/validations/crm/ActivityValidation';
@@ -399,24 +400,34 @@ const TaskForm = (
  * @param props.me The caller's user id.
  * @param props.canAssign Whether the caller may give it to someone else (`RECORDS_ASSIGN`).
  * @param props.timeZone The workspace's time zone, which the due time is entered in.
- * @param props.defaultOpen Whether it opens at once (the Tasks page's `?new=1`, which the rail's
- *   "+ New" links to).
+ * @param props.defaultOpen Whether it opens at once (`NewTaskDialog`).
+ * @param props.onClose Called when it closes, saved or not.
  * @returns The trigger and its dialog.
  */
 export const TaskDialog = (
-  props: TaskDialogProps & { trigger: React.ReactElement; defaultOpen?: boolean },
+  props: TaskDialogProps & {
+    trigger: React.ReactElement;
+    defaultOpen?: boolean;
+    onClose?: () => void;
+  },
 ) => {
   const t = useTranslations('TaskDialog');
   const [open, setOpen] = useState(props.defaultOpen ?? false);
   const inFlight = useInFlight();
+  const close = () => {
+    setOpen(false);
+    props.onClose?.();
+  };
 
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
         // Closing would lose the answer, and a second try would add the task twice.
-        if (next || !inFlight.busy()) {
-          setOpen(next);
+        if (next) {
+          setOpen(true);
+        } else if (!inFlight.busy()) {
+          close();
         }
       }}
     >
@@ -425,14 +436,37 @@ export const TaskDialog = (
         closeLabel={t('close')}
         className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl"
       >
-        <TaskForm
-          {...props}
-          once={inFlight.once}
-          onDone={() => {
-            setOpen(false);
-          }}
-        />
+        <TaskForm {...props} once={inFlight.once} onDone={close} />
       </DialogContent>
     </Dialog>
+  );
+};
+
+/**
+ * The Tasks page's dialog for a new task, open at once when "+ New → Task" sent the viewer there
+ * (`?new=1`, which `defaultOpen` says). Closed, saved or not, the page's URL loses `new` (a
+ * replace): a reload doesn't open it again, and the next "+ New → Task" does.
+ * @param props The dialog's props (`TaskDialog`).
+ * @returns The trigger and its dialog.
+ */
+export const NewTaskDialog = (
+  props: TaskDialogProps & { trigger: React.ReactElement; defaultOpen: boolean },
+) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const search = useSearchParams();
+
+  return (
+    <TaskDialog
+      {...props}
+      onClose={() => {
+        if (search.has('new')) {
+          const rest = new URLSearchParams(search);
+          rest.delete('new');
+          const query = rest.toString();
+          router.replace(`${pathname}${query ? `?${query}` : ''}`, { scroll: false });
+        }
+      }}
+    />
   );
 };
