@@ -3656,8 +3656,8 @@
   },
   "CrmReports": {
     "title": "Rapports",
-    "owner_invalid_title": "Impossible de filtrer les rapports sur ce propriétaire",
-    "owner_invalid_text": "Cette personne n'est plus membre de cet espace de travail, ou le lien vient d'un autre. Le rapport porte sur tout l'espace de travail.",
+    "owner_invalid_title": "Ce propriétaire ne fait pas partie de cet espace de travail",
+    "owner_invalid_text": "Le lien désigne une personne qui n'est pas membre de cet espace de travail. Le rapport porte donc sur tout l'espace de travail.",
     "owner_invalid_reset": "Retirer le propriétaire",
     "intro_pipeline": "Les affaires en cours à ce jour.",
     "intro_won-lost": "Les affaires clôturées chaque mois de la période, comptées selon leur étape actuelle.",

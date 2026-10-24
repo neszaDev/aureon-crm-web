@@ -769,7 +769,7 @@ test.describe('Reports', () => {
   }) => {
     const { owner, leaver } = await seedReports(request);
     await signIn(page, { email: owner.email, password: PASSWORD });
-    // The API refuses a removed member, and the page asks it again without them.
+    // The API refuses a removed member; the page, which knows the members, doesn't ask for them.
     const refused = await request.get(
       `${BACKEND_URL}/api/v1/workspaces/${owner.workspaceId}/reports/pipeline?ownerId=${leaver.userId}`,
       { headers: owner.headers },
@@ -778,19 +778,22 @@ test.describe('Reports', () => {
 
     await page.goto(reports(owner.path, `?tab=pipeline&ownerId=${leaver.userId}`));
 
-    await expect(
-      page.getByRole('heading', { name: "This owner can't be reported on" }),
-    ).toBeVisible();
-    await expect(ownerChip(page, 'Former member')).toBeVisible();
+    const notice = page.getByRole('heading', { name: "This owner isn't in this workspace" });
+    await expect(notice).toBeVisible();
+    // The chip and the tabs carry the owner no further: the notice says why.
+    await expect(ownerChip(page)).toBeVisible();
+    expect(
+      await tabsOf(page)
+        .getByRole('link')
+        .evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
+    ).not.toContainEqual(expect.stringContaining('ownerId'));
     await expectFigures(page, request, owner, 'pipeline');
     await expectNoA11yViolations(page);
 
     await page.getByRole('link', { name: 'Clear the owner' }).click();
     await expect(page).toHaveURL(reports(owner.path, '?tab=pipeline'));
     await expect(ownerChip(page)).toBeVisible();
-    await expect(
-      page.getByRole('heading', { name: "This owner can't be reported on" }),
-    ).toHaveCount(0);
+    await expect(notice).toHaveCount(0);
   });
 
   test.describe('on a phone, with an owner', () => {

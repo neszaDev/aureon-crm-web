@@ -3656,8 +3656,8 @@
   },
   "CrmReports": {
     "title": "Reports",
-    "owner_invalid_title": "This owner can't be reported on",
-    "owner_invalid_text": "They're no longer a member of this workspace, or the link comes from another one. The report shows the whole workspace.",
+    "owner_invalid_title": "This owner isn't in this workspace",
+    "owner_invalid_text": "The link names someone who isn't a member of this workspace, so the report shows the whole workspace.",
     "owner_invalid_reset": "Clear the owner",
     "intro_pipeline": "The open deals as of now.",
     "intro_won-lost": "Deals closed in each month of the period, counted by the stage they are in now.",

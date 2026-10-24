@@ -46,9 +46,9 @@ export async function generateMetadata(props: ReportsPageProps): Promise<Metadat
  * the follow-ups, one tab each (`?tab=`, the pipeline without one). Only the shown report is
  * read. Every figure is the API's, as it answered, in the period the response names; the URL's
  * `?from&to` is read leniently, so a hand-edited one gives the default period, never an error.
- * The Owner chip (`?ownerId`) narrows every report to one member's records; an owner the API
- * refuses (a member who left, an id from another workspace) gives the whole workspace's report
- * under a notice that says so.
+ * The Owner chip (`?ownerId`) narrows every report to one member's records; an id that is no
+ * current member (one who left, an id from another workspace) is never sent: the page shows the
+ * whole workspace's report under a notice that says so, the chip, tabs and period without it.
  * @param props Page props.
  * @returns The reports page.
  */
@@ -75,7 +75,12 @@ export default async function ReportsPage(props: ReportsPageProps) {
   const { members: list } = members;
   const today = todayIn(workspace.timezone);
   const query: PeriodQuery = parsePeriod(searchParams, today);
-  const ownerId = parseOwner(searchParams);
+  const requested = parseOwner(searchParams);
+  // An id that is no member (one who left, one from another workspace) would only be refused (a
+  // 400): the whole workspace's report instead, under a notice, with nothing carrying it on.
+  const ownerRefused =
+    requested !== undefined && !list.some((member) => member.userId === requested);
+  const ownerId = ownerRefused ? undefined : requested;
   const path = `/app/${workspace.id}/reports`;
   // A member by their id, whom a report names when it has nothing of theirs.
   const ownerOf = (id?: number) => list.find((member) => member.userId === id);
@@ -140,14 +145,8 @@ export default async function ReportsPage(props: ReportsPageProps) {
       };
     },
   } satisfies Record<ReportTab, (owner?: number) => Promise<unknown>>;
-  let shown = await loaders[tab](ownerId);
-  // The API refused the owner (400 on `ownerId`: a member who left, an id from elsewhere): the
-  // whole workspace's report, under a notice.
-  const ownerRefused = shown.invalid && ownerId !== undefined;
-  if (ownerRefused) {
-    shown = await loaders[tab]();
-  }
-  const { body, period, ...flags } = shown;
+  // The API's 400 stays the backstop (a member who left meanwhile): the plain invalid notice.
+  const { body, period, ...flags } = await loaders[tab](ownerId);
   if (flags.unauthorized) {
     return endRejectedSession(locale);
   }
