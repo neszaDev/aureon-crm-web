@@ -16,7 +16,8 @@ import {
 } from '@/libs/crm/BulkSelection';
 
 /**
- * A list's selection, kept to the rows on screen and cleared when the list's state changes.
+ * A list's selection, kept to the rows on screen (a row that leaves leaves it) and cleared when the
+ * list's state changes.
  * @param scope The list's state (its URL query).
  * @param items The rows on screen.
  * @param headingId The list's heading, which takes the focus when the bar goes with it.
@@ -24,15 +25,20 @@ import {
  */
 export const useSelection = (scope: string, items: BulkItem[], headingId: string) => {
   const [selection, setSelection] = useState(() => emptySelection(scope));
-  // Another list state starts afresh, so the old selection can't come back with its state.
-  if (selection.scope !== scope) {
-    setSelection(emptySelection(scope));
-  }
   const live = liveSelection(
     selection,
     scope,
     items.map((item) => item.id),
   );
+  // Another list state starts afresh, and a row that left the list leaves the selection, so
+  // neither comes back selected with its state or its row.
+  if (
+    selection.scope !== scope ||
+    live.keys.size < selection.keys.size ||
+    live.anchor !== selection.anchor
+  ) {
+    setSelection(live);
+  }
 
   return {
     keys: live.keys,

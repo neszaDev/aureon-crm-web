@@ -192,6 +192,20 @@ describe(BulkList, () => {
     await expect.element(box('Acme')).toHaveAttribute('aria-checked', 'false');
   });
 
+  it('forgets a row that left the list, so it comes back unselected', async () => {
+    const { rerender } = await render(<List scope="a" sections={[NEW, WON]} />);
+    await box('Acme').click();
+    await box('Brightwater').click();
+
+    // Brightwater left the list (archived elsewhere), then came back (restored).
+    await rerender(<List scope="a" sections={[NEW.filter((row) => row.id !== 2), WON]} />);
+    await expect.element(toolbar()).toHaveAccessibleName('1 selected');
+    await rerender(<List scope="a" sections={[NEW, WON]} />);
+
+    await expect.element(toolbar()).toHaveAccessibleName('1 selected');
+    await expect.element(box('Brightwater')).toHaveAttribute('aria-checked', 'false');
+  });
+
   it('forgets the selection of a list state once another is shown, when the first comes back', async () => {
     const { rerender } = await render(<List scope="a" sections={[NEW, WON]} />);
     await all('New').click();
