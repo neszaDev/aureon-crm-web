@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import type { components } from '@/libs/api/schema';
 
 const optionalText = (max: number) => z.string().trim().max(max, 'too_long');
 const optionalId = z.number().int().positive().nullable();
@@ -35,6 +36,26 @@ export const ContactValidation = z.object({
 });
 
 export type ContactValues = z.infer<typeof ContactValidation>;
+
+/**
+ * The form's values of a saved contact: what the inputs hold, an absent field empty.
+ * @param contact The contact.
+ * @returns The values: what an edit starts from, and what an owner change sends back unchanged.
+ */
+export const contactValues = (
+  contact: components['schemas']['ContactResponse'],
+): ContactValues => ({
+  firstName: contact.firstName,
+  lastName: contact.lastName ?? '',
+  email: contact.email ?? '',
+  phone: contact.phone ?? '',
+  jobTitle: contact.jobTitle ?? '',
+  companyId: contact.company?.id ?? null,
+  ownerId: contact.owner?.userId ?? null,
+  sourceId: contact.source?.id ?? null,
+  tags: contact.tags,
+  notes: contact.notes ?? '',
+});
 
 // What a duplicate check sends: the email and phone as typed so far, valid or not yet.
 export const ContactDuplicateValidation = z.object({

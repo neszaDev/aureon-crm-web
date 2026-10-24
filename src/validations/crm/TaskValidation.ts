@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import type { components } from '@/libs/api/schema';
 import { Instant, LocalDateTime } from './DateTimeValidation';
 
 /** A task's priorities, lowest first. */
@@ -40,3 +41,22 @@ export const TaskValidation = z.object({
 });
 
 export type TaskValues = z.infer<typeof TaskValidation>;
+
+/**
+ * A saved task's fields as the actions send them, an absent field empty: what an assignee change
+ * sends back unchanged. Linked to a contact or a deal, its company is left for the backend to
+ * derive again, as the dialog does.
+ * @param task The task.
+ * @returns The values.
+ */
+export const taskValues = (task: components['schemas']['TaskResponse']): TaskValues => ({
+  title: task.title,
+  description: task.description ?? '',
+  priority: task.priority,
+  assigneeId: task.assignee?.userId ?? null,
+  dueAt: task.dueAt ?? null,
+  companyId: task.contact || task.deal ? null : (task.company?.id ?? null),
+  contactId: task.contact?.id ?? null,
+  leadId: task.lead?.id ?? null,
+  dealId: task.deal?.id ?? null,
+});

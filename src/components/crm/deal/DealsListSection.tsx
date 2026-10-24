@@ -12,7 +12,7 @@ import type { components } from '@/libs/api/schema';
 import { endRejectedSession } from '@/libs/api/Session';
 import type { ListQuery } from '@/libs/crm/ListQuery';
 import { groupQuery, isFiltered, listHref, ownerGroups, pastEndHref } from '@/libs/crm/ListQuery';
-import { canAssign } from '@/libs/crm/RecordAccess';
+import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
 import { stageTone } from '@/libs/crm/StatusColors';
 import { redirect } from '@/libs/I18nNavigation';
 
@@ -157,6 +157,19 @@ export const DealsListSection = async (props: {
           me={props.me}
         />
       )}
+      bulk={{
+        entity: 'deal',
+        workspaceId: props.workspace.id,
+        item: (deal) => ({
+          id: deal.id,
+          name: deal.name,
+          version: deal.version,
+          ownerId: deal.owner?.userId,
+          mayEdit: canEditRecord(props.workspace, props.me, deal.owner?.userId),
+          state: String(deal.stage.id),
+        }),
+        stages: stageRefs,
+      }}
       // The create form, in the group's stage when it is open (a deal starts in one), for the
       // group's or the filter's owner.
       addRow={(owner, key) => {

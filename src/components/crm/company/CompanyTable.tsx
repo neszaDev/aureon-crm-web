@@ -1,5 +1,6 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { archiveCompany, restoreCompany } from '@/actions/crm/CompanyActions';
+import { SelectAllHead } from '@/components/crm/list/BulkSelect';
 import { OwnerCell } from '@/components/crm/list/OwnerCell';
 import { RecordRow } from '@/components/crm/list/RecordRow';
 import { RowMenu } from '@/components/crm/list/RowMenu';
@@ -19,9 +20,9 @@ import type { Permission } from '@/libs/crm/Permissions';
 import { canEditRecord } from '@/libs/crm/RecordAccess';
 
 /**
- * Companies as list rows: the name with its record number, industry, owner, contacts, open deals,
- * when it last changed, and the row menu (archive, or restore) where the caller may change it.
- * Name and "Updated" sort the list.
+ * Companies as list rows: the box that selects one for a bulk action, the name with its record
+ * number, industry, owner, contacts, open deals, when it last changed, and the row menu (archive,
+ * or restore) where the caller may change it. Name and "Updated" sort the list.
  * @param props Component props.
  * @param props.rows The companies.
  * @param props.path The list's path; a company's page is under it.
@@ -50,6 +51,7 @@ export const CompanyTable = (props: {
     <Table className="table-fixed">
       <TableHeader>
         <TableRow>
+          <SelectAllHead />
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
           <TableHead title={t('industry')} className="w-[16%] truncate max-md:hidden">
             {t('industry')}
@@ -79,6 +81,7 @@ export const CompanyTable = (props: {
         {props.rows.map((company) => (
           <RecordRow
             key={company.id}
+            id={company.id}
             name={company.name}
             href={`${props.path}/${company.id}`}
             number={recordNumber('company', company.id)}

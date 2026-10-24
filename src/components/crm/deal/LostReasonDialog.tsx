@@ -18,14 +18,22 @@ import { Textarea } from '@/components/ui/textarea';
 import type { LostReasonValues } from '@/validations/crm/DealValidation';
 import { LostReasonValidation, REASON_MAX } from '@/validations/crm/DealValidation';
 
+/** A reason dialog's own words: a bulk action's, for several records. */
+type ReasonText = { title: string; description: string; submit: string };
+
 /**
  * The reason field, mounted each time the dialog opens, so it starts empty.
  * @param props The dialog's props.
  * @param props.dealName The deal's name, for the title.
+ * @param props.text What it says instead of the deal's own title, description and button.
  * @param props.onConfirm Called with the reason once it is valid.
  * @returns The form.
  */
-const LostReasonForm = (props: { dealName: string; onConfirm: (reason: string) => void }) => {
+const LostReasonForm = (props: {
+  dealName: string;
+  text?: ReasonText;
+  onConfirm: (reason: string) => void;
+}) => {
   const t = useTranslations('LostReasonDialog');
   const form = useForm<LostReasonValues>({
     resolver: zodResolver(LostReasonValidation),
@@ -43,8 +51,8 @@ const LostReasonForm = (props: { dealName: string; onConfirm: (reason: string) =
       noValidate
     >
       <DialogHeader>
-        <DialogTitle>{t('title', { name: props.dealName })}</DialogTitle>
-        <DialogDescription>{t('description')}</DialogDescription>
+        <DialogTitle>{props.text?.title ?? t('title', { name: props.dealName })}</DialogTitle>
+        <DialogDescription>{props.text?.description ?? t('description')}</DialogDescription>
       </DialogHeader>
       <FormField
         htmlFor="lost-reason"
@@ -67,7 +75,7 @@ const LostReasonForm = (props: { dealName: string; onConfirm: (reason: string) =
             {t('cancel')}
           </Button>
         </DialogClose>
-        <Button type="submit">{t('submit')}</Button>
+        <Button type="submit">{props.text?.submit ?? t('submit')}</Button>
       </DialogFooter>
     </form>
   );
@@ -76,11 +84,13 @@ const LostReasonForm = (props: { dealName: string; onConfirm: (reason: string) =
 /**
  * Asks why a deal was lost when its card is dropped on the Lost column: the reason (at most 500
  * characters) is required, and stays on the deal. Cancelling moves nothing. The board opens it
- * (`open`, `onOpenChange`) and makes the move once the reason is given.
+ * (`open`, `onOpenChange`) and makes the move once the reason is given. A bulk action asks once
+ * for all its records in its own words (`text`): deals lost, or leads unqualified.
  * @param props Component props.
  * @param props.open Whether it is open.
  * @param props.onOpenChange Called when it opens or closes.
  * @param props.dealName The deal's name, for the title.
+ * @param props.text What it says instead of the deal's own title, description and button.
  * @param props.onConfirm Called with the reason; the dialog closes.
  * @param props.onCancel Called when it is closed without a reason (Cancel, Escape, outside).
  * @param props.returnFocus The element that takes the focus back on close (the card's handle,
@@ -91,6 +101,7 @@ export const LostReasonDialog = (props: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   dealName: string;
+  text?: ReasonText;
   onConfirm: (reason: string) => void;
   onCancel?: () => void;
   returnFocus?: () => HTMLElement | null | undefined;
@@ -120,6 +131,7 @@ export const LostReasonDialog = (props: {
       >
         <LostReasonForm
           dealName={props.dealName}
+          text={props.text}
           onConfirm={(reason) => {
             props.onOpenChange(false);
             props.onConfirm(reason);

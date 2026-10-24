@@ -8,37 +8,16 @@ import { RecordFormPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { getDeal, getLeadSources, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
-import type { components } from '@/libs/api/schema';
 import { endRejectedSession } from '@/libs/api/Session';
 import { recordNumber } from '@/libs/crm/Format';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
-import type { DealValues } from '@/validations/crm/DealValidation';
+import { dealValues } from '@/validations/crm/DealValidation';
 
 type EditDealPageProps = {
   params: Promise<{ locale: string; workspaceId: string; id: string }>;
 };
-
-/**
- * The form's values of a saved deal: what the inputs hold, an absent field empty. The deal's
- * own probability is set only when it overrides its stage's.
- * @param deal The deal.
- * @returns The values.
- */
-const formValues = (deal: components['schemas']['DealResponse']): DealValues => ({
-  name: deal.name,
-  amount: deal.amount,
-  currency: deal.currency,
-  stageId: null,
-  probability: deal.probabilityOverride === undefined ? '' : String(deal.probabilityOverride),
-  expectedCloseDate: deal.expectedCloseDate ?? '',
-  ownerId: deal.owner?.userId ?? null,
-  companyId: deal.company?.id ?? null,
-  contactId: deal.contact?.id ?? null,
-  sourceId: deal.source?.id ?? null,
-  notes: deal.notes ?? '',
-});
 
 export async function generateMetadata(props: EditDealPageProps): Promise<Metadata> {
   const { locale, workspaceId, id } = await props.params;
@@ -105,7 +84,7 @@ export default async function EditDealPage(props: EditDealPageProps) {
     >
       <DealForm
         action={updateDeal.bind(null, workspace.id, deal.id, deal.version)}
-        defaults={formValues(deal)}
+        defaults={dealValues(deal)}
         isEdit
         workspaceId={workspace.id}
         company={deal.company ? { id: deal.company.id, label: deal.company.name } : null}

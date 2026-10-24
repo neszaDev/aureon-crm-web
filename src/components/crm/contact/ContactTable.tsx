@@ -1,6 +1,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { archiveContact, restoreContact } from '@/actions/crm/ContactActions';
 import { TagBadge } from '@/components/crm/contact/TagBadge';
+import { SelectAllHead } from '@/components/crm/list/BulkSelect';
 import { OwnerCell } from '@/components/crm/list/OwnerCell';
 import { RecordRow } from '@/components/crm/list/RecordRow';
 import { RowMenu } from '@/components/crm/list/RowMenu';
@@ -26,9 +27,9 @@ const SHOWN_TAGS = 1;
 const none = <span className="text-muted-foreground">—</span>;
 
 /**
- * Contacts as list rows: the name with its record number, company, email, phone, owner, the first
- * tags, when it last changed, and the row menu (archive, or restore) where the caller may change
- * it. Name, company and "Updated" sort the list.
+ * Contacts as list rows: the box that selects one for a bulk action, the name with its record
+ * number, company, email, phone, owner, the first tags, when it last changed, and the row menu
+ * (archive, or restore) where the caller may change it. Name, company and "Updated" sort the list.
  * @param props Component props.
  * @param props.rows The contacts.
  * @param props.path The list's path; a contact's page is under it.
@@ -59,6 +60,7 @@ export const ContactTable = (props: {
     <Table className="table-fixed">
       <TableHeader>
         <TableRow>
+          <SelectAllHead />
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
           <SortHeader
             label={t('company')}
@@ -95,6 +97,7 @@ export const ContactTable = (props: {
         {props.rows.map((contact) => (
           <RecordRow
             key={contact.id}
+            id={contact.id}
             name={contact.fullName}
             href={`${props.path}/${contact.id}`}
             number={recordNumber('contact', contact.id)}

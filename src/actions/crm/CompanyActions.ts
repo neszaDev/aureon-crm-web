@@ -9,7 +9,11 @@ import { authedBackend } from '@/libs/api/Backend';
 import type { components } from '@/libs/api/schema';
 import { redirect } from '@/libs/I18nNavigation';
 import type { CompanyDuplicateValues, CompanyValues } from '@/validations/crm/CompanyValidation';
-import { CompanyDuplicateValidation, CompanyValidation } from '@/validations/crm/CompanyValidation';
+import {
+  CompanyDuplicateValidation,
+  CompanyValidation,
+  companyValues,
+} from '@/validations/crm/CompanyValidation';
 
 /**
  * The request body of checked form values: an empty field is left out, which the backend reads
@@ -124,6 +128,40 @@ export async function updateCompany(
 
   refresh();
   return { ok: true };
+}
+
+/**
+ * Gives a company to another owner (a list's bulk action). There is no owner endpoint: it reads the
+ * company and saves its fields back unchanged through `updateCompany`, with the new owner, at the
+ * version the list read, so a company changed since is the reload message.
+ * @param workspaceId The workspace.
+ * @param companyId The company.
+ * @param version The version the list read; none (a list without versions: companies,
+ *   contacts) sends the one just read.
+ * @param ownerId The new owner.
+ * @returns Success, or the translated refusal.
+ */
+export async function assignCompany(
+  workspaceId: number,
+  companyId: number,
+  version: number | undefined,
+  ownerId: number,
+): Promise<ActionResult> {
+  const api = await authedBackend();
+  const { data, error, response } = await api.GET(
+    '/api/v1/workspaces/{workspaceId}/companies/{id}',
+    {
+      params: { path: { workspaceId, id: companyId } },
+    },
+  );
+  if (!data) {
+    return await actionFailure(response, error);
+  }
+
+  return await updateCompany(workspaceId, companyId, version ?? data.version, {
+    ...companyValues(data),
+    ownerId,
+  });
 }
 
 /**

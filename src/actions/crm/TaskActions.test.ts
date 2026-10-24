@@ -2,7 +2,7 @@ import { refresh } from 'next/cache';
 import { describe, expect, it, vi } from 'vitest';
 import { actionFailure } from '@/libs/api/ActionFailure';
 import { authedBackend } from '@/libs/api/Backend';
-import { addTask } from './TaskActions';
+import { addTask, assignTask } from './TaskActions';
 
 vi.mock(import('server-only'), () => ({}));
 // @ts-expect-error -- a translator that gives the key back
@@ -55,5 +55,69 @@ describe(addTask, () => {
     const result = await addTask(1, { assigneeId: null, dueAt: null }, 'Call');
 
     expect(result.fieldErrors).toStrictEqual({ name: 'Too long' });
+  });
+});
+
+describe(assignTask, () => {
+  it('reads the task and saves every field back, at the list’s version, with the new assignee', async () => {
+    const GET = vi.fn<(path: string, init: unknown) => Promise<unknown>>().mockResolvedValue({
+      data: {
+        id: 7,
+        title: 'Call back',
+        priority: 'HIGH',
+        status: 'OPEN',
+        dueAt: '2026-10-30T09:00:00Z',
+        assignee: { userId: 2 },
+        company: { id: 4, name: 'Acme' },
+        contact: { id: 5, fullName: 'Ana' },
+        version: 6,
+      },
+      response: new Response(null, { status: 200 }),
+    });
+    const PUT = vi
+      .fn<(path: string, init: unknown) => Promise<unknown>>()
+      .mockResolvedValue({ response: new Response(null, { status: 200 }) });
+    // @ts-expect-error -- only the calls this action makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET, PUT });
+
+    const result = await assignTask(1, 7, 5, 3);
+
+    expect(result).toStrictEqual({ ok: true });
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/tasks/{id}', {
+      params: { path: { workspaceId: 1, id: 7 } },
+    });
+    expect(PUT).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/tasks/{id}', {
+      params: { path: { workspaceId: 1, id: 7 } },
+      body: {
+        title: 'Call back',
+        description: undefined,
+        dueAt: '2026-10-30T09:00:00Z',
+        priority: 'HIGH',
+        assigneeId: 3,
+        // Linked to a contact, its company is the backend's to derive again.
+        companyId: undefined,
+        contactId: 5,
+        leadId: undefined,
+        dealId: undefined,
+        version: 5,
+      },
+    });
+  });
+
+  it('answers a refused read with its refusal and saves nothing', async () => {
+    const GET = vi.fn<(path: string, init: unknown) => Promise<unknown>>().mockResolvedValue({
+      error: { status: 404 },
+      response: new Response(null, { status: 404 }),
+    });
+    const PUT = vi.fn<(path: string, init: unknown) => Promise<unknown>>();
+    // @ts-expect-error -- only the calls this action makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET, PUT });
+    vi.mocked(actionFailure).mockResolvedValue({ ok: false, message: 'Not found' });
+
+    await expect(assignTask(1, 7, 5, 3)).resolves.toStrictEqual({
+      ok: false,
+      message: 'Not found',
+    });
+    expect(PUT).not.toHaveBeenCalled();
   });
 });

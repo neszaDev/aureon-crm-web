@@ -411,6 +411,12 @@
     line-height: 1.65;
   }
 
+  /* The bulk bar floats over the foot of the screen: what scrolls into view, the focus included,
+     stays above it. */
+  html:has([data-bulk-bar]) {
+    scroll-padding-bottom: 5rem;
+  }
+
   body {
     @apply min-h-dvh bg-background text-foreground;
     caret-color: var(--violet-ink);

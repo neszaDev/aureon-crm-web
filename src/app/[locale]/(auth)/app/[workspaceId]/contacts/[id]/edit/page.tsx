@@ -13,35 +13,16 @@ import {
   getWorkspace,
 } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
-import type { components } from '@/libs/api/schema';
 import { endRejectedSession } from '@/libs/api/Session';
 import { recordNumber } from '@/libs/crm/Format';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
-import type { ContactValues } from '@/validations/crm/ContactValidation';
+import { contactValues } from '@/validations/crm/ContactValidation';
 
 type EditContactPageProps = {
   params: Promise<{ locale: string; workspaceId: string; id: string }>;
 };
-
-/**
- * The form's values of a saved contact: what the inputs hold, an absent field empty.
- * @param contact The contact.
- * @returns The values.
- */
-const formValues = (contact: components['schemas']['ContactResponse']): ContactValues => ({
-  firstName: contact.firstName,
-  lastName: contact.lastName ?? '',
-  email: contact.email ?? '',
-  phone: contact.phone ?? '',
-  jobTitle: contact.jobTitle ?? '',
-  companyId: contact.company?.id ?? null,
-  ownerId: contact.owner?.userId ?? null,
-  sourceId: contact.source?.id ?? null,
-  tags: contact.tags,
-  notes: contact.notes ?? '',
-});
 
 export async function generateMetadata(props: EditContactPageProps): Promise<Metadata> {
   const { locale, workspaceId, id } = await props.params;
@@ -110,7 +91,7 @@ export default async function EditContactPage(props: EditContactPageProps) {
       <ContactForm
         action={updateContact.bind(null, workspace.id, contact.id, contact.version)}
         findDuplicates={findContactDuplicates.bind(null, workspace.id)}
-        defaults={formValues(contact)}
+        defaults={contactValues(contact)}
         company={contact.company ? { id: contact.company.id, label: contact.company.name } : null}
         recordId={contact.id}
         workspaceId={workspace.id}

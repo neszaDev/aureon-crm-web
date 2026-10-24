@@ -10,6 +10,7 @@ import { Link } from '@/libs/I18nNavigation';
  * the group, its count), then the group's rows. A group with more rows than it shows ends with a
  * link to all of them.
  * @param props Component props.
+ * @param props.titleId The heading button's id, which names the group's select-all box.
  * @param props.title What heads the group: a status pill, or an owner (`OwnerTitle`).
  * @param props.count How many records the group holds (the API's total), or a lower bound such as
  *   "8+" where the API sends only the first few.
@@ -22,6 +23,7 @@ import { Link } from '@/libs/I18nNavigation';
  * @returns The group.
  */
 export const StatusSection = (props: {
+  titleId?: string;
   title: React.ReactNode;
   count: number | string;
   countLabel: string;
@@ -31,7 +33,10 @@ export const StatusSection = (props: {
 }) => (
   <Collapsible defaultOpen={!props.closed} className="flex flex-col">
     <h3 className="flex">
-      <CollapsibleTrigger className="group/section -ml-1.5 flex h-9 max-w-full min-w-0 items-center gap-2 rounded-md px-1.5 text-sm font-semibold outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
+      <CollapsibleTrigger
+        id={props.titleId}
+        className="group/section -ml-1.5 flex h-9 max-w-full min-w-0 items-center gap-2 rounded-md px-1.5 text-sm font-semibold outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+      >
         <ChevronDownIcon
           aria-hidden="true"
           className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-data-[state=closed]/section:-rotate-90 motion-reduce:transition-none"

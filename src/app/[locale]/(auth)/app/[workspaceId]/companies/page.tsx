@@ -30,7 +30,7 @@ import {
 } from '@/libs/crm/ListQuery';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
-import { canAssign } from '@/libs/crm/RecordAccess';
+import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
 import { Link, redirect } from '@/libs/I18nNavigation';
 
 type CompaniesPageProps = {
@@ -199,6 +199,16 @@ export default async function CompaniesPage(props: CompaniesPageProps) {
               me={user.id}
             />
           )}
+          bulk={{
+            entity: 'company',
+            workspaceId: workspace.id,
+            item: (company) => ({
+              id: company.id,
+              name: company.name,
+              ownerId: company.owner?.userId,
+              mayEdit: canEditRecord(workspace, user.id, company.owner?.userId),
+            }),
+          }}
           // A company by its name alone, in the list's industry.
           addRow={(owner) => (
             <InlineAddRow

@@ -22,7 +22,7 @@ import { endRejectedSession } from '@/libs/api/Session';
 import { ownerGroups, parseListQuery, pastEndHref } from '@/libs/crm/ListQuery';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
-import { canAssign } from '@/libs/crm/RecordAccess';
+import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
 import { Link, redirect } from '@/libs/I18nNavigation';
 
 type ContactsPageProps = {
@@ -169,6 +169,16 @@ export default async function ContactsPage(props: ContactsPageProps) {
               me={user.id}
             />
           )}
+          bulk={{
+            entity: 'contact',
+            workspaceId: workspace.id,
+            item: (contact) => ({
+              id: contact.id,
+              name: contact.fullName,
+              ownerId: contact.owner?.userId,
+              mayEdit: canEditRecord(workspace, user.id, contact.owner?.userId),
+            }),
+          }}
           // The form, filled in with the list's company and the group's owner.
           addRow={(owner) => (
             <InlineAddRow

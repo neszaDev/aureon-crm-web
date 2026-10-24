@@ -20,7 +20,7 @@ import type { ListQuery } from '@/libs/crm/ListQuery';
 import { groupQuery, listHref, parseListQuery, pastEndHref } from '@/libs/crm/ListQuery';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
-import { canAssign } from '@/libs/crm/RecordAccess';
+import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
 import type { DueBounds, TaskView } from '@/libs/crm/TaskViews';
 import { dueBounds, SECTION_TONES, sectionsOf, viewQuery } from '@/libs/crm/TaskViews';
 import { redirect } from '@/libs/I18nNavigation';
@@ -207,8 +207,26 @@ export default async function TasksPage(props: TasksPageProps) {
               bounds={bounds}
               fixed
               sectioned={query.group !== undefined}
+              selectable
             />
           )}
+          bulk={{
+            entity: 'task',
+            workspaceId: workspace.id,
+            item: (task) => ({
+              id: task.id,
+              name: task.title,
+              version: task.version,
+              ownerId: task.assignee?.userId,
+              mayEdit: canEditRecord(
+                workspace,
+                user.id,
+                task.assignee?.userId,
+                task.createdBy?.userId,
+              ),
+              state: task.status,
+            }),
+          }}
           // A task by its title, due today in the Today section and without a due time in its own
           // (else none, where the list shows those), for the filter's assignee or the caller.
           addRow={(owner, key) => {

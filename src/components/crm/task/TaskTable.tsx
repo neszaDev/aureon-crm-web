@@ -1,5 +1,6 @@
 import { cn } from 'cn';
 import { useTranslations } from 'next-intl';
+import { SelectAllHead } from '@/components/crm/list/BulkSelect';
 import { TaskRow } from '@/components/crm/task/TaskRow';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { components } from '@/libs/api/schema';
@@ -27,6 +28,8 @@ import type { ActivityLink } from '@/validations/crm/ActivityValidation';
  *   colour.
  * @param props.fixed Fixed columns, so the groups of a grouped list line up.
  * @param props.sectioned Whether the rows are in due sections, whose headings say "Overdue".
+ * @param props.selectable Whether its rows can be selected for a bulk action (the Tasks page's
+ *   list): a box first, before the one that completes it.
  * @returns The table.
  */
 export const TaskTable = (props: {
@@ -41,6 +44,7 @@ export const TaskTable = (props: {
   bounds?: DueBounds;
   fixed?: boolean;
   sectioned?: boolean;
+  selectable?: boolean;
 }) => {
   const t = useTranslations('TaskTable');
   const { bounds } = props;
@@ -51,6 +55,7 @@ export const TaskTable = (props: {
           technology only. */}
       <TableHeader className={cn(props.compact && 'sr-only')}>
         <TableRow>
+          {props.selectable && <SelectAllHead />}
           <TableHead className="w-10 pr-0">
             <span className="sr-only">{t('done')}</span>
           </TableHead>
@@ -115,6 +120,7 @@ export const TaskTable = (props: {
             headingId={props.headingId}
             compact={props.compact}
             sectioned={props.sectioned}
+            selectable={props.selectable}
           />
         ))}
       </TableBody>

@@ -15,10 +15,11 @@ import { Button } from '@/components/ui/button';
 import { getLeads, getLeadSources, getMembers, LEAD_LIST } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
 import { endRejectedSession } from '@/libs/api/Session';
+import { fullName } from '@/libs/crm/Format';
 import { groupQuery, ownerGroups, parseListQuery, pastEndHref } from '@/libs/crm/ListQuery';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
-import { canAssign } from '@/libs/crm/RecordAccess';
+import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
 import { LEAD_STATUS_TONES } from '@/libs/crm/StatusColors';
 import { todayIn } from '@/libs/crm/ZonedTime';
 import { Link, redirect } from '@/libs/I18nNavigation';
@@ -158,6 +159,18 @@ export default async function LeadsPage(props: LeadsPageProps) {
               me={user.id}
             />
           )}
+          bulk={{
+            entity: 'lead',
+            workspaceId: workspace.id,
+            item: (lead) => ({
+              id: lead.id,
+              name: fullName(lead),
+              version: lead.version,
+              ownerId: lead.owner?.userId,
+              mayEdit: canEditRecord(workspace, user.id, lead.owner?.userId),
+              state: lead.status,
+            }),
+          }}
           // A lead by its name and company, in the group's status (else the first one the status
           // filter keeps), for the group's or the filter's owner.
           addRow={(owner, key) => {

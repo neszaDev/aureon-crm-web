@@ -9,7 +9,11 @@ import { authedBackend } from '@/libs/api/Backend';
 import type { components } from '@/libs/api/schema';
 import { redirect } from '@/libs/I18nNavigation';
 import type { ContactDuplicateValues, ContactValues } from '@/validations/crm/ContactValidation';
-import { ContactDuplicateValidation, ContactValidation } from '@/validations/crm/ContactValidation';
+import {
+  ContactDuplicateValidation,
+  ContactValidation,
+  contactValues,
+} from '@/validations/crm/ContactValidation';
 
 /**
  * The request body of checked form values: an empty field is left out, which the backend reads
@@ -96,6 +100,40 @@ export async function updateContact(
 
   refresh();
   return { ok: true };
+}
+
+/**
+ * Gives a contact to another owner (a list's bulk action). There is no owner endpoint: it reads the
+ * contact and saves its fields back unchanged through `updateContact`, with the new owner, at the
+ * version the list read, so a contact changed since is the reload message.
+ * @param workspaceId The workspace.
+ * @param contactId The contact.
+ * @param version The version the list read; none (a list without versions: companies,
+ *   contacts) sends the one just read.
+ * @param ownerId The new owner.
+ * @returns Success, or the translated refusal.
+ */
+export async function assignContact(
+  workspaceId: number,
+  contactId: number,
+  version: number | undefined,
+  ownerId: number,
+): Promise<ActionResult> {
+  const api = await authedBackend();
+  const { data, error, response } = await api.GET(
+    '/api/v1/workspaces/{workspaceId}/contacts/{id}',
+    {
+      params: { path: { workspaceId, id: contactId } },
+    },
+  );
+  if (!data) {
+    return await actionFailure(response, error);
+  }
+
+  return await updateContact(workspaceId, contactId, version ?? data.version, {
+    ...contactValues(data),
+    ownerId,
+  });
 }
 
 /**

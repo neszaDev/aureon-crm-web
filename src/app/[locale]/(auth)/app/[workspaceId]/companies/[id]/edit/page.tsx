@@ -7,33 +7,16 @@ import { RecordFormPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { getCompany, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
-import type { components } from '@/libs/api/schema';
 import { endRejectedSession } from '@/libs/api/Session';
 import { recordNumber } from '@/libs/crm/Format';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
-import type { CompanyValues } from '@/validations/crm/CompanyValidation';
+import { companyValues } from '@/validations/crm/CompanyValidation';
 
 type EditCompanyPageProps = {
   params: Promise<{ locale: string; workspaceId: string; id: string }>;
 };
-
-/**
- * The form's values of a saved company: what the inputs hold, an absent field empty.
- * @param company The company.
- * @returns The values.
- */
-const formValues = (company: components['schemas']['CompanyResponse']): CompanyValues => ({
-  name: company.name,
-  industry: company.industry ?? '',
-  website: company.website ?? '',
-  phone: company.phone ?? '',
-  address: company.address ?? '',
-  employeeCount: company.employeeCount === undefined ? '' : String(company.employeeCount),
-  ownerId: company.owner?.userId ?? null,
-  notes: company.notes ?? '',
-});
 
 export async function generateMetadata(props: EditCompanyPageProps): Promise<Metadata> {
   const { locale, workspaceId, id } = await props.params;
@@ -100,7 +83,7 @@ export default async function EditCompanyPage(props: EditCompanyPageProps) {
       <CompanyForm
         action={updateCompany.bind(null, workspace.id, company.id, company.version)}
         findDuplicates={findCompanyDuplicates.bind(null, workspace.id)}
-        defaults={formValues(company)}
+        defaults={companyValues(company)}
         recordId={company.id}
         members={members.members}
         me={user.id}

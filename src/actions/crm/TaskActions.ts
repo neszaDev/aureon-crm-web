@@ -6,7 +6,7 @@ import { actionFailure } from '@/libs/api/ActionFailure';
 import type { ActionResult } from '@/libs/api/ApiError';
 import { authedBackend } from '@/libs/api/Backend';
 import type { TaskValues } from '@/validations/crm/TaskValidation';
-import { TaskValidation } from '@/validations/crm/TaskValidation';
+import { TaskValidation, taskValues } from '@/validations/crm/TaskValidation';
 
 type StatusPath =
   | '/api/v1/workspaces/{workspaceId}/tasks/{id}/complete'
@@ -122,6 +122,37 @@ export async function updateTask(
 
   refresh();
   return { ok: true };
+}
+
+/**
+ * Gives a task to another assignee (a list's bulk action). There is no assignee endpoint: it reads the
+ * task and saves its fields back unchanged through `updateTask`, with the new assignee, at the
+ * version the list read, so a task changed since is the reload message.
+ * @param workspaceId The workspace.
+ * @param taskId The task.
+ * @param version The version the list read; none (a list without versions: companies,
+ *   contacts) sends the one just read.
+ * @param assigneeId The new assignee.
+ * @returns Success, or the translated refusal.
+ */
+export async function assignTask(
+  workspaceId: number,
+  taskId: number,
+  version: number | undefined,
+  assigneeId: number,
+): Promise<ActionResult> {
+  const api = await authedBackend();
+  const { data, error, response } = await api.GET('/api/v1/workspaces/{workspaceId}/tasks/{id}', {
+    params: { path: { workspaceId, id: taskId } },
+  });
+  if (!data) {
+    return await actionFailure(response, error);
+  }
+
+  return await updateTask(workspaceId, taskId, version ?? data.version, {
+    ...taskValues(data),
+    assigneeId,
+  });
 }
 
 /**

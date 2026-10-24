@@ -1,11 +1,14 @@
+import { SelectCell } from '@/components/crm/list/BulkSelect';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Link } from '@/libs/I18nNavigation';
 
 /**
- * A list's 36 px row: the record's name as the link that opens it, its number dimmed beside it,
- * the row's own cells, then its "…" menu. On a phone the number yields its room to the name. A
- * long name is cut short, whole in its tooltip.
+ * A list's 36 px row: the box that selects it for a bulk action, the record's name as the link
+ * that opens it, its number dimmed beside it, the row's own cells, then its "…" menu. On a phone
+ * the number yields its room to the name. A long name is cut short, whole in its tooltip. Selected,
+ * it takes the violet tint.
  * @param props Component props.
+ * @param props.id The record.
  * @param props.name The record's name.
  * @param props.href Its page.
  * @param props.number Its record number, such as `C-0012`.
@@ -14,13 +17,15 @@ import { Link } from '@/libs/I18nNavigation';
  * @returns The row.
  */
 export const RecordRow = (props: {
+  id: number;
   name: string;
   href: string;
   number: string;
   menu?: React.ReactNode;
   children: React.ReactNode;
 }) => (
-  <TableRow className="group/row">
+  <TableRow className="group/row has-[[data-select-id][data-state=checked]]:bg-violet-tint">
+    <SelectCell id={props.id} name={props.name} />
     <TableCell>
       <span className="flex min-w-0 items-baseline gap-2">
         <Link

@@ -1,10 +1,14 @@
 import { useTranslations } from 'next-intl';
+import { BulkList } from '@/components/crm/list/BulkList';
+import { BulkSection } from '@/components/crm/list/BulkSelect';
 import { ListEmpty } from '@/components/crm/list/ListEmpty';
 import { ListPager } from '@/components/crm/list/ListPager';
 import { OwnerTitle, StatusSection } from '@/components/crm/list/StatusSection';
 import type { components } from '@/libs/api/schema';
+import type { BulkEntity, BulkItem } from '@/libs/crm/BulkSelection';
 import type { ListQuery } from '@/libs/crm/ListQuery';
 import { isFiltered, listHref } from '@/libs/crm/ListQuery';
+import type { StageRef } from '@/libs/crm/Stages';
 
 type Member = components['schemas']['MemberResponse'];
 
@@ -59,6 +63,8 @@ export const ownerSections = (
  * archive is empty, or nothing yet (with the create action). The add row shows only where the new
  * record lands in view: not in the archive, nor under Unassigned, nor for an owner the caller may
  * not give records to; `addRow` may leave out a group of its own (a status no record starts in).
+ * With `bulk`, its rows can be selected (each table's own boxes, `SelectAllHead` and `SelectCell`)
+ * for the bulk action bar, per section and within what is on screen.
  * @param props Component props.
  * @param props.id The heading's id.
  * @param props.heading The count in words, such as "3 companies".
@@ -80,6 +86,12 @@ export const ownerSections = (
  *   the grouping and the sort.
  * @param props.table The rows, as the entity's table.
  * @param props.addRow The row that adds a record, for an owner (none: the caller) and a group.
+ * @param props.bulk What the bulk action bar needs: the records' kind, the workspace, a row as
+ *   what an action needs of it, and the pipeline's stages (deals).
+ * @param props.bulk.entity The records' kind.
+ * @param props.bulk.workspaceId The workspace.
+ * @param props.bulk.item A row as a bulk action needs it.
+ * @param props.bulk.stages The pipeline's stages, in order (deals).
  * @returns The list.
  */
 export const RecordList = <Row,>(props: {
@@ -102,6 +114,12 @@ export const RecordList = <Row,>(props: {
   };
   table: (rows: Row[]) => React.ReactNode;
   addRow: (owner?: AddOwner, group?: string) => React.ReactElement | null;
+  bulk?: {
+    entity: BulkEntity;
+    workspaceId: number;
+    item: (row: Row) => BulkItem;
+    stages?: StageRef[];
+  };
 }) => {
   const t = useTranslations('ListToolbar');
   const total = props.pages.reduce((sum, page) => sum + page.totalElements, 0);
@@ -116,6 +134,17 @@ export const RecordList = <Row,>(props: {
       key,
     );
   const [page] = props.pages;
+  const { bulk } = props;
+  const items = props.pages.map((list) => (bulk ? list.content.map(bulk.item) : []));
+  // A section's table, whose rows can be selected with a bulk action.
+  const table = (rows: Row[], index: number, labelledBy?: string): React.ReactNode =>
+    bulk ? (
+      <BulkSection ids={(items[index] ?? []).map((item) => item.id)} labelledBy={labelledBy}>
+        {props.table(rows)}
+      </BulkSection>
+    ) : (
+      props.table(rows)
+    );
   let empty = (
     <ListEmpty
       variant="none"
@@ -144,7 +173,7 @@ export const RecordList = <Row,>(props: {
     );
   }
 
-  return (
+  const list = (
     <section aria-labelledby={props.id} className="flex flex-col gap-5">
       {/* It takes the focus when a row leaves with it (a task completed out of its section). */}
       <h2 id={props.id} tabIndex={-1} className="sr-only">
@@ -153,7 +182,7 @@ export const RecordList = <Row,>(props: {
       {total === 0 && empty}
       {!props.groups && page && page.content.length > 0 && (
         <div>
-          {props.table(page.content)}
+          {table(page.content, 0)}
           {!props.query.unassigned && add(filterOwner)}
           <ListPager path={props.path} query={props.query} total={page.totalElements} />
         </div>
@@ -167,9 +196,11 @@ export const RecordList = <Row,>(props: {
         if (!rows || (!rows.totalElements && !(item.keep && addRow))) {
           return null;
         }
+        const titleId = `${props.id}-${item.key}`;
         return (
           <StatusSection
             key={item.key}
+            titleId={titleId}
             title={item.title}
             count={rows.totalElements}
             countLabel={props.heading(rows.totalElements)}
@@ -183,11 +214,32 @@ export const RecordList = <Row,>(props: {
                 : undefined
             }
           >
-            {rows.content.length > 0 && props.table(rows.content)}
+            {rows.content.length > 0 && table(rows.content, index, titleId)}
             {addRow}
           </StatusSection>
         );
       })}
     </section>
+  );
+
+  return bulk ? (
+    <BulkList
+      // The list's state: another group, filter, sort or page starts a new selection.
+      scope={JSON.stringify(props.query.params)}
+      items={items.flat()}
+      bar={{
+        entity: bulk.entity,
+        workspaceId: bulk.workspaceId,
+        members: props.members,
+        mayAssign: props.mayAssign,
+        archived: props.query.archived ?? false,
+        stages: bulk.stages,
+        headingId: props.id,
+      }}
+    >
+      {list}
+    </BulkList>
+  ) : (
+    list
   );
 };

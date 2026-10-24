@@ -2,10 +2,13 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
+import { Table, TableBody, TableHeader, TableRow } from '@/components/ui/table';
+import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import type { ListSpec } from '@/libs/crm/ListQuery';
 import { ownerGroups, parseListQuery } from '@/libs/crm/ListQuery';
 import messages from '@/locales/en.json';
+import { SelectAllHead, SelectCell } from './BulkSelect';
 import { ownerSections, RecordList } from './RecordList';
 
 // Plain links: the real ones need Next's runtime.
@@ -14,8 +17,39 @@ vi.mock(import('@/libs/I18nNavigation'), () => ({
   Link: (props: { href: string; children: React.ReactNode }) => (
     <a href={props.href}>{props.children}</a>
   ),
-  useRouter: () => ({ push: vi.fn<(href: string) => void>() }),
+  useRouter: () => ({ push: vi.fn<(href: string) => void>(), refresh: vi.fn<() => void>() }),
 }));
+// The bar's actions: these tests send none.
+vi.mock(import('@/actions/crm/CompanyActions'), () => ({
+  assignCompany: vi.fn<Send>(),
+  archiveCompany: vi.fn<Send>(),
+  restoreCompany: vi.fn<Send>(),
+}));
+vi.mock(import('@/actions/crm/ContactActions'), () => ({
+  assignContact: vi.fn<Send>(),
+  archiveContact: vi.fn<Send>(),
+  restoreContact: vi.fn<Send>(),
+}));
+vi.mock(import('@/actions/crm/DealActions'), () => ({
+  assignDeal: vi.fn<Send>(),
+  moveDeal: vi.fn<Send>(),
+  archiveDeal: vi.fn<Send>(),
+  restoreDeal: vi.fn<Send>(),
+}));
+vi.mock(import('@/actions/crm/LeadActions'), () => ({
+  changeLeadStatus: vi.fn<Send>(),
+  assignLead: vi.fn<Send>(),
+  archiveLead: vi.fn<Send>(),
+  restoreLead: vi.fn<Send>(),
+}));
+vi.mock(import('@/actions/crm/TaskActions'), () => ({
+  assignTask: vi.fn<Send>(),
+  completeTask: vi.fn<Send>(),
+  reopenTask: vi.fn<Send>(),
+  cancelTask: vi.fn<Send>(),
+}));
+
+type Send = () => Promise<ActionResult>;
 
 const SPEC = {
   sorts: ['NAME', 'UPDATED_AT'],
@@ -41,6 +75,7 @@ const MIA: components['schemas']['MemberResponse'] = {
 const renderList = async (
   params: Record<string, string>,
   pages: { content: string[]; totalElements: number }[],
+  bulk = false,
 ) => {
   const query = parseListQuery(SPEC, params);
   const groups = query.group
@@ -59,13 +94,40 @@ const renderList = async (
         me={ME.userId}
         mayAssign
         empty={{ title: 'No companies yet', text: 'Add one.', archivedText: '', action: null }}
-        table={(rows) => (
-          <ul>
-            {rows.map((row) => (
-              <li key={row}>{row}</li>
-            ))}
-          </ul>
-        )}
+        table={(rows) =>
+          bulk ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <SelectAllHead />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((row) => (
+                  <TableRow key={row}>
+                    <SelectCell id={row.length} name={row} />
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <ul>
+              {rows.map((row) => (
+                <li key={row}>{row}</li>
+              ))}
+            </ul>
+          )
+        }
+        bulk={
+          bulk
+            ? {
+                entity: 'company',
+                workspaceId: 1,
+                // A name's length for its id: the rows' names differ in length.
+                item: (row) => ({ id: row.length, name: row, version: 1, mayEdit: true }),
+              }
+            : undefined
+        }
         addRow={(owner) => <p>Add for {owner?.name ?? 'me'}</p>}
       />
     </NextIntlClientProvider>,
@@ -102,5 +164,35 @@ describe(RecordList, () => {
     await expect
       .element(page.getByRole('link', { name: 'Clear filters' }))
       .toHaveAttribute('href', `${PATH}?group=owner&sort=UPDATED_AT&direction=ASC`);
+  });
+
+  it('gives each section a select-all box named after its heading, and the bar for the list', async () => {
+    await renderList({ group: 'owner' }, [
+      { content: ['Brightwater'], totalElements: 1 },
+      { content: ['Acme', 'Cobalt'], totalElements: 2 },
+      { content: [], totalElements: 0 },
+    ]);
+    await expect.element(page.getByRole('checkbox')).not.toBeInTheDocument();
+
+    document.body.replaceChildren();
+    await renderList(
+      { group: 'owner' },
+      [
+        { content: ['Brightwater'], totalElements: 1 },
+        { content: ['Acme', 'Cobalt'], totalElements: 2 },
+        { content: [], totalElements: 0 },
+      ],
+      true,
+    );
+
+    const mia = page.getByRole('checkbox', { name: 'Select all Mia Manager 2 companies' });
+    await mia.click();
+    await expect.element(page.getByRole('toolbar')).toHaveAccessibleName('2 selected');
+    await expect
+      .element(page.getByRole('checkbox', { name: 'Select Cobalt' }))
+      .toHaveAttribute('aria-checked', 'true');
+    await expect
+      .element(page.getByRole('checkbox', { name: 'Select all Olivia Owner 1 companies' }))
+      .toHaveAttribute('aria-checked', 'false');
   });
 });

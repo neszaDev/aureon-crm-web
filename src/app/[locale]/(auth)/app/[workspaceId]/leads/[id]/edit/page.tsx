@@ -8,39 +8,17 @@ import { RecordFormPage } from '@/components/crm/record/RecordLayout';
 import { RecordNotFound } from '@/components/crm/record/RecordNotFound';
 import { getLead, getLeadSources, getMembers, getWorkspace } from '@/libs/api/CrmQueries';
 import { getCurrentUser } from '@/libs/api/Queries';
-import type { components } from '@/libs/api/schema';
 import { endRejectedSession } from '@/libs/api/Session';
 import { fullName, recordNumber } from '@/libs/crm/Format';
 import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
 import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
 import { canAssign, canEditRecord } from '@/libs/crm/RecordAccess';
 import { redirect } from '@/libs/I18nNavigation';
-import type { LeadValues } from '@/validations/crm/LeadValidation';
+import { leadValues } from '@/validations/crm/LeadValidation';
 
 type EditLeadPageProps = {
   params: Promise<{ locale: string; workspaceId: string; id: string }>;
 };
-
-/**
- * The form's values of a saved lead: what the inputs hold, an absent field empty.
- * @param lead The lead.
- * @returns The values.
- */
-const formValues = (lead: components['schemas']['LeadResponse']): LeadValues => ({
-  firstName: lead.firstName,
-  lastName: lead.lastName ?? '',
-  companyName: lead.companyName ?? '',
-  email: lead.email ?? '',
-  phone: lead.phone ?? '',
-  jobTitle: lead.jobTitle ?? '',
-  sourceId: lead.source?.id ?? null,
-  ownerId: lead.owner?.userId ?? null,
-  priority: lead.priority,
-  followUpDate: lead.followUpDate ?? '',
-  estimatedValue: lead.estimatedValue ?? '',
-  currency: lead.currency ?? '',
-  notes: lead.notes ?? '',
-});
 
 export async function generateMetadata(props: EditLeadPageProps): Promise<Metadata> {
   const { locale, workspaceId, id } = await props.params;
@@ -111,7 +89,7 @@ export default async function EditLeadPage(props: EditLeadPageProps) {
     >
       <LeadForm
         action={updateLead.bind(null, workspace.id, lead.id, lead.version)}
-        defaults={formValues(lead)}
+        defaults={leadValues(lead)}
         isEdit
         members={members.members}
         me={user.id}

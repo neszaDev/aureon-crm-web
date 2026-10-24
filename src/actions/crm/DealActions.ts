@@ -8,7 +8,7 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import { authedBackend } from '@/libs/api/Backend';
 import { redirect } from '@/libs/I18nNavigation';
 import type { DealValues, MoveValues } from '@/validations/crm/DealValidation';
-import { DealValidation, MoveValidation } from '@/validations/crm/DealValidation';
+import { DealValidation, dealValues, MoveValidation } from '@/validations/crm/DealValidation';
 
 /** What a move gives back: the deal's new version, for a card moved again before the refresh. */
 export type MoveResult = ActionResult & { version?: number };
@@ -97,6 +97,37 @@ export async function updateDeal(
 
   refresh();
   return { ok: true };
+}
+
+/**
+ * Gives a deal to another owner (a list's bulk action). There is no owner endpoint: it reads the
+ * deal and saves its fields back unchanged through `updateDeal`, with the new owner, at the
+ * version the list read, so a deal changed since is the reload message.
+ * @param workspaceId The workspace.
+ * @param dealId The deal.
+ * @param version The version the list read; none (a list without versions: companies,
+ *   contacts) sends the one just read.
+ * @param ownerId The new owner.
+ * @returns Success, or the translated refusal.
+ */
+export async function assignDeal(
+  workspaceId: number,
+  dealId: number,
+  version: number | undefined,
+  ownerId: number,
+): Promise<ActionResult> {
+  const api = await authedBackend();
+  const { data, error, response } = await api.GET('/api/v1/workspaces/{workspaceId}/deals/{id}', {
+    params: { path: { workspaceId, id: dealId } },
+  });
+  if (!data) {
+    return await actionFailure(response, error);
+  }
+
+  return await updateDeal(workspaceId, dealId, version ?? data.version, {
+    ...dealValues(data),
+    ownerId,
+  });
 }
 
 /**

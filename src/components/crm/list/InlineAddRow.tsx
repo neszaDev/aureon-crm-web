@@ -11,6 +11,9 @@ import { useSettle } from '@/utils/SettleAction';
 const ROW =
   'flex h-9 w-full items-center gap-2 px-3 text-[0.8125rem] text-muted-foreground transition-colors duration-150';
 
+// The + on the rows' select boxes, the text where their names start.
+const ICON = 'mr-3 size-4 shrink-0';
+
 const FIELD =
   'h-full min-w-0 bg-transparent text-[0.8125rem] text-foreground outline-none placeholder:text-muted-foreground';
 
@@ -54,7 +57,7 @@ export const InlineAddRow = (
   if ('href' in props) {
     return (
       <Link href={props.href} className={`${ROW} hover:bg-accent/60 hover:text-foreground`}>
-        <PlusIcon aria-hidden="true" className="size-4" />
+        <PlusIcon aria-hidden="true" className={ICON} />
         {props.label}
       </Link>
     );
@@ -107,9 +110,9 @@ export const InlineAddRow = (
           className={`flex h-full min-w-0 flex-1 items-center gap-2 ${props.extra ? 'sm:flex-none sm:basis-72' : ''}`}
         >
           {isPending ? (
-            <LoaderCircleIcon aria-hidden="true" className="size-4 shrink-0 animate-spin" />
+            <LoaderCircleIcon aria-hidden="true" className={`${ICON} animate-spin`} />
           ) : (
-            <PlusIcon aria-hidden="true" className="size-4 shrink-0" />
+            <PlusIcon aria-hidden="true" className={ICON} />
           )}
           <input
             {...field}
@@ -152,12 +155,12 @@ export const InlineAddRow = (
         )}
       </div>
       {error && (
-        <p id={errorId} role="alert" className="px-3 pb-2 pl-9 text-[0.8125rem] text-destructive">
+        <p id={errorId} role="alert" className="px-3 pb-2 pl-12 text-[0.8125rem] text-destructive">
           {error}
         </p>
       )}
       {notice && (
-        <p role="alert" className="px-3 pb-2 pl-9 text-[0.8125rem] text-muted-foreground">
+        <p role="alert" className="px-3 pb-2 pl-12 text-[0.8125rem] text-muted-foreground">
           {notice}
         </p>
       )}

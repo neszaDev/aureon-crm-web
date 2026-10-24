@@ -3,6 +3,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { archiveLead, restoreLead } from '@/actions/crm/LeadActions';
 import { isFollowUpOverdue, LeadFollowUp } from '@/components/crm/lead/LeadFollowUp';
 import { LeadStatusPill } from '@/components/crm/lead/LeadStatusPill';
+import { SelectAllHead } from '@/components/crm/list/BulkSelect';
 import { OwnerCell } from '@/components/crm/list/OwnerCell';
 import { RecordRow } from '@/components/crm/list/RecordRow';
 import { RowMenu } from '@/components/crm/list/RowMenu';
@@ -25,7 +26,7 @@ import { canEditRecord } from '@/libs/crm/RecordAccess';
 const none = <span className="text-muted-foreground">—</span>;
 
 /**
- * Leads as list rows: the name with its record number, company name, the status pill (the control
+ * Leads as list rows: the box that selects one for a bulk action, the name with its record number, company name, the status pill (the control
  * that changes it), the priority flag, the follow-up date (an overdue one in red), owner,
  * estimated value, when it was created, and the row menu (archive, or restore) where the caller
  * may change it. Name, priority, follow-up and "Created" sort the list. A phone shows name and
@@ -62,6 +63,7 @@ export const LeadTable = (props: {
     <Table className="table-fixed">
       <TableHeader>
         <TableRow>
+          <SelectAllHead />
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
           <TableHead title={t('company')} className="w-[15%] truncate max-md:hidden">
             {t('company')}
@@ -111,6 +113,7 @@ export const LeadTable = (props: {
           return (
             <RecordRow
               key={lead.id}
+              id={lead.id}
               name={name}
               href={`${props.path}/${lead.id}`}
               number={recordNumber('lead', lead.id)}

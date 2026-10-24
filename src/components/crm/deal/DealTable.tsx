@@ -2,6 +2,7 @@ import { cn } from 'cn';
 import { useLocale, useTranslations } from 'next-intl';
 import { archiveDeal, restoreDeal } from '@/actions/crm/DealActions';
 import { DealStagePill } from '@/components/crm/deal/DealStagePill';
+import { SelectAllHead } from '@/components/crm/list/BulkSelect';
 import { OwnerCell } from '@/components/crm/list/OwnerCell';
 import { RecordRow } from '@/components/crm/list/RecordRow';
 import { RowMenu } from '@/components/crm/list/RowMenu';
@@ -25,7 +26,7 @@ import { Link } from '@/libs/I18nNavigation';
 const none = <span className="text-muted-foreground">—</span>;
 
 /**
- * Deals as list rows: the name with its record number, company, the stage pill (the control that
+ * Deals as list rows: the box that selects one for a bulk action, the name with its record number, company, the stage pill (the control that
  * moves it; won green, lost red), amount, expected close date, owner, when it last changed, and
  * the row menu (archive, or restore) where the caller may change it. Name, amount, close date and
  * "Updated" sort the list (a deal row carries no creation date, so "Created" sorts from the
@@ -64,6 +65,7 @@ export const DealTable = (props: {
     <Table className="table-fixed">
       <TableHeader>
         <TableRow>
+          <SelectAllHead />
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
           <TableHead title={t('company')} className="w-[17%] truncate max-md:hidden">
             {t('company')}
@@ -109,6 +111,7 @@ export const DealTable = (props: {
           return (
             <RecordRow
               key={deal.id}
+              id={deal.id}
               name={deal.name}
               href={`${props.path}/${deal.id}`}
               number={recordNumber('deal', deal.id)}

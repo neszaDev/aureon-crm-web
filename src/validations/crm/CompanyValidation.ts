@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import type { components } from '@/libs/api/schema';
 
 const optionalText = (max: number) => z.string().trim().max(max, 'too_long');
 
@@ -41,6 +42,24 @@ export const CompanyValidation = z.object({
 });
 
 export type CompanyValues = z.infer<typeof CompanyValidation>;
+
+/**
+ * The form's values of a saved company: what the inputs hold, an absent field empty.
+ * @param company The company.
+ * @returns The values: what an edit starts from, and what an owner change sends back unchanged.
+ */
+export const companyValues = (
+  company: components['schemas']['CompanyResponse'],
+): CompanyValues => ({
+  name: company.name,
+  industry: company.industry ?? '',
+  website: company.website ?? '',
+  phone: company.phone ?? '',
+  address: company.address ?? '',
+  employeeCount: company.employeeCount === undefined ? '' : String(company.employeeCount),
+  ownerId: company.owner?.userId ?? null,
+  notes: company.notes ?? '',
+});
 
 // What a duplicate check sends: the name and website as typed so far, valid or not yet, the
 // website with the scheme the save would add.

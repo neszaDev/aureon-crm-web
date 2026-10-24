@@ -7,6 +7,7 @@ import { useLayoutEffect, useOptimistic, useRef, useState, useTransition } from 
 import { toast } from 'sonner';
 import { cancelTask, completeTask, reopenTask } from '@/actions/crm/TaskActions';
 import { ConfirmAction } from '@/components/crm/ConfirmAction';
+import { SelectCell } from '@/components/crm/list/BulkSelect';
 import { OwnerCell } from '@/components/crm/list/OwnerCell';
 import { PriorityFlag } from '@/components/crm/PriorityFlag';
 import { LinkedRecords } from '@/components/crm/record/LinkedRecords';
@@ -131,6 +132,8 @@ export const TaskDue = (props: {
  * @param props.compact A narrow list (the home's, a record's): the title, due time and menu only,
  *   the linked records beside the title; status, priority and assignee are left out.
  * @param props.sectioned Whether the row is in a due section, whose heading says "Overdue".
+ * @param props.selectable Whether it starts with the box that selects it for a bulk action
+ *   (selected, it takes the violet tint).
  * @returns The table row.
  */
 export const TaskRow = (props: {
@@ -143,6 +146,7 @@ export const TaskRow = (props: {
   headingId: string;
   compact?: boolean;
   sectioned?: boolean;
+  selectable?: boolean;
 }) => {
   const t = useTranslations('TaskRow');
   const tError = useTranslations('ActionError');
@@ -210,7 +214,12 @@ export const TaskRow = (props: {
   };
 
   return (
-    <TableRow ref={row} data-state={ticked ? 'done' : undefined}>
+    <TableRow
+      ref={row}
+      data-state={ticked ? 'done' : undefined}
+      className="group/row has-[[data-select-id][data-state=checked]]:bg-violet-tint"
+    >
+      {props.selectable && <SelectCell id={props.task.id} name={props.task.title} />}
       <TableCell className="w-10 pr-0">
         <Checkbox
           checked={ticked}

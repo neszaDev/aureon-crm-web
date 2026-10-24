@@ -295,7 +295,7 @@ Spacing runs on the 4 px grid; 6 px gaps inside controls and between toolbar ite
 Flat by default, with depth from tone (rail, sidebar, canvas) and hairlines. Panels, cards, tables and controls carry no shadow; the demos' ply and sheet shadow tokens resolve to nothing. Shadows appear only on layers that float above the page.
 
 ### Shadow Vocabulary
-- **Float** (`box-shadow: 0 4px 12px -2px rgb(29 26 46 / 10%), 0 12px 28px -6px rgb(29 26 46 / 14%)`): menus, popovers, tooltips, the chart tooltip, the skip link; a board card on hover (it can be picked up) and its dragged copy.
+- **Float** (`box-shadow: 0 4px 12px -2px rgb(29 26 46 / 10%), 0 12px 28px -6px rgb(29 26 46 / 14%)`): menus, popovers, tooltips, the chart tooltip, the skip link, the bulk bar and its alert; a board card on hover (it can be picked up) and its dragged copy.
 - **Overlay** (`box-shadow: 0 12px 32px -8px rgb(29 26 46 / 18%), 0 32px 64px -16px rgb(29 26 46 / 24%)`): the record panel and sheets, dialogs, and the landing's capture sheet that crosses the band.
 - In dark both switch to black (35/45% and 45/55%).
 
@@ -331,7 +331,10 @@ A deal's progress as 6 px full-round segments, one per open stage, filled in the
 A grouped list's group: a 36 px heading that is the collapse button (caret, the status pill or an owner, the count in muted tabular figures), a hairline, its rows, and "View all N" in violet ink when it shows only some.
 
 ### Lists and Rows
-36 px rows on hairlines, 12 px cell padding, 12 px muted table heads. The record's name is the link (underlined on hover), its number in dimmed mono beside it (hidden on phones), a "…" menu at the end. **Inline Add Row:** the last row of a list or group, a + and muted 13 px text; typed into, Enter creates, the row waits for the server (spinner), and an error stays under it with the text kept.
+36 px rows on hairlines, 12 px cell padding, 12 px muted table heads. A 16 px select box leads each row (shown on the row's hover or focus, on touch, and while anything is selected; the head's box selects its section and shows a dash while only some is); a selected row takes the violet tint. The record's name is the link (underlined on hover), its number in dimmed mono beside it (hidden on phones), a "…" menu at the end. **Inline Add Row:** the last row of a list or group, a + over the select boxes and muted 13 px text where the names start; typed into, Enter creates, the row waits for the server (spinner), and an error stays under it with the text kept.
+
+### Bulk Bar
+While rows are selected, an ink-violet toolbar (8 px corners, the float shadow, a 10% white ring that keeps its edge on the dark canvas) stays 16 px above the foot of the screen, centred under the list: "N selected" in 13 px semibold, then only the actions every selected record allows as rail-style controls (white at 80%, a white wash on hover or open, the on-rail focus ring), menus opening upward, and × to clear. It wraps onto two lines on a phone. While records are on their way it counts them ("Updating 3 of 7") with a spinner; refusals rise above it in a popover-coloured alert, a red-ink icon and the count, then each record by name with the server's reason.
 
 ### Chips (toolbar)
 - **Style:** a 32 px control on a hairline over the canvas, 13 px medium. Filter Chip, Group, Sort and Me share it.

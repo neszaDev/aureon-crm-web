@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import type { components } from '@/libs/api/schema';
 import { EMAIL } from './ContactValidation';
 import { CurrencyCode, MoneyAmount } from './MoneyValidation';
 
@@ -54,6 +55,27 @@ export const LeadValidation = z
   });
 
 export type LeadValues = z.infer<typeof LeadValidation>;
+
+/**
+ * The form's values of a saved lead: what the inputs hold, an absent field empty.
+ * @param lead The lead.
+ * @returns The values: what an edit starts from, and what an owner change sends back unchanged.
+ */
+export const leadValues = (lead: components['schemas']['LeadResponse']): LeadValues => ({
+  firstName: lead.firstName,
+  lastName: lead.lastName ?? '',
+  companyName: lead.companyName ?? '',
+  email: lead.email ?? '',
+  phone: lead.phone ?? '',
+  jobTitle: lead.jobTitle ?? '',
+  sourceId: lead.source?.id ?? null,
+  ownerId: lead.owner?.userId ?? null,
+  priority: lead.priority,
+  followUpDate: lead.followUpDate ?? '',
+  estimatedValue: lead.estimatedValue ?? '',
+  currency: lead.currency ?? '',
+  notes: lead.notes ?? '',
+});
 
 const Reason = z.string().trim().max(500, 'too_long');
 

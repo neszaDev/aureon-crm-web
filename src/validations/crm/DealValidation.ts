@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import type { components } from '@/libs/api/schema';
 import { CurrencyCode, MoneyAmount } from './MoneyValidation';
 
 /** The Deals page's views: the board (default) or the table. */
@@ -49,6 +50,26 @@ export const DealValidation = z.object({
 });
 
 export type DealValues = z.infer<typeof DealValidation>;
+
+/**
+ * The form's values of a saved deal: what the inputs hold, an absent field empty. The deal's
+ * own probability is set only when it overrides its stage's.
+ * @param deal The deal.
+ * @returns The values: what an edit starts from, and what an owner change sends back unchanged.
+ */
+export const dealValues = (deal: components['schemas']['DealResponse']): DealValues => ({
+  name: deal.name,
+  amount: deal.amount,
+  currency: deal.currency,
+  stageId: null,
+  probability: deal.probabilityOverride === undefined ? '' : String(deal.probabilityOverride),
+  expectedCloseDate: deal.expectedCloseDate ?? '',
+  ownerId: deal.owner?.userId ?? null,
+  companyId: deal.company?.id ?? null,
+  contactId: deal.contact?.id ?? null,
+  sourceId: deal.source?.id ?? null,
+  notes: deal.notes ?? '',
+});
 
 /**
  * The Move dialog's fields: the stage, and the reason when that stage is Lost (`lost`, which the

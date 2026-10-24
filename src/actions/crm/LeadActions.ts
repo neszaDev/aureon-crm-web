@@ -18,6 +18,7 @@ import {
   ConversionValidation,
   LeadStatusValidation,
   LeadValidation,
+  leadValues,
 } from '@/validations/crm/LeadValidation';
 
 /** What converting gives back: the records linked or created, `alreadyConverted` on a repeat. */
@@ -193,6 +194,37 @@ export async function updateLead(
 
   refresh();
   return { ok: true };
+}
+
+/**
+ * Gives a lead to another owner (a list's bulk action). There is no owner endpoint: it reads the
+ * lead and saves its fields back unchanged through `updateLead`, with the new owner, at the
+ * version the list read, so a lead changed since is the reload message. A converted lead is refused.
+ * @param workspaceId The workspace.
+ * @param leadId The lead.
+ * @param version The version the list read; none (a list without versions: companies,
+ *   contacts) sends the one just read.
+ * @param ownerId The new owner.
+ * @returns Success, or the translated refusal.
+ */
+export async function assignLead(
+  workspaceId: number,
+  leadId: number,
+  version: number | undefined,
+  ownerId: number,
+): Promise<ActionResult> {
+  const api = await authedBackend();
+  const { data, error, response } = await api.GET('/api/v1/workspaces/{workspaceId}/leads/{id}', {
+    params: { path: { workspaceId, id: leadId } },
+  });
+  if (!data) {
+    return await actionFailure(response, error);
+  }
+
+  return await updateLead(workspaceId, leadId, version ?? data.version, {
+    ...leadValues(data),
+    ownerId,
+  });
 }
 
 /**

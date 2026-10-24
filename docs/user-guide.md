@@ -136,6 +136,18 @@ cancelled asks to confirm. On a phone, a list grouped by status or stage shows n
 Click a column heading to sort by it (again to reverse it), or use **Sort by** where a list has
 one; choose 20, 50 or 100 rows a page.
 
+**Several at once.** Each row has a box before its name (it shows when you point at the row, and
+stays once anything is selected); a section's heading row has one for the whole section, half
+filled while only some of it is. Shift+click a box to select every row from the last one you
+clicked; with the keyboard, Space on a row's name selects it and Shift+Space the range. Escape
+clears the selection, and so does changing the group, a filter, the sort or the page. A bar then
+offers what you may do to every selected record: **Assign** (the owner; a task's assignee),
+**Status** or **Stage** (Unqualified and Lost ask one reason for all; tasks complete, reopen, or
+cancel once confirmed), **Archive** (confirmed) or, in the archived view, **Restore**. If you
+can't change one of them, the bar says so and offers only to clear. Each record is saved on its
+own and the bar counts them; when some are refused (your role, or someone changed them first) the
+bar lists each by name with the reason, keeps them selected and shows the list as it now is.
+
 Who may change a record: its owner, or a manager, admin or owner of the workspace. A **sales rep**
 reads everything in the workspace but edits, archives and moves only the records they own (and the
 tasks assigned to them or that they created). Every role can create records; a sales rep owns what
