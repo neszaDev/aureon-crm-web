@@ -27,10 +27,12 @@ const REPORT: Props['report'] = {
   ],
 };
 
-const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en') =>
+const MIA = { userId: 12, displayName: 'Mia Rossi', email: 'mia@demo.test' };
+
+const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en', owner?: Props['owner']) =>
   await render(
     <NextIntlClientProvider locale={locale} messages={locale === 'fr' ? fr : en} timeZone="UTC">
-      <WonLostReport report={value} />
+      <WonLostReport report={value} owner={owner} />
     </NextIntlClientProvider>,
   );
 
@@ -42,6 +44,31 @@ const rowsOf = () =>
     .map((row) => [...row.children].map((cell) => cell.textContent));
 
 describe(WonLostReport, () => {
+  it('says so when no deal closed in the period, and still lists its months', async () => {
+    await report({ ...REPORT, months: [{ month: '2026-09', won: 0, lost: 0, wonTotals: [] }] });
+
+    await expect.element(page.getByText('No deals closed in this period.')).toBeVisible();
+    expect(rowsOf()).toStrictEqual([['Sep 2026', '0', '0', 'None']]);
+  });
+
+  it('names the owner it counts when none of their deals closed in the period', async () => {
+    await report(
+      { ...REPORT, months: [{ month: '2026-09', won: 0, lost: 0, wonTotals: [] }] },
+      'en',
+      MIA,
+    );
+
+    await expect
+      .element(page.getByText('No deals owned by Mia Rossi closed in this period.'))
+      .toBeVisible();
+  });
+
+  it('says nothing of the kind while a month has a deal', async () => {
+    await report(REPORT, 'en', MIA);
+
+    expect(document.body.textContent).not.toContain('closed in this period');
+  });
+
   it('lists every month of the period, oldest first, the one without deals too', async () => {
     await report(REPORT);
 

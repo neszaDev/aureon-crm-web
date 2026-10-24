@@ -56,7 +56,9 @@ const REPORT: Props['report'] = {
   dueLeads: { count: 1, first: [lead(3, 'Noa', '2026-10-17')] },
 };
 
-const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en') =>
+const MIA = { userId: 12, displayName: 'Mia Rossi', email: 'mia@demo.test' };
+
+const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en', owner?: Props['owner']) =>
   await render(
     <NextIntlClientProvider
       locale={locale}
@@ -67,6 +69,7 @@ const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en') =>
         report={value}
         workspace={{ id: 7, timezone: 'Asia/Bangkok' }}
         today="2026-10-18"
+        owner={owner}
       />
     </NextIntlClientProvider>,
   );
@@ -160,6 +163,42 @@ describe(FollowUpReport, () => {
     await expect.element(page.getByText('No overdue tasks.')).toBeVisible();
     await expect.element(page.getByText('Nothing due in the next 7 days.')).toBeVisible();
     await expect.element(page.getByText('No leads to follow up.')).toBeVisible();
+  });
+
+  it('names the member it counts in a group with nothing of theirs', async () => {
+    await report(
+      {
+        overdueTasks: { count: 0, first: [] },
+        upcomingTasks: { count: 0, first: [] },
+        dueLeads: { count: 0, first: [] },
+      },
+      'en',
+      MIA,
+    );
+
+    await expect.element(page.getByText('No overdue tasks assigned to Mia Rossi.')).toBeVisible();
+    await expect
+      .element(page.getByText('Nothing assigned to Mia Rossi is due in the next 7 days.'))
+      .toBeVisible();
+    await expect.element(page.getByText('No leads owned by Mia Rossi to follow up.')).toBeVisible();
+  });
+
+  it("links the rest to the member's own tasks and leads", async () => {
+    await report(
+      { ...REPORT, dueLeads: { count: 21, first: [lead(3, 'Noa', '2026-10-17')] } },
+      'en',
+      MIA,
+    );
+
+    await expect
+      .element(group('Overdue tasks').getByRole('link', { name: 'and 23 more' }))
+      .toHaveAttribute('href', '/app/7/tasks?view=overdue&assigneeId=12');
+    await expect
+      .element(group('Leads to follow up').getByRole('link', { name: 'and 20 more' }))
+      .toHaveAttribute(
+        'href',
+        '/app/7/leads?status=NEW&status=CONTACTED&status=QUALIFIED&followUpBefore=2026-10-18&sort=FOLLOW_UP_DATE&direction=ASC&ownerId=12',
+      );
   });
 
   it('writes the groups in the page language', async () => {

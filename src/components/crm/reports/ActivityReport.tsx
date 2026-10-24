@@ -17,9 +17,13 @@ const COLUMNS = ['calls', 'emails', 'meetings', 'notes', 'tasksCompleted'] as co
  * own region, which the keyboard can reach.
  * @param props Component props.
  * @param props.report The activities report.
+ * @param props.owner The member whose records it counts, when the page counts one member's.
  * @returns The panel.
  */
-export const ActivityReport = (props: { report: components['schemas']['ActivityReport'] }) => {
+export const ActivityReport = (props: {
+  report: components['schemas']['ActivityReport'];
+  owner?: components['schemas']['MemberRef'];
+}) => {
   const t = useTranslations('ActivityReport');
   const number = new Intl.NumberFormat(useLocale());
 
@@ -80,7 +84,11 @@ export const ActivityReport = (props: { report: components['schemas']['ActivityR
           />
         </section>
       ) : (
-        <p className="border-t border-rule px-4 py-6 text-muted-foreground sm:px-5">{t('empty')}</p>
+        <p className="border-t border-rule px-4 py-6 text-muted-foreground sm:px-5">
+          {props.owner
+            ? t('empty_owner', { name: props.owner.displayName ?? props.owner.email })
+            : t('empty')}
+        </p>
       )}
     </Panel>
   );

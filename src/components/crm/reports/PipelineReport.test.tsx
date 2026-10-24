@@ -50,10 +50,12 @@ const REPORT: Props['report'] = {
   ],
 };
 
-const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en') =>
+const MIA = { userId: 12, displayName: 'Mia Rossi', email: 'mia@demo.test' };
+
+const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en', owner?: Props['owner']) =>
   await render(
     <NextIntlClientProvider locale={locale} messages={locale === 'fr' ? fr : en} timeZone="UTC">
-      <PipelineReport report={value} />
+      <PipelineReport report={value} owner={owner} />
     </NextIntlClientProvider>,
   );
 
@@ -128,6 +130,12 @@ describe(PipelineReport, () => {
 
     await expect.element(page.getByText('No open stages.')).toBeVisible();
     await expect.element(page.getByText('No open deals.')).toBeVisible();
+  });
+
+  it('names the owner when they have no open deal', async () => {
+    await report({ byStage: [], byOwner: [] }, 'en', MIA);
+
+    await expect.element(page.getByText('No open deals owned by Mia Rossi.')).toBeVisible();
   });
 
   it('writes the unassigned row in the page language', async () => {

@@ -3654,11 +3654,14 @@
   },
   "CrmReports": {
     "title": "Rapports",
+    "owner_invalid_title": "Impossible de filtrer les rapports sur ce propriétaire",
+    "owner_invalid_text": "Cette personne n'est plus membre de cet espace de travail, ou le lien vient d'un autre. Le rapport porte sur tout l'espace de travail.",
+    "owner_invalid_reset": "Retirer le propriétaire",
     "intro_pipeline": "Les affaires en cours à ce jour.",
     "intro_won-lost": "Les affaires clôturées chaque mois de la période, comptées selon leur étape actuelle.",
     "intro_funnel": "Les affaires créées sur la période et jusqu'où elles sont allées.",
     "intro_activities": "Ce que chaque membre a consigné et terminé sur la période.",
-    "intro_follow-ups": "Tout ce qui attend une relance dans l'espace de travail, à ce jour."
+    "intro_follow-ups": "Tout ce qui attend une relance, à ce jour."
   },
   "ReportTabs": {
     "label": "Rapports",
@@ -3678,7 +3681,8 @@
     "value": "Valeur",
     "unassigned": "Sans propriétaire",
     "no_value": "Aucune",
-    "empty": "Aucune affaire en cours."
+    "empty": "Aucune affaire en cours.",
+    "empty_owner": "Aucune affaire en cours appartenant à {name}."
   },
   "WonLostReport": {
     "title": "Gagnées et perdues par mois",
@@ -3686,7 +3690,9 @@
     "won": "Gagnées",
     "lost": "Perdues",
     "won_value": "Valeur gagnée",
-    "no_value": "Aucune"
+    "no_value": "Aucune",
+    "none": "Aucune affaire conclue sur cette période.",
+    "none_owner": "Aucune affaire appartenant à {name} n'a été conclue sur cette période."
   },
   "FunnelReport": {
     "title": "Entonnoir",
@@ -3696,6 +3702,7 @@
     "reached": "Atteinte",
     "reached_of": "{reached, number} sur {created, number}",
     "none": "Aucune affaire n'a été créée sur cette période.",
+    "none_owner": "Aucune affaire appartenant à {name} n'a été créée sur cette période.",
     "history_from": "L'historique des étapes commence le {date} ; les affaires créées avant ne comptent que les étapes enregistrées depuis.",
     "history_none": "Aucun changement d'étape pour l'instant."
   },
@@ -3711,18 +3718,22 @@
     "total": "Total",
     "former": "Anciens membres",
     "empty": "Aucune activité sur cette période.",
+    "empty_owner": "Aucune activité de {name} sur cette période.",
     "table": "Tableau de l'activité"
   },
   "FollowUpReport": {
     "overdue": "Tâches en retard",
     "overdue_hint": "Tâches ouvertes dont l'échéance est passée, les plus en retard d'abord.",
     "overdue_none": "Aucune tâche en retard.",
+    "overdue_none_owner": "Aucune tâche en retard assignée à {name}.",
     "upcoming": "Tâches à venir",
     "upcoming_hint": "Tâches ouvertes à rendre dans les 7 prochains jours, les plus proches d'abord.",
     "upcoming_none": "Rien à rendre dans les 7 prochains jours.",
+    "upcoming_none_owner": "Rien à rendre par {name} dans les 7 prochains jours.",
     "leads": "Prospects à relancer",
     "leads_hint": "Prospects ouverts dont le jour de relance est aujourd'hui ou avant, les plus anciens d'abord.",
     "leads_none": "Aucun prospect à relancer.",
+    "leads_none_owner": "Aucun prospect de {name} à relancer.",
     "more": "et {count, number} de plus",
     "count": "{count, number}",
     "unassigned": "Sans propriétaire"

@@ -35,10 +35,12 @@ const REPORT: Props['report'] = {
   ],
 };
 
-const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en') =>
+const MIA = { userId: 12, displayName: 'Mia Rossi', email: 'mia@demo.test' };
+
+const report = async (value: Props['report'], locale: 'en' | 'fr' = 'en', owner?: Props['owner']) =>
   await render(
     <NextIntlClientProvider locale={locale} messages={locale === 'fr' ? fr : en} timeZone="UTC">
-      <ActivityReport report={value} />
+      <ActivityReport report={value} owner={owner} />
     </NextIntlClientProvider>,
   );
 
@@ -159,6 +161,12 @@ describe(ActivityReport, () => {
 
     await expect.element(page.getByText('No activity in this period.')).toBeVisible();
     expect(document.querySelector('table')).toBeNull();
+  });
+
+  it('names the member it counts when they did nothing in the period', async () => {
+    await report({ ...REPORT, byUser: [] }, 'en', MIA);
+
+    await expect.element(page.getByText('No activity by Mia Rossi in this period.')).toBeVisible();
   });
 
   it('heads the columns in the page language', async () => {

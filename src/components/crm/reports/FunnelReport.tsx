@@ -23,9 +23,13 @@ import { stageTone } from '@/libs/crm/StatusColors';
  * are decoration of the table's figures and hidden from assistive technology.
  * @param props Component props.
  * @param props.report The funnel report.
+ * @param props.owner The member whose records it counts, when the page counts one member's.
  * @returns The panel.
  */
-export const FunnelReport = (props: { report: components['schemas']['FunnelReport'] }) => {
+export const FunnelReport = (props: {
+  report: components['schemas']['FunnelReport'];
+  owner?: components['schemas']['MemberRef'];
+}) => {
   const t = useTranslations('FunnelReport');
   const locale = useLocale();
   const { created, historyFrom, period, stages } = props.report;
@@ -98,7 +102,11 @@ export const FunnelReport = (props: { report: components['schemas']['FunnelRepor
           </Table>
         </>
       ) : (
-        <p className="border-t border-rule px-4 py-6 text-muted-foreground sm:px-5">{t('none')}</p>
+        <p className="border-t border-rule px-4 py-6 text-muted-foreground sm:px-5">
+          {props.owner
+            ? t('none_owner', { name: props.owner.displayName ?? props.owner.email })
+            : t('none')}
+        </p>
       )}
     </Panel>
   );

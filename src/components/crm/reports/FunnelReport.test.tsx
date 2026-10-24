@@ -35,10 +35,16 @@ const REPORT: Props['report'] = {
   ],
 };
 
-const funnel = async (report: Props['report'], locale: 'en' | 'fr' = 'en') =>
+const MIA = { userId: 12, displayName: 'Mia Rossi', email: 'mia@demo.test' };
+
+const funnel = async (
+  report: Props['report'],
+  locale: 'en' | 'fr' = 'en',
+  owner?: Props['owner'],
+) =>
   await render(
     <NextIntlClientProvider locale={locale} messages={locale === 'fr' ? fr : en} timeZone="UTC">
-      <FunnelReport report={report} />
+      <FunnelReport report={report} owner={owner} />
     </NextIntlClientProvider>,
   );
 
@@ -131,6 +137,18 @@ describe(FunnelReport, () => {
 
     await expect.element(page.getByText('No deals were created in this period.')).toBeVisible();
     expect(document.querySelector('table')).toBeNull();
+  });
+
+  it('names the owner it counts when they created no deal in the period', async () => {
+    await funnel(
+      { ...REPORT, created: 0, stages: REPORT.stages.map((s) => ({ ...s, reached: 0 })) },
+      'en',
+      MIA,
+    );
+
+    await expect
+      .element(page.getByText('No deals owned by Mia Rossi were created in this period.'))
+      .toBeVisible();
   });
 
   it('labels the figures in the page language', async () => {

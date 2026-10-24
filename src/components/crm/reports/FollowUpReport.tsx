@@ -16,7 +16,7 @@ const LEADS_DUE = 'status=NEW&status=CONTACTED&status=QUALIFIED';
  * @param props.id The group's name, for its heading's id.
  * @param props.title The title.
  * @param props.hint What the group holds.
- * @param props.count How many there are in the workspace.
+ * @param props.count How many there are in all.
  * @param props.shown How many of them are listed.
  * @param props.empty What it says with none.
  * @param props.moreHref The list of all of them.
@@ -69,23 +69,29 @@ const TITLE = 'text-[0.9375rem] font-medium break-words text-foreground';
 const META = 'flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[0.8125rem] text-muted-foreground';
 
 /**
- * The follow-ups of the whole workspace as of now: the overdue tasks, the tasks due in the next 7
- * days and the leads whose follow-up is due, each with its count and the first items the API
- * sent (a link to the record, its number, when it is due, who holds it), and a link to the
- * filtered list for the rest.
+ * The follow-ups of the whole workspace, or of one member, as of now: the overdue tasks, the tasks
+ * due in the next 7 days and the leads whose follow-up is due, each with its count and the first
+ * items the API sent (a link to the record, its number, when it is due, who holds it), and a link
+ * to the filtered list for the rest (the member's tasks or leads, for one member).
  * @param props Component props.
  * @param props.report The follow-ups report.
  * @param props.workspace The workspace: its id and time zone.
  * @param props.today Today in the workspace's time zone, `YYYY-MM-DD`.
+ * @param props.owner The member whose tasks and leads it counts, when the page counts one member's.
  * @returns The three groups.
  */
 export const FollowUpReport = (props: {
   report: components['schemas']['FollowUpReport'];
   workspace: Pick<components['schemas']['WorkspaceResponse'], 'id' | 'timezone'>;
   today: string;
+  owner?: components['schemas']['MemberRef'];
 }) => {
   const t = useTranslations('FollowUpReport');
   const base = `/app/${props.workspace.id}`;
+  const name = props.owner && (props.owner.displayName ?? props.owner.email);
+  // The lists of the rest, narrowed to the member's own.
+  const assignee = props.owner ? `&assigneeId=${props.owner.userId}` : '';
+  const owned = props.owner ? `&ownerId=${props.owner.userId}` : '';
   const { overdueTasks, upcomingTasks, dueLeads } = props.report;
   const tasks = (list: typeof overdueTasks) =>
     list.first.map((task) => (
@@ -112,8 +118,8 @@ export const FollowUpReport = (props: {
         hint={t('overdue_hint')}
         count={overdueTasks.count}
         shown={overdueTasks.first.length}
-        empty={t('overdue_none')}
-        moreHref={`${base}/tasks?view=overdue`}
+        empty={name ? t('overdue_none_owner', { name }) : t('overdue_none')}
+        moreHref={`${base}/tasks?view=overdue${assignee}`}
       >
         {tasks(overdueTasks)}
       </Group>
@@ -123,8 +129,8 @@ export const FollowUpReport = (props: {
         hint={t('upcoming_hint')}
         count={upcomingTasks.count}
         shown={upcomingTasks.first.length}
-        empty={t('upcoming_none')}
-        moreHref={`${base}/tasks?view=upcoming`}
+        empty={name ? t('upcoming_none_owner', { name }) : t('upcoming_none')}
+        moreHref={`${base}/tasks?view=upcoming${assignee}`}
       >
         {tasks(upcomingTasks)}
       </Group>
@@ -134,8 +140,8 @@ export const FollowUpReport = (props: {
         hint={t('leads_hint')}
         count={dueLeads.count}
         shown={dueLeads.first.length}
-        empty={t('leads_none')}
-        moreHref={`${base}/leads?${LEADS_DUE}&followUpBefore=${props.today}&sort=FOLLOW_UP_DATE&direction=ASC`}
+        empty={name ? t('leads_none_owner', { name }) : t('leads_none')}
+        moreHref={`${base}/leads?${LEADS_DUE}&followUpBefore=${props.today}&sort=FOLLOW_UP_DATE&direction=ASC${owned}`}
       >
         {dueLeads.first.map((lead) => (
           <li key={lead.id} className={ITEM}>

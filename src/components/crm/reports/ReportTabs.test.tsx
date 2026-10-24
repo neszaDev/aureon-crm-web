@@ -52,6 +52,17 @@ describe(ReportTabs, () => {
       .toHaveAttribute('href', '/app/7/reports?tab=activities&from=2026-09-01&to=2026-09-30');
   });
 
+  it('keeps the owner the page counts from tab to tab', async () => {
+    await tabs({ ownerId: 12, period: { from: '2026-09-01', to: '2026-09-30' } });
+
+    await expect
+      .element(page.getByRole('link', { name: 'Pipeline' }))
+      .toHaveAttribute(
+        'href',
+        '/app/7/reports?tab=pipeline&ownerId=12&from=2026-09-01&to=2026-09-30',
+      );
+  });
+
   it('marks the current tab with an underline as well as its colour', async () => {
     await tabs();
 

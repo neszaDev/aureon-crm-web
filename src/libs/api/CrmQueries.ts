@@ -738,9 +738,10 @@ export const getDashboard = async (segment: string, period: PeriodQuery) => {
  * Loads the pipeline report (`GET /workspaces/{id}/reports/pipeline`): the open deals by stage
  * and by owner, as of now.
  * @param segment The `[workspaceId]` route segment.
- * @returns The report and the outcome flags.
+ * @param query The owner whose deals alone it counts, if any (`parseOwner`).
+ * @returns The report and the outcome flags (`invalid`: the backend refused the owner).
  */
-export const getPipelineReport = async (segment: string) => {
+export const getPipelineReport = async (segment: string, query: { ownerId?: number }) => {
   const workspaceId = toWorkspaceId(segment);
   if (workspaceId === undefined) {
     return { report: undefined, ...NOT_FOUND };
@@ -748,7 +749,7 @@ export const getPipelineReport = async (segment: string) => {
 
   const api = await authedBackend();
   const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reports/pipeline', {
-    params: { path: { workspaceId } },
+    params: { path: { workspaceId }, query },
   });
 
   return { report: data, ...flags(response.status) };
@@ -759,9 +760,10 @@ export const getPipelineReport = async (segment: string) => {
  * upcoming tasks and the due leads of the whole workspace, as of now, each with its count and
  * first items.
  * @param segment The `[workspaceId]` route segment.
- * @returns The report and the outcome flags.
+ * @param query The member whose tasks and leads alone it counts, if any (`parseOwner`).
+ * @returns The report and the outcome flags (`invalid`: the backend refused the owner).
  */
-export const getFollowUpReport = async (segment: string) => {
+export const getFollowUpReport = async (segment: string, query: { ownerId?: number }) => {
   const workspaceId = toWorkspaceId(segment);
   if (workspaceId === undefined) {
     return { report: undefined, ...NOT_FOUND };
@@ -769,7 +771,7 @@ export const getFollowUpReport = async (segment: string) => {
 
   const api = await authedBackend();
   const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reports/follow-ups', {
-    params: { path: { workspaceId } },
+    params: { path: { workspaceId }, query },
   });
 
   return { report: data, ...flags(response.status) };
@@ -780,11 +782,15 @@ export const getFollowUpReport = async (segment: string) => {
  * period with its won and lost deals and the won totals per currency. The response names the
  * `period` it used.
  * @param segment The `[workspaceId]` route segment.
- * @param period The period from the URL, read with `parsePeriod`; a day left out is the API's
- *   default.
- * @returns The report and the outcome flags (`invalid`: the backend refused the period).
+ * @param query The period from the URL, read with `parsePeriod` (a day left out is the API's
+ *   default), and the owner whose records alone it counts, if any (`parseOwner`).
+ * @returns The report and the outcome flags (`invalid`: the backend refused the period or the
+ *   owner).
  */
-export const getWonLostReport = async (segment: string, period: PeriodQuery) => {
+export const getWonLostReport = async (
+  segment: string,
+  query: PeriodQuery & { ownerId?: number },
+) => {
   const workspaceId = toWorkspaceId(segment);
   if (workspaceId === undefined) {
     return { report: undefined, ...NOT_FOUND };
@@ -792,7 +798,7 @@ export const getWonLostReport = async (segment: string, period: PeriodQuery) => 
 
   const api = await authedBackend();
   const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reports/won-lost', {
-    params: { path: { workspaceId }, query: period },
+    params: { path: { workspaceId }, query },
   });
 
   return { report: data, ...flags(response.status) };
@@ -803,10 +809,15 @@ export const getWonLostReport = async (segment: string, period: PeriodQuery) => 
  * period and, for each stage, how many reached it. The response names the `period` it used and
  * the day the workspace's stage history starts.
  * @param segment The `[workspaceId]` route segment.
- * @param period The period from the URL, read with `parsePeriod`.
- * @returns The report and the outcome flags (`invalid`: the backend refused the period).
+ * @param query The period from the URL, read with `parsePeriod` (a day left out is the API's
+ *   default), and the owner whose records alone it counts, if any (`parseOwner`).
+ * @returns The report and the outcome flags (`invalid`: the backend refused the period or the
+ *   owner).
  */
-export const getFunnelReport = async (segment: string, period: PeriodQuery) => {
+export const getFunnelReport = async (
+  segment: string,
+  query: PeriodQuery & { ownerId?: number },
+) => {
   const workspaceId = toWorkspaceId(segment);
   if (workspaceId === undefined) {
     return { report: undefined, ...NOT_FOUND };
@@ -814,7 +825,7 @@ export const getFunnelReport = async (segment: string, period: PeriodQuery) => {
 
   const api = await authedBackend();
   const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reports/funnel', {
-    params: { path: { workspaceId }, query: period },
+    params: { path: { workspaceId }, query },
   });
 
   return { report: data, ...flags(response.status) };
@@ -825,10 +836,15 @@ export const getFunnelReport = async (segment: string, period: PeriodQuery) => {
  * activities logged in the period by type and the tasks completed. The response names the
  * `period` it used.
  * @param segment The `[workspaceId]` route segment.
- * @param period The period from the URL, read with `parsePeriod`.
- * @returns The report and the outcome flags (`invalid`: the backend refused the period).
+ * @param query The period from the URL, read with `parsePeriod` (a day left out is the API's
+ *   default), and the owner whose records alone it counts, if any (`parseOwner`).
+ * @returns The report and the outcome flags (`invalid`: the backend refused the period or the
+ *   owner).
  */
-export const getActivityReport = async (segment: string, period: PeriodQuery) => {
+export const getActivityReport = async (
+  segment: string,
+  query: PeriodQuery & { ownerId?: number },
+) => {
   const workspaceId = toWorkspaceId(segment);
   if (workspaceId === undefined) {
     return { report: undefined, ...NOT_FOUND };
@@ -836,7 +852,7 @@ export const getActivityReport = async (segment: string, period: PeriodQuery) =>
 
   const api = await authedBackend();
   const { data, response } = await api.GET('/api/v1/workspaces/{workspaceId}/reports/activities', {
-    params: { path: { workspaceId }, query: period },
+    params: { path: { workspaceId }, query },
   });
 
   return { report: data, ...flags(response.status) };

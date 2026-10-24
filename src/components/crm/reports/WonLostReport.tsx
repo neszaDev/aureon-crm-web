@@ -33,14 +33,18 @@ const LABELLED_MONTHS = 6;
  * is there too, oldest first): grouped bars of the deals won and lost, with their counts on them
  * while there is room, and under them the table of the same figures with the won totals, each
  * currency on its own line and never added. Won is a solid green bar and Lost a hatched red one
- * (the status colours of Won and Lost), so the two read apart without their colours. The bars
- * are the table's picture: assistive
- * technology has the table.
+ * (the status colours of Won and Lost), so the two read apart without their colours. When no deal
+ * closed in the period, a line above says so (naming the owner it counts). The bars are the
+ * table's picture: assistive technology has the table.
  * @param props Component props.
  * @param props.report The won and lost report.
+ * @param props.owner The member whose records it counts, when the page counts one member's.
  * @returns The panel.
  */
-export const WonLostReport = (props: { report: components['schemas']['WonLostReport'] }) => {
+export const WonLostReport = (props: {
+  report: components['schemas']['WonLostReport'];
+  owner?: components['schemas']['MemberRef'];
+}) => {
   const t = useTranslations('WonLostReport');
   const locale = useLocale();
   const number = new Intl.NumberFormat(locale);
@@ -51,9 +55,17 @@ export const WonLostReport = (props: { report: components['schemas']['WonLostRep
     lost: { label: t('lost'), color: 'var(--chart-5)' },
   } satisfies ChartConfig;
   const labelled = props.report.months.length <= LABELLED_MONTHS;
+  const closed = props.report.months.some((month) => month.won + month.lost > 0);
 
   return (
     <Panel id="won-lost" title={t('title')}>
+      {!closed && (
+        <p className="px-4 pb-3 text-muted-foreground sm:px-5">
+          {props.owner
+            ? t('none_owner', { name: props.owner.displayName ?? props.owner.email })
+            : t('none')}
+        </p>
+      )}
       <div aria-hidden="true" className="px-4 pb-3 sm:px-5">
         <ul className="mb-2 flex gap-4 text-[0.8125rem] font-medium">
           <li className="flex items-center gap-1.5">

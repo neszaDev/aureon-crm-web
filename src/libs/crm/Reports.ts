@@ -1,3 +1,5 @@
+import { toRecordId } from './WorkspaceId';
+
 /** The reports, in the order of the tabs; each is `?tab=<one of these>`. */
 export const REPORT_TABS = ['pipeline', 'won-lost', 'funnel', 'activities', 'follow-ups'] as const;
 
@@ -21,3 +23,27 @@ export const parseTab = (searchParams: Record<string, string | string[] | undefi
  * @returns Whether it takes a period.
  */
 export const hasPeriod = (tab: ReportTab) => PERIOD_TABS.has(tab);
+
+/**
+ * Reads the member the reports count (`?ownerId`): the first value, when it is an id. A value that
+ * is none is dropped, as a list's filter is, and the reports count the whole workspace; whether the
+ * id is a current member is the API's to say (a 400 on `ownerId`).
+ * @param searchParams The page's search params.
+ * @returns The member's user id, or undefined.
+ */
+export const parseOwner = (searchParams: Record<string, string | string[] | undefined>) => {
+  const [value] = [searchParams.ownerId].flat();
+
+  return value === undefined ? undefined : toRecordId(value);
+};
+
+/**
+ * The URL params a report's links keep beside its period: the tab, and the owner it counts.
+ * @param tab The tab.
+ * @param ownerId The owner, if any.
+ * @returns The params.
+ */
+export const reportParams = (tab: ReportTab, ownerId?: number) => ({
+  tab,
+  ...(ownerId !== undefined && { ownerId: String(ownerId) }),
+});

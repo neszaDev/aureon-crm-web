@@ -130,7 +130,7 @@ export const OptionsChip = (props: {
   param: string;
   options: FilterOption[];
   path: string;
-  query: ListQuery;
+  query: Pick<ListQuery, 'params'>;
 }) => {
   const t = useTranslations('ListToolbar');
   const router = useRouter();

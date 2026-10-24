@@ -3654,11 +3654,14 @@
   },
   "CrmReports": {
     "title": "Reports",
+    "owner_invalid_title": "This owner can't be reported on",
+    "owner_invalid_text": "They're no longer a member of this workspace, or the link comes from another one. The report shows the whole workspace.",
+    "owner_invalid_reset": "Clear the owner",
     "intro_pipeline": "The open deals as of now.",
     "intro_won-lost": "Deals closed in each month of the period, counted by the stage they are in now.",
     "intro_funnel": "Deals created in the period, and how far they got.",
     "intro_activities": "What each member logged and completed in the period.",
-    "intro_follow-ups": "Everything waiting on a follow-up across the workspace, as of now."
+    "intro_follow-ups": "Everything waiting on a follow-up, as of now."
   },
   "ReportTabs": {
     "label": "Reports",
@@ -3678,7 +3681,8 @@
     "value": "Value",
     "unassigned": "Unassigned",
     "no_value": "None",
-    "empty": "No open deals."
+    "empty": "No open deals.",
+    "empty_owner": "No open deals owned by {name}."
   },
   "WonLostReport": {
     "title": "Won and lost by month",
@@ -3686,7 +3690,9 @@
     "won": "Won",
     "lost": "Lost",
     "won_value": "Won value",
-    "no_value": "None"
+    "no_value": "None",
+    "none": "No deals closed in this period.",
+    "none_owner": "No deals owned by {name} closed in this period."
   },
   "FunnelReport": {
     "title": "Funnel",
@@ -3696,6 +3702,7 @@
     "reached": "Reached",
     "reached_of": "{reached, number} of {created, number}",
     "none": "No deals were created in this period.",
+    "none_owner": "No deals owned by {name} were created in this period.",
     "history_from": "Stage history starts on {date}; deals created before it count only the stages recorded since.",
     "history_none": "No stage changes yet."
   },
@@ -3711,18 +3718,22 @@
     "total": "Total",
     "former": "Former members",
     "empty": "No activity in this period.",
+    "empty_owner": "No activity by {name} in this period.",
     "table": "Activity table"
   },
   "FollowUpReport": {
     "overdue": "Overdue tasks",
     "overdue_hint": "Open tasks past their due time, the longest overdue first.",
     "overdue_none": "No overdue tasks.",
+    "overdue_none_owner": "No overdue tasks assigned to {name}.",
     "upcoming": "Upcoming tasks",
     "upcoming_hint": "Open tasks due in the next 7 days, the soonest first.",
     "upcoming_none": "Nothing due in the next 7 days.",
+    "upcoming_none_owner": "Nothing assigned to {name} is due in the next 7 days.",
     "leads": "Leads to follow up",
     "leads_hint": "Open leads whose follow-up day is today or earlier, the oldest first.",
     "leads_none": "No leads to follow up.",
+    "leads_none_owner": "No leads owned by {name} to follow up.",
     "more": "and {count, number} more",
     "count": "{count, number}",
     "unassigned": "Unassigned"

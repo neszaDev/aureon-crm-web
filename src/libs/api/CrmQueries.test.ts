@@ -301,16 +301,43 @@ describe('the reports', () => {
   );
 
   it.each([
+    ['won-lost', getWonLostReport],
+    ['funnel', getFunnelReport],
+    ['activities', getActivityReport],
     ['pipeline', getPipelineReport],
     ['follow-ups', getFollowUpReport],
-  ] as const)('asks %s for nothing but the workspace: it is as of now', async (path, get) => {
+  ] as const)(
+    "asks %s for the owner's records, and flags a refused owner as invalid",
+    async (path, get) => {
+      const GET = vi
+        .fn<() => Promise<unknown>>()
+        .mockResolvedValueOnce(ok)
+        .mockResolvedValueOnce(refused);
+      // @ts-expect-error -- only the call this query makes
+      vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+      await expect(get('7', { ownerId: 12 })).resolves.toMatchObject({ invalid: false });
+      expect(GET).toHaveBeenCalledWith(`/api/v1/workspaces/{workspaceId}/reports/${path}`, {
+        params: { path: { workspaceId: 7 }, query: { ownerId: 12 } },
+      });
+      await expect(get('7', { ownerId: 99 })).resolves.toMatchObject({
+        report: undefined,
+        invalid: true,
+      });
+    },
+  );
+
+  it.each([
+    ['pipeline', getPipelineReport],
+    ['follow-ups', getFollowUpReport],
+  ] as const)('asks %s for no period: it is as of now', async (path, get) => {
     const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue(ok);
     // @ts-expect-error -- only the call this query makes
     vi.mocked(authedBackend).mockResolvedValue({ GET });
 
-    await expect(get('7')).resolves.toMatchObject({ report: { period: {} }, forbidden: false });
+    await expect(get('7', {})).resolves.toMatchObject({ report: { period: {} }, forbidden: false });
     expect(GET).toHaveBeenCalledWith(`/api/v1/workspaces/{workspaceId}/reports/${path}`, {
-      params: { path: { workspaceId: 7 } },
+      params: { path: { workspaceId: 7 }, query: {} },
     });
   });
 

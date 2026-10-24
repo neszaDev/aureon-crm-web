@@ -1,4 +1,4 @@
-import type { APIRequestContext, Page } from '@playwright/test';
+import type { APIRequestContext, Locator, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { PASSWORD, signIn } from '../helpers';
 import { COMPANIES, DEALS, MORE_LEADS, PEOPLE } from '../mockData';
@@ -6,8 +6,10 @@ import type { Member } from './helpers';
 import {
   addMember,
   apiCall,
+  BACKEND_URL,
   apiSend,
   dayLabel,
+  expectFits,
   expectNoA11yViolations,
   expectNoSidewaysScroll,
   money,
@@ -16,6 +18,7 @@ import {
   seed,
   seedWorkspace,
   stagesOf,
+  waitForHydration,
 } from './helpers';
 
 // What the page is checked against of the API's answers.
@@ -86,7 +89,7 @@ const move = async (
  * and a completed task; an overdue and an upcoming task; a lead due. A manager who made a deal and
  * activities then leaves, so there are an unassigned row and former members.
  * @param request Playwright API client.
- * @returns The owner, the rep and the company's id.
+ * @returns The owner, the rep and the manager who left.
  */
 const seedReports = async (request: APIRequestContext) => {
   const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
@@ -149,10 +152,119 @@ const seedReports = async (request: APIRequestContext) => {
     `/workspaces/${owner.workspaceId}/members/${leaver.userId}`,
   );
 
-  return { owner, riley };
+  return { owner, riley, leaver };
 };
 
 const tabsOf = (page: Page) => page.getByRole('navigation', { name: 'Reports' });
+
+const TABS = ['pipeline', 'won-lost', 'funnel', 'activities', 'follow-ups'] as const;
+
+// A table's rows, each a row header and the figures of its cells in order, as the page shows them.
+const expectRows = async (table: Locator, expected: string[][]) => {
+  await expect(table.getByRole('row')).toHaveCount(expected.length + 1);
+  await Promise.all(
+    expected.map(async (cells, index) => {
+      const row = table.getByRole('row').nth(index + 1);
+      const [name, ...figures] = cells;
+      await expect(row.getByRole('rowheader')).toContainText(name ?? '');
+      await Promise.all(
+        figures.map(async (figure, column) => {
+          await expect(row.getByRole('cell').nth(column)).toContainText(figure);
+        }),
+      );
+    }),
+  );
+};
+
+type Check = (page: Page, request: APIRequestContext, as: Member, query: string) => Promise<void>;
+
+// Per report: its figures on the page, checked against the API's answer to the same params
+// (`?ownerId=…&from=…`, as the page's URL has them beside the tab).
+const FIGURES: Record<(typeof TABS)[number], Check> = {
+  pipeline: async (page, request, as, query) => {
+    const api = await report<Pipeline>(request, as, 'pipeline', query);
+    await expectRows(
+      page.getByRole('region', { name: 'Open deals by stage' }).getByRole('table'),
+      api.byStage.map((bucket) => [bucket.stage.name, String(bucket.count)]),
+    );
+    await expectRows(
+      page.getByRole('table', { name: 'Open deals by owner' }),
+      api.byOwner.map((bucket) => [
+        named(bucket.owner) ?? 'Unassigned',
+        String(bucket.count),
+        bucket.totals.map((total) => money(total.amount, total.currency)).join(''),
+      ]),
+    );
+  },
+  'won-lost': async (page, request, as, query) => {
+    const api = await report<WonLost>(request, as, 'won-lost', query);
+    await expectRows(
+      page.getByRole('region', { name: 'Won and lost by month' }).getByRole('table'),
+      api.months.map((item) => [monthLabel(item.month), String(item.won), String(item.lost)]),
+    );
+  },
+  funnel: async (page, request, as, query) => {
+    const api = await report<Funnel>(request, as, 'funnel', query);
+    await expect(
+      page.getByText(new RegExp(`^${api.created} deals? created in this period`, 'u')),
+    ).toBeVisible();
+    await expectRows(
+      page.getByRole('region', { name: 'Funnel' }).getByRole('table'),
+      api.stages.map((step) => [step.stage.name, `${step.reached} of ${api.created}`]),
+    );
+  },
+  activities: async (page, request, as, query) => {
+    const api = await report<Activities>(request, as, 'activities', query);
+    await expectRows(
+      page.getByRole('region', { name: 'Activity table' }),
+      api.byUser.map((entry) => [
+        named(entry.user) ?? 'Former members',
+        ...[entry.calls, entry.emails, entry.meetings, entry.notes, entry.tasksCompleted].map(
+          String,
+        ),
+        String(entry.total),
+      ]),
+    );
+  },
+  'follow-ups': async (page, request, as, query) => {
+    const api = await report<FollowUps>(request, as, 'follow-ups', query);
+    await Promise.all(
+      (
+        [
+          ['Overdue tasks', api.overdueTasks],
+          ['Upcoming tasks', api.upcomingTasks],
+          ['Leads to follow up', api.dueLeads],
+        ] as const
+      ).map(async ([name, group]) => {
+        const region = page.getByRole('region', { name });
+        await expect(region.getByText(String(group.count), { exact: true })).toBeVisible();
+        await expect(region.getByRole('listitem')).toHaveCount(group.first.length);
+      }),
+    );
+  },
+};
+
+/**
+ * Checks the figures of the report on the page against the API's answer to the same params.
+ * @param page Playwright page, on the report.
+ * @param request Playwright API client.
+ * @param as The member the page is signed in as.
+ * @param tab The report.
+ * @param query The params beside the tab, as the page's URL has them.
+ */
+const expectFigures = async (
+  page: Page,
+  request: APIRequestContext,
+  as: Member,
+  tab: (typeof TABS)[number],
+  query = '',
+) => {
+  await FIGURES[tab](page, request, as, query);
+};
+
+// The Owner chip, before and after a member is chosen.
+const ownerChip = (page: Page, name?: string) =>
+  page.getByRole('button', { name: name ? `Owner: ${name}` : 'Owner', exact: true });
 
 test.describe('Reports', () => {
   test('opens the pipeline from the rail, and for a value that is no report', async ({
@@ -561,6 +673,142 @@ test.describe('Reports', () => {
     await expect(owners.getByRole('row')).toHaveCount(api.byOwner.length + 1);
     await expect(owners).toContainText(PEOPLE.owner);
     await expect(owners).toContainText(PEOPLE.rep);
+  });
+
+  for (const tab of TABS) {
+    test(`counts one member's records on ${tab} as the API does for them, and the workspace's once cleared`, async ({
+      page,
+      request,
+    }) => {
+      const { owner, riley } = await seedReports(request);
+      await signIn(page, { email: owner.email, password: PASSWORD });
+      await page.goto(reports(owner.path, `?tab=${tab}`));
+      await expectFigures(page, request, owner, tab);
+
+      // Members only, the caller first as "Me": a report counts one member's records.
+      await waitForHydration(ownerChip(page));
+      await ownerChip(page).click();
+      await expect(page.getByRole('option')).toHaveText([
+        /^Anyone/u,
+        /Me$/u,
+        new RegExp(`${PEOPLE.rep}$`, 'u'),
+      ]);
+      await page.getByRole('option', { name: PEOPLE.rep }).click();
+
+      await expect(page).toHaveURL(reports(owner.path, `?tab=${tab}&ownerId=${riley.userId}`));
+      await expect(ownerChip(page, PEOPLE.rep)).toBeVisible();
+      await expectFigures(page, request, owner, tab, `?ownerId=${riley.userId}`);
+      await expectNoA11yViolations(page);
+
+      await page.getByRole('button', { name: 'Clear the Owner filter' }).click();
+      await expect(page).toHaveURL(reports(owner.path, `?tab=${tab}`));
+      await expect(ownerChip(page)).toBeFocused();
+      await expectFigures(page, request, owner, tab);
+    });
+  }
+
+  test("counts the caller's own follow-ups from Me, and names them where they have none", async ({
+    page,
+    request,
+  }) => {
+    const { owner } = await seedReports(request);
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(reports(owner.path, '?tab=follow-ups'));
+
+    await waitForHydration(ownerChip(page));
+    await ownerChip(page).click();
+    await page.getByRole('option', { name: 'Me' }).click();
+
+    await expect(page).toHaveURL(reports(owner.path, `?tab=follow-ups&ownerId=${owner.userId}`));
+    await expect(ownerChip(page, 'Me')).toBeVisible();
+    await expectFigures(page, request, owner, 'follow-ups', `?ownerId=${owner.userId}`);
+    // Riley holds the overdue task; Olivia the upcoming one and the lead.
+    await expect(
+      page.getByText(`No overdue tasks assigned to ${PEOPLE.owner}.`, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole('region', { name: 'Upcoming tasks' })
+        .getByRole('link', { name: 'Book the demo' }),
+    ).toBeVisible();
+  });
+
+  test('keeps the owner when the period or the tab changes', async ({ page, request }) => {
+    const { owner, riley } = await seedReports(request);
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    const defaults = await report<WonLost>(request, owner, 'won-lost');
+    await page.goto(reports(owner.path, `?tab=won-lost&ownerId=${riley.userId}`));
+    const trigger = page.getByRole('button', { name: `Period: ${periodLabel(defaults.period)}` });
+    await waitForHydration(trigger);
+
+    await trigger.click();
+    await page.getByRole('link', { name: 'Last 7 days' }).click();
+
+    await expect(page).toHaveURL(
+      new RegExp(
+        `\\?tab=won-lost&ownerId=${riley.userId}&from=\\d{4}-\\d{2}-\\d{2}&to=\\d{4}-\\d{2}-\\d{2}$`,
+        'u',
+      ),
+    );
+    const url = new URL(page.url());
+    const period = `from=${url.searchParams.get('from')}&to=${url.searchParams.get('to')}`;
+    await expect(ownerChip(page, PEOPLE.rep)).toBeVisible();
+    await expectFigures(page, request, owner, 'won-lost', `?ownerId=${riley.userId}&${period}`);
+
+    await tabsOf(page).getByRole('link', { name: 'Activities' }).click();
+    await expect(page).toHaveURL(
+      reports(owner.path, `?tab=activities&ownerId=${riley.userId}&${period}`),
+    );
+    await expect(ownerChip(page, PEOPLE.rep)).toBeVisible();
+    await expectFigures(page, request, owner, 'activities', `?ownerId=${riley.userId}&${period}`);
+  });
+
+  test("shows the workspace's report under a notice for an owner who left", async ({
+    page,
+    request,
+  }) => {
+    const { owner, leaver } = await seedReports(request);
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    // The API refuses a removed member, and the page asks it again without them.
+    const refused = await request.get(
+      `${BACKEND_URL}/api/v1/workspaces/${owner.workspaceId}/reports/pipeline?ownerId=${leaver.userId}`,
+      { headers: owner.headers },
+    );
+    expect(refused.status()).toBe(400);
+
+    await page.goto(reports(owner.path, `?tab=pipeline&ownerId=${leaver.userId}`));
+
+    await expect(
+      page.getByRole('heading', { name: "This owner can't be reported on" }),
+    ).toBeVisible();
+    await expect(ownerChip(page, 'Former member')).toBeVisible();
+    await expectFigures(page, request, owner, 'pipeline');
+    await expectNoA11yViolations(page);
+
+    await page.getByRole('link', { name: 'Clear the owner' }).click();
+    await expect(page).toHaveURL(reports(owner.path, '?tab=pipeline'));
+    await expect(ownerChip(page)).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: "This owner can't be reported on" }),
+    ).toHaveCount(0);
+  });
+
+  test.describe('on a phone, with an owner', () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    for (const locale of ['th', 'fr']) {
+      test(`fits the width on every report in ${locale}`, async ({ page, request }) => {
+        const { owner, riley } = await seedReports(request);
+        await signIn(page, { email: owner.email, password: PASSWORD });
+        const path = reports(owner.path.replace('/app/', `/${locale}/app/`));
+
+        for (const tab of TABS) {
+          // oxlint-disable-next-line no-await-in-loop -- one page after the other
+          await expectFits(page, { url: `${path}?tab=${tab}&ownerId=${riley.userId}` });
+        }
+        await expectNoA11yViolations(page);
+      });
+    }
   });
 
   test.describe('on a phone, in Thai', () => {

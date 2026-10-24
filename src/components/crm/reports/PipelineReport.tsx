@@ -20,9 +20,13 @@ import { formatMoney } from '@/libs/crm/Format';
  * nothing is added across currencies, owners or stages.
  * @param props Component props.
  * @param props.report The pipeline report.
+ * @param props.owner The member whose records it counts, when the page counts one member's.
  * @returns The two panels, side by side from 1024 px.
  */
-export const PipelineReport = (props: { report: components['schemas']['PipelineReport'] }) => {
+export const PipelineReport = (props: {
+  report: components['schemas']['PipelineReport'];
+  owner?: components['schemas']['MemberRef'];
+}) => {
   const t = useTranslations('PipelineReport');
   const locale = useLocale();
   const number = new Intl.NumberFormat(locale);
@@ -78,7 +82,9 @@ export const PipelineReport = (props: { report: components['schemas']['PipelineR
           </Table>
         ) : (
           <p className="border-t border-rule px-4 py-6 text-muted-foreground sm:px-5">
-            {t('empty')}
+            {props.owner
+              ? t('empty_owner', { name: props.owner.displayName ?? props.owner.email })
+              : t('empty')}
           </p>
         )}
       </Panel>

@@ -46,7 +46,7 @@ export const FilterSelect = (props: {
   param: string;
   options: FilterOption[];
   path: string;
-  query: ListQuery;
+  query: Pick<ListQuery, 'params'>;
 }) => {
   const router = useRouter();
   const current = props.query.params[props.param];
