@@ -1,8 +1,14 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { PASSWORD, signUp } from '../helpers';
-import { emailFor, PEOPLE, TEAMS } from '../mockData';
-import { createWorkspace, expectNoA11yViolations } from './helpers';
+import { PASSWORD, signIn, signUp } from '../helpers';
+import { COMPANIES, emailFor, PEOPLE, TEAMS } from '../mockData';
+import {
+  createWorkspace,
+  expectNoA11yViolations,
+  seed,
+  seedWorkspace,
+  waitForHydration,
+} from './helpers';
 
 const NEW_PASSWORD = 'another-secure-password';
 
@@ -460,6 +466,47 @@ test.describe('Settings', () => {
       page.getByRole('navigation', { name: 'เมนูพื้นที่ทำงาน' }).getByRole('link', { name: 'การตั้งค่า' }),
     ).toHaveAttribute('aria-current', 'page');
     await expectNoA11yViolations(page);
+  });
+
+  test('switches the language on a record page, which a soft move would open in the panel', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request);
+    const company = await seed(request, owner, 'companies', { name: COMPANIES.kestrel.name });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(`${owner.path}/companies/${company.id}`);
+    const languages = async (name: string) => {
+      const account = page.getByRole('button', { name });
+      await waitForHydration(account);
+      await account.click();
+      await page.getByRole('menuitem', { name: /^(Language|ภาษา)$/u }).click();
+    };
+
+    // From the record's full page, its page again in Thai: not its panel, in English, over it.
+    await languages('Your account');
+    await page.getByRole('menuitemradio', { name: 'ไทย' }).click();
+    await expect(page).toHaveURL(new RegExp(`/th${owner.path}/companies/${company.id}$`, 'u'));
+    await expect(page.locator('html')).toHaveAttribute('lang', 'th');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(
+      page.getByRole('heading', { level: 1, name: COMPANIES.kestrel.name }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('navigation', { name: 'ตำแหน่งปัจจุบัน' }).getByRole('link', { name: 'บริษัท' }),
+    ).toBeVisible();
+
+    // And back to English, unprefixed.
+    await languages('บัญชีของคุณ');
+    await page.getByRole('menuitemradio', { name: 'English' }).click();
+    await expect(page).toHaveURL(
+      new RegExp(`^[^?]*//[^/]+${owner.path}/companies/${company.id}$`, 'u'),
+    );
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(
+      page.getByRole('navigation', { name: 'Location' }).getByRole('link', { name: 'Companies' }),
+    ).toBeVisible();
   });
 
   test.describe('on a phone', () => {

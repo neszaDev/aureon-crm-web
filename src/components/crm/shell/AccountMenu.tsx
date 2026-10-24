@@ -30,7 +30,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Link, usePathname, useRouter } from '@/libs/I18nNavigation';
+import { getPathname, Link, usePathname } from '@/libs/I18nNavigation';
 import { routing } from '@/libs/I18nRouting';
 import { chooseTheme, parseTheme, themeFromCookie, THEMES } from '@/libs/Theme';
 import { asResult, useSettle } from '@/utils/SettleAction';
@@ -106,7 +106,6 @@ export const AccountMenu = (props: {
   const locale = useLocale();
   const person = { userId: props.userId, displayName: props.displayName, email: props.email };
   const pathname = usePathname();
-  const router = useRouter();
   const settle = useSettle();
 
   const trigger = (
@@ -172,10 +171,17 @@ export const AccountMenu = (props: {
             <DropdownMenuRadioGroup
               value={locale}
               onValueChange={(next) => {
-                router.replace(`${pathname}${window.location.search}`, {
-                  locale: next,
-                  scroll: false,
-                });
+                // A full load: a soft one renders the page's intercepted routes (a record in the
+                // panel, a new record's form) in the old locale, which Next reads from the
+                // router's state. Always prefixed, so the proxy updates the locale cookie on the way:
+                // an unprefixed English URL would be redirected to the cookie's locale.
+                window.location.assign(
+                  getPathname({
+                    href: `${pathname}${window.location.search}`,
+                    locale: next,
+                    forcePrefix: true,
+                  }),
+                );
               }}
             >
               {routing.locales.map((item) => (
