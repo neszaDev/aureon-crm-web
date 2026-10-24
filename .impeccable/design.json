@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-24T03:46:45.000Z",
+  "generatedAt": "2026-10-24T12:00:00.000Z",
   "title": "Design System: Aureon CRM",
   "extensions": {
     "colorMeta": {
@@ -258,6 +258,54 @@
           "oklch(72.1% 0.103 256.3)",
           "oklch(83.6% 0.074 256.3)",
           "oklch(95.0% 0.044 256.3)"
+        ]
+      },
+      "status-teal": {
+        "role": "tertiary",
+        "displayName": "Lagoon Teal",
+        "canonical": "#10929a",
+        "oklch": "oklch(60.2% 0.100 201.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.030 201.9)",
+          "oklch(26.4% 0.050 201.9)",
+          "oklch(37.9% 0.070 201.9)",
+          "oklch(49.3% 0.090 201.9)",
+          "oklch(60.7% 0.090 201.9)",
+          "oklch(72.1% 0.070 201.9)",
+          "oklch(83.6% 0.050 201.9)",
+          "oklch(95.0% 0.030 201.9)"
+        ]
+      },
+      "status-teal-tint": {
+        "role": "tertiary",
+        "displayName": "Lagoon Teal Tint",
+        "canonical": "#dff1f2",
+        "oklch": "oklch(94.5% 0.019 200.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.006 200.9)",
+          "oklch(26.4% 0.009 200.9)",
+          "oklch(37.9% 0.013 200.9)",
+          "oklch(49.3% 0.017 200.9)",
+          "oklch(60.7% 0.017 200.9)",
+          "oklch(72.1% 0.013 200.9)",
+          "oklch(83.6% 0.009 200.9)",
+          "oklch(95.0% 0.006 200.9)"
+        ]
+      },
+      "status-teal-ink": {
+        "role": "tertiary",
+        "displayName": "Lagoon Teal Ink",
+        "canonical": "#0b6f75",
+        "oklch": "oklch(49.4% 0.082 201.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.025 201.6)",
+          "oklch(26.4% 0.041 201.6)",
+          "oklch(37.9% 0.057 201.6)",
+          "oklch(49.3% 0.074 201.6)",
+          "oklch(60.7% 0.074 201.6)",
+          "oklch(72.1% 0.057 201.6)",
+          "oklch(83.6% 0.041 201.6)",
+          "oklch(95.0% 0.025 201.6)"
         ]
       },
       "status-amber": {
@@ -740,6 +788,38 @@
           "oklch(95.0% 0.039 255.3)"
         ]
       },
+      "dark-status-teal-tint": {
+        "role": "tertiary",
+        "displayName": "Lagoon Teal Tint (dark)",
+        "canonical": "#1a3439",
+        "oklch": "oklch(30.6% 0.033 211.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.010 211.3)",
+          "oklch(26.4% 0.017 211.3)",
+          "oklch(37.9% 0.023 211.3)",
+          "oklch(49.3% 0.030 211.3)",
+          "oklch(60.7% 0.030 211.3)",
+          "oklch(72.1% 0.023 211.3)",
+          "oklch(83.6% 0.017 211.3)",
+          "oklch(95.0% 0.010 211.3)"
+        ]
+      },
+      "dark-status-teal-ink": {
+        "role": "tertiary",
+        "displayName": "Lagoon Teal Ink (dark)",
+        "canonical": "#3cb0b8",
+        "oklch": "oklch(69.7% 0.102 201.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.031 201.7)",
+          "oklch(26.4% 0.051 201.7)",
+          "oklch(37.9% 0.071 201.7)",
+          "oklch(49.3% 0.092 201.7)",
+          "oklch(60.7% 0.092 201.7)",
+          "oklch(72.1% 0.071 201.7)",
+          "oklch(83.6% 0.051 201.7)",
+          "oklch(95.0% 0.031 201.7)"
+        ]
+      },
       "dark-status-amber-tint": {
         "role": "tertiary",
         "displayName": "Harvest Amber Tint (dark)",
@@ -862,17 +942,37 @@
         "displayName": "Headline",
         "purpose": "Landing section headings (44px desktop, 32px phones)."
       },
+      "display-tablet": {
+        "displayName": "Display Tablet",
+        "purpose": "The thesis from 640 px and the closing band's heading from 1024 px (60px)."
+      },
+      "display-close-phone": {
+        "displayName": "Display Close Phone",
+        "purpose": "The closing band's heading on phones, and the about page's h1 there (40px)."
+      },
+      "headline-phone": {
+        "displayName": "Headline Phone",
+        "purpose": "Landing section headings on phones (32px)."
+      },
+      "language-sample": {
+        "displayName": "Language Sample",
+        "purpose": "The landing's three language samples (26px), each captioned after by its language's name."
+      },
+      "desk-statement": {
+        "displayName": "Desk Statement",
+        "purpose": "The hero desks' statements from 1024 px (22px; 18px below)."
+      },
       "record-title": {
         "displayName": "Record Title",
-        "purpose": "A record's name in its header; the record form's name input at 22px."
+        "purpose": "A record's name in its header, the record form's name input, and the auth aside's statement."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "A page's h1: lists, settings, a state that stands in for a page."
+        "purpose": "A page's h1: lists, settings, a state that stands in for a page; the dashboard's line of figures."
       },
       "body-reading": {
         "displayName": "Body Reading",
-        "purpose": "Landing prose and notes, card descriptions."
+        "purpose": "Landing prose and notes, card descriptions, a record header's figure (semibold)."
       },
       "body": {
         "displayName": "Body",
@@ -880,7 +980,7 @@
       },
       "row": {
         "displayName": "Row",
-        "purpose": "Toolbar chips, view tabs, inline-add rows, property chips, captions."
+        "purpose": "Toolbar chips, view tabs, inline-add rows, property chips, captions, a phone row's second line."
       },
       "label": {
         "displayName": "Label",
@@ -888,7 +988,7 @@
       },
       "micro": {
         "displayName": "Micro",
-        "purpose": "Bylines under a full track, counters."
+        "purpose": "Bylines under a full track, counters, the \"More\" count, initials in 20 and 24 px avatars and workspace marks."
       }
     },
     "shadows": [
@@ -896,7 +996,7 @@
         "name": "float",
         "value": "0 4px 12px -2px rgb(29 26 46 / 10%), 0 12px 28px -6px rgb(29 26 46 / 14%)",
         "dark": "0 4px 12px -2px rgb(0 0 0 / 35%), 0 12px 28px -6px rgb(0 0 0 / 45%)",
-        "purpose": "Menus, popovers, tooltips, the chart tooltip, the skip link; a board card on hover and its dragged copy."
+        "purpose": "Menus, popovers, tooltips, the chart tooltip, the skip link, the bulk bar and its alert; a board card on hover and its dragged copy."
       },
       {
         "name": "overlay",
@@ -960,8 +1060,8 @@
     },
     "statusTones": {
       "mechanism": "data-tone=\"<tone>\" sets --tone (hue), --tone-tint (pill fill), --tone-ink (text)",
-      "tones": ["blue", "violet", "amber", "green", "red", "slate"],
-      "stageWalk": "open stages blue → violet → amber by place; won green; lost red; unknown slate",
+      "tones": ["blue", "teal", "violet", "amber", "green", "red", "slate"],
+      "stageWalk": "open stages walk blue → teal → violet → amber by place: up to four spread over it (first blue, last amber; three are blue, violet, amber), more cycle through it, so neighbours never share a tone; won green; lost red; unknown slate",
       "leadStatus": {
         "NEW": "blue",
         "CONTACTED": "violet",
@@ -1078,6 +1178,14 @@
       "description": "A flat 8px panel on a hairline; no shadow at rest.",
       "html": "<section class=\"ds-panel\"><h3>Pipeline</h3><p>4 open deals worth €79,950.</p></section>",
       "css": ".ds-panel { font-family: var(--font-sans, Inter, Anuphan, ui-sans-serif, system-ui, sans-serif); width: 320px; padding: 20px; border: 1px solid var(--rule, #e6e6ec); border-radius: 8px; background: var(--card, #fff); color: var(--ink, #1f2030); } .ds-panel h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; } .ds-panel p { margin: 0; font-size: 14px; color: var(--ink-2, #5d6072); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Bulk Bar",
+      "kind": "custom",
+      "refersTo": "rail",
+      "description": "While rows are selected: an ink-violet toolbar 16 px above the foot of the screen, the count, the actions every selected record allows as rail-style controls, and × to clear; the raised ink in dark.",
+      "html": "<div class=\"ds-bulk\" role=\"toolbar\" aria-label=\"3 selected\"><output>3 selected</output><span class=\"ds-bulk-rule\" aria-hidden=\"true\"></span><button>Assign<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></button><button aria-expanded=\"true\">Stage<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></button><button>Archive</button><button aria-label=\"Clear selection\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M18 6 6 18M6 6l12 12\"/></svg></button></div>",
+      "css": ".ds-bulk { font-family: var(--font-sans, Inter, Anuphan, ui-sans-serif, system-ui, sans-serif); display: inline-flex; align-items: center; gap: 4px; padding: 6px; border-radius: 8px; background: var(--rail, #1d1a2e); color: #fff; box-shadow: 0 0 0 1px rgb(255 255 255 / 10%), 0 4px 12px -2px rgb(29 26 46 / 10%), 0 12px 28px -6px rgb(29 26 46 / 14%); } .ds-bulk output { padding: 0 8px; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; } .ds-bulk-rule { width: 1px; height: 20px; margin: 0 2px; background: rgb(255 255 255 / 20%); } .ds-bulk button { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: rgb(255 255 255 / 80%); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-bulk button:hover, .ds-bulk button[aria-expanded=true] { background: rgb(255 255 255 / 10%); color: #fff; } .ds-bulk button:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--rail, #1d1a2e), 0 0 0 4px #fff; }"
     }
   ],
   "narrative": {
@@ -1086,7 +1194,7 @@
     "keyCharacteristics": [
       "Ink-violet rail (56 px), off-white sidebar (240 px, folds into the rail), white canvas; dark is violet-black.",
       "Aureon violet for primary actions, selection and focus only.",
-      "Six status tones, each a hue, a tint and an ink, applied with `data-tone`.",
+      "Seven status tones, each a hue, a tint and an ink, applied with `data-tone`.",
       "Inter for the UI, Anuphan for Thai; 13/14 px text, tabular figures.",
       "6 px controls, 8 px panels, full-round pills and avatars; hairline borders.",
       "Flat panels; shadows only on floating layers.",
@@ -1095,7 +1203,7 @@
     "rules": [
       {
         "name": "The Hue Beside Its Words Rule",
-        "body": "A status hue is only ever a dot, a track segment or a chart fill next to the words that name it. Light amber (2.2:1 on the sidebar) and slate (3:1) are accepted only that way, never alone as a bar, stripe, icon or text colour. Anything that must read alone takes the `-ink` token.",
+        "body": "A status hue is only ever a dot, a track segment, a funnel bar labelled with its stage or a chart fill next to the words that name it. Light amber (2.2:1 on the sidebar) and slate (3:1) are accepted only that way, never alone as a bar, stripe, icon or text colour. Anything that must read alone takes the `-ink` token.",
         "section": "colors"
       },
       {
@@ -1115,7 +1223,7 @@
       },
       {
         "name": "The Thai Breathes Rule",
-        "body": "Under `:lang(th)` line-heights open (1.6 on small text, 1.65 body, 1.35 on display) and letter-spacing returns to normal on headings, labels, table heads and badges.",
+        "body": "Under `:lang(th)` line-heights open (1.6 on small text, 1.65 body, 1.35 on display, 1.5 in a record form's name input, which would clip its marks) and letter-spacing returns to normal on headings, labels, table heads and badges.",
         "section": "typography"
       },
       {
@@ -1143,7 +1251,7 @@
       "**Do** apply status colour through `data-tone` and its hue, tint and ink; write status words in the ink.",
       "**Do** put a status hue only beside the words that name it (dots, track segments, chart fills).",
       "**Do** keep rows at 36 px and controls at 32 px (36 px on phones); keep 44 px for the landing's two main actions.",
-      "**Do** separate with 1 px hairlines and lie panels flat; give shadows only to menus, popovers, tooltips, the record panel, sheets and dialogs.",
+      "**Do** separate with 1 px hairlines and lie panels flat; give shadows only to menus, popovers, tooltips, the bulk bar, the record panel, sheets and dialogs.",
       "**Do** mark the current item with the satellite plus a fill, weight or name.",
       "**Do** write off-scale sizes as `text-[…rem]`.",
       "**Do** check every new pair in light and dark: 4.5:1 for text, 3:1 for strokes and meaningful fills.",
