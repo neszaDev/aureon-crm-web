@@ -35,7 +35,10 @@ const TASK: Task = {
   version: 3,
 };
 
-const renderRow = async (task: Task, compact?: boolean, sectioned?: boolean) => {
+// When the page was read: the phone's short due time leaves out this year.
+const NOW = '2026-10-01T00:00:00Z';
+
+const renderRow = async (task: Task, compact?: boolean, sectioned?: boolean, now = NOW) => {
   await render(
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
       <TooltipProvider>
@@ -49,6 +52,7 @@ const renderRow = async (task: Task, compact?: boolean, sectioned?: boolean) => 
               headingId="tasks-heading"
               compact={compact}
               sectioned={sectioned}
+              now={now}
             />
           </TableBody>
         </Table>
@@ -94,7 +98,14 @@ const twoSections = (task: Task, section: 'open' | 'completed') => (
       <Table key={key}>
         <TableBody>
           {key === section && (
-            <TaskRow task={task} workspaceId={1} canEdit timeZone="UTC" headingId="tasks-heading" />
+            <TaskRow
+              task={task}
+              workspaceId={1}
+              canEdit
+              timeZone="UTC"
+              headingId="tasks-heading"
+              now={NOW}
+            />
           )}
         </TableBody>
       </Table>
@@ -272,10 +283,9 @@ describe(TaskRow, () => {
     expect(kept).toStrictEqual(['Oct 19, 2026', '4:30 PM']);
   });
 
-  it("writes a phone row's due time short and whole, the year left out within this one", async () => {
+  it("writes a phone row's due time short and whole, the year left out within the page's", async () => {
     await page.viewport(390, 844);
-    const year = new Date().getFullYear();
-    await renderRow({ ...TASK, dueAt: `${year}-10-20T09:40:00Z` });
+    await renderRow({ ...TASK, dueAt: '2026-10-20T09:40:00Z' });
 
     const due = page.getByText(/^Oct 20, 4:40\sPM$/u);
     await expect.element(due).toBeVisible();
@@ -287,6 +297,18 @@ describe(TaskRow, () => {
         [...element.childNodes].some((node) => node.nodeType === Node.TEXT_NODE),
     );
     expect(cut.map((element) => element.textContent)).toStrictEqual([]);
+  });
+
+  it("writes the year in a phone row's due time when the page was read in another", async () => {
+    await page.viewport(390, 844);
+    await renderRow(
+      { ...TASK, dueAt: '2026-10-20T09:40:00Z' },
+      false,
+      false,
+      '2027-01-02T00:00:00Z',
+    );
+
+    await expect.element(page.getByText(/^Oct 20, 2026, 4:40\sPM$/u).first()).toBeVisible();
   });
 
   it('marks an overdue task in words, not colour alone', async () => {

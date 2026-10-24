@@ -54,6 +54,7 @@ export const RecordWork = async (props: {
             me={props.me}
             permissions={props.workspace.permissions}
             timeZone={props.workspace.timezone}
+            now={work.readAt}
           />
         </>
       }

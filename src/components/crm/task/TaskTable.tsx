@@ -30,6 +30,7 @@ import type { ActivityLink } from '@/validations/crm/ActivityValidation';
  * @param props.sectioned Whether the rows are in due sections, whose headings say "Overdue".
  * @param props.selectable Whether its rows can be selected for a bulk action (the Tasks page's
  *   list): a box first, before the one that completes it.
+ * @param props.now When the page was read (an ISO instant), for a phone's short due times.
  * @returns The table.
  */
 export const TaskTable = (props: {
@@ -45,6 +46,7 @@ export const TaskTable = (props: {
   fixed?: boolean;
   sectioned?: boolean;
   selectable?: boolean;
+  now: string;
 }) => {
   const t = useTranslations('TaskTable');
   const { bounds } = props;
@@ -121,6 +123,7 @@ export const TaskTable = (props: {
             compact={props.compact}
             sectioned={props.sectioned}
             selectable={props.selectable}
+            now={props.now}
           />
         ))}
       </TableBody>

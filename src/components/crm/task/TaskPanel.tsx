@@ -34,6 +34,7 @@ type Task = components['schemas']['TaskResponse'];
  * @param props.me The caller's user id.
  * @param props.permissions The caller's permissions.
  * @param props.timeZone The workspace's time zone.
+ * @param props.now When the page was read (an ISO instant), for a phone's short due times.
  * @returns The panel.
  */
 export const TaskPanel = (props: {
@@ -48,6 +49,7 @@ export const TaskPanel = (props: {
   me: number;
   permissions: Permission[];
   timeZone: string;
+  now: string;
 }) => {
   const t = useTranslations('TaskPanel');
   const [showClosed, setShowClosed] = useState(false);
@@ -62,6 +64,7 @@ export const TaskPanel = (props: {
       viewed={props.link}
       headingId={headingId}
       compact
+      now={props.now}
     />
   );
 

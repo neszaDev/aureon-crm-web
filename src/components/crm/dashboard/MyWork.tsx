@@ -96,6 +96,7 @@ export const MyWork = (props: {
               timeZone={props.workspace.timezone}
               headingId={HEADING}
               bounds={props.bounds}
+              now={props.bounds.now}
               compact
               sectioned
             />

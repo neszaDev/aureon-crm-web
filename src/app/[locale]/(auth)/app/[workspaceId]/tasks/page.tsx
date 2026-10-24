@@ -205,6 +205,7 @@ export default async function TasksPage(props: TasksPageProps) {
               timeZone={workspace.timezone}
               headingId="tasks-heading"
               bounds={bounds}
+              now={bounds.now}
               fixed
               sectioned={query.group !== undefined}
               selectable

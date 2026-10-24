@@ -112,12 +112,7 @@ describe(instantParts, () => {
   it('writes a short form for a phone: the month abbreviated, the year only outside this one', () => {
     const instant = '2026-10-20T09:40:00Z';
     const short = (locale: string, now: string) => {
-      const parts = instantParts(instant, {
-        locale,
-        timeZone: 'Asia/Bangkok',
-        short: true,
-        now: new Date(now),
-      });
+      const parts = instantParts(instant, { locale, timeZone: 'Asia/Bangkok', short: { now } });
       return `${parts.date}${parts.between}${parts.time}`.replaceAll(/\s/gu, ' ');
     };
 

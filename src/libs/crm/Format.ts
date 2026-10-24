@@ -66,26 +66,27 @@ export const formatInstant = (
 /**
  * An instant as `formatInstant` writes it with its time, in its parts: the date, what the language
  * puts between it and the time (", " in English), and the time, so each can be kept whole. Short,
- * for a phone's row, the month is abbreviated and the year left out within the current one
- * ("Oct 20, 4:40 PM").
+ * for a phone's row, the month is abbreviated and the year left out within the year the page was
+ * read in ("Oct 20, 4:40 PM").
  * @param instant An ISO 8601 instant.
  * @param opts Options.
  * @param opts.locale The page's locale.
  * @param opts.timeZone The workspace's time zone.
- * @param opts.short Whether to write the short form.
- * @param opts.now The current time, whose year the short form leaves out.
+ * @param opts.short The short form, and when the page was read (an ISO instant), whose year it
+ *   leaves out: the server's time, so the browser draws the same.
  * @returns The date, the text between and the time; joined, they are `formatInstant`'s text (or
  *   the short form's).
  */
 export const instantParts = (
   instant: string,
-  opts: { locale: string; timeZone: string; short?: boolean; now?: Date },
+  opts: { locale: string; timeZone: string; short?: { now: string } },
 ) => {
   const at = new Date(instant);
   const format = (options: Intl.DateTimeFormatOptions, date = at) =>
     new Intl.DateTimeFormat(opts.locale, { ...options, timeZone: opts.timeZone }).format(date);
   const thisYear =
-    format({ year: 'numeric' }) === format({ year: 'numeric' }, opts.now ?? new Date());
+    opts.short !== undefined &&
+    format({ year: 'numeric' }) === format({ year: 'numeric' }, new Date(opts.short.now));
   const day: Intl.DateTimeFormatOptions = opts.short
     ? { month: 'short', day: 'numeric', year: thisYear ? undefined : 'numeric' }
     : { dateStyle: 'medium' };

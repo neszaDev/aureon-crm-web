@@ -46,8 +46,8 @@ type StatusAction = (workspaceId: number, taskId: number, version: number) => Pr
  * @param props.tone The colour of its due section (`TaskViews`), in a list.
  * @param props.line Whether it is a fixed column's: on one line, cut short.
  * @param props.quiet Whether the word "Overdue" is read out but not drawn.
- * @param props.short Whether to write it short, as a phone's row does ("Oct 20, 4:40 PM"; the
- *   year only outside the current one).
+ * @param props.short Writes it short, as a phone's row does ("Oct 20, 4:40 PM"), the year only
+ *   outside the one the page was read in (`now`, an ISO instant).
  * @returns The due time, or "No due date".
  */
 export const TaskDue = (props: {
@@ -57,7 +57,7 @@ export const TaskDue = (props: {
   tone?: StatusTone;
   line?: boolean;
   quiet?: boolean;
-  short?: boolean;
+  short?: { now: string };
 }) => {
   const t = useTranslations('TaskRow');
   const locale = useLocale();
@@ -135,6 +135,7 @@ export const TaskDue = (props: {
  * @param props.compact A narrow list (the home's, a record's): the title, due time and menu only,
  *   the linked records beside the title; status, priority and assignee are left out.
  * @param props.sectioned Whether the row is in a due section, whose heading says "Overdue".
+ * @param props.now When the page was read (an ISO instant): a phone's due time leaves out its year.
  * @param props.selectable Whether it starts with the box that selects it for a bulk action
  *   (selected, it takes the violet tint).
  * @returns The table row.
@@ -150,6 +151,7 @@ export const TaskRow = (props: {
   compact?: boolean;
   sectioned?: boolean;
   selectable?: boolean;
+  now: string;
 }) => {
   const t = useTranslations('TaskRow');
   const tError = useTranslations('ActionError');
@@ -277,7 +279,7 @@ export const TaskRow = (props: {
             timeZone={props.timeZone}
             tone={props.dueTone}
             quiet={props.sectioned}
-            short
+            short={{ now: props.now }}
           />
           {linked('max-w-full')}
         </span>
