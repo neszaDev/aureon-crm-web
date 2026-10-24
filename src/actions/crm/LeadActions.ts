@@ -89,8 +89,8 @@ const INLINE_STATUSES = new Set<string>(['NEW', 'CONTACTED', 'QUALIFIED']);
  * the group's status, from its first version. The list refreshes. A refused name is the `name`
  * field's error; a move refused after the lead was made is still a success (the lead exists, so
  * the field clears), whose message says that it was added as New. A status the inline add can't
- * start in (the preset comes from the browser), or a name or company that is not text, is refused
- * before anything is made.
+ * start in (the preset comes from the browser), a preset that is not an object, or a name or
+ * company that is not text, is refused before anything is made.
  * @param workspaceId The workspace.
  * @param preset What the list's group or filter gives it.
  * @param preset.status The status it lands in (New is where every lead starts).
@@ -108,6 +108,8 @@ export async function addLead(
   const t = await getTranslations('LeadForm');
   // What the browser sent, as it sent it: checked before it is read.
   if (
+    typeof preset !== 'object' ||
+    preset === null ||
     !INLINE_STATUSES.has(preset.status) ||
     typeof name !== 'string' ||
     typeof company !== 'string'

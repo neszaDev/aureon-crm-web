@@ -205,6 +205,22 @@ describe(addLead, () => {
     expect(POST).not.toHaveBeenCalled();
   });
 
+  it('refuses a preset that is not an object, making nothing and throwing nothing', async () => {
+    const { POST } = backend(200, { id: 9, version: 0 });
+
+    // The preset is bound in the page, but it reaches the action from the browser as it was sent.
+    // @ts-expect-error -- a forged preset
+    const nothing = await addLead(1, null, 'Noa');
+    // @ts-expect-error -- a forged preset
+    const text = await addLead(1, 'NEW', 'Noa');
+
+    expect([nothing, text]).toStrictEqual([
+      { ok: false, message: 'error_invalid_input' },
+      { ok: false, message: 'error_invalid_input' },
+    ]);
+    expect(POST).not.toHaveBeenCalled();
+  });
+
   it('refuses a name or company that is not text, making nothing and throwing nothing', async () => {
     const { POST } = backend(200, { id: 9, version: 0 });
 
