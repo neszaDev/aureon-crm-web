@@ -333,7 +333,7 @@ export default async function IndexPage(props: IndexPageProps) {
           id="features"
           titleId="lists-title"
           note={
-            <Note label={devLabel} spot={t('lists_spot')}>
+            <Note label={devLabel} spot>
               {t('lists_note')}
             </Note>
           }
@@ -364,7 +364,7 @@ export default async function IndexPage(props: IndexPageProps) {
         <Row
           titleId="deal-title"
           note={
-            <Note label={devLabel} spot={t('deal_spot')}>
+            <Note label={devLabel} spot>
               {t('deal_note')}
             </Note>
           }
@@ -393,7 +393,7 @@ export default async function IndexPage(props: IndexPageProps) {
         <Row
           titleId="tasks-title"
           note={
-            <Note label={devLabel} spot={t('tasks_spot')}>
+            <Note label={devLabel} spot>
               {t('tasks_note')}
             </Note>
           }
@@ -495,10 +495,11 @@ export default async function IndexPage(props: IndexPageProps) {
                   lang={item.language}
                   className="flex flex-col gap-1 py-4 first:pt-0"
                 >
-                  <span className="text-[0.8125rem] font-medium text-ink-2">{item.name}</span>
+                  {/* The sample first; its language's name after it, as its caption. */}
                   <span className="text-[1.625rem] leading-tight font-semibold tracking-[-0.01em] [:lang(th)_&]:leading-normal">
                     {item.title}
                   </span>
+                  <span className={CAPTION}>{item.name}</span>
                 </li>
               ))}
             </ul>

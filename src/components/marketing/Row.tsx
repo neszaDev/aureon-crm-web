@@ -36,18 +36,18 @@ export const Row = (props: {
 );
 
 /**
- * The developer's note beside a section, in second ink on a hairline. With a spot, it names the
- * part of the capture it is about, and hovering it rings that part.
+ * The developer's note beside a section, in second ink on a hairline. With a spot, its first words
+ * name the part of the capture it is about, and hovering it rings that part.
  * @param props Component props.
  * @param props.label "For developers", said to screen readers before the note.
- * @param props.spot The part of the capture the note is about.
+ * @param props.spot Whether the note is about a ringed part of the capture.
  * @param props.lead A first line in ink, above the note.
  * @param props.children The note.
  * @returns The note.
  */
 export const Note = (props: {
   label: string;
-  spot?: string;
+  spot?: boolean;
   lead?: React.ReactNode;
   children: React.ReactNode;
 }) => (
@@ -56,15 +56,6 @@ export const Note = (props: {
     className="flex flex-col gap-2.5 self-start border-l border-rule pl-6 text-[0.9375rem] leading-relaxed text-ink-2"
   >
     {props.lead}
-    {props.spot && (
-      <p className="flex items-center gap-2 text-[0.8125rem] font-medium text-violet-ink">
-        <span
-          aria-hidden="true"
-          className="h-3 w-4.5 shrink-0 rounded-[3px] border-2 border-violet-ink"
-        />
-        {props.spot}
-      </p>
-    )}
     <p>
       {!props.lead && <span className="sr-only">{`${props.label}: `}</span>}
       {props.children}

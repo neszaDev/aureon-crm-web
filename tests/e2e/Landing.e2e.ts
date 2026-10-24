@@ -74,6 +74,21 @@ test.describe('Landing', () => {
     await expect(
       page.getByText('The deals board · demo workspace, fictional data').first(),
     ).toBeVisible();
+    // Each developer note names the spot it rings in its own first words, with no label above it.
+    await expect(page.getByText(/^(A status section|The deal's track|The inbox)$/u)).toHaveCount(0);
+    await expect(
+      page.getByText('For developers: A status section, ringed on the capture,'),
+    ).toBeVisible();
+    // Each language's sample first, its name after it as its caption, in its own language.
+    const samples = page
+      .getByRole('region', { name: 'In English, French and Thai.' })
+      .getByRole('listitem');
+    await expect(samples.locator(':scope > :last-child')).toHaveText([
+      'English',
+      'Français',
+      'ไทย',
+    ]);
+    await expect(samples.nth(1)).toHaveAttribute('lang', 'fr');
     // Reminders are in-app only, and the product is a sample.
     await expect(
       page.getByText('Reminders are in-app only: nothing is sent by email, push or calendar.'),
