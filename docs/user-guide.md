@@ -134,16 +134,19 @@ cancelled asks to confirm. On a phone, a list grouped by status or stage shows n
 (each section's heading names the status): change the status from the pill in the record's header.
 
 Click a column heading to sort by it (again to reverse it), or use **Sort by** where a list has
-one; choose 20, 50 or 100 rows a page.
+one; choose 20, 50 or 100 rows a page. On a phone a list has no column headings (the sort is
+behind **Filters**): each row says under its name what matters most, such as a deal's amount,
+owner and expected close, a lead's owner and source, or a task's due time.
 
 **Several at once.** Each row has a box before its name (it shows when you point at the row, and
 stays once anything is selected); a section's heading row has one for the whole section, half
-filled while only some of it is. Shift+click a box to select every row from the last one you
+filled while only some of it is (on a phone, with no heading row, you select rows one by one). Shift+click a box to select every row from the last one you
 clicked; with the keyboard, Space on a row's name selects it and Shift+Space the range. Escape
 clears the selection (outside a text field), and so does changing the group, a filter, the sort or
 the page. A bar then floats at the foot of the screen and offers what you may do to every selected record: **Assign** (the owner; a task's assignee),
 **Status** or **Stage** (Unqualified and Lost ask one reason for all; tasks complete, reopen, or
-cancel once confirmed), **Archive** (confirmed) or, in the archived view, **Restore**. If you
+cancel once confirmed), **Archive** (confirmed) or, in the archived view, **Restore** (on a phone,
+as icons). If you
 can't change one of them, the bar says so and offers only to clear. Each record is saved on its
 own and the bar counts them; when some are refused (your role, or someone changed them first) the
 bar lists each by name with the reason, keeps them selected and shows the list as it now is; the
