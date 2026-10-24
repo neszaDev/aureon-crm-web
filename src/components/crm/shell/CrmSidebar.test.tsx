@@ -356,6 +356,23 @@ describe(CrmSidebar, () => {
       ).toStrictEqual([true]);
     });
 
+    it('fills a closed space holding the current view, its view filled once it is open', async () => {
+      await renderSidebar('/app/1/deals?view=list');
+      const deals = nav().getByRole('link', { name: 'Deals', exact: true });
+      const fill = () => getComputedStyle(deals.element()).backgroundColor;
+      const tint = getComputedStyle(document.documentElement).getPropertyValue('--violet-tint');
+      const probe = document.createElement('span');
+      probe.style.backgroundColor = tint;
+      document.body.append(probe);
+      const tinted = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+
+      await expect.element(deals).toHaveAttribute('aria-current', 'true');
+      expect(fill()).toBe(tinted);
+      await views('Deals').click();
+      await expect.poll(fill).not.toBe(tinted);
+    });
+
     it('marks the space itself where none of its views matches', async () => {
       localStorage.setItem(SPACES_KEY, 'tasks');
       runHeadScript();

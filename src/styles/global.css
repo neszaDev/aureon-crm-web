@@ -580,6 +580,15 @@
   display: flex;
 }
 
+/* A closed space holding the current view: its own row is filled, as the view's would be. */
+:root:not([data-spaces~='companies']) [data-space='companies'] > [aria-current='true'],
+:root:not([data-spaces~='contacts']) [data-space='contacts'] > [aria-current='true'],
+:root:not([data-spaces~='leads']) [data-space='leads'] > [aria-current='true'],
+:root:not([data-spaces~='deals']) [data-space='deals'] > [aria-current='true'],
+:root:not([data-spaces~='tasks']) [data-space='tasks'] > [aria-current='true'] {
+  background-color: var(--violet-tint);
+}
+
 [data-views-toggle] svg {
   transition: rotate 150ms var(--ease-out-expo);
 }

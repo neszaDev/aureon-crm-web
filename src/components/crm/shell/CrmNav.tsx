@@ -172,7 +172,8 @@ const plainIcon = (Icon: LucideIcon) => (
 const GROUP_LABEL = 'px-2.5 pt-4 pb-1 text-xs font-medium whitespace-nowrap text-ink-2';
 
 // A link's look by its `aria-current`: the page's is filled with the violet tint and set heavier (a
-// cue besides colour); a space holding the current view is set heavier in violet, its view filled.
+// cue besides colour); a space holding the current view is set heavier in violet, its view filled
+// (global.css fills the space itself while it is closed).
 const LOOK = {
   page: 'bg-violet-tint font-semibold text-violet-ink',
   true: 'font-semibold text-violet-ink hover:bg-ink/6',
@@ -269,7 +270,7 @@ export const CrmNav = (props: {
 
             return (
               <li key={space.key}>
-                <div className="relative">
+                <div className="relative" data-space={space.key}>
                   {link({
                     label,
                     href: `/${space.key}`,
