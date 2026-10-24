@@ -62,7 +62,7 @@ const statusMenu = () => document.querySelector<HTMLElement>('[data-bar-menu="st
 // A control on the ink-violet bar, as on the rail: white at 80%, full white on hover or open, the
 // on-rail focus ring (the page's violet one would sit on the bar under 3:1).
 const ON_BAR =
-  'px-2.5 text-[0.8125rem] text-on-rail/80 hover:bg-white/10 hover:text-on-rail focus-visible:ring-on-rail focus-visible:ring-offset-rail aria-expanded:bg-white/10 aria-expanded:text-on-rail';
+  'px-2.5 text-[0.8125rem] text-on-rail/80 hover:bg-white/10 hover:text-on-rail focus-visible:ring-on-rail focus-visible:ring-offset-rail aria-expanded:bg-white/10 aria-expanded:text-on-rail dark:focus-visible:ring-offset-rail-raised';
 
 /**
  * An action's name over its icon where a phone's bar draws the icon alone, on a device with hover
@@ -489,7 +489,8 @@ export const BulkBar = (props: BulkBarProps) => {
           <TooltipProvider>
             <Toolbar.Root
               aria-label={t('selected', { count })}
-              className="flex max-w-full items-center gap-1 rounded-lg bg-rail p-1.5 text-on-rail shadow-float ring-1 ring-white/10"
+              // In dark the raised ink, so it stands off the violet-black canvas by more than its ring.
+              className="flex max-w-full items-center gap-1 rounded-lg bg-rail p-1.5 text-on-rail shadow-float ring-1 ring-white/10 dark:bg-rail-raised"
             >
               <BarCount
                 count={count}
