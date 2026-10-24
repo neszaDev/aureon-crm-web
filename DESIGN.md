@@ -18,6 +18,9 @@ colors:
   status-blue: "#2f7de1"
   status-blue-tint: "#e4eefb"
   status-blue-ink: "#2769bd"
+  status-teal: "#10929a"
+  status-teal-tint: "#dff1f2"
+  status-teal-ink: "#0b6f75"
   status-amber: "#e69a1c"
   status-amber-tint: "#fcf2e1"
   status-amber-ink: "#956412"
@@ -48,6 +51,8 @@ colors:
   dark-violet-ink: "#9689eb"
   dark-status-blue-tint: "#222f4f"
   dark-status-blue-ink: "#5f9be8"
+  dark-status-teal-tint: "#1a3439"
+  dark-status-teal-ink: "#3cb0b8"
   dark-status-amber-tint: "#473527"
   dark-status-green-tint: "#1f3635"
   dark-status-green-ink: "#45ae7e"
@@ -207,7 +212,7 @@ The status pill is the system's signature: a lead's status, a deal's stage or a 
 **Key Characteristics:**
 - Ink-violet rail (56 px), off-white sidebar (240 px, folds into the rail), white canvas; dark is violet-black.
 - Aureon violet for primary actions, selection and focus only.
-- Six status tones, each a hue, a tint and an ink, applied with `data-tone`.
+- Seven status tones, each a hue, a tint and an ink, applied with `data-tone`.
 - Inter for the UI, Anuphan for Thai; 13/14 px text, tabular figures.
 - 6 px controls, 8 px panels, full-round pills and avatars; hairline borders.
 - Flat panels; shadows only on floating layers.
@@ -215,7 +220,7 @@ The status pill is the system's signature: a lead's status, a deal's stage or a 
 
 ## Colors
 
-A neutral, slightly cool workspace where one violet acts and six status tones inform.
+A neutral, slightly cool workspace where one violet acts and seven status tones inform.
 
 ### Primary
 - **Aureon Violet** (violet): the primary button fill (white text at 6.25:1), the current rail item, focus rings, caret, the selection wash, the violet ink of links and active tabs, and the public pages' brand fields (header, hero and closing bands, the auth aside). Hover deepens to **Violet Pressed** (violet-hover). **Violet Haze** (violet-tint) fills a current sidebar item and a toolbar chip that is on. In dark the fill lifts to dark-violet, the tint deepens to dark-violet-tint (the landing's band in dark, carrying white at 13.7:1) and violet text becomes dark-violet-ink (6.1:1 on the canvas).
@@ -226,13 +231,14 @@ A neutral, slightly cool workspace where one violet acts and six status tones in
 ### Tertiary
 The status tones. Each is a triplet: the hue (`--status-<tone>`) for dots, track segments and chart fills that sit beside their words; the tint for a pill's fill; the ink for text on the tint or the canvas (4.5:1 or more on both, in both themes). Any element with `data-tone="<tone>"` gets them as `--tone`, `--tone-tint` and `--tone-ink`.
 - **Signal Blue** (status-blue): new leads, open tasks, the first open stage, Companies, the coming week.
-- **Aureon Violet** (as status-violet): contacted leads, middle stages, Deals, later dates.
+- **Lagoon Teal** (status-teal): the second open stage of four or more, so neighbouring stages never share a tone. Hue 3.8:1 on white and 4.8:1 on the dark canvas; its ink 5.1:1 on its tint and 5.9:1 on white (dark: 5.1:1 and 7:1).
+- **Aureon Violet** (as status-violet): contacted leads, the middle open stage, Deals, later dates.
 - **Harvest Amber** (status-amber): qualified leads, the last open stage, Leads, due today, medium priority. Its hue is 2.3:1 on white; amber words are always status-amber-ink.
 - **Won Green** (status-green): converted, won, completed, Contacts.
 - **Signal Red** (status-red): lost, overdue, high priority, Tasks; as danger (the red ink) always with an icon and words.
 - **Quiet Slate** (status-slate): unqualified, cancelled, no date, low priority, a stage the list doesn't hold.
 
-Open stages walk blue → violet → amber in pipeline order, then green (won) and red (lost). Semantic aliases follow the inks: danger = red ink, warning = amber ink, success = green ink, info = blue ink.
+Open stages take the walk blue → teal → violet → amber in pipeline order: up to four spread over it (the first blue, the last amber; three are blue, violet, amber), more cycle through it, so neighbouring open stages never share a tone. Then green (won) and red (lost). Semantic aliases follow the inks: danger = red ink, warning = amber ink, success = green ink, info = blue ink.
 
 People take one of eight avatar colours by member id (violet, the blue, green, red, amber and slate inks, **Deep Teal** avatar-teal, **Orchid** avatar-orchid), white initials at 5:1 or more. Charts take five colours: violet, blue, green, **Chart Amber** (chart-amber, 3.1:1 on white) and red; in dark, the inks.
 

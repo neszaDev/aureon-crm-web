@@ -77,6 +77,9 @@
   --status-blue: #2f7de1;
   --status-blue-tint: #e4eefb;
   --status-blue-ink: #2769bd;
+  --status-teal: #10929a;
+  --status-teal-tint: #dff1f2;
+  --status-teal-ink: #0b6f75;
   --status-violet: #5a45e0;
   --status-violet-tint: #efedfd;
   --status-violet-ink: #5a45e0;
@@ -194,6 +197,8 @@
     --status-violet-ink: #9689eb;
     --status-blue-tint: #222f4f;
     --status-blue-ink: #5f9be8;
+    --status-teal-tint: #1a3439;
+    --status-teal-ink: #3cb0b8;
     --status-amber-tint: #473527;
     --status-amber-ink: #e69a1c;
     --status-green-tint: #1f3635;
@@ -237,6 +242,12 @@
   --tone: var(--status-blue);
   --tone-tint: var(--status-blue-tint);
   --tone-ink: var(--status-blue-ink);
+}
+
+[data-tone='teal'] {
+  --tone: var(--status-teal);
+  --tone-tint: var(--status-teal-tint);
+  --tone-ink: var(--status-teal-ink);
 }
 
 [data-tone='violet'] {

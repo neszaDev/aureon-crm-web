@@ -2,7 +2,7 @@ import type { components } from '@/libs/api/schema';
 import type { Stage } from '@/libs/crm/Stages';
 
 /** The status colours (`--status-<tone>` in global.css; `data-tone` applies one). */
-export type StatusTone = 'blue' | 'violet' | 'amber' | 'green' | 'red' | 'slate';
+export type StatusTone = 'blue' | 'teal' | 'violet' | 'amber' | 'green' | 'red' | 'slate';
 
 /**
  * A status pill's look (`StatusPill`) on an element with `data-tone`, for what draws one without
@@ -55,11 +55,12 @@ export const PRIORITY_TONES: Record<components['schemas']['TaskResponse']['prior
     LOW: 'slate',
   };
 
-const OPEN_WALK: StatusTone[] = ['blue', 'violet', 'amber'];
+const OPEN_WALK: StatusTone[] = ['blue', 'teal', 'violet', 'amber'];
 
 /**
- * A deal stage's tone by its place in the pipeline: the open stages walk from blue (the first)
- * through violet to amber (the last), won is green and lost red.
+ * A deal stage's tone by its place in the pipeline: up to four open stages spread over the walk
+ * blue → teal → violet → amber (the first blue, the last amber), more cycle through it, so
+ * neighbouring open stages never share a tone; won is green and lost red.
  * @param stages The workspace's stages, in pipeline order.
  * @param id The stage.
  * @returns Its tone; slate for a stage the list doesn't hold.
@@ -77,6 +78,9 @@ export const stageTone = (stages: readonly Pick<Stage, 'id' | 'kind'>[], id: num
   if (index === -1) {
     return 'slate';
   }
+  // A step of 1 or more keeps neighbours apart; past four stages the step is 1 and the walk cycles.
+  const step =
+    open.length > OPEN_WALK.length ? 1 : (OPEN_WALK.length - 1) / Math.max(open.length - 1, 1);
 
-  return OPEN_WALK[open.length === 1 ? 0 : Math.round((index * 2) / (open.length - 1))] ?? 'slate';
+  return OPEN_WALK[Math.round(index * step) % OPEN_WALK.length] ?? 'slate';
 };

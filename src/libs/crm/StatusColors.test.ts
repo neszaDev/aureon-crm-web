@@ -60,7 +60,7 @@ const contrast = (theme: Record<string, string | undefined>, first: string, seco
   return a && b && hex.test(a) && hex.test(b) ? contrastRatio(a, b) : 0;
 };
 
-const TONES: StatusTone[] = ['blue', 'violet', 'amber', 'green', 'red', 'slate'];
+const TONES: StatusTone[] = ['blue', 'teal', 'violet', 'amber', 'green', 'red', 'slate'];
 
 describe('status tones', () => {
   it('gives each lead status, task state, due bucket and priority its tone', () => {
@@ -102,9 +102,20 @@ describe(stageTone, () => {
   const tones = (open: number) =>
     pipeline(open).map((stage) => stageTone(pipeline(open), stage.id));
 
-  it('walks the open stages from blue through violet to amber, then won green and lost red', () => {
+  it('walks the open stages from blue through teal and violet to amber, then won green and lost red', () => {
     expect(tones(3)).toStrictEqual(['blue', 'violet', 'amber', 'green', 'red']);
-    expect(tones(5)).toStrictEqual(['blue', 'violet', 'violet', 'amber', 'amber', 'green', 'red']);
+    expect(tones(4)).toStrictEqual(['blue', 'teal', 'violet', 'amber', 'green', 'red']);
+  });
+
+  it('cycles the walk past four open stages', () => {
+    expect(tones(5).slice(0, 5)).toStrictEqual(['blue', 'teal', 'violet', 'amber', 'blue']);
+  });
+
+  it.each([2, 4, 5, 8])('never gives neighbouring open stages one tone (%i open)', (open) => {
+    const walk = tones(open).slice(0, open);
+
+    expect(walk[0]).toBe('blue');
+    expect(walk.filter((tone, index) => tone === walk[index - 1])).toStrictEqual([]);
   });
 
   it('starts at blue and ends at amber however few open stages there are', () => {
