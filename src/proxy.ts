@@ -27,7 +27,8 @@ const INVITE_PATH = new RegExp(`^(?:/(?:${localeGroup}))?/invite/`, 'u');
 const FILES_PAGE_PATH = new RegExp(`^(?:/(?:${localeGroup}))?/dashboard/files$`, 'u');
 const MAX_BODY_BYTES = 1024 * 1024;
 // What the page matcher leaves out (`config`), and the CRM's API routes it adds back.
-const OUTSIDE_PAGES = /^\/(?:_next|_vercel|api)|\./u;
+const OUTSIDE_PAGES =
+  /^\/(?:_next|_vercel|api|[a-z]{2}\/(?:apple-icon|icon|opengraph-image)(?:-\w+)?(?:\/|$))|\./u;
 const CRM_API_PATH = /^\/api\/crm(?:\/|$)/u;
 
 /**
@@ -217,13 +218,16 @@ export default async function proxy(request: NextRequest) {
 export const config = {
   // Match all pathnames except for
   // - … if they start with `/_next`, `/_vercel` or `api`
+  // - … a locale's icons and shared image, as the pages link them (`/en/icon`,
+  //   `/th/opengraph-image-ds8rmm`): public files, which English's prefix would otherwise send
+  //   through a redirect first (unprefixed, `/icon` still goes through, to its locale)
   // - … the ones containing a dot (e.g. `favicon.ico`)
   // and the CRM's API routes, which only get their session refreshed; and every request with a
   // body, but to the build's assets and images: `[locale]` takes any first segment, so a server
   // action runs under `/api/sign-in` or `/en/invite/a.b` too, and its body must meet
   // `bodyRefusal`.
   matcher: [
-    '/((?!_next|_vercel|api|.*\\..*).*)',
+    '/((?!_next|_vercel|api|[a-z]{2}/(?:apple-icon|icon|opengraph-image)(?:-\\w+)?(?:/|$)|.*\\..*).*)',
     '/api/crm/:path*',
     {
       source: '/((?!_next/static|_next/image).*)',

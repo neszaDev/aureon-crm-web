@@ -45,17 +45,30 @@ describe('proxy security', () => {
     expect(guarded.filter((path) => !runsOn(path))).toStrictEqual([]);
   });
 
-  it('leaves out only the session route, static files and paths with a dot', () => {
+  it('leaves out only the session route, static files, paths with a dot and the icons', () => {
     // Pages behind a path with a dot still ask the backend, which refuses them without a token
-    // (Security.e2e.ts); the session route must stay outside, or ending a session would loop.
+    // (Security.e2e.ts); the session route must stay outside, or ending a session would loop. The
+    // icons and the shared image, at the prefixed paths the pages link, are public files: through
+    // the proxy, English's would be redirected to the unprefixed path first.
     const outside = [
       '/api/session/expired',
       '/_next/static/chunks/app.js',
       '/favicon.ico',
       '/fr/app/7/companies/3.json',
+      '/en/icon',
+      '/th/apple-icon',
+      '/en/opengraph-image-ds8rmm',
+      '/fr/opengraph-image',
     ];
 
     expect(outside.filter((path) => runsOn(path))).toStrictEqual([]);
+  });
+
+  it('still runs on every page whose path only begins like an icon', () => {
+    // Unprefixed, an icon still goes to its locale through the proxy.
+    const pages = ['/icon', '/iconic', '/en/icons', '/app/7/icon', '/en/app/icon', '/en/opengraph'];
+
+    expect(pages.filter((path) => !runsOn(path))).toStrictEqual([]);
   });
 
   it('runs on any path with a body, whatever its first segment: a server action runs there too', () => {
@@ -63,6 +76,7 @@ describe('proxy security', () => {
     const bodies: Record<string, string>[] = [length, { 'transfer-encoding': 'chunked' }];
     // `[locale]` takes any first segment, so each of these renders the sign-in page.
     const paths = [
+      '/en/icon',
       '/en/invite/a.b',
       '/fr/app/7/companies/3.json',
       '/sign-in',
