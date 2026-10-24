@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { Bar, BarChart, LabelList, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, LabelList, Rectangle, XAxis, YAxis } from 'recharts';
 import { Panel } from '@/components/crm/dashboard/Panel';
 import { ChartTable } from '@/components/crm/reports/ChartTable';
 import type { ChartConfig } from '@/components/ui/chart';
@@ -27,7 +27,7 @@ const BAR_HEIGHT = 36;
  * number, so no colour has to read alone (the amber one can't), and under them the table of the
  * same figures, each stage by its colour's dot,
  * with the totals for each currency on its own line, never added. A stage without deals is
- * listed too. The bars are the table's picture: assistive technology has the table.
+ * listed too, its "0" written where its bar would start. The bars are the table's picture: assistive technology has the table.
  * @param props Component props.
  * @param props.stages The `byStage` of the dashboard or of the pipeline report.
  * @param props.collapsible Gives the table `ChartTable`'s button to hide it (the reports'),
@@ -135,7 +135,15 @@ export const StageDistribution = (props: {
                   axisLine={false}
                 />
                 <XAxis type="number" hide />
-                <Bar dataKey="count" radius={3} barSize={16} isAnimationActive={!reducedMotion}>
+                <Bar
+                  dataKey="count"
+                  radius={3}
+                  barSize={16}
+                  isAnimationActive={!reducedMotion}
+                  // A shape of its own keeps a stage without deals in the chart (no bar drawn), so
+                  // its "0" is written beside its name, as the table says it.
+                  shape={(bar) => <Rectangle {...bar} />}
+                >
                   <LabelList
                     dataKey="count"
                     position="right"

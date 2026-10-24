@@ -104,6 +104,18 @@ describe(StageDistribution, () => {
       .toContain('12,345');
   });
 
+  it('writes "0" beside a stage without deals, as the table does, where it draws no bar', async () => {
+    await distribution(STAGES);
+
+    await expect
+      .poll(() =>
+        [...document.querySelectorAll('[data-slot="chart"] .recharts-label-list text')].map(
+          (label) => label.textContent,
+        ),
+      )
+      .toStrictEqual(['4', '0', '2']);
+  });
+
   it('says so when there are no open stages', async () => {
     await distribution([]);
 
