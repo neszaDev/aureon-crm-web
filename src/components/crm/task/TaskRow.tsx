@@ -46,6 +46,8 @@ type StatusAction = (workspaceId: number, taskId: number, version: number) => Pr
  * @param props.tone The colour of its due section (`TaskViews`), in a list.
  * @param props.line Whether it is a fixed column's: on one line, cut short.
  * @param props.quiet Whether the word "Overdue" is read out but not drawn.
+ * @param props.short Whether to write it short, as a phone's row does ("Oct 20, 4:40 PM"; the
+ *   year only outside the current one).
  * @returns The due time, or "No due date".
  */
 export const TaskDue = (props: {
@@ -55,13 +57,14 @@ export const TaskDue = (props: {
   tone?: StatusTone;
   line?: boolean;
   quiet?: boolean;
+  short?: boolean;
 }) => {
   const t = useTranslations('TaskRow');
   const locale = useLocale();
   if (!props.dueAt) {
     return <span className="text-muted-foreground">{t('no_due')}</span>;
   }
-  const due = instantParts(props.dueAt, { locale, timeZone: props.timeZone });
+  const due = instantParts(props.dueAt, { locale, timeZone: props.timeZone, short: props.short });
   const look = cn(
     'tabular-nums',
     props.tone && 'text-(--tone-ink)',
@@ -265,9 +268,17 @@ export const TaskRow = (props: {
           {props.compact && linked('ml-auto max-w-[45%] text-[0.8125rem] max-sm:hidden')}
         </span>
         {/* A phone's row has no room for the due and linked columns: they sit under the title, the
-            linked records on a line of their own when the due time leaves them none. */}
+            due time short and never cut (it breaks only between its date and its time), the linked
+            records on a line of their own when the due time leaves them none. */}
         <span className="flex flex-wrap items-baseline gap-x-2 text-[0.8125rem] sm:hidden">
-          {due}
+          <TaskDue
+            dueAt={props.task.dueAt}
+            overdue={props.task.overdue}
+            timeZone={props.timeZone}
+            tone={props.dueTone}
+            quiet={props.sectioned}
+            short
+          />
           {linked('max-w-full')}
         </span>
       </TableCell>

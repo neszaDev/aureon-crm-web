@@ -272,6 +272,23 @@ describe(TaskRow, () => {
     expect(kept).toStrictEqual(['Oct 19, 2026', '4:30 PM']);
   });
 
+  it("writes a phone row's due time short and whole, the year left out within this one", async () => {
+    await page.viewport(390, 844);
+    const year = new Date().getFullYear();
+    await renderRow({ ...TASK, dueAt: `${year}-10-20T09:40:00Z` });
+
+    const due = page.getByText(/^Oct 20, 4:40\sPM$/u);
+    await expect.element(due).toBeVisible();
+    // No text in the row is cut short.
+    const cut = [...page.getByRole('row').element().querySelectorAll<HTMLElement>('*')].filter(
+      (element) =>
+        element.checkVisibility() &&
+        element.scrollWidth > element.clientWidth + 1 &&
+        [...element.childNodes].some((node) => node.nodeType === Node.TEXT_NODE),
+    );
+    expect(cut.map((element) => element.textContent)).toStrictEqual([]);
+  });
+
   it('marks an overdue task in words, not colour alone', async () => {
     await page.viewport(1280, 800);
     await renderRow({ ...TASK, overdue: true, dueAt: '2026-10-10T02:00:00Z' });

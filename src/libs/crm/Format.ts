@@ -65,20 +65,36 @@ export const formatInstant = (
 
 /**
  * An instant as `formatInstant` writes it with its time, in its parts: the date, what the language
- * puts between it and the time (", " in English), and the time, so each can be kept whole.
+ * puts between it and the time (", " in English), and the time, so each can be kept whole. Short,
+ * for a phone's row, the month is abbreviated and the year left out within the current one
+ * ("Oct 20, 4:40 PM").
  * @param instant An ISO 8601 instant.
  * @param opts Options.
  * @param opts.locale The page's locale.
  * @param opts.timeZone The workspace's time zone.
- * @returns The date, the text between and the time; joined, they are `formatInstant`'s text.
+ * @param opts.short Whether to write the short form.
+ * @param opts.now The current time, whose year the short form leaves out.
+ * @returns The date, the text between and the time; joined, they are `formatInstant`'s text (or
+ *   the short form's).
  */
-export const instantParts = (instant: string, opts: { locale: string; timeZone: string }) => {
-  const full = formatInstant(instant, { ...opts, withTime: true });
-  const date = formatInstant(instant, opts);
-  const time = new Intl.DateTimeFormat(opts.locale, {
-    timeStyle: 'short',
-    timeZone: opts.timeZone,
-  }).format(new Date(instant));
+export const instantParts = (
+  instant: string,
+  opts: { locale: string; timeZone: string; short?: boolean; now?: Date },
+) => {
+  const at = new Date(instant);
+  const format = (options: Intl.DateTimeFormatOptions, date = at) =>
+    new Intl.DateTimeFormat(opts.locale, { ...options, timeZone: opts.timeZone }).format(date);
+  const thisYear =
+    format({ year: 'numeric' }) === format({ year: 'numeric' }, opts.now ?? new Date());
+  const day: Intl.DateTimeFormatOptions = opts.short
+    ? { month: 'short', day: 'numeric', year: thisYear ? undefined : 'numeric' }
+    : { dateStyle: 'medium' };
+  const clock: Intl.DateTimeFormatOptions = opts.short
+    ? { hour: 'numeric', minute: '2-digit' }
+    : { timeStyle: 'short' };
+  const full = format({ ...day, ...clock });
+  const date = format(day);
+  const time = format(clock);
 
   // shortcut: a language that writes the time first (none of en, fr, th) stays one whole part.
   return full.startsWith(date) && full.endsWith(time)

@@ -108,6 +108,25 @@ describe(instantParts, () => {
       time: expect.stringMatching(/^4:30\sPM$/u),
     });
   });
+
+  it('writes a short form for a phone: the month abbreviated, the year only outside this one', () => {
+    const instant = '2026-10-20T09:40:00Z';
+    const short = (locale: string, now: string) => {
+      const parts = instantParts(instant, {
+        locale,
+        timeZone: 'Asia/Bangkok',
+        short: true,
+        now: new Date(now),
+      });
+      return `${parts.date}${parts.between}${parts.time}`.replaceAll(/\s/gu, ' ');
+    };
+
+    expect(short('en', '2026-03-01T00:00:00Z')).toBe('Oct 20, 4:40 PM');
+    expect(short('fr', '2026-03-01T00:00:00Z')).toBe('20 oct., 16:40');
+    expect(short('th', '2026-03-01T00:00:00Z')).toBe('20 ต.ค. 16:40');
+    expect(short('en', '2027-01-02T00:00:00Z')).toBe('Oct 20, 2026, 4:40 PM');
+    expect(short('th', '2027-01-02T00:00:00Z')).toBe('20 ต.ค. 2569 16:40');
+  });
 });
 
 describe(daysSince, () => {
