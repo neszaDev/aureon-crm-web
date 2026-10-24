@@ -163,12 +163,16 @@ describe(StageList, () => {
     ).toHaveLength(0);
   });
 
-  it("lines up every stage's probability in one column, Won's and Lost's too", async () => {
-    await page.viewport(1280, 800);
-    await renderList(vi.fn<Reorder>());
-    expect(right('100%')).toBe(right('10%'));
-    expect(right('0%')).toBe(right('60%'));
-  });
+  it.each([1280, 390])(
+    "lines up every stage's probability in one column, Won's and Lost's too, at %i px",
+    async (width) => {
+      await page.viewport(width, 800);
+      await renderList(vi.fn<Reorder>());
+      expect(right('100%')).toBe(right('10%'));
+      expect(right('0%')).toBe(right('60%'));
+      await page.viewport(414, 896);
+    },
+  );
 
   it('shows the pipeline without controls to a member who cannot change it', async () => {
     await renderList(vi.fn<Reorder>(), false);

@@ -851,7 +851,10 @@ test.describe('Records', () => {
       page,
       request,
     }) => {
+      test.setTimeout(60_000);
       const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+      // A name of forty characters without a break wraps inside its cell.
+      await seed(request, owner, 'companies', { name: 'Donaudampfschifffahrtsgesellschaftskapit' });
       const source = await apiCall<{ id: number }>(
         request,
         owner,
@@ -912,6 +915,15 @@ test.describe('Records', () => {
         row(buyer).getByText(COMPANIES.brightwater.name).filter({ visible: true }),
       ).toBeVisible();
       await expect(page.getByRole('columnheader')).toHaveCount(0);
+
+      // French and Thai fit too: nothing scrolls sideways, nothing spills out of its box.
+      for (const locale of ['fr', 'th']) {
+        const path = owner.path.replace('/app/', `/${locale}/app/`);
+        for (const list of ['deals?view=list', 'leads', 'companies', 'contacts']) {
+          // oxlint-disable-next-line no-await-in-loop -- one page after the other
+          await expectFits(page, { url: `${path}/${list}` });
+        }
+      }
     });
 
     test('scrolls the Unqualify and Convert dialogs to their buttons', async ({
