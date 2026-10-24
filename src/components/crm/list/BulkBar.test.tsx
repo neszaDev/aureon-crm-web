@@ -334,6 +334,29 @@ describe(BulkBar, () => {
       await expect.element(page.getByText('1 lead moved to Qualified')).toBeVisible();
     });
 
+    it('opens no menu while records are on their way', async () => {
+      const answer = Promise.withResolvers<ActionResult>();
+      vi.mocked(LeadActions.changeLeadStatus).mockReturnValue(answer.promise);
+      await renderBar('lead', [item(1, 'Amara', { state: 'NEW' })]);
+      await bar().getByRole('button', { name: 'Status' }).click();
+      await page.getByRole('menuitem', { name: 'Qualified', exact: true }).click();
+      await expect.element(bar()).toHaveTextContent('Updating 0 of 1');
+
+      // By keyboard: the pointer can't press a control marked disabled.
+      const assign = bar().getByRole('button', { name: 'Assign' }).element();
+      if (assign instanceof HTMLElement) {
+        assign.focus();
+      }
+      await userEvent.keyboard('{Enter}');
+
+      await expect
+        .element(bar().getByRole('button', { name: 'Assign' }))
+        .toHaveAttribute('aria-expanded', 'false');
+      expect(page.getByRole('menuitem').elements()).toHaveLength(0);
+      answer.resolve({ ok: true });
+      await expect.element(page.getByText('1 lead moved to Qualified')).toBeVisible();
+    });
+
     it('clears with its button', async () => {
       const { onClear } = await renderBar('lead', [item(1, 'Amara')]);
 

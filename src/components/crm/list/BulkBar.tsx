@@ -115,7 +115,7 @@ export type BulkBarProps = {
  * @param props.icon The button's icon.
  * @param props.label The button's label.
  * @param props.menuLabel What the menu's items do, such as "Move to".
- * @param props.busy Whether records are on their way (it stays, but does nothing).
+ * @param props.busy Whether records are on their way (it stays, but doesn't open).
  * @param props.name What finds the button again (`data-bar-menu`), for a dialog opened from the
  *   menu to give it the focus back.
  * @param props.children The items.
@@ -128,26 +128,37 @@ const BarMenu = (props: {
   busy: boolean;
   name: string;
   children: React.ReactNode;
-}) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button
-        data-bar-menu={props.name}
-        variant="ghost"
-        aria-disabled={props.busy || undefined}
-        className={ON_BAR}
-      >
-        {props.icon}
-        {props.label}
-        <ChevronDownIcon data-icon="inline-end" className="opacity-70" />
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent side="top" align="start" className="max-h-72 overflow-y-auto">
-      <DropdownMenuLabel>{props.menuLabel}</DropdownMenuLabel>
-      {props.children}
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+}) => {
+  // Held here: it opens only while not busy. (An `open` forced shut while busy would drop the
+  // close that follows an item's select, which starts the run, and reopen the menu after it.)
+  const [open, setOpen] = useState(false);
+
+  return (
+    <DropdownMenu
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next && !props.busy);
+      }}
+    >
+      <DropdownMenuTrigger asChild>
+        <Button
+          data-bar-menu={props.name}
+          variant="ghost"
+          aria-disabled={props.busy || undefined}
+          className={ON_BAR}
+        >
+          {props.icon}
+          {props.label}
+          <ChevronDownIcon data-icon="inline-end" className="opacity-70" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="top" align="start" className="max-h-72 overflow-y-auto">
+        <DropdownMenuLabel>{props.menuLabel}</DropdownMenuLabel>
+        {props.children}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 /**
  * What the bar says first: how many records are selected, or how far a run has got; then why
