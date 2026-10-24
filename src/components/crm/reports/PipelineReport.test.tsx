@@ -132,10 +132,13 @@ describe(PipelineReport, () => {
     await expect.element(page.getByText('No open deals.')).toBeVisible();
   });
 
-  it('names the owner when they have no open deal', async () => {
+  it('names the owner in both panels when they have no open deal', async () => {
     await report({ byStage: [], byOwner: [] }, 'en', MIA);
 
-    await expect.element(page.getByText('No open deals owned by Mia Rossi.')).toBeVisible();
+    await expect
+      .poll(() => page.getByText('No open deals owned by Mia Rossi.').elements())
+      .toHaveLength(2);
+    expect(page.getByText('No open stages.').elements()).toHaveLength(0);
   });
 
   it('writes the unassigned row in the page language', async () => {

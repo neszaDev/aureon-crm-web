@@ -30,10 +30,13 @@ export const PipelineReport = (props: {
   const t = useTranslations('PipelineReport');
   const locale = useLocale();
   const number = new Intl.NumberFormat(locale);
+  // With one owner's deals, both panels name them when there are none.
+  const empty =
+    props.owner && t('empty_owner', { name: props.owner.displayName ?? props.owner.email });
 
   return (
     <div className="grid items-start gap-5 lg:grid-cols-2">
-      <StageDistribution stages={props.report.byStage} collapsible />
+      <StageDistribution stages={props.report.byStage} collapsible empty={empty} />
       <Panel id="owners" title={t('owners_title')}>
         {props.report.byOwner.length > 0 ? (
           <Table aria-labelledby="owners-heading" className="border-t border-rule">
@@ -82,9 +85,7 @@ export const PipelineReport = (props: {
           </Table>
         ) : (
           <p className="border-t border-rule px-4 py-6 text-muted-foreground sm:px-5">
-            {props.owner
-              ? t('empty_owner', { name: props.owner.displayName ?? props.owner.email })
-              : t('empty')}
+            {empty ?? t('empty')}
           </p>
         )}
       </Panel>

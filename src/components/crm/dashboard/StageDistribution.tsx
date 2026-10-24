@@ -32,11 +32,14 @@ const BAR_HEIGHT = 36;
  * @param props.stages The `byStage` of the dashboard or of the pipeline report.
  * @param props.collapsible Gives the table `ChartTable`'s button to hide it (the reports'),
  *   instead of always showing it (the dashboard's).
+ * @param props.empty What it says without stages, in place of "No open stages." (a report of one
+ *   owner's deals names them).
  * @returns The panel.
  */
 export const StageDistribution = (props: {
   stages: components['schemas']['StageBucket'][];
   collapsible?: boolean;
+  empty?: string;
 }) => {
   const t = useTranslations('StageDistribution');
   const locale = useLocale();
@@ -150,7 +153,9 @@ export const StageDistribution = (props: {
           )}
         </>
       ) : (
-        <p className="border-t border-rule px-4 py-6 text-muted-foreground sm:px-5">{t('empty')}</p>
+        <p className="border-t border-rule px-4 py-6 text-muted-foreground sm:px-5">
+          {props.empty ?? t('empty')}
+        </p>
       )}
     </Panel>
   );
