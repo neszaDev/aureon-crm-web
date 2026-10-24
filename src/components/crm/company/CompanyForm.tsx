@@ -17,6 +17,7 @@ import {
   TITLE_INPUT,
   TitleField,
 } from '@/components/crm/record/RecordForm';
+import { usePanelIds } from '@/components/crm/record/RecordPanel';
 import { describedBy, FormField } from '@/components/FormField';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -66,6 +67,7 @@ export const CompanyForm = (props: {
   submitLabel: string;
 }) => {
   const t = useTranslations('CompanyForm');
+  const fieldId = usePanelIds();
   const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const [saved, setSaved] = useState(false);
@@ -136,7 +138,7 @@ export const CompanyForm = (props: {
       <ActionAlert result={failure} />
 
       <div className="flex flex-col gap-3">
-        <TitleField id="company-name" label={t('name_label')} error={errors.name}>
+        <TitleField id={fieldId('company-name')} label={t('name_label')} error={errors.name}>
           <Input
             autoComplete="organization"
             // A new company starts with its name (in a record panel too, `data-autofocus`).
@@ -144,7 +146,7 @@ export const CompanyForm = (props: {
             data-autofocus={creating ? '' : undefined}
             placeholder={t('name_label')}
             className={TITLE_INPUT}
-            {...field('name', 'company-name')}
+            {...field('name', fieldId('company-name'))}
           />
         </TitleField>
         <div className={CHIP_ROW}>
@@ -153,7 +155,7 @@ export const CompanyForm = (props: {
             name="ownerId"
             render={(controller) => (
               <PropertyChip
-                id="company-owner-chip"
+                id={fieldId('company-owner-chip')}
                 label={t('owner_label')}
                 icon={UserRoundIcon}
                 value={
@@ -166,7 +168,7 @@ export const CompanyForm = (props: {
                 error={errors.ownerId}
               >
                 <OwnerField
-                  id="company-owner"
+                  id={fieldId('company-owner')}
                   label={t('owner_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -188,20 +190,24 @@ export const CompanyForm = (props: {
       <FormDetails id="company-details">
         <div className="grid gap-5 sm:grid-cols-2">
           <FormField
-            htmlFor="company-website"
+            htmlFor={fieldId('company-website')}
             label={t('website_label')}
             hint={t('website_hint')}
             error={errors.website}
           >
-            <Input type="url" autoComplete="url" {...field('website', 'company-website')} />
+            <Input
+              type="url"
+              autoComplete="url"
+              {...field('website', fieldId('company-website'))}
+            />
           </FormField>
           <FormField
-            htmlFor="company-industry"
+            htmlFor={fieldId('company-industry')}
             label={t('industry_label')}
             hint={t('industry_hint')}
             error={errors.industry}
           >
-            <Input autoComplete="off" {...field('industry', 'company-industry')} />
+            <Input autoComplete="off" {...field('industry', fieldId('company-industry'))} />
           </FormField>
         </div>
 
@@ -215,28 +221,39 @@ export const CompanyForm = (props: {
         />
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <FormField htmlFor="company-phone" label={t('phone_label')} error={errors.phone}>
-            <Input type="tel" autoComplete="tel" {...field('phone', 'company-phone')} />
+          <FormField
+            htmlFor={fieldId('company-phone')}
+            label={t('phone_label')}
+            error={errors.phone}
+          >
+            <Input type="tel" autoComplete="tel" {...field('phone', fieldId('company-phone'))} />
           </FormField>
           <FormField
-            htmlFor="company-employees"
+            htmlFor={fieldId('company-employees')}
             label={t('employees_label')}
             error={errors.employeeCount}
           >
             <Input
               inputMode="numeric"
               autoComplete="off"
-              {...field('employeeCount', 'company-employees')}
+              {...field('employeeCount', fieldId('company-employees'))}
             />
           </FormField>
         </div>
 
-        <FormField htmlFor="company-address" label={t('address_label')} error={errors.address}>
-          <Textarea autoComplete="street-address" {...field('address', 'company-address')} />
+        <FormField
+          htmlFor={fieldId('company-address')}
+          label={t('address_label')}
+          error={errors.address}
+        >
+          <Textarea
+            autoComplete="street-address"
+            {...field('address', fieldId('company-address'))}
+          />
         </FormField>
 
-        <FormField htmlFor="company-notes" label={t('notes_label')} error={errors.notes}>
-          <Textarea className="min-h-28" {...field('notes', 'company-notes')} />
+        <FormField htmlFor={fieldId('company-notes')} label={t('notes_label')} error={errors.notes}>
+          <Textarea className="min-h-28" {...field('notes', fieldId('company-notes'))} />
         </FormField>
       </FormDetails>
 

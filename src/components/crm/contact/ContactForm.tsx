@@ -22,6 +22,7 @@ import {
   TITLE_INPUT,
   TitleField,
 } from '@/components/crm/record/RecordForm';
+import { usePanelIds } from '@/components/crm/record/RecordPanel';
 import { describedBy, FormField } from '@/components/FormField';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -80,6 +81,7 @@ export const ContactForm = (props: {
   submitLabel: string;
 }) => {
   const t = useTranslations('ContactForm');
+  const fieldId = usePanelIds();
   const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const [saved, setSaved] = useState(false);
@@ -158,7 +160,7 @@ export const ContactForm = (props: {
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-x-6 gap-y-1 *:basis-48">
           <TitleField
-            id="contact-first-name"
+            id={fieldId('contact-first-name')}
             label={t('first_name_label')}
             error={errors.firstName}
           >
@@ -169,15 +171,19 @@ export const ContactForm = (props: {
               data-autofocus={creating ? '' : undefined}
               placeholder={t('first_name_label')}
               className={TITLE_INPUT}
-              {...field('firstName', 'contact-first-name')}
+              {...field('firstName', fieldId('contact-first-name'))}
             />
           </TitleField>
-          <TitleField id="contact-last-name" label={t('last_name_label')} error={errors.lastName}>
+          <TitleField
+            id={fieldId('contact-last-name')}
+            label={t('last_name_label')}
+            error={errors.lastName}
+          >
             <Input
               autoComplete="family-name"
               placeholder={t('last_name_label')}
               className={TITLE_INPUT}
-              {...field('lastName', 'contact-last-name')}
+              {...field('lastName', fieldId('contact-last-name'))}
             />
           </TitleField>
         </div>
@@ -187,7 +193,7 @@ export const ContactForm = (props: {
             name="ownerId"
             render={(controller) => (
               <PropertyChip
-                id="contact-owner-chip"
+                id={fieldId('contact-owner-chip')}
                 label={t('owner_label')}
                 icon={UserRoundIcon}
                 value={
@@ -200,7 +206,7 @@ export const ContactForm = (props: {
                 error={errors.ownerId}
               >
                 <OwnerField
-                  id="contact-owner"
+                  id={fieldId('contact-owner')}
                   label={t('owner_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -221,24 +227,26 @@ export const ContactForm = (props: {
             name="companyId"
             render={(controller) => (
               <PropertyChip
-                id="contact-company-chip"
+                id={fieldId('contact-company-chip')}
                 label={t('company_label')}
                 icon={Building2Icon}
                 value={company ? <span className="truncate">{company.label}</span> : undefined}
                 error={errors.companyId}
               >
                 <FormField
-                  htmlFor="contact-company"
+                  htmlFor={fieldId('contact-company')}
                   label={t('company_label')}
                   error={errors.companyId}
                 >
                   <RecordPicker
-                    id="contact-company"
+                    id={fieldId('contact-company')}
                     workspaceId={props.workspaceId}
                     kind="company"
                     value={company}
                     invalid={Boolean(errors.companyId)}
-                    describedBy={errors.companyId ? describedBy('contact-company') : undefined}
+                    describedBy={
+                      errors.companyId ? describedBy(fieldId('contact-company')) : undefined
+                    }
                     onChange={(next) => {
                       setCompany(next);
                       controller.field.onChange(next?.id ?? null);
@@ -254,14 +262,14 @@ export const ContactForm = (props: {
             name="sourceId"
             render={(controller) => (
               <PropertyChip
-                id="contact-source-chip"
+                id={fieldId('contact-source-chip')}
                 label={t('source_label')}
                 icon={SignpostIcon}
                 value={sourceValue(props.sources, controller.field.value)}
                 error={errors.sourceId}
               >
                 <SourceField
-                  id="contact-source"
+                  id={fieldId('contact-source')}
                   label={t('source_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -279,11 +287,23 @@ export const ContactForm = (props: {
 
       <FormDetails id="contact-details">
         <div className="grid gap-5 sm:grid-cols-2">
-          <FormField htmlFor="contact-email" label={t('email_label')} error={errors.email}>
-            <Input type="email" autoComplete="email" {...field('email', 'contact-email')} />
+          <FormField
+            htmlFor={fieldId('contact-email')}
+            label={t('email_label')}
+            error={errors.email}
+          >
+            <Input
+              type="email"
+              autoComplete="email"
+              {...field('email', fieldId('contact-email'))}
+            />
           </FormField>
-          <FormField htmlFor="contact-phone" label={t('phone_label')} error={errors.phone}>
-            <Input type="tel" autoComplete="tel" {...field('phone', 'contact-phone')} />
+          <FormField
+            htmlFor={fieldId('contact-phone')}
+            label={t('phone_label')}
+            error={errors.phone}
+          >
+            <Input type="tel" autoComplete="tel" {...field('phone', fieldId('contact-phone'))} />
           </FormField>
         </div>
 
@@ -296,17 +316,24 @@ export const ContactForm = (props: {
           }))}
         />
 
-        <FormField htmlFor="contact-job-title" label={t('job_title_label')} error={errors.jobTitle}>
-          <Input autoComplete="organization-title" {...field('jobTitle', 'contact-job-title')} />
+        <FormField
+          htmlFor={fieldId('contact-job-title')}
+          label={t('job_title_label')}
+          error={errors.jobTitle}
+        >
+          <Input
+            autoComplete="organization-title"
+            {...field('jobTitle', fieldId('contact-job-title'))}
+          />
         </FormField>
 
-        <FormField htmlFor="contact-tags" label={t('tags_label')} error={tagsError}>
+        <FormField htmlFor={fieldId('contact-tags')} label={t('tags_label')} error={tagsError}>
           <Controller
             control={form.control}
             name="tags"
             render={(controller) => (
               <TagInput
-                id="contact-tags"
+                id={fieldId('contact-tags')}
                 value={controller.field.value}
                 onChange={(tags) => {
                   controller.field.onChange(tags);
@@ -316,14 +343,14 @@ export const ContactForm = (props: {
                 }}
                 suggestions={props.tags}
                 invalid={Boolean(tagsError)}
-                errorId={tagsError ? describedBy('contact-tags') : undefined}
+                errorId={tagsError ? describedBy(fieldId('contact-tags')) : undefined}
               />
             )}
           />
         </FormField>
 
-        <FormField htmlFor="contact-notes" label={t('notes_label')} error={errors.notes}>
-          <Textarea className="min-h-28" {...field('notes', 'contact-notes')} />
+        <FormField htmlFor={fieldId('contact-notes')} label={t('notes_label')} error={errors.notes}>
+          <Textarea className="min-h-28" {...field('notes', fieldId('contact-notes'))} />
         </FormField>
       </FormDetails>
 

@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
 import type { searchRecords } from '@/actions/crm/RecordSearchActions';
+import { InRecordPanel } from '@/components/crm/record/RecordPanel';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import messages from '@/locales/en.json';
@@ -181,6 +183,35 @@ describe(DealForm, () => {
 
     expect(chip('deal-stage-chip')).toBe('Stage: Proposal');
     expect(chip('deal-amount-chip')).toBe('Amount: 10 USD');
+  });
+
+  it('keeps its ids its own in a record panel over the full page of a deal form', async () => {
+    const action = vi.fn<Action>();
+    await render(
+      <>
+        {form({ action })}
+        <Sheet open>
+          <SheetContent closeLabel="Close">
+            <SheetTitle>New deal</SheetTitle>
+            <InRecordPanel value>{form({ action, defaults: { ...NEW, name: '' } })}</InRecordPanel>
+          </SheetContent>
+        </Sheet>
+      </>,
+    );
+    const panel = page.getByRole('dialog', { name: 'New deal' });
+
+    await panel.getByRole('button', { name: 'Create deal' }).click();
+
+    // The panel's label, chips and error point at its own field, not at the page's.
+    const name = panel.getByLabelText('Deal name');
+    await expect.element(name).toHaveValue('');
+    await expect.element(name).toHaveAccessibleDescription('Required');
+    await expect.element(name).toHaveAttribute('aria-invalid', 'true');
+    await expect.element(panel.getByRole('button', { name: /^Stage:/u })).toBeVisible();
+    const ids = [...document.querySelectorAll('[id]')].map((element) => element.id);
+
+    expect(ids.filter((id, index) => ids.indexOf(id) !== index)).toStrictEqual([]);
+    expect(action).not.toHaveBeenCalled();
   });
 
   it('sends what was typed since the last save, not the values saved before', async () => {

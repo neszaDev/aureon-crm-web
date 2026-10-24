@@ -21,6 +21,7 @@ import {
   TITLE_INPUT,
   TitleField,
 } from '@/components/crm/record/RecordForm';
+import { usePanelIds } from '@/components/crm/record/RecordPanel';
 import { describedBy, FormField } from '@/components/FormField';
 import { Input } from '@/components/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
@@ -81,6 +82,7 @@ export const LeadForm = (props: {
   submitLabel: string;
 }) => {
   const t = useTranslations('LeadForm');
+  const fieldId = usePanelIds();
   const settle = useSettle();
   const tStatus = useTranslations('LeadStatus');
   const [failure, setFailure] = useState<ActionResult>();
@@ -138,7 +140,11 @@ export const LeadForm = (props: {
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-x-6 gap-y-1 *:basis-48">
-          <TitleField id="lead-first-name" label={t('first_name_label')} error={errors.firstName}>
+          <TitleField
+            id={fieldId('lead-first-name')}
+            label={t('first_name_label')}
+            error={errors.firstName}
+          >
             <Input
               autoComplete="given-name"
               // A new lead starts with their name (in a record panel too, `data-autofocus`).
@@ -146,15 +152,19 @@ export const LeadForm = (props: {
               data-autofocus={creating ? '' : undefined}
               placeholder={t('first_name_label')}
               className={TITLE_INPUT}
-              {...field('firstName', 'lead-first-name')}
+              {...field('firstName', fieldId('lead-first-name'))}
             />
           </TitleField>
-          <TitleField id="lead-last-name" label={t('last_name_label')} error={errors.lastName}>
+          <TitleField
+            id={fieldId('lead-last-name')}
+            label={t('last_name_label')}
+            error={errors.lastName}
+          >
             <Input
               autoComplete="family-name"
               placeholder={t('last_name_label')}
               className={TITLE_INPUT}
-              {...field('lastName', 'lead-last-name')}
+              {...field('lastName', fieldId('lead-last-name'))}
             />
           </TitleField>
         </div>
@@ -164,7 +174,7 @@ export const LeadForm = (props: {
             name="ownerId"
             render={(controller) => (
               <PropertyChip
-                id="lead-owner-chip"
+                id={fieldId('lead-owner-chip')}
                 label={t('owner_label')}
                 icon={UserRoundIcon}
                 value={
@@ -177,7 +187,7 @@ export const LeadForm = (props: {
                 error={errors.ownerId}
               >
                 <OwnerField
-                  id="lead-owner"
+                  id={fieldId('lead-owner')}
                   label={t('owner_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -194,18 +204,22 @@ export const LeadForm = (props: {
             )}
           />
           <PropertyChip
-            id="lead-priority-chip"
+            id={fieldId('lead-priority-chip')}
             label={t('priority_label')}
             icon={FlagIcon}
             value={<span className="truncate">{tStatus(`priority_${priority}`)}</span>}
             error={errors.priority}
           >
-            <FormField htmlFor="lead-priority" label={t('priority_label')} error={errors.priority}>
+            <FormField
+              htmlFor={fieldId('lead-priority')}
+              label={t('priority_label')}
+              error={errors.priority}
+            >
               <NativeSelect
-                id="lead-priority"
+                id={fieldId('lead-priority')}
                 defaultValue={priority}
                 aria-invalid={errors.priority ? true : undefined}
-                aria-describedby={describedBy('lead-priority')}
+                aria-describedby={describedBy(fieldId('lead-priority'))}
                 {...form.register('priority')}
               >
                 {LEAD_PRIORITIES.map((item) => (
@@ -221,7 +235,7 @@ export const LeadForm = (props: {
             name="followUpDate"
             render={(controller) => (
               <PropertyChip
-                id="lead-follow-up-chip"
+                id={fieldId('lead-follow-up-chip')}
                 label={t('follow_up_label')}
                 icon={CalendarIcon}
                 value={
@@ -230,7 +244,7 @@ export const LeadForm = (props: {
                 error={errors.followUpDate}
               >
                 <DateTimeField
-                  id="lead-follow-up"
+                  id={fieldId('lead-follow-up')}
                   label={t('follow_up_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -246,7 +260,7 @@ export const LeadForm = (props: {
             )}
           />
           <PropertyChip
-            id="lead-value-chip"
+            id={fieldId('lead-value-chip')}
             label={t('value_label')}
             icon={BanknoteIcon}
             value={
@@ -259,7 +273,7 @@ export const LeadForm = (props: {
             error={errors.estimatedValue ?? errors.currency}
           >
             <FormField
-              htmlFor="lead-value"
+              htmlFor={fieldId('lead-value')}
               label={t('value_label')}
               hint={t('value_hint')}
               error={errors.estimatedValue}
@@ -267,7 +281,7 @@ export const LeadForm = (props: {
               <Input
                 inputMode="decimal"
                 autoComplete="off"
-                {...field('estimatedValue', 'lead-value', {
+                {...field('estimatedValue', fieldId('lead-value'), {
                   // The API always returns a currency with a value: without the value it means
                   // nothing.
                   onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -278,12 +292,16 @@ export const LeadForm = (props: {
                 })}
               />
             </FormField>
-            <FormField htmlFor="lead-currency" label={t('currency_label')} error={errors.currency}>
+            <FormField
+              htmlFor={fieldId('lead-currency')}
+              label={t('currency_label')}
+              error={errors.currency}
+            >
               <NativeSelect
-                id="lead-currency"
+                id={fieldId('lead-currency')}
                 defaultValue={currency}
                 aria-invalid={errors.currency ? true : undefined}
-                aria-describedby={describedBy('lead-currency')}
+                aria-describedby={describedBy(fieldId('lead-currency'))}
                 {...form.register('currency')}
               >
                 <NativeSelectOption value="">
@@ -302,14 +320,14 @@ export const LeadForm = (props: {
             name="sourceId"
             render={(controller) => (
               <PropertyChip
-                id="lead-source-chip"
+                id={fieldId('lead-source-chip')}
                 label={t('source_label')}
                 icon={SignpostIcon}
                 value={sourceValue(props.sources, controller.field.value)}
                 error={errors.sourceId}
               >
                 <SourceField
-                  id="lead-source"
+                  id={fieldId('lead-source')}
                   label={t('source_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -327,25 +345,36 @@ export const LeadForm = (props: {
 
       <FormDetails id="lead-details">
         <div className="grid gap-5 sm:grid-cols-2">
-          <FormField htmlFor="lead-email" label={t('email_label')} error={errors.email}>
-            <Input type="email" autoComplete="email" {...field('email', 'lead-email')} />
+          <FormField htmlFor={fieldId('lead-email')} label={t('email_label')} error={errors.email}>
+            <Input type="email" autoComplete="email" {...field('email', fieldId('lead-email'))} />
           </FormField>
-          <FormField htmlFor="lead-phone" label={t('phone_label')} error={errors.phone}>
-            <Input type="tel" autoComplete="tel" {...field('phone', 'lead-phone')} />
+          <FormField htmlFor={fieldId('lead-phone')} label={t('phone_label')} error={errors.phone}>
+            <Input type="tel" autoComplete="tel" {...field('phone', fieldId('lead-phone'))} />
           </FormField>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <FormField htmlFor="lead-company" label={t('company_label')} error={errors.companyName}>
-            <Input autoComplete="organization" {...field('companyName', 'lead-company')} />
+          <FormField
+            htmlFor={fieldId('lead-company')}
+            label={t('company_label')}
+            error={errors.companyName}
+          >
+            <Input autoComplete="organization" {...field('companyName', fieldId('lead-company'))} />
           </FormField>
-          <FormField htmlFor="lead-job-title" label={t('job_title_label')} error={errors.jobTitle}>
-            <Input autoComplete="organization-title" {...field('jobTitle', 'lead-job-title')} />
+          <FormField
+            htmlFor={fieldId('lead-job-title')}
+            label={t('job_title_label')}
+            error={errors.jobTitle}
+          >
+            <Input
+              autoComplete="organization-title"
+              {...field('jobTitle', fieldId('lead-job-title'))}
+            />
           </FormField>
         </div>
 
-        <FormField htmlFor="lead-notes" label={t('notes_label')} error={errors.notes}>
-          <Textarea className="min-h-28" {...field('notes', 'lead-notes')} />
+        <FormField htmlFor={fieldId('lead-notes')} label={t('notes_label')} error={errors.notes}>
+          <Textarea className="min-h-28" {...field('notes', fieldId('lead-notes'))} />
         </FormField>
       </FormDetails>
 

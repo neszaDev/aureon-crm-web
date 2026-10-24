@@ -31,6 +31,7 @@ import {
   TITLE_INPUT,
   TitleField,
 } from '@/components/crm/record/RecordForm';
+import { usePanelIds } from '@/components/crm/record/RecordPanel';
 import { describedBy, FormField } from '@/components/FormField';
 import { Input } from '@/components/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
@@ -98,6 +99,7 @@ export const DealForm = (props: {
   submitLabel: string;
 }) => {
   const t = useTranslations('DealForm');
+  const fieldId = usePanelIds();
   const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
   const [saved, setSaved] = useState(false);
@@ -148,12 +150,12 @@ export const DealForm = (props: {
       <p className="text-[0.8125rem] text-muted-foreground">{t('stage_read_only')}</p>
     </div>
   ) : (
-    <FormField htmlFor="deal-stage" label={t('stage_label')} error={errors.stageId}>
+    <FormField htmlFor={fieldId('deal-stage')} label={t('stage_label')} error={errors.stageId}>
       <NativeSelect
-        id="deal-stage"
+        id={fieldId('deal-stage')}
         defaultValue={stageId ?? undefined}
         aria-invalid={errors.stageId ? true : undefined}
-        aria-describedby={describedBy('deal-stage')}
+        aria-describedby={describedBy(fieldId('deal-stage'))}
         {...form.register('stageId', {
           setValueAs: (value) => (value ? Number(value) : null),
         })}
@@ -184,7 +186,7 @@ export const DealForm = (props: {
       <ActionAlert result={failure} />
 
       <div className="flex flex-col gap-3">
-        <TitleField id="deal-name" label={t('name_label')} error={errors.name}>
+        <TitleField id={fieldId('deal-name')} label={t('name_label')} error={errors.name}>
           <Input
             autoComplete="off"
             // A new deal starts with its name (in a record panel too, `data-autofocus`).
@@ -192,12 +194,12 @@ export const DealForm = (props: {
             data-autofocus={props.isEdit ? undefined : ''}
             placeholder={t('name_label')}
             className={TITLE_INPUT}
-            {...field('name', 'deal-name')}
+            {...field('name', fieldId('deal-name'))}
           />
         </TitleField>
         <div className={CHIP_ROW}>
           <PropertyChip
-            id="deal-stage-chip"
+            id={fieldId('deal-stage-chip')}
             label={t('stage_label')}
             icon={CircleDotIcon}
             value={
@@ -221,7 +223,7 @@ export const DealForm = (props: {
             name="ownerId"
             render={(controller) => (
               <PropertyChip
-                id="deal-owner-chip"
+                id={fieldId('deal-owner-chip')}
                 label={t('owner_label')}
                 icon={UserRoundIcon}
                 value={
@@ -234,7 +236,7 @@ export const DealForm = (props: {
                 error={errors.ownerId}
               >
                 <OwnerField
-                  id="deal-owner"
+                  id={fieldId('deal-owner')}
                   label={t('owner_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -251,7 +253,7 @@ export const DealForm = (props: {
             )}
           />
           <PropertyChip
-            id="deal-amount-chip"
+            id={fieldId('deal-amount-chip')}
             label={t('amount_label')}
             icon={BanknoteIcon}
             value={
@@ -264,19 +266,27 @@ export const DealForm = (props: {
             error={errors.amount ?? errors.currency}
           >
             <FormField
-              htmlFor="deal-amount"
+              htmlFor={fieldId('deal-amount')}
               label={t('amount_label')}
               hint={t('amount_hint')}
               error={errors.amount}
             >
-              <Input inputMode="decimal" autoComplete="off" {...field('amount', 'deal-amount')} />
+              <Input
+                inputMode="decimal"
+                autoComplete="off"
+                {...field('amount', fieldId('deal-amount'))}
+              />
             </FormField>
-            <FormField htmlFor="deal-currency" label={t('currency_label')} error={errors.currency}>
+            <FormField
+              htmlFor={fieldId('deal-currency')}
+              label={t('currency_label')}
+              error={errors.currency}
+            >
               <NativeSelect
-                id="deal-currency"
+                id={fieldId('deal-currency')}
                 defaultValue={currency}
                 aria-invalid={errors.currency ? true : undefined}
-                aria-describedby={describedBy('deal-currency')}
+                aria-describedby={describedBy(fieldId('deal-currency'))}
                 {...form.register('currency')}
               >
                 <NativeSelectOption value="">
@@ -295,7 +305,7 @@ export const DealForm = (props: {
             name="expectedCloseDate"
             render={(controller) => (
               <PropertyChip
-                id="deal-close-chip"
+                id={fieldId('deal-close-chip')}
                 label={t('close_label')}
                 icon={CalendarIcon}
                 value={
@@ -304,7 +314,7 @@ export const DealForm = (props: {
                 error={errors.expectedCloseDate}
               >
                 <DateTimeField
-                  id="deal-close"
+                  id={fieldId('deal-close')}
                   label={t('close_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -324,24 +334,26 @@ export const DealForm = (props: {
             name="companyId"
             render={(controller) => (
               <PropertyChip
-                id="deal-company-chip"
+                id={fieldId('deal-company-chip')}
                 label={t('company_label')}
                 icon={Building2Icon}
                 value={company ? <span className="truncate">{company.label}</span> : undefined}
                 error={errors.companyId}
               >
                 <FormField
-                  htmlFor="deal-company"
+                  htmlFor={fieldId('deal-company')}
                   label={t('company_label')}
                   error={errors.companyId}
                 >
                   <RecordPicker
-                    id="deal-company"
+                    id={fieldId('deal-company')}
                     workspaceId={props.workspaceId}
                     kind="company"
                     value={company}
                     invalid={Boolean(errors.companyId)}
-                    describedBy={errors.companyId ? describedBy('deal-company') : undefined}
+                    describedBy={
+                      errors.companyId ? describedBy(fieldId('deal-company')) : undefined
+                    }
                     onChange={(next) => {
                       setCompany(next);
                       controller.field.onChange(next?.id ?? null);
@@ -357,24 +369,26 @@ export const DealForm = (props: {
             name="contactId"
             render={(controller) => (
               <PropertyChip
-                id="deal-contact-chip"
+                id={fieldId('deal-contact-chip')}
                 label={t('contact_label')}
                 icon={ContactRoundIcon}
                 value={contact ? <span className="truncate">{contact.label}</span> : undefined}
                 error={errors.contactId}
               >
                 <FormField
-                  htmlFor="deal-contact"
+                  htmlFor={fieldId('deal-contact')}
                   label={t('contact_label')}
                   error={errors.contactId}
                 >
                   <RecordPicker
-                    id="deal-contact"
+                    id={fieldId('deal-contact')}
                     workspaceId={props.workspaceId}
                     kind="contact"
                     value={contact}
                     invalid={Boolean(errors.contactId)}
-                    describedBy={errors.contactId ? describedBy('deal-contact') : undefined}
+                    describedBy={
+                      errors.contactId ? describedBy(fieldId('deal-contact')) : undefined
+                    }
                     onChange={(next) => {
                       setContact(next);
                       controller.field.onChange(next?.id ?? null);
@@ -390,14 +404,14 @@ export const DealForm = (props: {
             name="sourceId"
             render={(controller) => (
               <PropertyChip
-                id="deal-source-chip"
+                id={fieldId('deal-source-chip')}
                 label={t('source_label')}
                 icon={SignpostIcon}
                 value={sourceValue(props.sources, controller.field.value)}
                 error={errors.sourceId}
               >
                 <SourceField
-                  id="deal-source"
+                  id={fieldId('deal-source')}
                   label={t('source_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -415,7 +429,7 @@ export const DealForm = (props: {
 
       <FormDetails id="deal-details">
         <FormField
-          htmlFor="deal-probability"
+          htmlFor={fieldId('deal-probability')}
           label={t('probability_label')}
           hint={t('probability_hint')}
           error={errors.probability}
@@ -424,12 +438,12 @@ export const DealForm = (props: {
           <Input
             inputMode="numeric"
             autoComplete="off"
-            {...field('probability', 'deal-probability')}
+            {...field('probability', fieldId('deal-probability'))}
           />
         </FormField>
 
-        <FormField htmlFor="deal-notes" label={t('notes_label')} error={errors.notes}>
-          <Textarea className="min-h-28" {...field('notes', 'deal-notes')} />
+        <FormField htmlFor={fieldId('deal-notes')} label={t('notes_label')} error={errors.notes}>
+          <Textarea className="min-h-28" {...field('notes', fieldId('deal-notes'))} />
         </FormField>
       </FormDetails>
 

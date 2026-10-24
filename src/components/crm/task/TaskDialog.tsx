@@ -28,6 +28,7 @@ import {
   TITLE_INPUT,
   TitleField,
 } from '@/components/crm/record/RecordForm';
+import { usePanelIds } from '@/components/crm/record/RecordPanel';
 import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import {
@@ -156,6 +157,7 @@ const TaskForm = (
   },
 ) => {
   const t = useTranslations('TaskDialog');
+  const fieldId = usePanelIds();
   const tRow = useTranslations('TaskRow');
   const settle = useSettle();
   const [failure, setFailure] = useState<ActionResult>();
@@ -223,14 +225,14 @@ const TaskForm = (
       </DialogHeader>
       <ActionAlert result={failure} />
       <div className="flex flex-col gap-3">
-        <TitleField id="task-title" label={t('title_label')} error={errors.title}>
+        <TitleField id={fieldId('task-title')} label={t('title_label')} error={errors.title}>
           <Input
-            id="task-title"
+            id={fieldId('task-title')}
             autoComplete="off"
             placeholder={t('title_label')}
             className={TITLE_INPUT}
             aria-invalid={errors.title ? true : undefined}
-            aria-describedby={describedBy('task-title')}
+            aria-describedby={describedBy(fieldId('task-title'))}
             {...form.register('title')}
           />
         </TitleField>
@@ -240,7 +242,7 @@ const TaskForm = (
             name="assigneeId"
             render={(controller) => (
               <PropertyChip
-                id="task-assignee-chip"
+                id={fieldId('task-assignee-chip')}
                 label={t('assignee_label')}
                 icon={UserRoundIcon}
                 value={
@@ -253,7 +255,7 @@ const TaskForm = (
                 error={errors.assigneeId}
               >
                 <OwnerField
-                  id="task-assignee"
+                  id={fieldId('task-assignee')}
                   label={t('assignee_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -273,7 +275,7 @@ const TaskForm = (
             name="dueAt"
             render={(controller) => (
               <PropertyChip
-                id="task-due-chip"
+                id={fieldId('task-due-chip')}
                 label={t('due_label')}
                 icon={CalendarIcon}
                 value={
@@ -282,7 +284,7 @@ const TaskForm = (
                 error={errors.dueAt}
               >
                 <DateTimeField
-                  id="task-due"
+                  id={fieldId('task-due')}
                   label={t('due_label')}
                   value={controller.field.value}
                   onChange={(value) => {
@@ -296,18 +298,22 @@ const TaskForm = (
             )}
           />
           <PropertyChip
-            id="task-priority-chip"
+            id={fieldId('task-priority-chip')}
             label={t('priority_label')}
             icon={FlagIcon}
             value={<span className="truncate">{tRow(`priority_${priority}`)}</span>}
             error={errors.priority}
           >
-            <FormField htmlFor="task-priority" label={t('priority_label')} error={errors.priority}>
+            <FormField
+              htmlFor={fieldId('task-priority')}
+              label={t('priority_label')}
+              error={errors.priority}
+            >
               <NativeSelect
-                id="task-priority"
+                id={fieldId('task-priority')}
                 defaultValue={priority}
                 aria-invalid={errors.priority ? true : undefined}
-                aria-describedby={describedBy('task-priority')}
+                aria-describedby={describedBy(fieldId('task-priority'))}
                 {...form.register('priority')}
               >
                 {TASK_PRIORITIES.map((item) => (
@@ -358,14 +364,14 @@ const TaskForm = (
         {!props.link && <p className="text-[0.8125rem] text-muted-foreground">{t('links_hint')}</p>}
       </div>
       <FormField
-        htmlFor="task-description"
+        htmlFor={fieldId('task-description')}
         label={t('description_label')}
         error={errors.description}
       >
         <Textarea
-          id="task-description"
+          id={fieldId('task-description')}
           aria-invalid={errors.description ? true : undefined}
-          aria-describedby={describedBy('task-description')}
+          aria-describedby={describedBy(fieldId('task-description'))}
           {...form.register('description')}
         />
       </FormField>

@@ -40,14 +40,25 @@ const focusTarget = (node: Element, kind: string) =>
 export const InRecordPanel = createContext(false);
 
 /**
+ * `usePanelId` for a component with many ids, a record form's fields: a new record's form in a
+ * panel over the full edit page of a record of its kind has the same ones, and a label, a
+ * field's `aria-describedby` or its error would find the page's.
+ * @returns What makes an id the panel's own, as `usePanelId` does.
+ */
+export const usePanelIds = () => {
+  const inPanel = use(InRecordPanel);
+
+  return (id: string) => (inPanel && !id.startsWith(PANEL_ID) ? `${PANEL_ID}${id}` : id);
+};
+
+/**
  * An id on a record's page (its heading, a section's), made the panel's own in a record panel:
  * the full page of a record of the same kind behind it has the same ones, and a name or label
  * pointing at an id would find that page's first. Applying it twice changes nothing.
  * @param id The page's id, such as `company-heading`.
  * @returns The id to use here.
  */
-export const usePanelId = (id: string) =>
-  use(InRecordPanel) && !id.startsWith(PANEL_ID) ? `${PANEL_ID}${id}` : id;
+export const usePanelId = (id: string) => usePanelIds()(id);
 
 /**
  * A record opened from inside the app, in a wide panel over the page it was opened from (an

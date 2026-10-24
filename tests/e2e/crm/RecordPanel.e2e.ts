@@ -353,6 +353,21 @@ test.describe('Record panel', () => {
       .click();
     await expect(page.getByRole('dialog', { name: 'New company', exact: true })).toBeVisible();
     expect(await repeatedIds()).toStrictEqual([]);
+
+    // Over the full edit page of one, the new company's fields keep ids of their own too.
+    await page.goto(`${owner.path}/companies/${company.id}/edit`);
+    const add = page
+      .getByRole('navigation', { name: 'Quick access' })
+      .getByRole('button', { name: 'New', exact: true });
+    await waitForHydration(add);
+    await add.click();
+    await page
+      .getByRole('menu', { name: 'New' })
+      .getByRole('menuitem', { name: 'Company' })
+      .click();
+    const form = page.getByRole('dialog', { name: 'New company', exact: true });
+    await expect(form.getByLabel('Company name')).toBeFocused();
+    expect(await repeatedIds()).toStrictEqual([]);
   });
 
   test.describe('on a phone', () => {
