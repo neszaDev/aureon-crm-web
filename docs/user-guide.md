@@ -140,13 +140,15 @@ one; choose 20, 50 or 100 rows a page.
 stays once anything is selected); a section's heading row has one for the whole section, half
 filled while only some of it is. Shift+click a box to select every row from the last one you
 clicked; with the keyboard, Space on a row's name selects it and Shift+Space the range. Escape
-clears the selection, and so does changing the group, a filter, the sort or the page. A bar then
-offers what you may do to every selected record: **Assign** (the owner; a task's assignee),
+clears the selection (outside a text field), and so does changing the group, a filter, the sort or
+the page. A bar then floats at the foot of the screen and offers what you may do to every selected record: **Assign** (the owner; a task's assignee),
 **Status** or **Stage** (Unqualified and Lost ask one reason for all; tasks complete, reopen, or
 cancel once confirmed), **Archive** (confirmed) or, in the archived view, **Restore**. If you
 can't change one of them, the bar says so and offers only to clear. Each record is saved on its
 own and the bar counts them; when some are refused (your role, or someone changed them first) the
-bar lists each by name with the reason, keeps them selected and shows the list as it now is.
+bar lists each by name with the reason, keeps them selected and shows the list as it now is; the
+list stays until you dismiss it. With the keyboard, Tab from a section's box to **Go to bulk
+actions** to reach the bar, and move along it with the arrow keys.
 
 Who may change a record: its owner, or a manager, admin or owner of the workspace. A **sales rep**
 reads everything in the workspace but edits, archives and moves only the records they own (and the
@@ -244,9 +246,11 @@ month of the period), **Funnel** (the deals created in the period and how far th
 workspace's overdue tasks, tasks due in the next 7 days and leads to follow up). Each chart has
 its data in a table under it (**Table** hides it). Amounts are never converted or added across
 currencies: each currency has its own line. When a period starts before the workspace began
-recording stage changes, the funnel says so.
+recording stage changes, the funnel says so. The **Owner** chip (**Me**, or any member) narrows
+every report to one member's records: the deals they own, their activity, the tasks assigned to
+them and the leads they own; the period and the tab keep it.
 
-Every member sees the dashboard and the reports, for the whole workspace.
+Every member sees the dashboard and the reports, for the whole workspace or one member.
 
 ## Export
 

@@ -45,7 +45,7 @@ src/libs/crm/*                  CRM logic: Permissions (`can`), RecordAccess (wh
                                 inputs), ListQuery (a list's state from its URL), DealHistory (the status track's movers),
                                 Reminders (the bell's count and its "20+"), PeriodQuery (a dashboard's or report's
                                 `?from&to`, read leniently, and the picker's presets), Reports (the
-                                report tabs: `?tab=`, which take a period), Audit (the trail's record types and URL state)
+                                report tabs: `?tab=`, which take a period; the member they count, `?ownerId`), Audit (the trail's record types and URL state)
 src/libs/Auth.ts                session cookie rules (names, lifetimes, flags)
 src/proxy.ts                    i18n routing + auth: protects /app and /dashboard, refreshes tokens (for /api/crm too)
 src/validations/                zod schemas mirroring the backend's request rules (CRM: crm/*)
