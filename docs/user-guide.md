@@ -1,7 +1,8 @@
 # User guide
 
 How to work in Aureon CRM: the workspace and its members, companies and contacts, leads, the
-pipeline, tasks and reminders, the dashboard and reports, exports, the audit trail and languages.
+pipeline, tasks and the inbox, Home, the dashboard and reports, exports, the audit trail and
+languages.
 Each section says who may do what; the [roles](#roles-at-a-glance) table sums it up. The server
 checks every action against the same rules, so a button you don't see is one your role can't use.
 
@@ -13,25 +14,36 @@ checks every action against the same rules, so a button you don't see is one you
    (the browser's is suggested). Due times, reminders and report periods use that time zone, wherever
    you are. You become its owner. Create more from the workspace switcher; with several, `/app`
    lists them.
-3. The workspace opens on its **dashboard**. A new one offers to create your first records and to
-   invite your team.
+3. The workspace opens on its **Home**: what is yours (see [Home](#home-dashboard-and-reports)).
+   A new one offers to create your first records and to invite your team.
 
 The dark rail on the far left has:
 
-- **Home**: the workspace's dashboard.
-- **Reminders**: see [Reminders](#reminders).
+- **Home**: your work, your open deals and the workspace's latest activity.
+- **Inbox**: your reminders, see [The inbox](#the-inbox).
 - **Search records** (`⌘K` or `Ctrl+K`): type at least 2 characters to find active companies,
-  contacts, leads and deals; Enter opens the highlighted one.
-- **+ New**: a company, contact, lead or deal (its form), or a task (the task list).
+  contacts, leads and deals; Enter opens the highlighted one. From 1024 px wide it is the
+  **Search ⌘K** field in the middle of the bar above the page instead.
+- **+ New**: a company, contact, lead or deal (its form, in the side panel), or a task (the task
+  list, its dialog open).
 - **Your avatar**, at the foot: your profile, the theme (light, dark or the system's), the
   language, and sign out.
 
-Beside it, the sidebar has the workspace switcher and the sections: Companies, Contacts, Leads,
-Deals and Tasks, then Dashboard and Reports, and Settings at the foot. Its « button (or `⌘\` /
-`Ctrl+\`) collapses it to a strip of icons and back; your browser remembers which. The bar above
-the page says where you are: the workspace, the section and the record's number. On a phone the
-rail and the sidebar are one drawer behind the menu button, and search and reminders are in the
-bar.
+Beside it, the sidebar has the workspace switcher, the **Spaces**, **Insights** (Dashboard,
+Reports) and **Settings** at the foot. The spaces are a tree of saved views: each space's › opens
+its views, each its list at an address of its own:
+
+- Companies and Contacts: **All**, **Mine** (owned by you), **Archived**;
+- Leads: **All**, **Mine**, **To follow up** (open leads whose follow-up day has come);
+- Deals: **Board**, **List**, **Mine**;
+- Tasks: **My tasks**, **Overdue**, **Next 7 days**, **Completed**.
+
+Your browser remembers which spaces are open. The view you are on is marked, and the orbit's
+satellite (the dot of the Aureon mark) sits on the current section's icon. The « button (or `⌘\` /
+`Ctrl+\`) folds the sidebar into the rail, which then carries the sections as icons (Settings too)
+and » to bring it back; your browser remembers that too. The bar above the page says where you
+are: the workspace, the section and the record's number. On a phone the rail and the sidebar are
+one drawer behind the menu button, and search and the inbox are in the bar.
 
 ## Workspace and members
 
@@ -45,7 +57,7 @@ bar.
 | Pipeline | The deal stages: add, rename, set the win probability, reorder, delete | Owners and admins |
 | Lead sources | Where leads come from: add, rename, archive, delete an unused one | Owners and admins |
 | Audit | The workspace's trail of changes and exports | Owners and admins only see it |
-| Your profile | Your display name (on your seal and in history) and your password | You |
+| Your profile | Your display name (on your avatar and in history) and your password | You |
 
 Won and Lost are always the last two stages. Changing your password signs you out on every other
 device.
@@ -69,13 +81,15 @@ them on.
 company if you like. Create one from its list (**Add company**, **Add contact**, or the **Add**
 row at the end of the list or of a group: a company from its name alone, on Enter; a contact
 through its form, filled in with the group's owner and the list's company; a lead from its name and
-company, in its section's status; a deal through its form, in its section's stage; a task from its
-title, due today in Today or without a due date) or from the dashboard's
-quick actions. Once you have entered a company's name or website, or a contact's
+company (its name alone on a phone: add the company in its panel), in its section's status; a deal through its form, in its section's stage; a task from its
+title, due today in Today or without a due date), from the rail's **+ New**, or, in a new
+workspace, from Home's first steps. Once you have entered a company's name or website, or a contact's
 email or phone, the records that look like it are listed, so the same one isn't entered twice;
 saving stays possible.
 
-A record's page shows its number (`C-0001` for a company, `P-…` for a contact, `L-…` a lead, `D-…`
+A record opens in a **side panel** over the list it was opened from, at its own address (a
+reload, or the panel's **Open as a full page**, shows it as a full page; ×, Escape or a click
+beside it closes it, back to the list where you were). A record's page shows its number (`C-0001` for a company, `P-…` for a contact, `L-…` a lead, `D-…`
 a deal, `T-…` a task), its owner, its details, and below them its tasks, its activity timeline and
 its **History** (every change, by whom). A company's page also lists its contacts and deals, and
 its timeline includes theirs.
@@ -128,8 +142,8 @@ they create and can't give it to someone else.
 
 ## Leads and conversion
 
-A **lead** is someone who may become a customer. Its status pill in the list, or **Change status**
-on its page, moves it between **New**,
+A **lead** is someone who may become a customer. Its status pill, in the list or at the top of its
+page, moves it between **New**,
 **Contacted**, **Qualified** and **Unqualified** (which asks why; the reason stays on the lead). A
 **follow-up date** puts it in its owner's reminders from that day on, for as long as it is New,
 Contacted or Qualified (a lead without an owner is in nobody's).
@@ -151,8 +165,8 @@ see who moved the deal there and when. Move a deal to another stage:
 - **drag** its card by the handle;
 - with the **keyboard**: focus the handle, press Space, move with the arrow keys, Space to drop
   (Escape cancels);
-- or open the card's menu: **Move to…**, which is also the **Move** button on the deal's page;
-- or, in the **List** view, its stage pill.
+- or open the card's menu: **Move to…**;
+- or click its stage pill: in the **List** view, or at the top of the deal's page.
 
 Dropping on **Lost** asks for the reason first; cancelling leaves the deal where it was. **Won**
 and **Lost** close the deal and take it off the board: they start as narrow strips that count it
@@ -164,12 +178,13 @@ The **List** view filters and sorts all deals, open and closed. A deal's page sh
 track** (whoever moved the deal into each stage, and when; the current stage with its days; a
 closed deal's Won or Lost) and the **stage history** with every move, by whom and when. A lost deal's page also says why it was lost.
 
-Only a deal's owner, or a manager, admin or owner, gets the handle, the menu and the Move button.
+Only a deal's owner, or a manager, admin or owner, gets the handle, the menu and a stage pill that
+opens.
 
 ## Tasks and reminders
 
-Create a task from **Tasks → Add task** (or **+ New → Task** on the rail), its list's add row, the
-dashboard, or **Add task** on a record (it is
+Create a task from **Tasks → Add task** (or **+ New → Task** on the rail), its list's add row, or
+**Add task** on a record (it is
 then linked to that record and shows on its page; a task on a contact or deal shows on its company
 too). A task has a title, a due date and time (in the workspace's time zone), a priority and an
 assignee: you, unless you choose someone else, which managers, admins and owners can.
@@ -180,21 +195,27 @@ yours (what the old **My tasks** tab showed); the **Due** chip keeps one of thos
 task's box to **complete** it; its status pill also completes, **cancels** or **reopens** it. Tasks
 are never deleted. A task can be changed by its assignee, its creator, or a manager, admin or owner.
 
-### Reminders
+### The inbox
 
-The **reminders** icon on the rail (in the top bar on a phone) counts what needs you now: your open tasks that are overdue, those due
-in the next 24 hours, and your open leads whose follow-up day has come. Its popover lists them,
+The **Inbox** on the rail (in the top bar on a phone) counts your reminders, what needs you now:
+your open tasks that are overdue, those due in the next 24 hours, and your open leads whose
+follow-up day has come. Its popover lists them by **Overdue**, **Today** and **Upcoming**,
 completes a task in place, and links to **All tasks**. The count is refreshed on every page you
 open. Reminders appear in the app only: nothing is sent by email, push notification or calendar.
 
-## Dashboard and reports
+## Home, dashboard and reports
 
-The **dashboard** is the workspace's home:
+**Home** is yours:
 
-- the workspace's totals: companies, contacts, open leads, open deals and overdue tasks, each a
-  link to that list;
-- **My deals** (your most recently updated open deals) and **Follow-ups** (your overdue and upcoming
-  tasks, and the leads you should follow up);
+- **My work**: your open tasks that are overdue, due today or in the next 7 days, each section
+  headed by its pill (tick a box to complete one), and the leads you should follow up;
+- **My deals**: your most recently updated open deals, each with its status track;
+- the workspace's **recent activity**.
+
+**Insights › Dashboard** is the workspace's:
+
+- its totals: companies, contacts, open leads, open deals and overdue tasks, each a link to that
+  list;
 - the **open pipeline** per currency (the amount, and the amount weighted by each deal's
   probability), **won and lost** deals in the period, and the open deals **by stage**;
 - **recent activity** and **recent changes**.
@@ -234,7 +255,7 @@ Every record's page has its own **History**, which every member can read.
 
 ## Languages and themes
 
-The app is in **English**, **French** and **Thai**: choose one from your seal's menu (or the public
+The app is in **English**, **French** and **Thai**: choose one from your avatar's menu (or the public
 pages' language switch). Dates, numbers and amounts follow the language; Thai dates use the
 Buddhist year. The language is part of the address (`/fr/app/…`, `/th/app/…`), so a shared link
 opens in its language. The theme is light, dark or the system's, from the same menu.

@@ -53,8 +53,9 @@ src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx
 src/components/report/          Marksheet domain UI: marks, totals, results table (demos only)
 src/components/marketing/       the public landing page: hero capture, section row and developer note, capture sheet,
                                 the app's pill, track and avatar drawn without their components (`TrackSample`)
-src/components/crm/**           the CRM: shell/ (rail, collapsible sidebar, location, + New, switcher, account menu, record search, the inbox of
-                                reminders: `RemindersBell`), settings/, seals, dashboard/ (Home, the workspace's root: my work, my deals,
+src/components/crm/**           the CRM: shell/ (rail, sidebar with the tree of saved views that folds into the rail, location, + New,
+                                switcher, account menu, record search, the inbox of reminders: `RemindersBell`), settings/, status pills,
+                                tracks and avatars, dashboard/ (Home, the workspace's root: my work, my deals,
                                 recent activity; Insights › Dashboard, `dashboard/`: the line of figures, stages, won and lost, pipeline,
                                 recent activity and changes),
                                 audit/ (`AuditEventItem`, `AuditTrail`, `RecordHistory`), reports/ (the tabs and a panel per report, `ChartTable`),

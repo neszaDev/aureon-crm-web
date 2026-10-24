@@ -90,12 +90,13 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
 
 | Route | What it is |
 |---|---|
-| `/app` | The signed-in home: the create form with no workspace, the workspace itself with one, the list with several (`PickerFrame`: wordmark and your seal over one column) |
+| `/app` | The signed-in home: the create form with no workspace, the workspace itself with one, the list with several (`PickerFrame`: wordmark and your avatar over one column) |
 | `/app/new` | Create another workspace |
-| `/app/{workspaceId}` | The dashboard (`?from&to`: the period of its won and lost); an empty workspace starts with its first records |
+| `/app/{workspaceId}` | Home, the caller's: my work (tasks by due section, leads to follow up), my deals, recent activity; an empty workspace starts with its first records (an old link with `?from&to` goes to the dashboard) |
+| `/app/{workspaceId}/dashboard` | Insights › Dashboard, the workspace's (`?from&to`: the period of its won and lost) |
 | `/app/{workspaceId}/settings/{workspace,members,roles,pipeline,sources,audit,profile}` | Settings: name, currency and time zone; members and invitation links; the role matrix; pipeline stages; lead sources; the audit trail (`?entityType&actorId&page`, owners and admins); your display name and password |
 | `/app/{workspaceId}/companies`, `/contacts`, `/leads`, `/deals` | The record lists (deals: `?view=list`; the default is the board). Each has `/new`, `/{id}` (the record page) and `/{id}/edit` |
-| `/app/{workspaceId}/tasks`, `/tasks/{id}` | Tasks: the list with its views (mine, overdue, next 7 days, completed, all) and a task's page |
+| `/app/{workspaceId}/tasks`, `/tasks/{id}` | Tasks: the list in its due sections (`?view=` one of them, `assigneeId`, `new=1`: its dialog open) and a task's page |
 | `/app/{workspaceId}/reports` | The reports, one tab at a time (`?tab=pipeline\|won-lost\|funnel\|activities\|follow-ups&from&to`) |
 | `/api/crm/{workspaceId}/export/{list}` | Route handler: the CSV of a list (companies, contacts, leads, deals) for its page's filters, streamed from the backend |
 | `/`, `/about` | Public: the landing page (real captures of the app in `public/landing/`) and About, static per locale |
@@ -105,12 +106,17 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
   5xx throws to the error boundary.
 - `app/[workspaceId]/layout.tsx` loads the workspace (`GET /workspaces/{id}`, with the caller's
   role and `permissions`) and the caller's workspaces, then renders `CrmShell`: from `md` the
-  ink-violet rail (Home, the reminders, record search, "+ New", your avatar for the account menu:
-  profile, theme, language, the demo gallery, sign out) beside the workspace sidebar (switcher,
-  sections from `CrmNav`), which collapses to an icon strip (`Sidebar.ts`: the viewer's choice in
-  localStorage, put on `<html>` before the first paint; by default the strip from 768 to 1279 px);
-  a top bar with where you are (`CrmLocation`, from the URL alone); below `md` the rail and the
-  sidebar are one drawer and the reminders and search sit in the top bar; and a skip link. A 404 (unknown workspace, or not a
+  ink-violet rail (Home, the inbox, record search below `lg`, "+ New", your avatar for the account
+  menu: profile, theme, language, the demo gallery, sign out) beside the workspace sidebar
+  (switcher; `CrmNav`: the spaces as a tree of saved views, each a list URL, which spaces are open
+  the viewer's; insights; settings). The sidebar folds into the rail, which then carries the
+  sections itself (`CrmStrip`): one strip. `Sidebar.ts` keeps both choices in localStorage and puts
+  them on `<html>` before the first paint (`data-sidebar`, `data-spaces`; global.css draws from
+  them), folded by default from 768 to 1279 px. The orbit's satellite (`Satellite`) marks the
+  current section there and the current stage on a status track. A top bar with where you are
+  (`CrmLocation`, from the URL alone) and from `lg` the record search as a field in its middle;
+  below `md` the rail and the sidebar are one drawer and the inbox and search sit in the top bar;
+  and a skip link. A 404 (unknown workspace, or not a
   member) is `notFound()`, "Workspace not found"; a 403 shows `ForbiddenNotice`.
 - Pages read the same cached calls (`CrmQueries.ts`), hide what `can(workspace, permission)`
   (`src/libs/crm/Permissions.ts`) says the caller can't do, and still handle the backend's 403.
@@ -125,8 +131,8 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
   refuses (a search over 200 characters) shows `InvalidFilterNotice` with a link that resets the
   list, never an error page. The list kit is `src/components/crm/list/` (search, sort headers,
   filters, pager, empty states).
-- **A record's page** is `RecordHeader` (mono record number `C/P/L/D/T` + 4 digits, name, owner's
-  seal, actions the caller may take), the record's facts, and `RecordWork`: its tasks and its
+- **A record's page** is `RecordHeader` (mono record number `C/P/L/D/T` + 4 digits, name, its
+  status pill, owner's avatar, its track, actions the caller may take), the record's facts, and `RecordWork`: its tasks and its
   activity timeline (a company's holds its contacts' and deals' too). A record that 404s is
   `RecordNotFound` inside the shell; only a lost workspace is "Workspace not found".
 - **Leads** move New, Contacted, Qualified (or Unqualified with a reason) from a status menu and
@@ -147,8 +153,9 @@ Every CRM route sits under `src/app/[locale]/(auth)/` and works in every locale 
   keeps only real days, `from` ≤ `to`, at most 366 days apart, and drops anything else for the
   API's default (the last 30 days in the workspace's time zone). Every chart (recharts, through
   `components/ui/chart.tsx`, colours `--chart-1..5`, never colour alone) has its data in a table.
-- **Record search** (`RecordSearch`, ⌘K) and **the reminders bell** live on the shell's rail (in
-  the top bar on a phone; one of each is ever mounted, `useRailShown`).
+- **Record search** (`RecordSearch`, ⌘K) and **the inbox** (`RemindersBell`) live on the shell's
+  rail (in the top bar on a phone, and the search as the top bar's field from `lg`; one of each is
+  ever mounted, `useRailShown`, `useSearchField`).
   The search asks the four lists (`q`, 5 each) through a server action; the bell's count comes from
   `GET /reminders`, read by the workspace layout and again by the bell on every navigation.
   Reminders are in-app only.
