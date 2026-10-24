@@ -218,4 +218,52 @@ test.describe('Bulk actions', () => {
     await expect(bar).toBeHidden();
     await expect(box(names[1] ?? '')).not.toBeChecked();
   });
+  test.describe('on a phone', () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test('keeps the bar to one row in English and Thai, never wider than the screen nor over the last row', async ({
+      page,
+      request,
+    }) => {
+      const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+      await Promise.all(
+        MORE_COMPANIES.slice(0, 12).map(
+          async (name) => await seed(request, owner, 'tasks', { title: `Call ${name}` }),
+        ),
+      );
+      await signIn(page, { email: owner.email, password: PASSWORD });
+
+      /**
+       * Selects two tasks and measures the bar (assign, status and ×).
+       * @param path The workspace's path, in the page's language.
+       * @param selected What the bar is named.
+       */
+      const expectOneRow = async (path: string, selected: string) => {
+        await page.goto(`${path}/tasks`);
+        const boxes = page.locator('#crm-main [data-select-id]');
+        await waitForHydration(boxes.first());
+        await boxes.nth(0).click();
+        await boxes.nth(1).click();
+        const bar = page.getByRole('toolbar', { name: selected });
+        await expect(bar).toBeVisible();
+
+        // One row of 36 px controls; the page doesn't scroll sideways.
+        const box = await bar.boundingBox();
+        expect(box?.height).toBeLessThanOrEqual(52);
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+        ).toBe(true);
+        // At the foot of the page the last row stays above the bar.
+        await page.evaluate(() => {
+          window.scrollTo(0, document.documentElement.scrollHeight);
+        });
+        const row = await page.locator('#crm-main tbody tr').last().boundingBox();
+        const drawn = await bar.boundingBox();
+        expect((row?.y ?? 0) + (row?.height ?? 0)).toBeLessThanOrEqual(drawn?.y ?? 0);
+      };
+
+      await expectOneRow(owner.path, '2 selected');
+      await expectOneRow(owner.path.replace('/app/', '/th/app/'), 'เลือก 2 รายการ');
+    });
+  });
 });

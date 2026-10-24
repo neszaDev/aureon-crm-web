@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { assignDeal, moveDeal } from '@/actions/crm/DealActions';
@@ -12,7 +12,9 @@ import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import type { BulkEntity, BulkItem } from '@/libs/crm/BulkSelection';
 import messages from '@/locales/en.json';
+import thai from '@/locales/th.json';
 import { BulkBar } from './BulkBar';
+import '@/styles/global.css';
 
 type Send = () => Promise<ActionResult>;
 
@@ -73,12 +75,16 @@ const item = (id: number, name: string, extra: Partial<BulkItem> = {}): BulkItem
 const renderBar = async (
   entity: BulkEntity,
   chosen: BulkItem[],
-  options: { mayAssign?: boolean; archived?: boolean } = {},
+  options: { mayAssign?: boolean; archived?: boolean; locale?: 'en' | 'th' } = {},
 ) => {
   const onClear = vi.fn<() => void>();
   const onKeep = vi.fn<(ids: number[]) => void>();
   await render(
-    <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+    <NextIntlClientProvider
+      locale={options.locale ?? 'en'}
+      messages={options.locale === 'th' ? thai : messages}
+      timeZone="UTC"
+    >
       <TooltipProvider>
         <h2 id="list-heading" tabIndex={-1}>
           List
@@ -104,6 +110,11 @@ const renderBar = async (
 };
 
 const bar = () => page.getByRole('toolbar');
+// An element's vertical centre, to tell which row of the bar it is on.
+const middle = (element: Element) => {
+  const box = element.getBoundingClientRect();
+  return Math.round(box.top + box.height / 2);
+};
 const buttonsOf = () =>
   bar()
     .getByRole('button')
@@ -198,6 +209,37 @@ describe(BulkBar, () => {
       expect(slot.querySelector('[role="toolbar"]')).not.toBeNull();
       slot.remove();
     });
+  });
+
+  describe('on a phone', () => {
+    afterEach(async () => {
+      await page.viewport(414, 896);
+    });
+
+    it.each([
+      ['en', '2 selected', ['Assign', 'Status', 'Archive', 'Clear selection']],
+      ['th', 'เลือก 2 รายการ', ['มอบหมาย', 'สถานะ', 'เก็บถาวร', 'ล้างการเลือก']],
+    ] as const)(
+      'keeps to one row in %s: the count and × stay, the actions are named icons',
+      async (locale, selected, names) => {
+        await page.viewport(390, 844);
+        await renderBar('lead', [item(1, 'Amara'), item(2, 'Bruno')], { locale });
+        const count = bar().getByText(selected).element();
+
+        expect(buttonsOf()).toStrictEqual(names);
+        for (const name of names) {
+          const button = bar().getByRole('button', { name, exact: true }).element();
+          // Named for assistive technology, drawn as its icon alone.
+          expect(button.getAttribute('aria-label')).toBe(name);
+          const words = [...button.querySelectorAll('span')].filter((part) =>
+            part.checkVisibility(),
+          );
+          expect(words.map((part) => part.textContent)).toStrictEqual([]);
+          expect(middle(button)).toBe(middle(count));
+        }
+        expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390);
+      },
+    );
   });
 
   describe('keyboard', () => {

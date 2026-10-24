@@ -32,6 +32,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import type { BulkEntity, BulkItem } from '@/libs/crm/BulkSelection';
@@ -62,6 +63,23 @@ const statusMenu = () => document.querySelector<HTMLElement>('[data-bar-menu="st
 // on-rail focus ring (the page's violet one would sit on the bar under 3:1).
 const ON_BAR =
   'px-2.5 text-[0.8125rem] text-on-rail/80 hover:bg-white/10 hover:text-on-rail focus-visible:ring-on-rail focus-visible:ring-offset-rail aria-expanded:bg-white/10 aria-expanded:text-on-rail';
+
+/**
+ * An action's name over its icon where a phone's bar draws the icon alone, on a device with hover
+ * (a touch screen opens no tooltip). Needs the bar's `TooltipProvider`.
+ * @param props Component props.
+ * @param props.label The action's name.
+ * @param props.children The action's button.
+ * @returns The button with its tooltip.
+ */
+const PhoneTip = (props: { label: string; children: React.ReactElement }) => (
+  <Tooltip>
+    <TooltipTrigger asChild>{props.children}</TooltipTrigger>
+    <TooltipContent side="top" sideOffset={6} className="sm:hidden">
+      {props.label}
+    </TooltipContent>
+  </Tooltip>
+);
 
 /**
  * The records' own actions: assign each, and archive or restore it (tasks are never archived).
@@ -150,20 +168,23 @@ const BarMenu = (props: {
         setOpen(next && !props.busy);
       }}
     >
-      <DropdownMenuTrigger asChild>
-        <Toolbar.Button asChild>
-          <Button
-            data-bar-menu={props.name}
-            variant="ghost"
-            aria-disabled={props.busy || undefined}
-            className={ON_BAR}
-          >
-            {props.icon}
-            {props.label}
-            <ChevronDownIcon data-icon="inline-end" className="opacity-70" />
-          </Button>
-        </Toolbar.Button>
-      </DropdownMenuTrigger>
+      <PhoneTip label={props.label}>
+        <DropdownMenuTrigger asChild>
+          <Toolbar.Button asChild>
+            <Button
+              data-bar-menu={props.name}
+              variant="ghost"
+              aria-label={props.label}
+              aria-disabled={props.busy || undefined}
+              className={ON_BAR}
+            >
+              {props.icon}
+              <span className="max-sm:hidden">{props.label}</span>
+              <ChevronDownIcon data-icon="inline-end" className="opacity-70" />
+            </Button>
+          </Toolbar.Button>
+        </DropdownMenuTrigger>
+      </PhoneTip>
       <DropdownMenuContent side="top" align="start" className="max-h-72 overflow-y-auto">
         <DropdownMenuLabel>{props.menuLabel}</DropdownMenuLabel>
         {props.children}
@@ -199,7 +220,7 @@ const BarCount = (props: {
         {props.pending ? t('progress', props.progress) : t('selected', { count: props.count })}
       </output>
       {(props.locked > 0 || props.converted > 0) && (
-        <span className="px-2 text-[0.8125rem] text-on-rail/80">
+        <span className="min-w-0 px-2 text-[0.8125rem] text-on-rail/80">
           {props.locked > 0
             ? t('locked', { count: props.locked })
             : t('converted', { count: props.converted })}
@@ -463,106 +484,118 @@ export const BulkBar = (props: BulkBarProps) => {
           </div>
         )}
         {(count > 0 || isPending) && (
-          // One Tab stop; the arrow keys move between its controls.
-          <Toolbar.Root
-            aria-label={t('selected', { count })}
-            className="flex flex-wrap items-center justify-center gap-1 rounded-lg bg-rail p-1.5 text-on-rail shadow-float ring-1 ring-white/10"
-          >
-            <BarCount
-              count={count}
-              pending={isPending}
-              progress={progress}
-              locked={allowed.locked}
-              converted={allowed.converted}
-            />
-            <span aria-hidden="true" className="mx-0.5 h-5 w-px bg-white/20" />
-            {allowed.assign && (
-              <BarMenu
-                icon={<UserRoundIcon data-icon="inline-start" />}
-                label={t('assign')}
-                menuLabel={t('assign_to')}
-                busy={isPending}
-                name="assign"
-              >
-                {props.members.map((member) => (
-                  <DropdownMenuItem
-                    key={member.userId}
-                    onSelect={() => {
-                      assign(member);
-                    }}
+          // One Tab stop; the arrow keys move between its controls. One row: the count and × stay,
+          // and the actions between them scroll inside the bar should they not fit, never the page.
+          <TooltipProvider>
+            <Toolbar.Root
+              aria-label={t('selected', { count })}
+              className="flex max-w-full items-center gap-1 rounded-lg bg-rail p-1.5 text-on-rail shadow-float ring-1 ring-white/10"
+            >
+              <BarCount
+                count={count}
+                pending={isPending}
+                progress={progress}
+                locked={allowed.locked}
+                converted={allowed.converted}
+              />
+              {/* Its padding keeps the focus ring of the first and last action unclipped. */}
+              <div className="-mx-1 -my-1.5 flex min-w-0 [scrollbar-width:thin] [scrollbar-color:rgb(255_255_255/30%)_transparent] items-center gap-1 overflow-x-auto px-1 py-1.5">
+                <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-white/20" />
+                {allowed.assign && (
+                  <BarMenu
+                    icon={<UserRoundIcon data-icon="inline-start" />}
+                    label={t('assign')}
+                    menuLabel={t('assign_to')}
+                    busy={isPending}
+                    name="assign"
                   >
-                    <PersonAvatar person={member} size="xs" />
-                    <span className="truncate">{member.displayName ?? member.email}</span>
-                  </DropdownMenuItem>
-                ))}
-              </BarMenu>
-            )}
-            {allowed.status && (
-              <BarMenu
-                icon={<CircleDotIcon data-icon="inline-start" />}
-                label={deal ? t('stage') : t('status')}
-                menuLabel={t('move_to')}
-                busy={isPending}
-                name="status"
-              >
-                {statusItems()}
-              </BarMenu>
-            )}
-            {allowed.restore && restore && (
+                    {props.members.map((member) => (
+                      <DropdownMenuItem
+                        key={member.userId}
+                        onSelect={() => {
+                          assign(member);
+                        }}
+                      >
+                        <PersonAvatar person={member} size="xs" />
+                        <span className="truncate">{member.displayName ?? member.email}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </BarMenu>
+                )}
+                {allowed.status && (
+                  <BarMenu
+                    icon={<CircleDotIcon data-icon="inline-start" />}
+                    label={deal ? t('stage') : t('status')}
+                    menuLabel={t('move_to')}
+                    busy={isPending}
+                    name="status"
+                  >
+                    {statusItems()}
+                  </BarMenu>
+                )}
+                {allowed.restore && restore && (
+                  <PhoneTip label={t('restore')}>
+                    <Toolbar.Button asChild>
+                      <Button
+                        variant="ghost"
+                        aria-label={t('restore')}
+                        aria-disabled={busy}
+                        className={ON_BAR}
+                        onClick={() => {
+                          run(
+                            async (item) =>
+                              await restore(props.workspaceId, item.id, { refreshPage: false }),
+                            (many) => t('done_restore', { records: records(many) }),
+                          );
+                        }}
+                      >
+                        <ArchiveRestoreIcon data-icon="inline-start" />
+                        <span className="max-sm:hidden">{t('restore')}</span>
+                      </Button>
+                    </Toolbar.Button>
+                  </PhoneTip>
+                )}
+                {allowed.archive && (
+                  <PhoneTip label={t('archive')}>
+                    <Toolbar.Button asChild>
+                      <Button
+                        variant="ghost"
+                        aria-label={t('archive')}
+                        aria-disabled={busy}
+                        className={ON_BAR}
+                        onClick={() => {
+                          if (!isPending) {
+                            setAsking('archive');
+                          }
+                        }}
+                      >
+                        <ArchiveIcon data-icon="inline-start" />
+                        <span className="max-sm:hidden">{t('archive')}</span>
+                      </Button>
+                    </Toolbar.Button>
+                  </PhoneTip>
+                )}
+              </div>
               <Toolbar.Button asChild>
                 <Button
                   variant="ghost"
-                  aria-disabled={busy}
-                  className={ON_BAR}
-                  onClick={() => {
-                    run(
-                      async (item) =>
-                        await restore(props.workspaceId, item.id, { refreshPage: false }),
-                      (many) => t('done_restore', { records: records(many) }),
-                    );
-                  }}
-                >
-                  <ArchiveRestoreIcon data-icon="inline-start" />
-                  {t('restore')}
-                </Button>
-              </Toolbar.Button>
-            )}
-            {allowed.archive && (
-              <Toolbar.Button asChild>
-                <Button
-                  variant="ghost"
+                  size="icon"
+                  aria-label={t('clear')}
+                  title={t('clear')}
                   aria-disabled={busy}
                   className={ON_BAR}
                   onClick={() => {
                     if (!isPending) {
-                      setAsking('archive');
+                      setRefused([]);
+                      props.onClear();
                     }
                   }}
                 >
-                  <ArchiveIcon data-icon="inline-start" />
-                  {t('archive')}
+                  <XIcon />
                 </Button>
               </Toolbar.Button>
-            )}
-            <Toolbar.Button asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t('clear')}
-                title={t('clear')}
-                aria-disabled={busy}
-                className={ON_BAR}
-                onClick={() => {
-                  if (!isPending) {
-                    setRefused([]);
-                    props.onClear();
-                  }
-                }}
-              >
-                <XIcon />
-              </Button>
-            </Toolbar.Button>
-          </Toolbar.Root>
+            </Toolbar.Root>
+          </TooltipProvider>
         )}
       </div>
 
