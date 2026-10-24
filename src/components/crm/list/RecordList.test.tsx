@@ -1,5 +1,7 @@
+// The section's boxes, a phone's and a desktop's, are placed by the styles.
+import '@/styles/global.css';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
 import { Table, TableBody, TableHeader, TableRow } from '@/components/ui/table';
@@ -97,7 +99,8 @@ const renderList = async (
         table={(rows) =>
           bulk ? (
             <Table>
-              <TableHeader>
+              {/* As the lists' own tables: no head row on a phone. */}
+              <TableHeader className="max-sm:hidden">
                 <TableRow>
                   <SelectAllHead />
                 </TableRow>
@@ -167,6 +170,7 @@ describe(RecordList, () => {
   });
 
   it('gives each section a select-all box named after its heading, and the bar for the list', async () => {
+    await page.viewport(1280, 800);
     await renderList({ group: 'owner' }, [
       { content: ['Brightwater'], totalElements: 1 },
       { content: ['Acme', 'Cobalt'], totalElements: 2 },
@@ -194,5 +198,60 @@ describe(RecordList, () => {
     await expect
       .element(page.getByRole('checkbox', { name: 'Select all Olivia Owner 1 companies' }))
       .toHaveAttribute('aria-checked', 'false');
+    // One box a section: the table's head row has it here, not the heading.
+    expect(page.getByRole('checkbox', { name: /^Select all/u }).elements()).toHaveLength(2);
+    await page.viewport(414, 896);
+  });
+
+  describe('on a phone', () => {
+    afterEach(async () => {
+      await page.viewport(414, 896);
+    });
+
+    const SECTIONS = [
+      { content: ['Brightwater'], totalElements: 1 },
+      { content: ['Acme', 'Cobalt'], totalElements: 2 },
+      { content: [], totalElements: 0 },
+    ];
+
+    it('selects a section from the box before its pill, and no row moves as selecting starts', async () => {
+      await page.viewport(390, 844);
+      await renderList({ group: 'owner' }, SECTIONS, true);
+      const mia = page.getByRole('checkbox', { name: 'Select all Mia Manager 2 companies' });
+      const acme = page.getByRole('checkbox', { name: 'Select Acme' });
+      const { top } = acme.element().getBoundingClientRect();
+
+      // Before the heading's pill, and shown without a pointer over it, as the rows' boxes are.
+      expect(mia.element().getBoundingClientRect().right).toBeLessThanOrEqual(
+        page
+          .getByRole('button', { name: 'Mia Manager 2 companies' })
+          .element()
+          .getBoundingClientRect().left,
+      );
+      expect(getComputedStyle(mia.element()).opacity).toBe('1');
+      expect(getComputedStyle(acme.element()).opacity).toBe('1');
+
+      await mia.click();
+      await expect.element(page.getByRole('toolbar')).toHaveAccessibleName('2 selected');
+      await expect.element(acme).toHaveAttribute('aria-checked', 'true');
+      await expect
+        .element(page.getByRole('checkbox', { name: 'Select Cobalt' }))
+        .toHaveAttribute('aria-checked', 'true');
+      expect(acme.element().getBoundingClientRect().top).toBe(top);
+
+      await page.getByRole('checkbox', { name: 'Select Cobalt' }).click();
+      await expect.element(mia).toHaveAttribute('aria-checked', 'mixed');
+      // One box a section: the heading has it here, not the table's head row.
+      expect(page.getByRole('checkbox', { name: /^Select all/u }).elements()).toHaveLength(2);
+    });
+
+    it('selects a whole ungrouped page from its own line', async () => {
+      await page.viewport(390, 844);
+      await renderList({}, [{ content: ['Acme', 'Cobalt'], totalElements: 2 }], true);
+
+      await page.getByRole('checkbox', { name: 'Select all', exact: true }).click();
+
+      await expect.element(page.getByRole('toolbar')).toHaveAccessibleName('2 selected');
+    });
   });
 });

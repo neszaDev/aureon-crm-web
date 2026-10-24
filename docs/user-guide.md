@@ -140,7 +140,8 @@ owner and expected close, a lead's owner and source, or a task's due time.
 
 **Several at once.** Each row has a box before its name (it shows when you point at the row, and
 stays once anything is selected); a section's heading row has one for the whole section, half
-filled while only some of it is (on a phone, with no heading row, you select rows one by one). Shift+click a box to select every row from the last one you
+filled while only some of it is (on a phone the boxes always show, and a section's box sits before
+its heading's pill; an ungrouped list has a **Select all** line above it). Shift+click a box to select every row from the last one you
 clicked; with the keyboard, Space on a row's name selects it and Shift+Space the range. Escape
 clears the selection (outside a text field), and so does changing the group, a filter, the sort or
 the page. A bar then floats at the foot of the screen and offers what you may do to every selected record: **Assign** (the owner; a task's assignee),

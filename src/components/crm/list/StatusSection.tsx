@@ -19,6 +19,8 @@ import { Link } from '@/libs/I18nNavigation';
  * @param props.viewAll The link to all of the group's records, when it shows only some.
  * @param props.viewAll.href The list filtered to the group.
  * @param props.viewAll.label Its text, such as "View all 51".
+ * @param props.select A phone's select-all box for the group (`SectionBox`), before what heads it;
+ *   from 640 px the table's head row has it. Hidden, its room kept, while the group is folded.
  * @param props.children The rows, and the row that adds one.
  * @returns The group.
  */
@@ -29,25 +31,34 @@ export const StatusSection = (props: {
   countLabel: string;
   closed?: boolean;
   viewAll?: { href: string; label: string };
+  select?: React.ReactNode;
   children: React.ReactNode;
 }) => (
-  <Collapsible defaultOpen={!props.closed} className="flex flex-col">
-    <h3 className="flex">
-      <CollapsibleTrigger
-        id={props.titleId}
-        className="group/section -ml-1.5 flex h-9 max-w-full min-w-0 items-center gap-2 rounded-md px-1.5 text-sm font-semibold outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <ChevronDownIcon
-          aria-hidden="true"
-          className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-data-[state=closed]/section:-rotate-90 motion-reduce:transition-none"
-        />
-        {props.title}{' '}
-        <span aria-hidden="true" className="font-medium text-muted-foreground tabular-nums">
-          {props.count}
+  <Collapsible defaultOpen={!props.closed} className="group/status flex flex-col">
+    <div className="flex items-center">
+      {props.select && (
+        // In the rows' box column; always there, so nothing moves as selecting starts.
+        <span className="flex w-9 shrink-0 items-center pl-3 group-data-[state=closed]/status:invisible sm:hidden">
+          {props.select}
         </span>
-        <span className="sr-only">{props.countLabel}</span>
-      </CollapsibleTrigger>
-    </h3>
+      )}
+      <h3 className="flex min-w-0 flex-1">
+        <CollapsibleTrigger
+          id={props.titleId}
+          className="group/section -ml-1.5 flex h-9 max-w-full min-w-0 items-center gap-2 rounded-md px-1.5 text-sm font-semibold outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <ChevronDownIcon
+            aria-hidden="true"
+            className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-data-[state=closed]/section:-rotate-90 motion-reduce:transition-none"
+          />
+          {props.title}{' '}
+          <span aria-hidden="true" className="font-medium text-muted-foreground tabular-nums">
+            {props.count}
+          </span>
+          <span className="sr-only">{props.countLabel}</span>
+        </CollapsibleTrigger>
+      </h3>
+    </div>
     <CollapsibleContent className="border-t border-rule">
       {props.children}
       {props.viewAll && (

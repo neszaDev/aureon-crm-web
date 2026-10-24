@@ -68,9 +68,10 @@ export const Bulk = createContext<ReturnType<typeof useSelection> | null>(null);
 // A section's rows, in order, and what names it (its heading), for the select-all box.
 const Section = createContext<{ ids: number[]; labelledBy?: string }>({ ids: [] });
 
-// Shown on the row's hover or focus, on a device without hover, and while anything is selected.
+// Shown on the row's hover or focus, on a device without hover, while anything is selected, and
+// always on a phone, where its target is 36 px tall.
 const BOX =
-  'opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 group-data-[selecting]/bulk:opacity-100 focus-visible:opacity-100 data-[state=checked]:opacity-100 [@media(hover:none)]:opacity-100';
+  'opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 group-data-[selecting]/bulk:opacity-100 focus-visible:opacity-100 data-[state=checked]:opacity-100 max-sm:opacity-100 max-sm:after:-inset-y-2.5 [@media(hover:none)]:opacity-100';
 
 /**
  * One section's table in a `BulkList`: its rows, in order, for its select-all box and Shift
@@ -111,35 +112,58 @@ const ToBar = () => {
 };
 
 /**
- * The select-all box at the head of a section's table: tri-state (mixed while some of the section
- * is selected), named after the section's heading. While rows are selected, the next Tab stop is
- * "Go to bulk actions", which takes the keyboard to the bar past the rest of the rows.
+ * A section's select-all box: tri-state (mixed while some of the section is selected), named "Select
+ * all" and the section's heading. While rows are selected, the next Tab stop is "Go to bulk
+ * actions", which takes the keyboard to the bar past the rest of the rows. From 640 px it heads the
+ * section's table (`SelectAllHead`); on a phone, whose tables have no head row, it sits in the
+ * section's heading row (`StatusSection`'s `select`), or on a line of its own above an ungrouped
+ * list.
+ * @param props Component props.
+ * @param props.ids The section's rows, in order.
+ * @param props.labelledBy The id of what names the section (its heading), if it has one.
+ * @param props.className Extra classes.
+ * @returns The box, or nothing outside a `BulkList` or for a section without rows.
+ */
+export const SectionBox = (props: { ids: number[]; labelledBy?: string; className?: string }) => {
+  const t = useTranslations('BulkBar');
+  const bulk = use(Bulk);
+  const id = useId();
+  if (!bulk || props.ids.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <span id={id} hidden>
+        {t('select_all')}
+      </span>
+      <Checkbox
+        checked={sectionState(bulk.keys, props.ids)}
+        aria-labelledby={props.labelledBy ? `${id} ${props.labelledBy}` : id}
+        className={cn(BOX, props.className)}
+        onCheckedChange={() => {
+          bulk.toggleSection(props.ids);
+        }}
+      />
+      {bulk.chosen.length > 0 && <ToBar />}
+    </>
+  );
+};
+
+/**
+ * The select-all box at the head of a section's table (`SectionBox`).
  * @returns The head cell.
  */
 export const SelectAllHead = () => {
-  const t = useTranslations('BulkBar');
-  const bulk = use(Bulk);
   const section = use(Section);
-  const id = useId();
 
   return (
     <TableHead className="w-9 pr-0">
-      {bulk && section.ids.length > 0 && (
-        <>
-          <span id={id} hidden>
-            {t('select_all')}
-          </span>
-          <Checkbox
-            checked={sectionState(bulk.keys, section.ids)}
-            aria-labelledby={section.labelledBy ? `${id} ${section.labelledBy}` : id}
-            className={cn(BOX, 'group-hover/table:opacity-100')}
-            onCheckedChange={() => {
-              bulk.toggleSection(section.ids);
-            }}
-          />
-          {bulk.chosen.length > 0 && <ToBar />}
-        </>
-      )}
+      <SectionBox
+        ids={section.ids}
+        labelledBy={section.labelledBy}
+        className="group-hover/table:opacity-100"
+      />
     </TableHead>
   );
 };

@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { BulkList } from '@/components/crm/list/BulkList';
-import { BulkSection } from '@/components/crm/list/BulkSelect';
+import { BulkSection, SectionBox } from '@/components/crm/list/BulkSelect';
 import { ListEmpty } from '@/components/crm/list/ListEmpty';
 import { ListPager } from '@/components/crm/list/ListPager';
 import { OwnerTitle, StatusSection } from '@/components/crm/list/StatusSection';
@@ -122,6 +122,7 @@ export const RecordList = <Row,>(props: {
   };
 }) => {
   const t = useTranslations('ListToolbar');
+  const tBulk = useTranslations('BulkBar');
   const total = props.pages.reduce((sum, page) => sum + page.totalElements, 0);
   // The owner filter's member (tasks: the assignee's).
   const { ownerId, assigneeId, group, sort, direction } = props.query.params;
@@ -182,6 +183,17 @@ export const RecordList = <Row,>(props: {
       {total === 0 && empty}
       {!props.groups && page && page.content.length > 0 && (
         <div>
+          {bulk && (
+            // A phone's select-all for the page, whose table has no head row there.
+            <div className="flex h-9 items-center border-b border-rule sm:hidden">
+              <span className="flex w-9 shrink-0 items-center pl-3">
+                <SectionBox ids={(items[0] ?? []).map((item) => item.id)} />
+              </span>
+              <span aria-hidden="true" className="px-3 text-[0.8125rem] text-muted-foreground">
+                {tBulk('select_all')}
+              </span>
+            </div>
+          )}
           {table(page.content, 0)}
           {!props.query.unassigned && add(filterOwner)}
           <ListPager path={props.path} query={props.query} total={page.totalElements} />
@@ -205,6 +217,11 @@ export const RecordList = <Row,>(props: {
             count={rows.totalElements}
             countLabel={props.heading(rows.totalElements)}
             closed={item.closed}
+            select={
+              bulk && (
+                <SectionBox ids={(items[index] ?? []).map((row) => row.id)} labelledBy={titleId} />
+              )
+            }
             viewAll={
               rows.totalElements > rows.content.length
                 ? {
