@@ -97,6 +97,8 @@ const List = (props: { scope: string; sections: BulkItem[][] }) => (
         {props.sections.map((rows, index) => (
           <Section key={rows[0]?.id} rows={rows} heading={index === 0 ? 'New' : 'Won'} />
         ))}
+        {/* A field in the list, as an inline-add row has. */}
+        <input aria-label="New company" />
       </BulkList>
     </TooltipProvider>
   </NextIntlClientProvider>
@@ -161,6 +163,16 @@ describe(BulkList, () => {
     await userEvent.keyboard('{Escape}');
     await expect.element(toolbar()).not.toBeInTheDocument();
     await expect.element(box('Dunford')).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('leaves the selection alone on Escape in a text field: the field takes it', async () => {
+    await render(<List scope="a" sections={[NEW, WON]} />);
+    await box('Acme').click();
+
+    await page.getByRole('textbox', { name: 'New company' }).click();
+    await userEvent.keyboard('{Escape}');
+
+    await expect.element(toolbar()).toHaveAccessibleName('1 selected');
   });
 
   it('keeps only the rows still there after a refresh, and clears for another list state', async () => {

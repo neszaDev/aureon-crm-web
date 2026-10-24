@@ -6,10 +6,13 @@ import { BulkBar } from '@/components/crm/list/BulkBar';
 import { Bulk, useSelection } from '@/components/crm/list/BulkSelect';
 import type { BulkItem } from '@/libs/crm/BulkSelection';
 
+// Where Escape is the field's own.
+const TEXT_FIELD = 'input, textarea, select, [contenteditable]';
+
 /**
  * A list whose rows can be selected for a bulk action: the selection, kept to the rows on screen
  * and cleared when the list's group, filters, sort or page change (`scope`), and the bar that acts
- * on it. Escape clears it. With the focus on a row's name, Space selects the row; Shift+Space there
+ * on it. Escape clears it, outside a text field. With the focus on a row's name, Space selects the row; Shift+Space there
  * or on its box selects the range from the last row toggled.
  * @param props Component props.
  * @param props.scope The list's state (its URL query).
@@ -27,12 +30,18 @@ export const BulkList = (props: {
   const selection = useSelection(props.scope, props.items, props.bar.headingId);
   const id = useId();
   const onKey = useEffectEvent((event: KeyboardEvent) => {
-    // A menu or dialog closing on Escape has already taken it (it prevents the default).
-    if (event.key === 'Escape' && !event.defaultPrevented && selection.chosen.length > 0) {
+    const target = event.target instanceof HTMLElement ? event.target : null;
+    // A menu or dialog closing on Escape has already taken it (it prevents the default); a field
+    // being typed in keeps it for itself (an inline-add row clears on it).
+    if (
+      event.key === 'Escape' &&
+      !event.defaultPrevented &&
+      !target?.matches(TEXT_FIELD) &&
+      selection.chosen.length > 0
+    ) {
       selection.clear();
       return;
     }
-    const target = event.target instanceof HTMLElement ? event.target : null;
     if (event.key !== ' ' || !target?.closest(`[data-bulk="${CSS.escape(id)}"]`)) {
       return;
     }
