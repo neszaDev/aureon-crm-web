@@ -59,6 +59,8 @@ const renderRow = async (task: Task, compact?: boolean, sectioned?: boolean) => 
 };
 
 const checkbox = () => page.getByRole('checkbox', { name: 'Complete Send the proposal' });
+// A computed length in pixels, as a number.
+const px = (value: string) => Number(value.replace('px', ''));
 // Whether two texts sit on one line: their boxes' middles level.
 const sameLine = (first: string, second: string) => {
   const [a, b] = [first, second].map((text) =>
@@ -102,6 +104,20 @@ describe(TaskRow, () => {
     expect(TaskActions.completeTask).toHaveBeenCalledWith(1, 42, 3);
     await expect.element(checkbox()).toBeChecked();
     answer.resolve({ ok: true });
+  });
+
+  it('completes from a round status circle, set apart from the square box that selects the row', async () => {
+    await renderRow({ ...TASK, status: 'COMPLETED', completedAt: '2026-10-19T00:00:00Z' });
+
+    const circle = getComputedStyle(checkbox().element());
+    // Round: its corners curve by half its width or more.
+    expect(px(circle.borderTopLeftRadius)).toBeGreaterThanOrEqual(px(circle.width) / 2);
+    // Done, it fills with the green of Completed.
+    await expect.element(checkbox()).toHaveAttribute('data-tone', 'green');
+    expect(circle.backgroundColor).toBe(circle.borderTopColor);
+    expect(circle.backgroundColor).not.toBe(
+      getComputedStyle(document.documentElement).getPropertyValue('--primary'),
+    );
   });
 
   it('un-ticks the box and says why when completing fails', async () => {

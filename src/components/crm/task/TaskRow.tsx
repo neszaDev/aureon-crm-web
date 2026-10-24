@@ -111,16 +111,16 @@ export const TaskDue = (props: {
 };
 
 /**
- * A task in a list, a 36 px row: a box that completes it (ticked at once, unticked with a toast
- * if refused), its title and its number beside it, its status pill (the control that completes,
- * cancels once confirmed, or reopens it), when it is due (an overdue one in crimson with the word
- * "Overdue", in a list in its due section's colour), its priority flag, assignee and linked
- * records (the first, then "+N"); on a phone the due time and the linked records sit under the
- * title. A compact row (the home's, a record's) has a menu instead of the pill: Reopen a completed
- * or cancelled task, Cancel an open one (confirmed); its linked records follow its title. The
- * controls work only for its assignee, its creator and with `RECORDS_EDIT_ANY`. A row that leaves
- * the list with the focus in it (completed out of an open list) hands the focus to the list's
- * heading.
+ * A task in a list, a 36 px row: a round status circle that completes it (ticked at once, unticked
+ * with a toast if refused), its title and its number beside it, its status pill (the control that
+ * completes, cancels once confirmed, or reopens it), when it is due (an overdue one in crimson with
+ * the word "Overdue", in a list in its due section's colour), its priority flag, assignee and
+ * linked records (the first, then "+N"); on a phone the due time and the linked records sit under
+ * the title. A compact row (the home's, a record's) has a menu instead of the pill: Reopen a
+ * completed or cancelled task, Cancel an open one (confirmed); its linked records follow its title.
+ * The controls work only for its assignee, its creator and with `RECORDS_EDIT_ANY`. A row that
+ * leaves the list with the focus in it (completed out of an open list) hands the focus to the
+ * list's heading.
  * @param props Component props.
  * @param props.task The task.
  * @param props.workspaceId The workspace.
@@ -221,12 +221,18 @@ export const TaskRow = (props: {
     >
       {props.selectable && <SelectCell id={props.task.id} name={props.task.title} />}
       <TableCell className="w-10 pr-0">
+        {/* A round status circle, not a second square beside the box that selects the row: done,
+            it fills with the green of Completed. */}
         <Checkbox
           checked={ticked}
+          data-tone="green"
           aria-label={t('complete', { title: props.task.title })}
           // aria-disabled, not disabled: a disabled box drops the focus to the page.
           aria-disabled={!isOpen || !props.canEdit || isPending || undefined}
-          className={cn(!props.canEdit && 'cursor-not-allowed opacity-50')}
+          className={cn(
+            'rounded-full data-checked:border-(--tone) data-checked:bg-(--tone)',
+            !props.canEdit && 'cursor-not-allowed opacity-50',
+          )}
           onCheckedChange={() => {
             if (isOpen && props.canEdit && !isPending) {
               run(completeTask, true);
