@@ -203,18 +203,21 @@ describe(BulkBar, () => {
 
       await expect.element(page.getByText('2 deals moved to Lost')).toBeVisible();
       expect(DealActions.moveDeal).toHaveBeenCalledTimes(2);
-      expect(DealActions.moveDeal).toHaveBeenCalledWith(1, 1, {
-        stageId: 3,
-        version: 10,
-        lostReason: 'Went with a competitor',
-      });
-      expect(DealActions.moveDeal).toHaveBeenCalledWith(1, 2, {
-        stageId: 3,
-        version: 20,
-        lostReason: 'Went with a competitor',
-      });
+      // Each without its own page refresh: the bar refreshes once, after the last answer.
+      expect(DealActions.moveDeal).toHaveBeenCalledWith(
+        1,
+        1,
+        { stageId: 3, version: 10, lostReason: 'Went with a competitor' },
+        false,
+      );
+      expect(DealActions.moveDeal).toHaveBeenCalledWith(
+        1,
+        2,
+        { stageId: 3, version: 20, lostReason: 'Went with a competitor' },
+        false,
+      );
       expect(onClear).toHaveBeenCalledOnce();
-      expect(refresh).not.toHaveBeenCalled();
+      expect(refresh).toHaveBeenCalledOnce();
     });
 
     it('lists each refused record by name with its reason, keeps them selected, and refreshes', async () => {
@@ -258,11 +261,12 @@ describe(BulkBar, () => {
 
       await expect.element(page.getByText('2 deals moved to Won')).toBeVisible();
       expect(DealActions.moveDeal).toHaveBeenCalledTimes(2);
-      expect(DealActions.moveDeal).toHaveBeenCalledWith(1, 2, {
-        stageId: 2,
-        version: 20,
-        lostReason: undefined,
-      });
+      expect(DealActions.moveDeal).toHaveBeenCalledWith(
+        1,
+        2,
+        { stageId: 2, version: 20, lostReason: undefined },
+        false,
+      );
     });
 
     it('assigns a record the list shows as the member’s already', async () => {
@@ -270,7 +274,7 @@ describe(BulkBar, () => {
       await bar().getByRole('button', { name: 'Assign' }).click();
       await page.getByRole('menuitem', { name: 'Mia Rossi' }).click();
       await expect.element(page.getByText('1 deal assigned to Mia Rossi')).toBeVisible();
-      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 1, 10, 2);
+      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 1, 10, 2, false);
     });
 
     it('assigns every deal to the member chosen, at the version the list read', async () => {
@@ -280,8 +284,9 @@ describe(BulkBar, () => {
       await page.getByRole('menuitem', { name: 'Mia Rossi' }).click();
 
       await expect.element(page.getByText('2 deals assigned to Mia Rossi')).toBeVisible();
-      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 1, 10, 2);
-      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 2, 20, 2);
+      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 1, 10, 2, false);
+      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 2, 20, 2, false);
+      expect(refresh).toHaveBeenCalledOnce();
     });
 
     it('says how far it got while the records are on their way', async () => {

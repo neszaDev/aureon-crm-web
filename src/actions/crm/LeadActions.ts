@@ -169,6 +169,8 @@ export async function addLead(
  * @param leadId The lead.
  * @param version The version the form was read at; an outdated one is the reload message.
  * @param values Form values, with the owner to keep, reassign to, or none to unassign.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or field and form errors (a converted lead can't be edited).
  */
 export async function updateLead(
@@ -176,6 +178,7 @@ export async function updateLead(
   leadId: number,
   version: number,
   values: LeadValues,
+  refreshPage = true,
 ): Promise<ActionResult> {
   const t = await getTranslations('LeadForm');
   const parsed = LeadValidation.safeParse(values);
@@ -192,7 +195,9 @@ export async function updateLead(
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true };
 }
 
@@ -205,6 +210,8 @@ export async function updateLead(
  * @param version The version the list read; none (a list without versions: companies,
  *   contacts) sends the one just read.
  * @param ownerId The new owner.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or the translated refusal.
  */
 export async function assignLead(
@@ -212,6 +219,7 @@ export async function assignLead(
   leadId: number,
   version: number | undefined,
   ownerId: number,
+  refreshPage = true,
 ): Promise<ActionResult> {
   const api = await authedBackend();
   const { data, error, response } = await api.GET('/api/v1/workspaces/{workspaceId}/leads/{id}', {
@@ -221,10 +229,16 @@ export async function assignLead(
     return await actionFailure(response, error);
   }
 
-  return await updateLead(workspaceId, leadId, version ?? data.version, {
-    ...leadValues(data),
-    ownerId,
-  });
+  return await updateLead(
+    workspaceId,
+    leadId,
+    version ?? data.version,
+    {
+      ...leadValues(data),
+      ownerId,
+    },
+    refreshPage,
+  );
 }
 
 /**
@@ -232,9 +246,15 @@ export async function assignLead(
  * converted lead can be archived too.
  * @param workspaceId The workspace.
  * @param leadId The lead.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or the translated refusal.
  */
-export async function archiveLead(workspaceId: number, leadId: number): Promise<ActionResult> {
+export async function archiveLead(
+  workspaceId: number,
+  leadId: number,
+  refreshPage = true,
+): Promise<ActionResult> {
   const api = await authedBackend();
   const { error, response } = await api.POST(
     '/api/v1/workspaces/{workspaceId}/leads/{id}/archive',
@@ -246,7 +266,9 @@ export async function archiveLead(workspaceId: number, leadId: number): Promise<
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true };
 }
 
@@ -254,9 +276,15 @@ export async function archiveLead(workspaceId: number, leadId: number): Promise<
  * Restores an archived lead (`POST .../leads/{id}/restore`).
  * @param workspaceId The workspace.
  * @param leadId The lead.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or the translated refusal.
  */
-export async function restoreLead(workspaceId: number, leadId: number): Promise<ActionResult> {
+export async function restoreLead(
+  workspaceId: number,
+  leadId: number,
+  refreshPage = true,
+): Promise<ActionResult> {
   const api = await authedBackend();
   const { error, response } = await api.POST(
     '/api/v1/workspaces/{workspaceId}/leads/{id}/restore',
@@ -268,7 +296,9 @@ export async function restoreLead(workspaceId: number, leadId: number): Promise<
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true };
 }
 
@@ -280,6 +310,8 @@ export async function restoreLead(workspaceId: number, leadId: number): Promise<
  * @param leadId The lead.
  * @param version The version the page was read at; an outdated one is the reload message.
  * @param change The new status and, for UNQUALIFIED, the reason.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or the translated refusal (a converted lead can't change status).
  */
 export async function changeLeadStatus(
@@ -287,6 +319,7 @@ export async function changeLeadStatus(
   leadId: number,
   version: number,
   change: LeadStatusChange,
+  refreshPage = true,
 ): Promise<ActionResult> {
   const t = await getTranslations('UnqualifyDialog');
   const parsed = LeadStatusValidation.safeParse(change);
@@ -307,7 +340,9 @@ export async function changeLeadStatus(
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true };
 }
 

@@ -72,6 +72,8 @@ export async function createDeal(workspaceId: number, values: DealValues): Promi
  * @param dealId The deal.
  * @param version The version the form was read at; an outdated one is the reload message.
  * @param values Form values, with the owner to keep, reassign to, or none to unassign.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or field and form errors.
  */
 export async function updateDeal(
@@ -79,6 +81,7 @@ export async function updateDeal(
   dealId: number,
   version: number,
   values: DealValues,
+  refreshPage = true,
 ): Promise<ActionResult> {
   const t = await getTranslations('DealForm');
   const parsed = DealValidation.safeParse(values);
@@ -95,7 +98,9 @@ export async function updateDeal(
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true };
 }
 
@@ -108,6 +113,8 @@ export async function updateDeal(
  * @param version The version the list read; none (a list without versions: companies,
  *   contacts) sends the one just read.
  * @param ownerId The new owner.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or the translated refusal.
  */
 export async function assignDeal(
@@ -115,6 +122,7 @@ export async function assignDeal(
   dealId: number,
   version: number | undefined,
   ownerId: number,
+  refreshPage = true,
 ): Promise<ActionResult> {
   const api = await authedBackend();
   const { data, error, response } = await api.GET('/api/v1/workspaces/{workspaceId}/deals/{id}', {
@@ -124,10 +132,16 @@ export async function assignDeal(
     return await actionFailure(response, error);
   }
 
-  return await updateDeal(workspaceId, dealId, version ?? data.version, {
-    ...dealValues(data),
-    ownerId,
-  });
+  return await updateDeal(
+    workspaceId,
+    dealId,
+    version ?? data.version,
+    {
+      ...dealValues(data),
+      ownerId,
+    },
+    refreshPage,
+  );
 }
 
 /**
@@ -135,9 +149,15 @@ export async function assignDeal(
  * history stays.
  * @param workspaceId The workspace.
  * @param dealId The deal.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or the translated refusal.
  */
-export async function archiveDeal(workspaceId: number, dealId: number): Promise<ActionResult> {
+export async function archiveDeal(
+  workspaceId: number,
+  dealId: number,
+  refreshPage = true,
+): Promise<ActionResult> {
   const api = await authedBackend();
   const { error, response } = await api.POST(
     '/api/v1/workspaces/{workspaceId}/deals/{id}/archive',
@@ -147,7 +167,9 @@ export async function archiveDeal(workspaceId: number, dealId: number): Promise<
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true };
 }
 
@@ -155,9 +177,15 @@ export async function archiveDeal(workspaceId: number, dealId: number): Promise<
  * Restores an archived deal (`POST .../deals/{id}/restore`).
  * @param workspaceId The workspace.
  * @param dealId The deal.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or the translated refusal.
  */
-export async function restoreDeal(workspaceId: number, dealId: number): Promise<ActionResult> {
+export async function restoreDeal(
+  workspaceId: number,
+  dealId: number,
+  refreshPage = true,
+): Promise<ActionResult> {
   const api = await authedBackend();
   const { error, response } = await api.POST(
     '/api/v1/workspaces/{workspaceId}/deals/{id}/restore',
@@ -167,7 +195,9 @@ export async function restoreDeal(workspaceId: number, dealId: number): Promise<
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true };
 }
 
@@ -179,12 +209,15 @@ export async function restoreDeal(workspaceId: number, dealId: number): Promise<
  * @param workspaceId The workspace.
  * @param dealId The deal.
  * @param change The stage, the version the deal was read at and, for Lost, the reason.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success with the deal's new version, or the translated refusal.
  */
 export async function moveDeal(
   workspaceId: number,
   dealId: number,
   change: MoveValues,
+  refreshPage = true,
 ): Promise<MoveResult> {
   const t = await getTranslations('MoveDealDialog');
   const parsed = MoveValidation.safeParse(change);
@@ -208,6 +241,8 @@ export async function moveDeal(
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true, version: data?.version };
 }

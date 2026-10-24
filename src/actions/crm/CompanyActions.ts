@@ -103,6 +103,8 @@ export async function addCompany(
  * @param companyId The company.
  * @param version The version the form was read at; an outdated one is the reload message.
  * @param values Form values, with the owner to keep, reassign to, or none to unassign.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or field and form errors.
  */
 export async function updateCompany(
@@ -110,6 +112,7 @@ export async function updateCompany(
   companyId: number,
   version: number,
   values: CompanyValues,
+  refreshPage = true,
 ): Promise<ActionResult> {
   const t = await getTranslations('CompanyForm');
   const parsed = CompanyValidation.safeParse(values);
@@ -126,7 +129,9 @@ export async function updateCompany(
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true };
 }
 
@@ -139,6 +144,8 @@ export async function updateCompany(
  * @param version The version the list read; none (a list without versions: companies,
  *   contacts) sends the one just read.
  * @param ownerId The new owner.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or the translated refusal.
  */
 export async function assignCompany(
@@ -146,6 +153,7 @@ export async function assignCompany(
   companyId: number,
   version: number | undefined,
   ownerId: number,
+  refreshPage = true,
 ): Promise<ActionResult> {
   const api = await authedBackend();
   const { data, error, response } = await api.GET(
@@ -158,21 +166,30 @@ export async function assignCompany(
     return await actionFailure(response, error);
   }
 
-  return await updateCompany(workspaceId, companyId, version ?? data.version, {
-    ...companyValues(data),
-    ownerId,
-  });
+  return await updateCompany(
+    workspaceId,
+    companyId,
+    version ?? data.version,
+    {
+      ...companyValues(data),
+      ownerId,
+    },
+    refreshPage,
+  );
 }
 
 /**
  * Archives a company (`POST .../companies/{id}/archive`): it leaves the lists, its history stays.
  * @param workspaceId The workspace.
  * @param companyId The company.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or the translated refusal.
  */
 export async function archiveCompany(
   workspaceId: number,
   companyId: number,
+  refreshPage = true,
 ): Promise<ActionResult> {
   const api = await authedBackend();
   const { error, response } = await api.POST(
@@ -183,7 +200,9 @@ export async function archiveCompany(
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true };
 }
 
@@ -191,11 +210,14 @@ export async function archiveCompany(
  * Restores an archived company (`POST .../companies/{id}/restore`).
  * @param workspaceId The workspace.
  * @param companyId The company.
+ * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
+ *   its last record.
  * @returns Success, or the translated refusal.
  */
 export async function restoreCompany(
   workspaceId: number,
   companyId: number,
+  refreshPage = true,
 ): Promise<ActionResult> {
   const api = await authedBackend();
   const { error, response } = await api.POST(
@@ -206,7 +228,9 @@ export async function restoreCompany(
     return await actionFailure(response, error);
   }
 
-  refresh();
+  if (refreshPage) {
+    refresh();
+  }
   return { ok: true };
 }
 

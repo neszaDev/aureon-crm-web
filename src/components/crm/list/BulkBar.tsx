@@ -74,9 +74,10 @@ const actionsOf = (
     id: number,
     version: number | undefined,
     ownerId: number,
+    refreshPage: boolean,
   ) => Promise<ActionResult>;
-  archive?: (workspaceId: number, id: number) => Promise<ActionResult>;
-  restore?: (workspaceId: number, id: number) => Promise<ActionResult>;
+  archive?: (workspaceId: number, id: number, refreshPage: boolean) => Promise<ActionResult>;
+  restore?: (workspaceId: number, id: number, refreshPage: boolean) => Promise<ActionResult>;
 } => {
   const actions = {
     company: { assign: assignCompany, archive: archiveCompany, restore: restoreCompany },
@@ -231,9 +232,9 @@ const RefusedAlert = (props: { refused: Refusal[]; total: number; onDismiss: () 
  * confirmed), archive (confirmed) or, in the archive, restore; and clear. A record that isn't the
  * caller's to change leaves only Clear, and says so. Each record goes through its own server
  * action, four at a time, with the count in the bar; nothing changes on screen before the server
- * says so. Then one answer: a toast when all of them changed (the selection clears), or an alert
- * naming each refused record with its reason (they stay selected; the list refreshes), until it is
- * dismissed, × clears the selection or the list's state changes.
+ * says so, and the list refreshes once, after the last answer. Then one answer: a toast when all
+ * of them changed (the selection clears), or an alert naming each refused record with its reason
+ * (they stay selected), until it is dismissed, × clears the selection or the list's state changes.
  * @param props Component props.
  * @returns The bar, or nothing while nothing is selected.
  */
@@ -277,6 +278,9 @@ export const BulkBar = (props: BulkBarProps) => {
           setProgress((now) => ({ ...now, done: now.done + 1 }));
         },
       );
+      // One refresh for the whole run, the refused records' current state included (a newer
+      // version, another owner): each record's action leaves it out (`refreshPage` false).
+      router.refresh();
       const failed = targets.flatMap((item, index) => {
         const result = results[index];
         return result?.ok
@@ -290,8 +294,6 @@ export const BulkBar = (props: BulkBarProps) => {
       }
       setRefused(failed);
       props.onKeep(failed.map((item) => item.id));
-      // The refused ones too: what the server holds now (a newer version, another owner).
-      router.refresh();
     });
   };
   const assign = (member: Member) => {
@@ -299,7 +301,8 @@ export const BulkBar = (props: BulkBarProps) => {
     // Every record goes, those the list shows already there too: the list may be stale, and the
     // server's answer is the one that counts (a repeat changes nothing there).
     run(
-      async (item) => await assignOne(props.workspaceId, item.id, item.version, member.userId),
+      async (item) =>
+        await assignOne(props.workspaceId, item.id, item.version, member.userId, false),
       (many) => t('done_assign', { records: records(many), name }),
     );
   };
@@ -307,18 +310,25 @@ export const BulkBar = (props: BulkBarProps) => {
     const label = tStatus(`status_${status}`);
     run(
       async (item) =>
-        await changeLeadStatus(props.workspaceId, item.id, versionOf(item), { status, reason }),
+        await changeLeadStatus(
+          props.workspaceId,
+          item.id,
+          versionOf(item),
+          { status, reason },
+          false,
+        ),
       (many) => t('done_move', { records: records(many), status: label }),
     );
   };
   const moveDeals = (stage: StageRef, lostReason?: string) => {
     run(
       async (item) =>
-        await moveDeal(props.workspaceId, item.id, {
-          stageId: stage.id,
-          version: versionOf(item),
-          lostReason,
-        }),
+        await moveDeal(
+          props.workspaceId,
+          item.id,
+          { stageId: stage.id, version: versionOf(item), lostReason },
+          false,
+        ),
       (many) => t('done_move', { records: records(many), status: stage.name }),
     );
   };
@@ -327,7 +337,7 @@ export const BulkBar = (props: BulkBarProps) => {
     done: 'done_complete' | 'done_reopen' | 'done_cancel',
   ) => {
     run(
-      async (item) => await action(props.workspaceId, item.id, versionOf(item)),
+      async (item) => await action(props.workspaceId, item.id, versionOf(item), false),
       (many) => t(done, { count: many }),
     );
   };
@@ -476,7 +486,7 @@ export const BulkBar = (props: BulkBarProps) => {
                 className={ON_BAR}
                 onClick={() => {
                   run(
-                    async (item) => await restore(props.workspaceId, item.id),
+                    async (item) => await restore(props.workspaceId, item.id, false),
                     (many) => t('done_restore', { records: records(many) }),
                   );
                 }}
@@ -533,7 +543,7 @@ export const BulkBar = (props: BulkBarProps) => {
           // The dialog closes at once: the bar counts the records on their way.
           if (archive) {
             run(
-              async (item) => await archive(props.workspaceId, item.id),
+              async (item) => await archive(props.workspaceId, item.id, false),
               (many) => t('done_archive', { records: records(many) }),
             );
           }

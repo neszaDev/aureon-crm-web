@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { refresh } from 'next/cache';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { authedBackend } from '@/libs/api/Backend';
-import { assignDeal } from './DealActions';
+import { archiveDeal, assignDeal, moveDeal } from './DealActions';
 
 vi.mock(import('server-only'), () => ({}));
 // @ts-expect-error -- a translator that gives the key back
@@ -56,5 +57,31 @@ describe(assignDeal, () => {
         version: 7,
       },
     });
+  });
+});
+
+describe('refreshing the page', () => {
+  const ok = { data: { version: 2 }, response: new Response(null, { status: 200 }) };
+
+  beforeEach(() => {
+    const call = vi.fn<() => Promise<unknown>>().mockResolvedValue(ok);
+    // @ts-expect-error -- only the calls these actions make
+    vi.mocked(authedBackend).mockResolvedValue({ GET: call, PUT: call, POST: call });
+    vi.mocked(refresh).mockClear();
+  });
+
+  it('refreshes after a change by default, as a form or a row needs', async () => {
+    await archiveDeal(1, 9);
+    await moveDeal(1, 9, { stageId: 3, version: 1 });
+
+    expect(refresh).toHaveBeenCalledTimes(2);
+  });
+
+  it('leaves the refresh to the bulk bar, which does it once after its last record', async () => {
+    await archiveDeal(1, 9, false);
+    await moveDeal(1, 9, { stageId: 3, version: 1 }, false);
+    await assignDeal(1, 9, 1, 3, false);
+
+    expect(refresh).not.toHaveBeenCalled();
   });
 });
