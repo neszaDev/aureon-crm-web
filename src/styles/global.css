@@ -8,9 +8,11 @@
  * the work. Hairlines separate; shadows only lift what floats (menus, popovers, the side panel,
  * dialogs). Dark is the same structure on violet-black.
  *
- * Status tones: `--status-<tone>` is the hue, for dots and fills that sit beside their words
- * (light amber is 2.3:1 and slate 3:1 on the sidebar: never a lone bar, stripe or filled step);
- * anything that must read alone takes the `-ink` token, and charts take `--chart-*`. `-tint` is a
+ * Status tones: `--status-<tone>` is the hue, for dots and fills that sit beside their words (a
+ * track's segment or a funnel's bar labelled with its stage counts as beside its words): light
+ * amber measures 2.3:1 on white and 2.2:1 on the sidebar, slate 3.2:1 and 3:1, so never a lone
+ * bar, stripe or filled step; anything that must read alone takes the `-ink` token, and charts
+ * take `--chart-*`. `-tint` is a
  * pill's fill and `-ink` the text on it or on the canvas (4.5:1 or more on both, in both
  * themes). Any element with `data-tone="<tone>"` gets them as `--tone`, `--tone-tint` and
  * `--tone-ink`.
