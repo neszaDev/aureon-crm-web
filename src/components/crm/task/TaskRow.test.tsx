@@ -61,6 +61,15 @@ const renderRow = async (task: Task, compact?: boolean, sectioned?: boolean) => 
 const checkbox = () => page.getByRole('checkbox', { name: 'Complete Send the proposal' });
 // A computed length in pixels, as a number.
 const px = (value: string) => Number(value.replace('px', ''));
+// A colour as the browser computes it (`rgb()`), to compare with an element's.
+const colorOf = (value: string) => {
+  const probe = document.createElement('span');
+  probe.style.backgroundColor = value;
+  document.body.append(probe);
+  const color = getComputedStyle(probe).backgroundColor;
+  probe.remove();
+  return color;
+};
 // Whether two texts sit on one line: their boxes' middles level.
 const sameLine = (first: string, second: string) => {
   const [a, b] = [first, second].map((text) =>
@@ -112,12 +121,12 @@ describe(TaskRow, () => {
     const circle = getComputedStyle(checkbox().element());
     // Round: its corners curve by half its width or more.
     expect(px(circle.borderTopLeftRadius)).toBeGreaterThanOrEqual(px(circle.width) / 2);
-    // Done, it fills with the green of Completed.
+    // Done, it fills with the green of Completed, its rim too: not the violet of a ticked box.
     await expect.element(checkbox()).toHaveAttribute('data-tone', 'green');
-    expect(circle.backgroundColor).toBe(circle.borderTopColor);
-    expect(circle.backgroundColor).not.toBe(
-      getComputedStyle(document.documentElement).getPropertyValue('--primary'),
-    );
+    const green = colorOf('var(--status-green)');
+    expect(circle.backgroundColor).toBe(green);
+    expect(circle.borderTopColor).toBe(green);
+    expect(green).not.toBe(colorOf('var(--primary)'));
   });
 
   it('un-ticks the box and says why when completing fails', async () => {
