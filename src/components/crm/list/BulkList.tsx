@@ -61,7 +61,9 @@ export const BulkList = (props: {
         className="group/bulk"
       >
         {props.children}
+        {/* A new list state starts a new bar: the last refusals go with the old one. */}
         <BulkBar
+          key={props.scope}
           {...props.bar}
           chosen={selection.chosen}
           onClear={() => {

@@ -149,6 +149,43 @@ const BarMenu = (props: {
 );
 
 /**
+ * What the bar says first: how many records are selected, or how far a run has got; then why
+ * actions are missing, when a record isn't the caller's to change or a lead was converted.
+ * @param props Component props.
+ * @param props.count How many are selected.
+ * @param props.pending Whether records are on their way.
+ * @param props.progress How many of them have had their answer, of how many.
+ * @param props.locked How many the caller may not change.
+ * @param props.converted How many are converted leads.
+ * @returns The count and the note.
+ */
+const BarCount = (props: {
+  count: number;
+  pending: boolean;
+  progress: { done: number; total: number };
+  locked: number;
+  converted: number;
+}) => {
+  const t = useTranslations('BulkBar');
+
+  return (
+    <>
+      <output className="flex items-center gap-2 px-2 text-[0.8125rem] font-semibold whitespace-nowrap tabular-nums">
+        {props.pending && <LoaderCircleIcon aria-hidden="true" className="size-4 animate-spin" />}
+        {props.pending ? t('progress', props.progress) : t('selected', { count: props.count })}
+      </output>
+      {(props.locked > 0 || props.converted > 0) && (
+        <span className="px-2 text-[0.8125rem] text-on-rail/80">
+          {props.locked > 0
+            ? t('locked', { count: props.locked })
+            : t('converted', { count: props.converted })}
+        </span>
+      )}
+    </>
+  );
+};
+
+/**
  * The records a bulk action left unchanged: each by name with the reason the server gave, in an
  * alert above the bar until dismissed.
  * @param props Component props.
@@ -195,8 +232,8 @@ const RefusedAlert = (props: { refused: Refusal[]; total: number; onDismiss: () 
  * caller's to change leaves only Clear, and says so. Each record goes through its own server
  * action, four at a time, with the count in the bar; nothing changes on screen before the server
  * says so. Then one answer: a toast when all of them changed (the selection clears), or an alert
- * naming each refused record with its reason (they stay selected; the list refreshes), for as long
- * as they are.
+ * naming each refused record with its reason (they stay selected; the list refreshes), until it is
+ * dismissed, × clears the selection or the list's state changes.
  * @param props Component props.
  * @returns The bar, or nothing while nothing is selected.
  */
@@ -215,11 +252,11 @@ export const BulkBar = (props: BulkBarProps) => {
   const [asking, setAsking] = useState<'archive' | 'cancel' | 'reason'>();
   const [losing, setLosing] = useState<StageRef>();
   const count = props.chosen.length;
-  if (count === 0 && !isPending) {
+  // The last action's refusals stay until dismissed, cleared with × or the list's state changes
+  // (the list remounts the bar), even once their records have left the list.
+  if (count === 0 && !isPending && refused.length === 0) {
     return null;
   }
-  // The last action's refusals, while their records are still selected.
-  const shown = refused.filter((item) => props.chosen.some((chosen) => chosen.id === item.id));
 
   const allowed = bulkActions(props.entity, props.chosen, props);
   const { assign: assignOne, archive, restore } = actionsOf(props.entity);
@@ -364,6 +401,8 @@ export const BulkBar = (props: BulkBarProps) => {
     ];
   };
   const deal = props.entity === 'deal';
+  // A control that stays while records are on their way, but does nothing.
+  const busy = isPending || undefined;
 
   return (
     // Under the list's last row, and stuck to the foot of the screen while the list runs past it;
@@ -373,10 +412,10 @@ export const BulkBar = (props: BulkBarProps) => {
       className="pointer-events-none sticky bottom-4 z-30 mt-4 flex justify-center"
     >
       <div className="pointer-events-auto relative flex max-w-full flex-col items-center">
-        {shown.length > 0 && (
+        {refused.length > 0 && (
           <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2">
             <RefusedAlert
-              refused={shown}
+              refused={refused}
               total={progress.total}
               onDismiss={() => {
                 setRefused([]);
@@ -384,104 +423,101 @@ export const BulkBar = (props: BulkBarProps) => {
             />
           </div>
         )}
-        <div
-          role="toolbar"
-          aria-label={t('selected', { count })}
-          className="flex flex-wrap items-center justify-center gap-1 rounded-lg bg-rail p-1.5 text-on-rail shadow-float ring-1 ring-white/10"
-        >
-          <output className="flex items-center gap-2 px-2 text-[0.8125rem] font-semibold whitespace-nowrap tabular-nums">
-            {isPending && <LoaderCircleIcon aria-hidden="true" className="size-4 animate-spin" />}
-            {isPending
-              ? t('progress', { done: progress.done, total: progress.total })
-              : t('selected', { count })}
-          </output>
-          {(allowed.locked > 0 || allowed.converted > 0) && (
-            <span className="px-2 text-[0.8125rem] text-on-rail/80">
-              {allowed.locked > 0
-                ? t('locked', { count: allowed.locked })
-                : t('converted', { count: allowed.converted })}
-            </span>
-          )}
-          <span aria-hidden="true" className="mx-0.5 h-5 w-px bg-white/20" />
-          {allowed.assign && (
-            <BarMenu
-              icon={<UserRoundIcon data-icon="inline-start" />}
-              label={t('assign')}
-              menuLabel={t('assign_to')}
-              busy={isPending}
-              name="assign"
-            >
-              {props.members.map((member) => (
-                <DropdownMenuItem
-                  key={member.userId}
-                  onSelect={() => {
-                    assign(member);
-                  }}
-                >
-                  <PersonAvatar person={member} size="xs" />
-                  <span className="truncate">{member.displayName ?? member.email}</span>
-                </DropdownMenuItem>
-              ))}
-            </BarMenu>
-          )}
-          {allowed.status && (
-            <BarMenu
-              icon={<CircleDotIcon data-icon="inline-start" />}
-              label={deal ? t('stage') : t('status')}
-              menuLabel={t('move_to')}
-              busy={isPending}
-              name="status"
-            >
-              {statusItems()}
-            </BarMenu>
-          )}
-          {allowed.restore && restore && (
+        {(count > 0 || isPending) && (
+          <div
+            role="toolbar"
+            aria-label={t('selected', { count })}
+            className="flex flex-wrap items-center justify-center gap-1 rounded-lg bg-rail p-1.5 text-on-rail shadow-float ring-1 ring-white/10"
+          >
+            <BarCount
+              count={count}
+              pending={isPending}
+              progress={progress}
+              locked={allowed.locked}
+              converted={allowed.converted}
+            />
+            <span aria-hidden="true" className="mx-0.5 h-5 w-px bg-white/20" />
+            {allowed.assign && (
+              <BarMenu
+                icon={<UserRoundIcon data-icon="inline-start" />}
+                label={t('assign')}
+                menuLabel={t('assign_to')}
+                busy={isPending}
+                name="assign"
+              >
+                {props.members.map((member) => (
+                  <DropdownMenuItem
+                    key={member.userId}
+                    onSelect={() => {
+                      assign(member);
+                    }}
+                  >
+                    <PersonAvatar person={member} size="xs" />
+                    <span className="truncate">{member.displayName ?? member.email}</span>
+                  </DropdownMenuItem>
+                ))}
+              </BarMenu>
+            )}
+            {allowed.status && (
+              <BarMenu
+                icon={<CircleDotIcon data-icon="inline-start" />}
+                label={deal ? t('stage') : t('status')}
+                menuLabel={t('move_to')}
+                busy={isPending}
+                name="status"
+              >
+                {statusItems()}
+              </BarMenu>
+            )}
+            {allowed.restore && restore && (
+              <Button
+                variant="ghost"
+                aria-disabled={busy}
+                className={ON_BAR}
+                onClick={() => {
+                  run(
+                    async (item) => await restore(props.workspaceId, item.id),
+                    (many) => t('done_restore', { records: records(many) }),
+                  );
+                }}
+              >
+                <ArchiveRestoreIcon data-icon="inline-start" />
+                {t('restore')}
+              </Button>
+            )}
+            {allowed.archive && (
+              <Button
+                variant="ghost"
+                aria-disabled={busy}
+                className={ON_BAR}
+                onClick={() => {
+                  if (!isPending) {
+                    setAsking('archive');
+                  }
+                }}
+              >
+                <ArchiveIcon data-icon="inline-start" />
+                {t('archive')}
+              </Button>
+            )}
             <Button
               variant="ghost"
-              aria-disabled={isPending || undefined}
-              className={ON_BAR}
-              onClick={() => {
-                run(
-                  async (item) => await restore(props.workspaceId, item.id),
-                  (many) => t('done_restore', { records: records(many) }),
-                );
-              }}
-            >
-              <ArchiveRestoreIcon data-icon="inline-start" />
-              {t('restore')}
-            </Button>
-          )}
-          {allowed.archive && (
-            <Button
-              variant="ghost"
-              aria-disabled={isPending || undefined}
+              size="icon"
+              aria-label={t('clear')}
+              title={t('clear')}
+              aria-disabled={busy}
               className={ON_BAR}
               onClick={() => {
                 if (!isPending) {
-                  setAsking('archive');
+                  setRefused([]);
+                  props.onClear();
                 }
               }}
             >
-              <ArchiveIcon data-icon="inline-start" />
-              {t('archive')}
+              <XIcon />
             </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t('clear')}
-            title={t('clear')}
-            aria-disabled={isPending || undefined}
-            className={ON_BAR}
-            onClick={() => {
-              if (!isPending) {
-                props.onClear();
-              }
-            }}
-          >
-            <XIcon />
-          </Button>
-        </div>
+          </div>
+        )}
       </div>
 
       <ConfirmAction

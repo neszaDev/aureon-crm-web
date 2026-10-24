@@ -187,27 +187,57 @@ describe(BulkList, () => {
     await expect.element(page.getByRole('heading', { name: 'Companies' })).toHaveFocus();
   });
 
-  it('drops the bar and the last refusals once the selection is cleared', async () => {
+  // Brightwater is refused, and stays selected with its reason above the bar.
+  const refuseBrightwater = async () => {
     vi.mocked(CompanyActions.archiveCompany).mockImplementation(
       async (_workspace, id) =>
         await Promise.resolve(
           id === 2 ? { ok: false, message: 'Your role doesn’t allow this.' } : { ok: true },
         ),
     );
-    await render(<List scope="a" sections={[NEW, WON]} />);
     await box('Acme').click();
     await box('Brightwater').click();
     await toolbar().getByRole('button', { name: 'Archive' }).click();
     await page.getByRole('alertdialog').getByRole('button', { name: 'Archive' }).click();
     await expect.element(page.getByRole('alert')).toHaveTextContent('Brightwater');
     await expect.element(toolbar()).toHaveAccessibleName('1 selected');
+  };
+
+  it('keeps the refusals on screen when the selection clears, until they are dismissed', async () => {
+    await render(<List scope="a" sections={[NEW, WON]} />);
+    await refuseBrightwater();
 
     await userEvent.keyboard('{Escape}');
     await expect.element(toolbar()).not.toBeInTheDocument();
-    await expect.element(page.getByRole('alert')).not.toBeInTheDocument();
+    await expect.element(page.getByRole('alert')).toHaveTextContent('Brightwater');
 
+    await page.getByRole('button', { name: 'Dismiss' }).click();
+    await expect.element(page.getByRole('alert')).not.toBeInTheDocument();
     await box('Cobalt').click();
     await expect.element(toolbar()).toHaveAccessibleName('1 selected');
+    await expect.element(page.getByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('drops the bar and the refusals with its ×', async () => {
+    await render(<List scope="a" sections={[NEW, WON]} />);
+    await refuseBrightwater();
+
+    await toolbar().getByRole('button', { name: 'Clear selection' }).click();
+
+    await expect.element(toolbar()).not.toBeInTheDocument();
+    await expect.element(page.getByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('still names a refused record that has left the list, until the list state changes', async () => {
+    const { rerender } = await render(<List scope="a" sections={[NEW, WON]} />);
+    await refuseBrightwater();
+
+    // Brightwater left the list meanwhile (archived by someone else).
+    await rerender(<List scope="a" sections={[NEW.filter((row) => row.id !== 2), WON]} />);
+    await expect.element(toolbar()).not.toBeInTheDocument();
+    await expect.element(page.getByRole('alert')).toHaveTextContent('Brightwater');
+
+    await rerender(<List scope="b" sections={[NEW.filter((row) => row.id !== 2), WON]} />);
     await expect.element(page.getByRole('alert')).not.toBeInTheDocument();
   });
 });
