@@ -423,6 +423,53 @@ export const expectNoSidewaysScroll = async (page: Page, url: string) => {
 };
 
 /**
+ * Checks that a page fits its window, as Thai and French need: nothing scrolls sideways, no text
+ * spills out of its box (it wraps, or is cut short with the whole of it in a tooltip), and no
+ * status pill is cut short.
+ * @param page Playwright page, with the viewport to check.
+ * @param options What to check.
+ * @param options.url The page to open; the one open without it (a record panel over a list).
+ * @param options.ready What shows once the page is drawn: its `h1` by default.
+ */
+export const expectFits = async (page: Page, options: { url?: string; ready?: Locator }) => {
+  if (options.url) {
+    await page.goto(options.url);
+  }
+  await expect(options.ready ?? page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+  const problems = await page.evaluate(() => {
+    const found: string[] = [];
+    // oxlint-disable-next-line unicorn/consistent-function-scoping -- runs in the page, sent alone
+    const name = (element: Element) =>
+      `${element.tagName.toLowerCase()} "${(element.textContent ?? '').trim().slice(0, 48)}"`;
+    if (document.documentElement.scrollWidth > window.innerWidth) {
+      found.push('the page scrolls sideways');
+    }
+    for (const element of document.querySelectorAll<HTMLElement>('body *')) {
+      const style = getComputedStyle(element);
+      const cut = element.scrollWidth > element.clientWidth + 1;
+      // Text read out but not drawn (`sr-only`) is a pixel wide on purpose.
+      if (!cut || element.clientWidth <= 1 || !element.checkVisibility()) {
+        continue;
+      }
+      // Words of its own, not a badge or a dot set past its edge.
+      const words = [...element.childNodes].some(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+      );
+      if (element.closest('[data-slot=status-pill]')) {
+        found.push(`a pill cut short: ${name(element)}`);
+      } else if (words && style.overflowX === 'visible' && style.display !== 'inline') {
+        found.push(`spills out: ${name(element)}`);
+      } else if (style.textOverflow === 'ellipsis' && !element.closest('[title]')) {
+        found.push(`cut short without a tooltip: ${name(element)}`);
+      }
+    }
+    return found;
+  });
+
+  expect(problems, options.url ?? page.url()).toStrictEqual([]);
+};
+
+/**
  * Through the API: the stage a deal is in.
  * @param request Playwright API client.
  * @param as A member.

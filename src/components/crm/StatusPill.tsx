@@ -59,7 +59,7 @@ export const StatusPill = (props: {
 
   if (!props.menu) {
     return (
-      <span data-tone={props.tone} className={cn(PILL, props.className)}>
+      <span data-slot="status-pill" data-tone={props.tone} className={cn(PILL, props.className)}>
         <span className="sr-only">{name}</span>
         {dot}
         {label}
@@ -74,6 +74,7 @@ export const StatusPill = (props: {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
+          data-slot="status-pill"
           data-tone={props.tone}
           aria-label={name}
           aria-busy={props.pending ? true : undefined}

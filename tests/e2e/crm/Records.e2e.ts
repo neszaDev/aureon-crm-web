@@ -10,6 +10,7 @@ import {
   createCompany,
   createContact,
   createLead,
+  expectFits,
   expectNoA11yViolations,
   expectNoSidewaysScroll,
   seed,
@@ -408,6 +409,42 @@ test.describe('Records', () => {
     await addQualified.fill('Elena Garcia');
     await addQualified.press('Enter');
     await expect(section('Qualified').getByRole('row', { name: /Elena Garcia/u })).toBeVisible();
+  });
+
+  test('links a default-grouped section of over 50 to its whole list, ungrouped and filtered', async ({
+    page,
+    request,
+  }) => {
+    test.setTimeout(60_000);
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    // 51 New leads: one more than a section shows. Leads group by status unless told otherwise.
+    await Promise.all(
+      Array.from(
+        { length: 51 },
+        async (_, index) =>
+          await seed(request, owner, 'leads', {
+            ...MORE_LEADS[index % MORE_LEADS.length],
+            lastName: `${MORE_LEADS[index % MORE_LEADS.length]?.lastName ?? ''} ${index + 1}`,
+          }),
+      ),
+    );
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(`${owner.path}/leads`);
+
+    const section = page.locator('[data-slot=collapsible]').filter({
+      has: page.getByRole('button', { name: /^Status: New 51/u }),
+    });
+    await expect(section.getByRole('row')).toHaveCount(51);
+    const all = section.getByRole('link', { name: 'View all 51' });
+    // The list without its default grouping, narrowed to the section's status.
+    const href = new URL((await all.getAttribute('href')) ?? '', 'http://x');
+    expect(href.searchParams.get('group')).toBe('none');
+    expect(href.searchParams.getAll('status')).toStrictEqual(['NEW']);
+
+    await all.click();
+    await expect(page.getByRole('heading', { name: '51 leads', exact: true })).toBeVisible();
+    await expect(page.getByText('1–20 of 51')).toBeVisible();
+    await expect(page.locator('[data-slot=collapsible]')).toHaveCount(0);
   });
 
   test('searches, sorts, filters and pages 25 companies, and finds those of a member who left', async ({
@@ -892,8 +929,86 @@ test.describe('Records', () => {
     });
   });
 
+  test('fits a list, the board and a record panel in French, at 1280 and 390 px', async ({
+    page,
+    request,
+  }) => {
+    test.setTimeout(60_000);
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const company = await seed(request, owner, 'companies', { name: COMPANIES.brightwater.name });
+    await seed(request, owner, 'contacts', { ...CONTACTS.buyer, companyId: company.id });
+    await seed(request, owner, 'leads', {
+      ...MORE_LEADS[0],
+      companyName: COMPANIES.brightwater.name,
+    });
+    await seed(request, owner, 'deals', {
+      name: DEALS.tablets,
+      amount: '1250.00',
+      companyId: company.id,
+    });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    const french = owner.path.replace('/app/', '/fr/app/');
+
+    for (const width of [1280, 390]) {
+      // oxlint-disable-next-line no-await-in-loop -- one width after the other
+      await page.setViewportSize({ width, height: 800 });
+      // oxlint-disable-next-line no-await-in-loop -- one page after the other
+      await expectFits(page, { url: `${french}/leads` });
+      // oxlint-disable-next-line no-await-in-loop -- one page after the other
+      await expectFits(page, { url: `${french}/deals` });
+      // oxlint-disable-next-line no-await-in-loop -- one page after the other
+      await expectFits(page, { url: `${french}/deals?view=list` });
+      const deal = page.getByRole('main').getByRole('link', { name: DEALS.tablets });
+      // oxlint-disable-next-line no-await-in-loop -- once the list can open it
+      await waitForHydration(deal);
+      // oxlint-disable-next-line no-await-in-loop -- one step after the other
+      await deal.click();
+      // oxlint-disable-next-line no-await-in-loop -- the panel over the list
+      await expectFits(page, {
+        ready: page.getByRole('dialog').getByRole('heading', { level: 1, name: DEALS.tablets }),
+      });
+    }
+  });
+
   test.describe('on a phone, in Thai', () => {
     test.use({ viewport: { width: 390, height: 844 } });
+
+    test('fits the leads and contacts lists, their sections and pills', async ({
+      page,
+      request,
+    }) => {
+      const owner = await seedWorkspace(request);
+      const person = { firstName: 'สมชายสมหญิงสมศักดิ์', lastName: 'เจริญรุ่งเรืองวัฒนาพานิช' };
+      const company = 'บริษัทการค้าระหว่างประเทศและการขนส่งสินค้าครบวงจรแห่งประเทศไทยจำกัดมหาชน';
+      const lead = await seed(request, owner, 'leads', { ...person, companyName: company });
+      await apiCall(
+        request,
+        owner,
+        'POST',
+        `/workspaces/${owner.workspaceId}/leads/${lead.id}/status`,
+        {
+          status: 'UNQUALIFIED',
+          reason: 'ไม่มีงบประมาณ',
+          version: lead.version,
+        },
+      );
+      await seed(request, owner, 'leads', { ...person, companyName: company });
+      await seed(request, owner, 'contacts', person);
+      await signIn(page, { email: owner.email, password: PASSWORD });
+      const thai = owner.path.replace('/app/', '/th/app/');
+
+      await expectFits(page, { url: `${thai}/leads` });
+      // In a status's section on a phone, the heading says the status: the rows have no pill.
+      await expect(
+        page
+          .getByRole('main')
+          .getByRole('table')
+          .getByRole('button', { name: /^สถานะ/u }),
+      ).toHaveCount(0);
+      await expectFits(page, { url: `${thai}/leads?group=none` });
+      await expectFits(page, { url: `${thai}/contacts` });
+      await expectFits(page, { url: `${thai}/contacts?group=owner` });
+    });
 
     test('fits the company, contact, lead and deal pages, with long names', async ({
       page,

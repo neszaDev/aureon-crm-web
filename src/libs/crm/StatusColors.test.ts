@@ -127,6 +127,18 @@ describe('colour tokens', () => {
       expect(contrast(theme, `status-${tone}-ink`, 'card')).toBeGreaterThanOrEqual(4.5);
     });
 
+    it.each(TONES)("keeps the %s pill's dot apart from its tint", (tone) => {
+      // The dot is aria-hidden, drawn beside the pill's word: it carries nothing alone, so 1.4.11's
+      // 3:1 doesn't bind it. Most reach 3:1 anyway; the contract's light amber, green and slate and
+      // the dark violet sit lower, at 2:1 or more, where it still reads as a dot.
+      const LOWER = new Set(['light amber', 'light green', 'light slate', 'dark violet']);
+      const floor = LOWER.has(`${themeName} ${tone}`) ? 2 : 3;
+
+      expect(contrast(theme, `status-${tone}`, `status-${tone}-tint`)).toBeGreaterThanOrEqual(
+        floor,
+      );
+    });
+
     it.each(TONES)('draws the %s hue at 3:1 or more on the canvas', (tone) => {
       // The contract's light amber (#e69a1c, 2.3:1) only ever sits beside its words.
       const floor = themeName === 'light' && tone === 'amber' ? 2.3 : 3;
