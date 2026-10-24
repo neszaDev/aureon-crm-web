@@ -130,7 +130,8 @@ On leads, deals and tasks the **status pill** in each row is also the control: c
 statuses the record can move to. The pill waits for the server: if the change is refused (your role,
 or someone changed the record first), the old status stays and the reason shows under it, with a
 reload when needed. A lead moved to Unqualified asks why; a deal moved to Lost asks why; a task
-cancelled asks to confirm.
+cancelled asks to confirm. On a phone, a list grouped by status or stage shows no pill in its rows
+(each section's heading names the status): change the status from the pill in the record's header.
 
 Click a column heading to sort by it (again to reverse it), or use **Sort by** where a list has
 one; choose 20, 50 or 100 rows a page.
