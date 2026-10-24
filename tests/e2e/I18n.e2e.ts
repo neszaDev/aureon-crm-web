@@ -11,7 +11,10 @@ test.describe('I18n', () => {
       await page.getByRole('combobox', { name: 'Change language' }).selectOption('fr');
 
       await expect(
-        page.getByRole('heading', { level: 1, name: "Chaque étape d'une relation est signée." }),
+        page.getByRole('heading', {
+          level: 1,
+          name: "Voyez où en est chaque affaire, et qui s'en charge.",
+        }),
       ).toBeVisible();
     });
 
@@ -27,7 +30,7 @@ test.describe('I18n', () => {
       await expect(
         page.getByRole('heading', {
           level: 1,
-          name: 'ทุกก้าวของความ\u2060สัมพันธ์มีตรา\u2060ประทับกำ\u2060กับ',
+          name: 'เห็นว่าทุกดีลอยู่\u2060ขั้น\u2060ไหน และใครเป็นผู้\u2060รับ\u2060ผิด\u2060ชอบ',
         }),
       ).toBeVisible();
     });

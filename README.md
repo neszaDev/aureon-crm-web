@@ -4,10 +4,10 @@ The web app of **Aureon CRM**, a multi-user CRM for small and medium-sized busin
 **Next.js 16** (App Router, React 19, TypeScript, Tailwind v4, shadcn/ui, next-intl). Every
 business is a workspace; people join one through an invitation link and get a role in it (owner,
 admin, manager or sales rep). It has companies and contacts, leads that convert into a contact and a
-deal, a drag-and-drop pipeline whose stamp row shows who moved each deal, tasks with in-app
-reminders, activities, a record search, a dashboard and five reports, CSV export and an audit
-trail, in English, French and Thai, in light and dark themes. How to use it:
-[the user guide](docs/user-guide.md).
+deal, lists in coloured status sections and a drag-and-drop pipeline whose track shows who moved
+each deal, tasks with in-app reminders, activities, a record search, a dashboard and five
+reports, CSV export and an audit trail, in English, French and Thai, in light and dark themes.
+How to use it: [the user guide](docs/user-guide.md).
 
 Its backend is [aureon-crm-api](https://github.com/neszaDev/aureon-crm-api) (Spring Boot and
 PostgreSQL). The CRM's specification, data model, permission matrix and REST contract live there,
@@ -22,16 +22,16 @@ itself based on [Next.js Boilerplate](https://github.com/ixartz/Next-js-Boilerpl
 
 ## Screens
 
-Real captures of the running app, on the API's demo data (from `public/landing/`, where the
-landing page shows them; see its README for how they are made):
+Real captures of the running app, on the demo workspace's fictional data (from `public/landing/`,
+where the landing page shows them; see its README for how they are made):
 
 | Dashboard | Deals board |
 |---|---|
 | ![The dashboard](public/landing/dashboard-light.webp) | ![The deals board](public/landing/board-light.webp) |
-| **A won deal: its stamp row and stage history** | **Reports** |
-| ![A won deal](public/landing/deal-light.webp) | ![The reports](public/landing/reports-light.webp) |
-| **My tasks, with the reminders open** | **On a phone, in Thai** |
-| ![Tasks and reminders](public/landing/tasks-light.webp) | ![The board on a phone, in Thai](public/landing/board-390-th-light.webp) |
+| **A deal in the side panel: its track and stage history** | **Reports** |
+| ![A deal in the side panel](public/landing/deal-light.webp) | ![The reports](public/landing/reports-light.webp) |
+| **Tasks by due date, with the inbox open** | **On a phone, in Thai** |
+| ![Tasks and the inbox](public/landing/tasks-light.webp) | ![The board on a phone, in Thai](public/landing/board-390-th-light.webp) |
 
 ## Prerequisites
 

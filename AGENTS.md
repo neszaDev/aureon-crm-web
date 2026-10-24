@@ -51,7 +51,8 @@ src/proxy.ts                    i18n routing + auth: protects /app and /dashboar
 src/validations/                zod schemas mirroring the backend's request rules (CRM: crm/*)
 src/components/ui/              shadcn/ui primitives (themed; add with `pnpm dlx shadcn add`)
 src/components/report/          Marksheet domain UI: marks, totals, results table (demos only)
-src/components/marketing/       the public landing page: hero capture, section row and developer note, capture sheet
+src/components/marketing/       the public landing page: hero capture, section row and developer note, capture sheet,
+                                the app's pill, track and avatar drawn without their components (`TrackSample`)
 src/components/crm/**           the CRM: shell/ (rail, collapsible sidebar, location, + New, switcher, account menu, record search, the inbox of
                                 reminders: `RemindersBell`), settings/, seals, dashboard/ (Home, the workspace's root: my work, my deals,
                                 recent activity; Insights › Dashboard, `dashboard/`: the line of figures, stages, won and lost, pipeline,

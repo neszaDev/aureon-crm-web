@@ -53,10 +53,10 @@ export const Note = (props: {
   >
     {props.lead}
     {props.spot && (
-      <p className="flex items-center gap-2 text-[0.8125rem] font-medium text-seal-ink">
+      <p className="flex items-center gap-2 text-[0.8125rem] font-medium text-violet-ink">
         <span
           aria-hidden="true"
-          className="h-3 w-4.5 shrink-0 rounded-[3px] border-2 border-seal-ink"
+          className="h-3 w-4.5 shrink-0 rounded-[3px] border-2 border-violet-ink"
         />
         {props.spot}
       </p>

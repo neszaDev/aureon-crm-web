@@ -6,7 +6,10 @@ test.describe('Sanity', () => {
       await page.goto('/');
 
       await expect(
-        page.getByRole('heading', { level: 1, name: 'Every step of a relationship is signed.' }),
+        page.getByRole('heading', {
+          level: 1,
+          name: 'See where every deal stands, and who owns it.',
+        }),
       ).toBeVisible();
       // The demos' handwriting font is theirs alone: not declared on the public pages.
       expect(

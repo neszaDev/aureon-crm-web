@@ -15,9 +15,9 @@
  * themes). Any element with `data-tone="<tone>"` gets them as `--tone`, `--tone-tint` and
  * `--tone-ink`.
  *
- * Legacy names: the pages Tasks 2-10 of the rework rebuild still read the "Seal and circular"
- * tokens; they resolve to this palette (`seal` is the rail, `seal-ink` the violet ink, `paper`
- * a panel, `ground` the canvas, `ink` the text, `rule` the hairline).
+ * Legacy names: some pages still read the "Seal and circular" tokens; they resolve to this
+ * palette (`seal` is the rail, `seal-ink` the violet ink, `paper` a panel, `ground` the canvas,
+ * `ink` the text, `rule` the hairline).
  */
 
 /* Dark: the `.dark` class on <html>, or the OS preference while the theme cookie is `system`. */
@@ -523,25 +523,19 @@
 }
 
 /*
- * The box that becomes current after a move is pressed like a stamp: it lands a little large and
- * the ink settles, in 220 ms. Not at all under reduced motion.
+ * The landing page's tracks fill as a deal moves: each reached segment slides in from the left,
+ * one after another (`--fill-delay`), in 600 ms. Filled from the start under reduced motion.
  */
-@keyframes stamp-press {
+@keyframes track-fill {
   from {
-    transform: scale(1.06);
-    opacity: 0.6;
-  }
-
-  to {
-    transform: scale(1);
-    opacity: 1;
+    transform: scaleX(0);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* `--press-delay` presses a row one box after another (the landing page's hero). */
-  .stamp-press {
-    animation: stamp-press 220ms var(--ease-out-expo) var(--press-delay, 0ms) both;
+  .track-fill {
+    transform-origin: left;
+    animation: track-fill 600ms var(--ease-out-expo) var(--fill-delay, 0ms) both;
   }
 }
 

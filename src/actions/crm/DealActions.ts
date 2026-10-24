@@ -142,7 +142,7 @@ export async function restoreDeal(workspaceId: number, dealId: number): Promise<
 
 /**
  * Moves a deal to another stage (`POST .../deals/{id}/move`) and refreshes the page: the board's
- * counts and totals, the stamp row and the history come from the server. A stale version is the
+ * counts and totals, the track and the history come from the server. A stale version is the
  * reload message; Lost needs a reason (the backend refuses without, on `lostReason`), which any
  * other stage drops.
  * @param workspaceId The workspace.

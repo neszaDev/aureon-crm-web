@@ -59,13 +59,12 @@ const Capture = (props: {
 };
 
 /**
- * A real capture of the app on a paper sheet: the light capture, or the lacquer one under the
- * dark theme (the other is `display: none` and, lazy, waits); with `narrow`, a crop around the
+ * A real capture of the app on a panel: the light capture, or the dark one under the dark theme (the other is `display: none` and, lazy, waits); with `narrow`, a crop around the
  * section's part below 768 px, where the whole screen would be too small to read.
  * @param props Component props.
  * @param props.light The light capture.
- * @param props.dark The lacquer capture.
- * @param props.narrow The light and lacquer crops for phones.
+ * @param props.dark The dark capture.
+ * @param props.narrow The light and dark crops for phones.
  * @param props.alt What the capture shows.
  * @param props.sizes The displayed width, for the image optimiser.
  * @param props.spot The part of the capture the section's note is about (the crop is that part).
@@ -106,7 +105,7 @@ export const Shot = (props: {
         aria-hidden="true"
         style={props.spot}
         className={cn(
-          'pointer-events-none absolute rounded-md border-2 border-seal-ink opacity-55 transition-[opacity,box-shadow] duration-200 ease-out-expo group-has-[[data-spot]:hover]/row:opacity-100 group-has-[[data-spot]:hover]/row:shadow-[0_0_0_4px_color-mix(in_oklab,var(--seal)_22%,transparent)] motion-reduce:transition-none',
+          'pointer-events-none absolute rounded-md border-2 border-violet-ink opacity-55 transition-[opacity,box-shadow] duration-200 ease-out-expo group-has-[[data-spot]:hover]/row:opacity-100 group-has-[[data-spot]:hover]/row:shadow-[0_0_0_4px_color-mix(in_oklab,var(--violet)_22%,transparent)] motion-reduce:transition-none',
           props.narrow && 'max-md:hidden',
         )}
       />

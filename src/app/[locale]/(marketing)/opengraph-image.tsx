@@ -12,12 +12,13 @@ export const contentType = 'image/png';
 // One image per language, drawn at build time.
 export const generateStaticParams = () => routing.locales.map((locale) => ({ locale }));
 
-// The image renders outside the page's CSS, so the tokens are spelled out (DESIGN.md, light).
-const SEAL = '#c8361c';
-const ON_SEAL = '#fff4f0';
-const SEAL_INK = '#b8321a';
-const SEAL_TINT = '#f6e3dc';
-const INK = '#1c1d21';
+// The image renders outside the page's CSS, so the tokens are spelled out (global.css, light).
+const VIOLET = '#5a45e0';
+const VIOLET_TINT = '#efedfd';
+const RULE = '#e6e6ec';
+const INK = '#1f2030';
+const INK_2 = '#5d6072';
+const WHITE = '#ffffff';
 
 // Anuphan Bold, the app's face for Latin and Thai, as a static TTF (the renderer reads no WOFF2),
 // beside this file with its licence (Anuphan-OFL.txt): the image is drawn without the network.
@@ -47,17 +48,10 @@ const thaiWords = (text: string) => {
   return words.map((word) => word.replaceAll('\u2060', ''));
 };
 
-const box = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: 72,
-  height: 72,
-};
-
 /**
- * The shared image of the public pages, per language: the wordmark, a stamp row and the headline
- * on the seal, as the landing page's band opens.
+ * The shared image of the public pages, per language, as the landing page's band opens: the
+ * orbit mark and the name, a deal of the demo workspace as its list row draws it (its stage's
+ * pill, its track filled up to it, its owner), and the headline, white on Aureon violet.
  * @param props Route props.
  * @param props.params The locale.
  * @returns The PNG.
@@ -65,10 +59,8 @@ const box = {
 export default async function OpenGraphImage(props: { params: Promise<{ locale: string }> }) {
   const { locale } = await props.params;
   const t = await getTranslations({ locale, namespace: 'Index' });
-  const tStamp = await getTranslations({ locale, namespace: 'StampRow' });
+  const tTrack = await getTranslations({ locale, namespace: 'StatusTrack' });
   const title = t('title');
-  const days = tStamp('days_short', { count: 8 });
-  const seals = ['RR', 'MM', 'AO'];
 
   return new ImageResponse(
     <div
@@ -79,69 +71,77 @@ export default async function OpenGraphImage(props: { params: Promise<{ locale: 
         width: '100%',
         height: '100%',
         padding: '64px 80px 72px',
-        background: SEAL,
-        color: ON_SEAL,
+        background: VIOLET,
+        color: WHITE,
         fontFamily: 'Anuphan',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 40 }}>
-        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke={ON_SEAL}>
-          <g transform="rotate(-8 12 12)" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10.25" strokeWidth="2" />
-            <circle cx="12" cy="12" r="7.75" strokeWidth="0.75" />
-            <path d="M8.9 15.6 12 7.6l3.1 8M10 12.9h4" strokeWidth="1.9" />
-          </g>
+        {/* The orbit mark (AureonMark): a ring open at the upper right, its satellite beyond. */}
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none">
+          <path d="M19.88 10.61A8 8 0 1 1 13.39 4.12" stroke={WHITE} strokeWidth="3" />
+          <circle cx="19" cy="5" r="2.75" fill={WHITE} />
         </svg>
         {AppConfig.name}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {seals.map((seal) => (
-            <div
-              key={seal}
-              style={{
-                ...box,
-                background: SEAL_TINT,
-                borderRadius: 6,
-                border: `2px solid ${SEAL_INK}66`,
-              }}
-            >
-              <div
-                style={{
-                  ...box,
-                  width: 56,
-                  height: 56,
-                  borderRadius: 28,
-                  border: `3px solid ${SEAL_INK}`,
-                  color: SEAL_INK,
-                  fontSize: 22,
-                  transform: 'rotate(-8deg)',
-                }}
-              >
-                {seal}
-              </div>
-            </div>
-          ))}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+        {/* The demo workspace's deal in Proposal, the third of four open stages, for a day. */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 24,
+            alignSelf: 'flex-start',
+            padding: '18px 28px',
+            borderRadius: 14,
+            background: WHITE,
+            color: INK,
+            fontSize: 26,
+          }}
+        >
           <div
             style={{
-              ...box,
-              background: '#ffffff',
-              borderRadius: 6,
-              border: `4px solid ${INK}`,
-              color: SEAL_INK,
-              fontSize: 22,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '6px 20px',
+              borderRadius: 999,
+              background: VIOLET_TINT,
+              color: VIOLET,
             }}
           >
-            {days}
+            <div style={{ width: 14, height: 14, borderRadius: 7, background: VIOLET }} />
+            Proposal
           </div>
+          <div style={{ display: 'flex', gap: 5 }}>
+            {[true, true, true, false].map((filled, step) => (
+              <div
+                key={step}
+                style={{
+                  width: 76,
+                  height: 10,
+                  borderRadius: 5,
+                  background: filled ? VIOLET : RULE,
+                }}
+              />
+            ))}
+          </div>
+          <div style={{ display: 'flex', color: INK_2 }}>{tTrack('days_short', { count: 1 })}</div>
           <div
             style={{
-              ...box,
-              background: '#ffffff',
-              borderRadius: 6,
-              border: `2px solid ${SEAL_INK}66`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              background: VIOLET,
+              color: WHITE,
+              fontSize: 18,
             }}
-          />
+          >
+            MR
+          </div>
         </div>
         <div
           style={{
@@ -156,7 +156,14 @@ export default async function OpenGraphImage(props: { params: Promise<{ locale: 
           {/* The renderer breaks lines only at spaces, and Thai has none between words: lay
               out its words as the boxes of a wrapping row instead. */}
           {locale === 'th'
-            ? thaiWords(title).map((word, index) => <span key={index}>{word}</span>)
+            ? thaiWords(title).map((word, index) =>
+                // A space between phrases is a box of its own, which the renderer would drop.
+                word.trim() ? (
+                  <span key={index}>{word}</span>
+                ) : (
+                  <span key={index} style={{ width: '0.3em' }} />
+                ),
+              )
             : title}
         </div>
       </div>

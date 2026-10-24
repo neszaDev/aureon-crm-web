@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
-import { SEAL_PRIMARY_BUTTON, SEAL_OUTLINE_BUTTON } from '@/components/marketing/sealButton';
+import { BRAND_OUTLINE_BUTTON, BRAND_PRIMARY_BUTTON } from '@/components/marketing/brandButton';
 import { Button } from '@/components/ui/button';
 import { Wordmark } from '@/components/Wordmark';
 import { Link } from '@/libs/I18nNavigation';
@@ -10,11 +10,11 @@ import { AppConfig } from '@/utils/AppConfig';
 const SECTIONS = ['how-it-works', 'features', 'roles', 'developers'] as const;
 
 const NAV_LINK =
-  'rounded-md px-2.5 py-1.5 text-[0.9375rem] font-medium text-on-seal no-underline hover:bg-black/10 focus-visible:outline-on-seal';
+  'rounded-md px-2.5 py-1.5 text-[0.9375rem] font-medium text-white no-underline hover:bg-white/12 focus-visible:outline-white';
 
 /**
- * Public pages: the ink-violet header (the top of the landing page's band), the page on the
- * ground, and a footer with the sample-product note.
+ * Public pages: the violet header (the top of the landing page's band; its deep tint in the dark
+ * theme), the page on the canvas, and a footer with the sample-product note.
  * @param props Component props.
  * @param props.children Page content.
  * @returns The marketing layout.
@@ -38,7 +38,7 @@ export const MarketingTemplate = (props: { children: React.ReactNode }) => {
       >
         {t('skip_link')}
       </a>
-      <header className="bg-seal text-on-seal">
+      <header className="bg-violet text-white dark:bg-violet-tint">
         <div className="mx-auto flex h-16 max-w-[76rem] items-center gap-8 px-4 sm:px-7 lg:h-18">
           <Wordmark tone="seal" />
           <nav aria-label={t('main_navigation_label')} className="flex flex-1 items-center gap-2">
@@ -58,10 +58,10 @@ export const MarketingTemplate = (props: { children: React.ReactNode }) => {
             </ul>
             <div className="ml-auto flex items-center gap-2">
               <LocaleSwitcher tone="seal" />
-              <Button asChild variant="ghost" size="sm" className={SEAL_OUTLINE_BUTTON}>
+              <Button asChild variant="outline" size="sm" className={BRAND_OUTLINE_BUTTON}>
                 <Link href="/sign-in">{t('sign_in_link')}</Link>
               </Button>
-              <Button asChild size="sm" className={`${SEAL_PRIMARY_BUTTON} max-sm:hidden`}>
+              <Button asChild size="sm" className={`${BRAND_PRIMARY_BUTTON} max-sm:hidden`}>
                 <Link href="/sign-up">{t('sign_up_link')}</Link>
               </Button>
             </div>
@@ -86,12 +86,12 @@ export const MarketingTemplate = (props: { children: React.ReactNode }) => {
           >
             <ul className="flex flex-wrap gap-x-5 gap-y-1.5">
               <li>
-                <Link href="/about" className="font-medium text-seal-ink hover:underline">
+                <Link href="/about" className="font-medium text-violet-ink hover:underline">
                   {t('about_link')}
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="font-medium text-seal-ink hover:underline">
+                <Link href="/about" className="font-medium text-violet-ink hover:underline">
                   {tFooter('template_link')}
                 </Link>
               </li>

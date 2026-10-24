@@ -9,7 +9,7 @@ type AboutPageProps = {
 };
 
 const LINK =
-  'font-semibold text-seal-ink underline decoration-seal-ink/40 underline-offset-4 hover:decoration-seal-ink';
+  'font-semibold text-violet-ink underline decoration-violet-ink/40 underline-offset-4 hover:decoration-violet-ink';
 const CODE = 'rounded-[3.6px] bg-muted px-1 py-px font-mono text-[0.8125rem] text-foreground';
 
 export async function generateMetadata(

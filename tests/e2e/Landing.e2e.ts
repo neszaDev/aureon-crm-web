@@ -5,8 +5,12 @@ test.describe('Landing', () => {
   test('opens sign-up from the hero, and sign-in from the header', async ({ page, baseURL }) => {
     await page.goto('/');
 
-    // The hero's, the first in the page's main region (the header has its own).
-    await page.getByRole('main').getByRole('link', { name: 'Create a workspace' }).first().click();
+    // The hero's, the first in the page's main region (the header has its own): 44 px, as the
+    // landing page's two main actions are.
+    const create = page.getByRole('main').getByRole('link', { name: 'Create a workspace' }).first();
+    const box = await create.boundingBox();
+    expect(box?.height).toBe(44);
+    await create.click();
     await expect(page).toHaveURL(`${baseURL}/sign-up`);
 
     await page.goto('/');
@@ -23,7 +27,7 @@ test.describe('Landing', () => {
     await expect(
       page.getByRole('heading', {
         level: 1,
-        name: 'ทุกก้าวของความ\u2060สัมพันธ์มีตรา\u2060ประทับกำ\u2060กับ',
+        name: 'เห็นว่าทุกดีลอยู่\u2060ขั้น\u2060ไหน และใครเป็นผู้\u2060รับ\u2060ผิด\u2060ชอบ',
       }),
     ).toBeVisible();
     await expect(
@@ -34,20 +38,26 @@ test.describe('Landing', () => {
   test('shows the product, its proof and the sample-product note', async ({ page, request }) => {
     await page.goto('/');
 
-    await expect(page).toHaveTitle('Aureon CRM: every step of a relationship is signed');
+    await expect(page).toHaveTitle('Aureon CRM: see where every deal stands, and who owns it');
     // Every section, in order, the closing band last.
     await expect(page.getByRole('heading', { level: 2 })).toHaveText([
-      'Capture, qualify, close. Every step keeps its signature.',
-      'See how far every deal has travelled.',
-      'Every deal keeps its history.',
+      'Capture, qualify, close. Every move keeps its name.',
+      'Every list, in status sections.',
+      'Every deal shows its whole track.',
       'Follow-ups, by whom and when.',
       "A dashboard and reports from what's stored.",
       'One workspace per business, one role per person.',
       'In English, French and Thai.',
       'Built for developers to start from.',
       'Questions',
-      'Open a workspace. Sign the first step.',
+      'Open a workspace. Move your first deal.',
     ]);
+    // The hero's deal is drawn from the app's looks: assistive technology reads what it shows.
+    await expect(
+      page.getByText(
+        'An illustration of a deal in the demo workspace: Brightwater fleet tablets, €18,500.00, in Proposal (stage 3 of 4), owned by Mia Rossi.',
+      ),
+    ).toBeAttached();
     // Real captures of the demo workspace, said so under each.
     await expect(
       page.getByRole('img', { name: /^The deals board of the demo workspace: deal cards/u }),
@@ -72,7 +82,9 @@ test.describe('Landing', () => {
   test('names its French page and shared image in French', async ({ page }) => {
     await page.goto('/fr');
 
-    await expect(page).toHaveTitle("Aureon CRM : chaque étape d'une relation est signée");
+    await expect(page).toHaveTitle(
+      "Aureon CRM : voyez où en est chaque affaire, et qui s'en charge",
+    );
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
       'content',
       /\/fr\/opengraph-image/u,
@@ -91,7 +103,7 @@ test.describe('Landing', () => {
 
     // English first: the app then remembers Thai, and would open / in it.
     const english = await crops('/');
-    // Those of the board, the deal, the tasks, the dashboard and the reports, light and dark.
+    // Those of the deals list, the deal, the inbox, the dashboard and the reports, light and dark.
     expect(english).toHaveLength(10);
     expect(english.filter((srcset) => srcset.includes('-th-'))).toStrictEqual([]);
     const thai = await crops('/th');

@@ -296,8 +296,8 @@ export const seedAdminProject = async (backendUrl: string) => {
     { createCompany: true, deal: { name: `${MORE_COMPANIES[3]} scanners`, amount: '4500.00' } },
   );
 
-  // Deals in two currencies, each moved stage by stage by its owner, so the history and the stamp
-  // rows are signed; one won, one lost with its reason.
+  // Deals in two currencies, each moved stage by stage by its owner, so the history and the
+  // tracks say who moved them; one won, one lost with its reason.
   const moveThrough = async (as: Account, saved: Saved, names: string[], lostReason?: string) => {
     let current = saved;
     for (const name of names) {

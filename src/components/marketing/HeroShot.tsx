@@ -3,7 +3,7 @@ import { getImageProps } from 'next/image';
 
 type Pair = { wide: StaticImageData; narrow: StaticImageData };
 
-// The sheet is the page column wide: the board's columns from 768 px, a phone's board below.
+// The sheet is the page column wide: the app at 1440 px from 768 px, a phone's board below.
 const WIDE_SIZES = '(min-width: 1280px) 1216px, calc(100vw - 3.5rem)';
 const NARROW_SIZES = 'calc(100vw - 2rem)';
 const WIDE = '(min-width: 768px)';
@@ -64,18 +64,18 @@ const Capture = (props: {
 };
 
 /**
- * The hero's capture of the deals board, laid as a sheet across the band's lower edge and cropped
- * to its top, in the theme the page shows. The first picture follows the system's colour scheme
+ * The hero's capture of the deals board in the app, laid as a sheet across the band's lower edge
+ * (cropped to its top on a phone), in the theme the page shows. The first picture follows the system's colour scheme
  * and loads at once (one image, the page's largest paint). When a theme chosen in the app
  * contradicts the system, its mirror shows instead, and only then loads.
  * @param props Component props.
  * @param props.light The light captures.
- * @param props.dark The lacquer captures.
+ * @param props.dark The dark captures.
  * @param props.alt What they show.
  * @returns The sheet.
  */
 export const HeroShot = (props: { light: Pair; dark: Pair; alt: string }) => (
-  <div className="h-[26rem] overflow-hidden rounded-lg border border-rule bg-paper shadow-sheet md:aspect-[2/1] md:h-auto">
+  <div className="h-[26rem] overflow-hidden rounded-lg border border-rule bg-paper shadow-overlay md:aspect-[16/9] md:h-auto">
     <Capture
       light={props.light}
       dark={props.dark}
