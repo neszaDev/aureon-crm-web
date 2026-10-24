@@ -5,23 +5,20 @@ import { HouseIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { AureonMark } from '@/components/brand/AureonMark';
 import { AccountMenu } from '@/components/crm/shell/AccountMenu';
+import { CrmStrip, RAIL_BUTTON, RailLink } from '@/components/crm/shell/CrmStrip';
 import { NewMenu } from '@/components/crm/shell/NewMenu';
 import { RecordSearch } from '@/components/crm/shell/RecordSearch';
 import { RemindersBell } from '@/components/crm/shell/RemindersBell';
-import { ShellTip } from '@/components/crm/shell/ShellTip';
 import type { BellReminders } from '@/libs/crm/Reminders';
-import { Link, usePathname } from '@/libs/I18nNavigation';
-import { useRailShown } from '@/utils/Viewport';
-
-// An icon on the rail: white at 75% (9:1 on the ink violet), full white on hover, the on-rail
-// focus ring (the page's violet one would sit on the rail at under 3:1).
-const RAIL_BUTTON =
-  'size-10 rounded-md text-on-rail/75 hover:bg-white/10 hover:text-on-rail focus-visible:ring-on-rail focus-visible:ring-offset-rail aria-expanded:bg-white/10 aria-expanded:text-on-rail sm:size-10 [&_svg:not([class*=size-])]:size-5';
+import { usePathname } from '@/libs/I18nNavigation';
+import { useRailShown, useSearchField } from '@/utils/Viewport';
 
 /**
  * The global rail, ink violet, 56 px: the Aureon mark, Home, the inbox (your reminders), the
- * record search and "+ New", and your avatar at the foot for the account menu; a tooltip names
- * each. In the phone's drawer the inbox and the search stay in the top bar.
+ * record search (below 1024 px; the top bar's field from there) and "+ New"; while the sidebar is
+ * folded, the workspace's sections (`CrmStrip`); your avatar at the foot for the account menu. A
+ * tooltip names each. In the phone's drawer the inbox and the search stay in the top bar, and the
+ * sidebar beside it is always open.
  * @param props Component props.
  * @param props.workspace The open workspace.
  * @param props.workspace.id Its id.
@@ -40,49 +37,45 @@ export const CrmRail = (props: {
   const t = useTranslations('CrmShell');
   const base = `/app/${props.workspace.id}`;
   const home = usePathname() === base;
-  // One of each, ever: the rail's below 768 px are the top bar's (`CrmBarTools`).
+  // One of each, ever: the rail's below 768 px are the top bar's (`CrmBarTools`), and its search
+  // from 1024 px is the top bar's field.
   const railShown = useRailShown();
   const tools = !props.drawer && railShown !== false;
+  const searchField = useSearchField();
 
   return (
-    <nav
-      aria-label={t('rail_label')}
-      className="flex h-full w-14 shrink-0 flex-col items-center gap-1.5 bg-rail py-3 text-on-rail"
-    >
-      <AureonMark className="mb-2 size-7 text-on-rail" />
-      <ShellTip label={t('nav_home')}>
-        <Link
-          href={base}
-          aria-label={t('nav_home')}
-          aria-current={home ? 'page' : undefined}
-          className={cn(
-            'grid place-items-center outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2',
-            RAIL_BUTTON,
-            // The fill is 2.71:1 on the rail: a light ring carries the 3:1.
-            home && 'bg-violet text-white ring-1 ring-on-rail/50 ring-inset hover:bg-violet',
-          )}
-        >
+    <div className="flex h-full w-14 shrink-0 flex-col items-center gap-1.5 bg-rail py-3 text-on-rail">
+      <nav aria-label={t('rail_label')} className="flex flex-col items-center gap-1.5">
+        <AureonMark className="mb-2 size-7 text-on-rail" />
+        <RailLink label={t('nav_home')} href={base} current={home}>
           <HouseIcon className="size-5" />
-        </Link>
-      </ShellTip>
-      {tools && (
-        <>
-          <RemindersBell
-            workspaceId={props.workspace.id}
-            me={props.user.id}
-            timeZone={props.workspace.timeZone}
-            reminders={props.reminders}
-            side="right"
-            className={RAIL_BUTTON}
-          />
-          <RecordSearch workspaceId={props.workspace.id} side="right" className={RAIL_BUTTON} />
-        </>
-      )}
-      <NewMenu
-        workspaceId={props.workspace.id}
-        className="mt-1 size-9 rounded-full bg-on-rail text-rail hover:bg-on-rail/85 focus-visible:ring-on-rail focus-visible:ring-offset-rail sm:size-9"
-      />
-      <div className="mt-auto">
+        </RailLink>
+        {tools && (
+          <>
+            <RemindersBell
+              workspaceId={props.workspace.id}
+              me={props.user.id}
+              timeZone={props.workspace.timeZone}
+              reminders={props.reminders}
+              side="right"
+              className={RAIL_BUTTON}
+            />
+            {searchField !== true && (
+              <RecordSearch
+                workspaceId={props.workspace.id}
+                side="right"
+                className={cn(RAIL_BUTTON, 'lg:hidden')}
+              />
+            )}
+          </>
+        )}
+        <NewMenu
+          workspaceId={props.workspace.id}
+          className="mt-1 size-9 rounded-full bg-on-rail text-rail hover:bg-on-rail/85 focus-visible:ring-on-rail focus-visible:ring-offset-rail sm:size-9"
+        />
+      </nav>
+      {!props.drawer && <CrmStrip workspaceId={props.workspace.id} />}
+      <div className="mt-auto shrink-0 pt-1.5">
         <AccountMenu
           userId={props.user.id}
           email={props.user.email}
@@ -92,19 +85,20 @@ export const CrmRail = (props: {
           className="focus-visible:outline-on-rail"
         />
       </div>
-    </nav>
+    </div>
   );
 };
 
 /**
- * Below 768 px, the rail's inbox and record search in the top bar.
+ * The record search and the inbox in the top bar: below 768 px both as icons (the rail's are off
+ * screen), and from 1024 px the search as a field, centred.
  * @param props Component props.
  * @param props.workspace The open workspace.
  * @param props.workspace.id Its id.
  * @param props.workspace.timeZone Its time zone, for the reminders' due times.
  * @param props.me The caller's user id, for the link to their tasks.
  * @param props.reminders The caller's reminders as the layout read them.
- * @returns The two buttons.
+ * @returns The tools.
  */
 export const CrmBarTools = (props: {
   workspace: { id: number; timeZone: string };
@@ -112,20 +106,30 @@ export const CrmBarTools = (props: {
   reminders?: BellReminders;
 }) => {
   const railShown = useRailShown();
-  if (railShown === true) {
-    return null;
-  }
+  const searchField = useSearchField();
 
   return (
-    <div className="flex items-center gap-1 md:hidden">
-      <RecordSearch workspaceId={props.workspace.id} side="bottom" />
-      <RemindersBell
-        workspaceId={props.workspace.id}
-        me={props.me}
-        timeZone={props.workspace.timeZone}
-        reminders={props.reminders}
-        side="bottom"
-      />
-    </div>
+    <>
+      {searchField !== false && (
+        <RecordSearch
+          workspaceId={props.workspace.id}
+          side="bottom"
+          field
+          className="hidden w-80 lg:flex xl:w-96"
+        />
+      )}
+      {railShown !== true && (
+        <div className="flex items-center gap-1 md:hidden">
+          <RecordSearch workspaceId={props.workspace.id} side="bottom" />
+          <RemindersBell
+            workspaceId={props.workspace.id}
+            me={props.me}
+            timeZone={props.workspace.timeZone}
+            reminders={props.reminders}
+            side="bottom"
+          />
+        </div>
+      )}
+    </>
   );
 };

@@ -60,6 +60,13 @@ const bars = () =>
     .elements()
     .map((item) => getComputedStyle(item.firstElementChild ?? item).backgroundColor);
 
+// Which segments carry the orbit's satellite.
+const satellites = () =>
+  page
+    .getByRole('listitem')
+    .elements()
+    .map((item) => item.querySelector('[data-satellite]') !== null);
+
 describe(StatusTrack, () => {
   it('names the track by its place, and each open stage by its state, mover and day', async () => {
     await renderTrack(
@@ -97,6 +104,18 @@ describe(StatusTrack, () => {
     expect(reached).toBe(current);
     expect(reached).not.toBe(blank);
     expect(tone).not.toBe('');
+  });
+
+  it('marks the current stage with the orbit’s satellite, compact and in full', async () => {
+    await renderTrack(track({}));
+    expect(satellites()).toStrictEqual([false, true, false]);
+
+    await renderTrack(track({ full: true }));
+    expect(satellites().slice(3)).toStrictEqual([false, true, false]);
+
+    // A closed deal's own segment is its Won.
+    await renderTrack(track({ stage: WON, full: true }));
+    expect(satellites().slice(6)).toStrictEqual([false, false, false, true]);
   });
 
   it('says so when the member who moved the deal there has left', async () => {

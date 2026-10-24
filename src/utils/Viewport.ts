@@ -1,25 +1,35 @@
 import { useSyncExternalStore } from 'react';
 
-// Tailwind's `md`: from here the CRM shows its rail and sidebar; below, a top bar and a drawer.
-const RAIL_SHOWN = '(width >= 48rem)';
-
-const subscribe = (onChange: () => void) => {
-  const query = window.matchMedia(RAIL_SHOWN);
-  query.addEventListener('change', onChange);
-  return () => {
-    query.removeEventListener('change', onChange);
-  };
-};
-
 /**
- * Tells whether the CRM's rail is on screen (768 px and wider), for the controls that must exist
- * once (the reminders' reads, the ⌘K listener) but sit in the rail or in the phone's top bar.
- * Undefined on the server and while hydrating: both render, and CSS shows the right one.
- * @returns Whether the rail shows, once known.
+ * Tells whether the window is at least as wide as a media query says, once known: undefined on
+ * the server and while hydrating, so both of a pair of controls render and CSS shows the right one.
+ * @param query The query, such as `(width >= 48rem)`.
+ * @returns Whether it matches, once known.
  */
-export const useRailShown = () =>
+const useWidth = (query: string) =>
   useSyncExternalStore(
-    subscribe,
-    () => window.matchMedia(RAIL_SHOWN).matches,
+    (onChange) => {
+      const list = window.matchMedia(query);
+      list.addEventListener('change', onChange);
+      return () => {
+        list.removeEventListener('change', onChange);
+      };
+    },
+    () => window.matchMedia(query).matches,
     (): boolean | undefined => undefined,
   );
+
+/**
+ * Tells whether the CRM's rail is on screen (768 px and wider; Tailwind's `md`), for the controls
+ * that must exist once (the reminders' reads, the ⌘K listener) but sit in the rail or in the
+ * phone's top bar.
+ * @returns Whether the rail shows, once known.
+ */
+export const useRailShown = () => useWidth('(width >= 48rem)');
+
+/**
+ * Tells whether the record search is a field in the top bar (1024 px and wider; Tailwind's `lg`)
+ * rather than the rail's icon.
+ * @returns Whether the field shows, once known.
+ */
+export const useSearchField = () => useWidth('(width >= 64rem)');

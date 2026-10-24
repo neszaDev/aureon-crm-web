@@ -14,10 +14,11 @@ type Schemas = components['schemas'];
 
 /**
  * The CRM's frame, a work OS: from 768 px the ink-violet rail (Home, the reminders, search,
- * "+ New", your account) beside the workspace sidebar (switcher, spaces, insights, settings),
- * which collapses to an icon strip; above the page, a 48 px top bar with where you are. Below
- * 768 px the rail and the sidebar are one drawer behind the top bar's menu button, and the
- * reminders and search sit in the bar. A skip link, first in the tab order, jumps to the page.
+ * "+ New", your account) beside the workspace sidebar (switcher, spaces with their saved views,
+ * insights, settings), which folds into the rail, one strip; above the page, a 48 px top bar with
+ * where you are, and from 1024 px the search field "Search ⌘K" in its middle. Below 768 px the
+ * rail and the sidebar are one drawer behind the top bar's menu button, and the reminders and
+ * search sit in the bar. A skip link, first in the tab order, jumps to the page.
  * @param props Component props.
  * @param props.workspace The open workspace.
  * @param props.workspace.id Its id.
@@ -51,10 +52,11 @@ export const CrmShell = (props: {
         <div className="sticky top-0 hidden h-dvh md:block">
           <CrmRail workspace={props.workspace} user={props.user} reminders={props.reminders} />
         </div>
-        <CrmSidebar workspace={props.workspace} workspaces={props.workspaces} />
+        <CrmSidebar workspace={props.workspace} workspaces={props.workspaces} me={props.user.id} />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-1 border-b border-rule bg-background px-2 md:px-5">
+          {/* From 1024 px: where you are on the left, the search field in the middle. */}
+          <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-1 border-b border-rule bg-background px-2 md:px-5 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4">
             <MobileCrmNav>
               <CrmRail
                 workspace={props.workspace}
@@ -67,7 +69,7 @@ export const CrmShell = (props: {
                 <div className="flex h-12 shrink-0 items-center pr-12 pl-2">
                   <WorkspaceSwitcher current={props.workspace} workspaces={props.workspaces} />
                 </div>
-                <CrmNav workspaceId={props.workspace.id} />
+                <CrmNav workspace={props.workspace} me={props.user.id} />
               </div>
             </MobileCrmNav>
             <CrmLocation workspace={props.workspace} />

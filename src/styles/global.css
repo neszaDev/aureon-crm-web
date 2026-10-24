@@ -562,3 +562,38 @@
     animation-range: max(0%, calc(100% - 3rem)) 100%;
   }
 }
+
+/*
+ * A space's saved views in the sidebar's tree, while the viewer has it open (`data-spaces` on
+ * <html>, set before the first paint, so an open space never opens as the page loads): its list
+ * shows, and its toggle's chevron turns down.
+ */
+[data-views] {
+  display: none;
+}
+
+:root[data-spaces~='companies'] [data-views='companies'],
+:root[data-spaces~='contacts'] [data-views='contacts'],
+:root[data-spaces~='leads'] [data-views='leads'],
+:root[data-spaces~='deals'] [data-views='deals'],
+:root[data-spaces~='tasks'] [data-views='tasks'] {
+  display: flex;
+}
+
+[data-views-toggle] svg {
+  transition: rotate 150ms var(--ease-out-expo);
+}
+
+:root[data-spaces~='companies'] [data-views-toggle='companies'] svg,
+:root[data-spaces~='contacts'] [data-views-toggle='contacts'] svg,
+:root[data-spaces~='leads'] [data-views-toggle='leads'] svg,
+:root[data-spaces~='deals'] [data-views-toggle='deals'] svg,
+:root[data-spaces~='tasks'] [data-views-toggle='tasks'] svg {
+  rotate: 90deg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-views-toggle] svg {
+    transition: none;
+  }
+}

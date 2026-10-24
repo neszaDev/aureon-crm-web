@@ -2,6 +2,7 @@
 
 import { cn } from 'cn';
 import { useLocale, useTranslations } from 'next-intl';
+import { Satellite } from '@/components/brand/AureonMark';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { StageSigner } from '@/libs/crm/DealHistory';
 import { daysSince, formatInstant } from '@/libs/crm/Format';
@@ -9,6 +10,10 @@ import type { StageRef } from '@/libs/crm/Stages';
 import { stageTone } from '@/libs/crm/StatusColors';
 
 type State = 'reached' | 'current' | 'blank' | 'unknown' | 'won' | 'lost';
+
+// The orbit's satellite over the end of the deal's own segment, in its colour: past the bar, as
+// the mark's sits past its ring.
+const SATELLITE = '-top-[7px] -right-0.5 text-(--tone)';
 
 /**
  * What a segment shows for a deal: an open deal has reached the stages before its own and none
@@ -45,8 +50,9 @@ const stateOf = (
 
 /**
  * A deal's progress as a segmented track: one segment per open stage, filled up to its own in the
- * colour of its stage (`stageTone`), then its stage's name and days in it written beside (or, in
- * full, each stage's name under its segment), so the colour is never the only cue; a closed deal adds its Won or Lost segment. The
+ * colour of its stage (`stageTone`), the orbit's satellite over the deal's own, then its stage's
+ * name and days in it written beside (or, in full, each stage's name under its segment), so neither
+ * colour nor the satellite is ever the only cue; a closed deal adds its Won or Lost segment. The
  * track's name says it all at once ("Stage 2 of 4: Needs analysis"). Each segment's tooltip, and
  * its screen-reader text, says its state, who moved the deal there and when (the current and the
  * closing stage always know when; a reached one when `signatures` does), or that a former member
@@ -125,10 +131,12 @@ export const StatusTrack = (props: {
                     <span
                       aria-hidden="true"
                       className={cn(
-                        'block h-1.5 rounded-full',
+                        'relative block h-1.5 rounded-full',
                         segment.filled ? 'bg-(--tone)' : 'bg-rule',
                       )}
-                    />
+                    >
+                      {segment.own && <Satellite className={SATELLITE} />}
+                    </span>
                     {/* A phone's segments are too narrow for names: the line under the track says it. */}
                     <span
                       aria-hidden="true"
@@ -189,10 +197,12 @@ export const StatusTrack = (props: {
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'block h-1.5 rounded-full',
+                      'relative block h-1.5 rounded-full',
                       segment.filled ? 'bg-(--tone)' : 'bg-rule',
                     )}
-                  />
+                  >
+                    {segment.own && <Satellite className={SATELLITE} />}
+                  </span>
                   <span className="sr-only">{segment.label}</span>
                 </li>
               </TooltipTrigger>

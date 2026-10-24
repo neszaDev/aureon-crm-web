@@ -24,3 +24,20 @@ export const AureonMark = (props: { className?: string; size?: number }) => (
     <circle cx="19" cy="5" r="2.75" fill="currentColor" />
   </svg>
 );
+
+/**
+ * The mark's satellite on its own, the system's "current": the dot at the upper right of the
+ * active item in the sidebar and the rail, and of the current stage on a status track, as it sits
+ * past the orbit in the mark. Never the only cue (the item is filled, set heavier or named), and
+ * decorative. Its parent is `relative`; `className` places and colours it (`currentColor`).
+ * @param props Component props.
+ * @param props.className Where it sits, and its colour.
+ * @returns The dot.
+ */
+export const Satellite = (props: { className?: string }) => (
+  <span
+    aria-hidden="true"
+    data-satellite=""
+    className={`pointer-events-none absolute size-1.5 rounded-full bg-current ${props.className ?? ''}`}
+  />
+);

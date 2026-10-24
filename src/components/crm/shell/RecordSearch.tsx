@@ -39,19 +39,22 @@ const isKKey = (event: KeyboardEvent) =>
 
 /**
  * Finds a company, contact, lead or deal by what you type (at least 2 characters, after a short
- * pause), from any page: its icon (on the rail, or in the phone's top bar) and ⌘K or Ctrl+K open a
- * palette of the first 5 of each kind. Arrow keys move through the hits and Enter opens the highlighted one. A hit shows
+ * pause), from any page: its field in the top bar (from 1024 px), its icon (on the rail, or in the
+ * phone's top bar) and ⌘K or Ctrl+K open a palette of the first 5 of each kind. Arrow keys move through the hits and Enter opens the highlighted one. A hit shows
  * while a newer search is on its way, dimmed and out of reach, so Enter never opens a record the
  * text no longer matches. Closed, it gives the focus back to what had it when the shortcut opened it.
  * @param props Component props.
  * @param props.workspaceId The workspace searched.
- * @param props.side Where its tooltip shows: `right` on the rail, `bottom` in the top bar.
+ * @param props.side Where its icon's tooltip shows: `right` on the rail, `bottom` in the top bar.
+ * @param props.field Whether it opens from a button drawn as a search field, "Search ⌘K" (the top
+ *   bar's, from 1024 px), rather than an icon.
  * @param props.className Extra classes for the button (its colours on the rail).
  * @returns The button and its palette.
  */
 export const RecordSearch = (props: {
   workspaceId: number;
   side: 'right' | 'bottom';
+  field?: boolean;
   className?: string;
 }) => {
   const t = useTranslations('RecordSearch');
@@ -64,7 +67,7 @@ export const RecordSearch = (props: {
   // The text whose answer may show: an earlier search answering late is dropped.
   const latest = useRef('');
   const timer = useRef(0);
-  const apple = useIsApple();
+  const shortcut = useIsApple() ? '⌘K' : 'Ctrl K';
   // What had the focus when the shortcut opened the palette, to give it back on closing; none
   // when its button did, which keeps the focus.
   const opener = useRef<HTMLElement | null>(null);
@@ -148,29 +151,53 @@ export const RecordSearch = (props: {
         }
       }}
     >
-      <ShellTip
-        side={props.side}
-        label={
-          <>
-            {t('open')}
-            <kbd data-slot="kbd" className="font-sans opacity-75">
-              {apple ? '⌘K' : 'Ctrl K'}
-            </kbd>
-          </>
-        }
-      >
+      {props.field ? (
         <DialogTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
+          {/* Named as the icon is; what it shows is "Search" and the shortcut. */}
+          <button
+            type="button"
             aria-label={t('open')}
             aria-keyshortcuts="Control+K Meta+K"
-            className={props.className}
+            className={cn(
+              'flex h-8 items-center gap-2 rounded-md border border-rule bg-sidebar px-2.5 text-[0.8125rem] text-ink-2 transition-colors duration-150 outline-none hover:border-input hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+              props.className,
+            )}
           >
-            <SearchIcon />
-          </Button>
+            <SearchIcon aria-hidden="true" className="size-4 shrink-0" />
+            <span className="flex-1 truncate text-left">{t('field')}</span>
+            <kbd
+              aria-hidden="true"
+              className="rounded-[4px] border border-rule bg-background px-1.5 font-sans text-[0.6875rem] leading-[1.125rem] font-medium"
+            >
+              {shortcut}
+            </kbd>
+          </button>
         </DialogTrigger>
-      </ShellTip>
+      ) : (
+        <ShellTip
+          side={props.side}
+          label={
+            <>
+              {t('open')}
+              <kbd data-slot="kbd" className="font-sans opacity-75">
+                {shortcut}
+              </kbd>
+            </>
+          }
+        >
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t('open')}
+              aria-keyshortcuts="Control+K Meta+K"
+              className={props.className}
+            >
+              <SearchIcon />
+            </Button>
+          </DialogTrigger>
+        </ShellTip>
+      )}
       <DialogContent
         showCloseButton={false}
         onCloseAutoFocus={(event) => {

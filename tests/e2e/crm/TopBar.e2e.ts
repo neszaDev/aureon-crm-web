@@ -76,7 +76,7 @@ test.describe('Shell', () => {
     await expect(page.getByRole('dialog')).toHaveCount(0);
   });
 
-  test('collapses the sidebar to its icon strip, keeps it on reload, and expands it again', async ({
+  test('folds the sidebar into the rail, one strip, keeps it on reload, and expands it again', async ({
     page,
     request,
   }) => {
@@ -85,12 +85,19 @@ test.describe('Shell', () => {
     await page.goto(owner.path);
     const collapse = page.getByRole('button', { name: 'Collapse sidebar' });
     const expand = page.getByRole('button', { name: 'Expand sidebar' });
+    const nav = page.getByRole('navigation', { name: 'Workspace navigation' });
     await waitForHydration(collapse);
     expect(await sidebarWidth(page)).toBe(240);
+    // Expanded, the rail has none of the sidebar's sections.
+    await expect(nav).toHaveCount(1);
 
     await collapse.click();
     await expect(expand).toHaveAttribute('aria-expanded', 'false');
-    await expect.poll(async () => await sidebarWidth(page)).toBe(56);
+    // The sidebar goes, width and all: the rail is the one strip, with the sections on it.
+    await expect.poll(async () => await sidebarWidth(page)).toBe(0);
+    await expect(page.locator('#crm-sidebar')).toBeHidden();
+    await expect(nav).toHaveCount(1);
+    await expect(nav.getByRole('link')).toHaveCount(8);
     await expectNoA11yViolations(page);
     await page.emulateMedia({ colorScheme: 'dark' });
     await expectNoA11yViolations(page);
@@ -114,19 +121,22 @@ test.describe('Shell', () => {
     await page.reload();
     await expect(expand).toBeVisible();
     expect(await page.evaluate((): unknown => Reflect.get(window, 'sidebarWidths'))).toStrictEqual([
-      56, 56, 56,
+      0, 0, 0,
     ]);
 
-    // A strip icon is named in its tooltip and goes to its section.
-    const contacts = page
-      .getByRole('navigation', { name: 'Workspace navigation' })
-      .getByRole('link', { name: 'Contacts' });
+    // A section on the strip is named in its tooltip, goes to its page and marks it, with the
+    // orbit's satellite beside its fill.
+    const contacts = nav.getByRole('link', { name: 'Contacts' });
     await waitForHydration(contacts);
     await contacts.hover();
     await expect(page.getByRole('tooltip', { name: 'Contacts' })).toBeVisible();
     await contacts.click();
     await expect(page).toHaveURL(new RegExp(`${owner.path}/contacts$`, 'u'));
     await expect(contacts).toHaveAttribute('aria-current', 'page');
+    await expect(contacts.locator('[data-satellite]')).toHaveCount(1);
+    // Settings stays in reach.
+    await nav.getByRole('link', { name: 'Settings' }).click();
+    await expect(page).toHaveURL(new RegExp(`${owner.path}/settings/workspace$`, 'u'));
 
     // Ctrl+\ expands it, outside a field.
     await page.getByRole('main').focus();
@@ -137,9 +147,97 @@ test.describe('Shell', () => {
     await expect(collapse).toBeVisible();
     expect(await sidebarWidth(page)).toBe(240);
   });
+
+  test('opens a space to its saved views, keeps it open, and marks the view the page is on', async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+    const deal = await seed(request, owner, 'deals', { name: DEALS.tablets, amount: '1250.00' });
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(`${owner.path}/deals`);
+    const nav = page.getByRole('navigation', { name: 'Workspace navigation' });
+    const views = nav.getByRole('button', { name: 'Deals views' });
+    await waitForHydration(views);
+    await expect(views).toHaveAttribute('aria-expanded', 'false');
+
+    await views.click();
+    await expect(views).toHaveAttribute('aria-expanded', 'true');
+    const tree = nav.getByRole('list', { name: 'Deals views' });
+    await expect(tree.getByRole('link')).toHaveText(['Board', 'List', 'Mine']);
+    // The board is the deals' page: the view says so, its space holds it.
+    await expect(tree.getByRole('link', { name: 'Board' })).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Deals', exact: true })).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+    await expectNoA11yViolations(page);
+
+    await tree.getByRole('link', { name: 'Mine' }).click();
+    await expect(page).toHaveURL(new RegExp(`${owner.path}/deals\\?ownerId=${owner.userId}$`, 'u'));
+    await expect(tree.getByRole('link', { name: 'Mine' })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('button', { name: 'Me', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await tree.getByRole('link', { name: 'List' }).click();
+    await expect(page).toHaveURL(new RegExp(`${owner.path}/deals\\?view=list$`, 'u'));
+    await expect(
+      page.getByRole('navigation', { name: 'View' }).getByRole('link', { name: 'List' }),
+    ).toHaveAttribute('aria-current', 'page');
+
+    // Open on the next visit, drawn so from the first paint.
+    await page.reload();
+    await expect(tree.getByRole('link', { name: 'List' })).toBeVisible();
+    await expect(tree.getByRole('link', { name: 'List' })).toHaveAttribute('aria-current', 'page');
+    // A record of the space is the space's.
+    await page.goto(`${owner.path}/deals/${deal.id}`);
+    await expect(page.getByRole('heading', { level: 1, name: DEALS.tablets })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Deals', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  });
 });
 
 test.describe('Top bar', () => {
+  test("centres the search field from 1024 px, and leaves it to the rail's icon below", async ({
+    page,
+    request,
+  }) => {
+    const owner = await seedWorkspace(request);
+    await signIn(page, { email: owner.email, password: PASSWORD });
+    await page.goto(owner.path);
+    const bar = page.getByRole('banner');
+    const rail = page.getByRole('navigation', { name: 'Quick access' });
+    const search = page.getByRole('button', { name: 'Search records' });
+    await waitForHydration(search);
+
+    // One search, the field: "Search" and its shortcut, in the middle of the 48 px bar.
+    await expect(search).toHaveCount(1);
+    await expect(bar.getByRole('button', { name: 'Search records' })).toHaveText(
+      /^Search(⌘K|Ctrl K)$/u,
+    );
+    const [box, viewport] = [await search.boundingBox(), page.viewportSize()];
+    const main = await page.getByRole('main').boundingBox();
+    expect(box && main && Math.abs(box.x + box.width / 2 - (main.x + main.width / 2))).toBeLessThan(
+      2,
+    );
+    expect(box && box.y + box.height <= 48).toBe(true);
+    expect(viewport?.width).toBe(1280);
+    await search.click();
+    await expect(page.getByRole('combobox', { name: 'Search records' })).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expectNoA11yViolations(page);
+
+    // Narrower, the rail's icon again.
+    await page.setViewportSize({ width: 900, height: 720 });
+    await expect(rail.getByRole('button', { name: 'Search records' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Search records' })).toHaveCount(1);
+    await page.keyboard.press('Control+K');
+    await expect(page.getByRole('combobox', { name: 'Search records' })).toBeFocused();
+  });
+
   test('finds a record by what you type from ⌘K, and opens it on Enter', async ({
     page,
     request,

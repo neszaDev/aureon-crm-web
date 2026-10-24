@@ -280,7 +280,18 @@
     "new_deals": "Deal",
     "new_tasks": "Task",
     "location_label": "Location",
-    "location_new": "New"
+    "location_new": "New",
+    "space_views": "{space} views",
+    "view_all": "All",
+    "view_mine": "Mine",
+    "view_archived": "Archived",
+    "view_follow_up": "To follow up",
+    "view_board": "Board",
+    "view_list": "List",
+    "view_my_tasks": "My tasks",
+    "view_overdue": "Overdue",
+    "view_week": "Next 7 days",
+    "view_completed": "Completed"
   },
   "RecordSearch": {
     "open": "Search records",
@@ -295,7 +306,8 @@
     "group_companies": "Companies",
     "group_contacts": "Contacts",
     "group_leads": "Leads",
-    "group_deals": "Deals"
+    "group_deals": "Deals",
+    "field": "Search"
   },
   "RemindersBell": {
     "label": "Inbox: {count}",

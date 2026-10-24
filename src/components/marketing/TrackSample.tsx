@@ -1,5 +1,6 @@
 import { cn } from 'cn';
 import { ChevronDownIcon } from 'lucide-react';
+import { Satellite } from '@/components/brand/AureonMark';
 import { initialsOf } from '@/libs/crm/Format';
 import type { StatusTone } from '@/libs/crm/StatusColors';
 import { PILL } from '@/libs/crm/StatusColors';
@@ -48,7 +49,8 @@ const fillDelay = (ms: number) => {
 
 /**
  * A track as the app draws it beside a record (`StatusTrack`, `LeadLifecycle`): one segment per
- * step, filled in the status's colour up to where the record is. With `fill`, each fill slides in
+ * step, filled in the status's colour up to where the record is, the orbit's satellite over its
+ * step. With `fill`, each fill slides in
  * from the left after the one before it, as the record moves (none under reduced motion). The
  * days in the current step can sit beside it (its pill names the step).
  * @param props Component props.
@@ -71,12 +73,17 @@ export const SampleTrack = (props: {
   <div data-tone={props.tone} className={cn('flex min-w-0 items-center gap-2', props.className)}>
     <span className="flex min-w-14 flex-1 gap-0.5">
       {Array.from({ length: props.steps }, (_, step) => (
-        <span key={step} className="block h-1.5 flex-1 overflow-hidden rounded-full bg-rule">
-          {step < props.reached && (
-            <span
-              style={props.fill === undefined ? undefined : fillDelay(props.fill + step * 140)}
-              className={cn('block h-full bg-(--tone)', props.fill !== undefined && 'track-fill')}
-            />
+        <span key={step} className="relative flex-1">
+          <span className="block h-1.5 overflow-hidden rounded-full bg-rule">
+            {step < props.reached && (
+              <span
+                style={props.fill === undefined ? undefined : fillDelay(props.fill + step * 140)}
+                className={cn('block h-full bg-(--tone)', props.fill !== undefined && 'track-fill')}
+              />
+            )}
+          </span>
+          {step === props.reached - 1 && (
+            <Satellite className="-top-[7px] -right-0.5 text-(--tone)" />
           )}
         </span>
       ))}

@@ -280,7 +280,18 @@
     "new_deals": "ดีล",
     "new_tasks": "งาน",
     "location_label": "ตำแหน่งปัจจุบัน",
-    "location_new": "สร้างใหม่"
+    "location_new": "สร้างใหม่",
+    "space_views": "มุมมองของ{space}",
+    "view_all": "ทั้งหมด",
+    "view_mine": "ของฉัน",
+    "view_archived": "เก็บถาวร",
+    "view_follow_up": "ต้องติดตาม",
+    "view_board": "บอร์ด",
+    "view_list": "รายการ",
+    "view_my_tasks": "งานของฉัน",
+    "view_overdue": "เกินกำหนด",
+    "view_week": "7 วันข้างหน้า",
+    "view_completed": "เสร็จแล้ว"
   },
   "RecordSearch": {
     "open": "ค้นหาระเบียน",
@@ -295,7 +306,8 @@
     "group_companies": "บริษัท",
     "group_contacts": "ผู้ติดต่อ",
     "group_leads": "ลีด",
-    "group_deals": "ดีล"
+    "group_deals": "ดีล",
+    "field": "ค้นหา"
   },
   "RemindersBell": {
     "label": "กล่องข้อความ: {count}",

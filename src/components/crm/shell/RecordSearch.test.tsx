@@ -36,7 +36,7 @@ const ACME: SearchGroups = {
 
 const push = vi.fn<(href: string) => void>();
 
-const renderSearch = async () => {
+const renderSearch = async (field = false) => {
   vi.mocked(searchAll).mockReset();
   push.mockReset();
   // @ts-expect-error -- only what the search uses
@@ -45,7 +45,7 @@ const renderSearch = async () => {
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
       <TooltipProvider>
         <button type="button">Notes</button>
-        <RecordSearch workspaceId={1} side="right" />
+        <RecordSearch workspaceId={1} side="right" field={field} />
       </TooltipProvider>
     </NextIntlClientProvider>,
   );
@@ -86,6 +86,20 @@ describe(RecordSearch, () => {
     await userEvent.keyboard('{Escape}');
     await expect.element(field()).not.toBeInTheDocument();
     await userEvent.keyboard('{Meta>}k{/Meta}');
+    await expect.element(field()).toBeVisible();
+  });
+
+  it('opens from the top bar\'s field, which shows "Search" and the shortcut', async () => {
+    await renderSearch(true);
+
+    await expect.element(trigger()).toHaveTextContent(/^Search(⌘K|Ctrl K)$/u);
+    await expect.element(trigger()).toHaveAttribute('aria-keyshortcuts', 'Control+K Meta+K');
+    await open();
+    await userEvent.keyboard('{Escape}');
+    await expect.element(field()).not.toBeInTheDocument();
+    await expect.element(trigger()).toHaveFocus();
+
+    await userEvent.keyboard('{Control>}k{/Control}');
     await expect.element(field()).toBeVisible();
   });
 

@@ -280,7 +280,18 @@
     "new_deals": "Affaire",
     "new_tasks": "Tâche",
     "location_label": "Emplacement",
-    "location_new": "Création"
+    "location_new": "Création",
+    "space_views": "Vues : {space}",
+    "view_all": "Tout",
+    "view_mine": "À moi",
+    "view_archived": "Archives",
+    "view_follow_up": "À relancer",
+    "view_board": "Tableau",
+    "view_list": "Liste",
+    "view_my_tasks": "Mes tâches",
+    "view_overdue": "En retard",
+    "view_week": "7 prochains jours",
+    "view_completed": "Terminées"
   },
   "RecordSearch": {
     "open": "Rechercher des fiches",
@@ -295,7 +306,8 @@
     "group_companies": "Entreprises",
     "group_contacts": "Contacts",
     "group_leads": "Prospects",
-    "group_deals": "Affaires"
+    "group_deals": "Affaires",
+    "field": "Rechercher"
   },
   "RemindersBell": {
     "label": "Boîte de réception : {count}",
