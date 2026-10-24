@@ -247,7 +247,7 @@ describe(BulkBar, () => {
       expect(refresh).toHaveBeenCalledOnce();
     });
 
-    it('skips the records already where the change takes them', async () => {
+    it('sends every record, those the list shows already there too: the server has the last word', async () => {
       await renderBar('deal', [
         item(1, 'Fleet tablets', { state: '1' }),
         item(2, 'Depot rollout', { state: '2' }),
@@ -257,7 +257,20 @@ describe(BulkBar, () => {
       await page.getByRole('menuitem', { name: 'Won' }).click();
 
       await expect.element(page.getByText('2 deals moved to Won')).toBeVisible();
-      expect(DealActions.moveDeal).toHaveBeenCalledOnce();
+      expect(DealActions.moveDeal).toHaveBeenCalledTimes(2);
+      expect(DealActions.moveDeal).toHaveBeenCalledWith(1, 2, {
+        stageId: 2,
+        version: 20,
+        lostReason: undefined,
+      });
+    });
+
+    it('assigns a record the list shows as the member’s already', async () => {
+      await renderBar('deal', [item(1, 'Fleet tablets', { ownerId: 2 })]);
+      await bar().getByRole('button', { name: 'Assign' }).click();
+      await page.getByRole('menuitem', { name: 'Mia Rossi' }).click();
+      await expect.element(page.getByText('1 deal assigned to Mia Rossi')).toBeVisible();
+      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 1, 10, 2);
     });
 
     it('assigns every deal to the member chosen, at the version the list read', async () => {

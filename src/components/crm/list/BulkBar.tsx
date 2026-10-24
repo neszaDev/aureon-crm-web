@@ -44,8 +44,8 @@ type Member = components['schemas']['MemberResponse'];
 type Act = (item: BulkItem) => Promise<ActionResult>;
 type Refusal = { id: number; name: string; reason: string };
 
-// A record already where the change takes it: nothing to send.
-const SKIP: ActionResult = { ok: true };
+// What a dialog's action answers: it closes at once, and the bar runs the records.
+const CLOSE: ActionResult = { ok: true };
 
 // How many records are on their way at once.
 const AT_ONCE = 4;
@@ -259,11 +259,10 @@ export const BulkBar = (props: BulkBarProps) => {
   };
   const assign = (member: Member) => {
     const name = member.displayName ?? member.email;
+    // Every record goes, those the list shows already there too: the list may be stale, and the
+    // server's answer is the one that counts (a repeat changes nothing there).
     run(
-      async (item) =>
-        item.ownerId === member.userId
-          ? SKIP
-          : await assignOne(props.workspaceId, item.id, item.version, member.userId),
+      async (item) => await assignOne(props.workspaceId, item.id, item.version, member.userId),
       (many) => t('done_assign', { records: records(many), name }),
     );
   };
@@ -271,22 +270,18 @@ export const BulkBar = (props: BulkBarProps) => {
     const label = tStatus(`status_${status}`);
     run(
       async (item) =>
-        item.state === status
-          ? SKIP
-          : await changeLeadStatus(props.workspaceId, item.id, versionOf(item), { status, reason }),
+        await changeLeadStatus(props.workspaceId, item.id, versionOf(item), { status, reason }),
       (many) => t('done_move', { records: records(many), status: label }),
     );
   };
   const moveDeals = (stage: StageRef, lostReason?: string) => {
     run(
       async (item) =>
-        item.state === String(stage.id)
-          ? SKIP
-          : await moveDeal(props.workspaceId, item.id, {
-              stageId: stage.id,
-              version: versionOf(item),
-              lostReason,
-            }),
+        await moveDeal(props.workspaceId, item.id, {
+          stageId: stage.id,
+          version: versionOf(item),
+          lostReason,
+        }),
       (many) => t('done_move', { records: records(many), status: stage.name }),
     );
   };
@@ -506,7 +501,7 @@ export const BulkBar = (props: BulkBarProps) => {
               (many) => t('done_archive', { records: records(many) }),
             );
           }
-          return await Promise.resolve(SKIP);
+          return await Promise.resolve(CLOSE);
         }}
       />
       <ConfirmAction
@@ -521,7 +516,7 @@ export const BulkBar = (props: BulkBarProps) => {
         cancelLabel={t('keep')}
         action={async () => {
           moveTasks(cancelTask, 'done_cancel');
-          return await Promise.resolve(SKIP);
+          return await Promise.resolve(CLOSE);
         }}
       />
       <LostReasonDialog
