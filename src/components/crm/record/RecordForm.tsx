@@ -19,10 +19,11 @@ import { Link } from '@/libs/I18nNavigation';
 
 /**
  * A record form's name input: large and on no field surface until pointed at (its error still
- * draws the border), the field's name as its placeholder. Pass it to `Input`'s `className`.
+ * draws the border), the field's name as its placeholder. Under Thai its line opens to 1.5, since
+ * an input clips the marks stacked above and below the letters. Pass it to `Input`'s `className`.
  */
 export const TITLE_INPUT =
-  '-mx-2 h-auto border-transparent bg-transparent px-2 py-1 text-[1.5rem] leading-8 font-semibold tracking-[-0.01em] hover:border-transparent hover:bg-muted/70 sm:h-auto sm:text-[1.5rem]';
+  '-mx-2 h-auto border-transparent bg-transparent px-2 py-1 text-[1.5rem] leading-8 font-semibold tracking-[-0.01em] hover:border-transparent hover:bg-muted/70 sm:h-auto sm:text-[1.5rem] [:lang(th)_&]:leading-[1.5]';
 
 /** The row of a record form's property chips, which wraps; their errors go under it. */
 export const CHIP_ROW = 'flex flex-wrap items-center gap-1.5';

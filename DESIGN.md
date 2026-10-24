@@ -310,7 +310,7 @@ People take one of eight avatar colours by member id (violet, the blue, green, r
 ### Named Rules
 **The Bracket Size Rule.** Off-scale sizes are written `text-[…rem]`, never as a custom named `text-<name>` utility: the project's `cn` reads an unknown `text-<name>` as a colour and drops the element's text colour. The app's ramp is 11/12/13/14/15/16/20/24 px.
 
-**The Thai Breathes Rule.** Under `:lang(th)` line-heights open (1.6 on small text, 1.65 body, 1.35 on display) and letter-spacing returns to normal on headings, labels, table heads and badges.
+**The Thai Breathes Rule.** Under `:lang(th)` line-heights open (1.6 on small text, 1.65 body, 1.35 on display, 1.5 in a record form's name input, which would clip its marks) and letter-spacing returns to normal on headings, labels, table heads and badges.
 
 **The Tabular Rule.** Tables, times and figures use tabular numerals; record numbers are mono and dimmed.
 
