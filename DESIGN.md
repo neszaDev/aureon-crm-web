@@ -1,481 +1,388 @@
 ---
 name: Aureon CRM
-description: A CRM that reads as an approval circular; every step of a relationship is signed with a vermilion seal on bond paper.
+description: A work OS for the pipeline; one calm shell, every list a set of coloured status sections, every record a click away in a panel.
 colors:
-  seal: "#c8361c"
-  seal-deep: "#9e2812"
-  seal-ink: "#b8321a"
-  seal-tint: "#f6e3dc"
-  on-seal: "#fff4f0"
-  danger: "#b4123a"
-  warning: "#8a5700"
-  success: "#2f6b4f"
-  info: "#1f5d8c"
-  ground: "#eff0ec"
-  paper: "#fbfbf9"
-  field: "#ffffff"
-  muted: "#e6e7e2"
-  ink: "#1c1d21"
-  ink-2: "#5b5e66"
-  rule: "#d9dad4"
-  input-stroke: "#84867f"
-  lacquer-ground: "#141212"
-  lacquer-paper: "#1c1a19"
-  lacquer-field: "#252220"
-  lacquer-muted: "#2c2826"
-  lacquer-ink: "#eeece8"
-  lacquer-ink-2: "#a9a49e"
-  lacquer-rule: "#3a3533"
-  lacquer-input-stroke: "#7a746e"
-  lacquer-seal-ink: "#ec7357"
-  lacquer-seal-tint: "#3d1a12"
-  lacquer-danger: "#ff7a95"
+  violet: "#5a45e0"
+  violet-hover: "#4a36c7"
+  violet-tint: "#efedfd"
+  on-violet: "#ffffff"
+  rail: "#1d1a2e"
+  rail-raised: "#2e2a45"
+  sidebar: "#f7f7fa"
+  canvas: "#ffffff"
+  muted: "#f1f1f5"
+  ink: "#1f2030"
+  ink-2: "#5d6072"
+  rule: "#e6e6ec"
+  input-stroke: "#878b9f"
+  status-blue: "#2f7de1"
+  status-blue-tint: "#e4eefb"
+  status-blue-ink: "#2769bd"
+  status-amber: "#e69a1c"
+  status-amber-tint: "#fcf2e1"
+  status-amber-ink: "#956412"
+  status-green: "#1f9d63"
+  status-green-tint: "#e2f2eb"
+  status-green-ink: "#187a4d"
+  status-red: "#d8433a"
+  status-red-tint: "#fae7e5"
+  status-red-ink: "#bc3a32"
+  status-slate: "#8b8fa3"
+  status-slate-tint: "#f0f0f3"
+  status-slate-ink: "#686b7a"
+  avatar-teal: "#0e7490"
+  avatar-orchid: "#b4367a"
+  chart-amber: "#c98410"
+  dark-rail: "#120f1f"
+  dark-rail-raised: "#262140"
+  dark-sidebar: "#1b1925"
+  dark-canvas: "#17151f"
+  dark-card: "#1f1c2a"
+  dark-muted: "#2a2737"
+  dark-ink: "#ecebf2"
+  dark-ink-2: "#a4a2b6"
+  dark-rule: "#2f2c3d"
+  dark-input-stroke: "#6f6c82"
+  dark-violet: "#6956e3"
+  dark-violet-tint: "#2e284f"
+  dark-violet-ink: "#9689eb"
+  dark-status-blue-tint: "#222f4f"
+  dark-status-blue-ink: "#5f9be8"
+  dark-status-amber-tint: "#473527"
+  dark-status-green-tint: "#1f3635"
+  dark-status-green-ink: "#45ae7e"
+  dark-status-red-tint: "#44242d"
+  dark-status-red-ink: "#e3766f"
+  dark-status-slate-tint: "#353342"
+  dark-status-slate-ink: "#9a9eaf"
 typography:
   display:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.875rem"
-    fontWeight: 800
-    lineHeight: 1.2
-    letterSpacing: "-0.03em"
-  headline:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 700
-    lineHeight: 1.333
-    letterSpacing: "-0.01em"
-  figure:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.125rem"
-    fontWeight: 600
-    lineHeight: 1.556
-  title:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1rem"
-    fontWeight: 600
-    lineHeight: 1.5
-  body:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1rem"
-    fontWeight: 400
-    lineHeight: 1.5
-  body-dense:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.9375rem"
-    fontWeight: 500
-    lineHeight: 1.5
-  small:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 400
-    lineHeight: 1.43
-  label:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.8125rem"
-    fontWeight: 500
-    lineHeight: 1.375
-    letterSpacing: "normal"
-  label-table:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.75rem"
-    fontWeight: 500
-    lineHeight: 1.333
-    letterSpacing: "normal"
-  button:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 600
-    lineHeight: 1.43
-  record-number:
-    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
-    fontSize: "0.8125rem"
-    fontWeight: 400
-    lineHeight: 1.375
-    fontFeature: "tnum"
-  stamp:
-    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
-    fontSize: "0.6875rem"
-    fontWeight: 700
-    lineHeight: 1
-    fontFeature: "tnum"
-  landing-display:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
     fontSize: "5rem"
     fontWeight: 700
     lineHeight: 1.02
     letterSpacing: "-0.035em"
-  landing-close:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "3.75rem"
-    fontWeight: 700
-    lineHeight: 1.05
-    letterSpacing: "-0.035em"
-  landing-headline:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
+  headline:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
     fontSize: "2.75rem"
     fontWeight: 700
     lineHeight: 1.1
     letterSpacing: "-0.03em"
-  landing-close-sm:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "2.5rem"
-    fontWeight: 700
-    lineHeight: 1.05
-    letterSpacing: "-0.035em"
-  landing-headline-sm:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "2rem"
-    fontWeight: 700
-    lineHeight: 1.1
-    letterSpacing: "-0.03em"
-  landing-line:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.625rem"
+  record-title:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.5rem"
     fontWeight: 600
     lineHeight: 1.25
     letterSpacing: "-0.01em"
-  landing-subhead:
-    fontFamily: "Anuphan, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.375rem"
+  title:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 600
+    lineHeight: 1.4
+    letterSpacing: "-0.01em"
+  body-reading:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.9375rem"
+    fontWeight: 400
+    lineHeight: 1.625
+  body:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 400
+    lineHeight: 1.43
+  row:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.8125rem"
     fontWeight: 500
-    lineHeight: 1.375
+    lineHeight: 1.4
+  label:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 600
+    lineHeight: 1.33
+  micro:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.6875rem"
+    fontWeight: 500
+    lineHeight: 1.45
 rounded:
-  stamp: "3px"
-  sm: "3.6px"
-  md: "4.8px"
-  lg: "6px"
-  xl: "8.4px"
+  sm: "4px"
+  md: "6px"
+  lg: "8px"
+  xl: "12px"
   full: "9999px"
 spacing:
-  hair: "4px"
-  xs: "8px"
-  sm: "12px"
-  md: "16px"
-  lg: "20px"
-  xl: "24px"
+  row: "36px"
+  control: "32px"
+  control-phone: "36px"
+  landing-action: "44px"
+  topbar: "48px"
+  rail: "56px"
+  sidebar: "240px"
   page-x: "28px"
-  2xl: "40px"
+  page-x-phone: "16px"
 components:
   button-primary:
-    backgroundColor: "{colors.seal}"
-    textColor: "#ffffff"
-    typography: "{typography.button}"
+    backgroundColor: "{colors.violet}"
+    textColor: "{colors.on-violet}"
     rounded: "{rounded.md}"
-    padding: "0 16px"
-    height: "36px"
+    padding: "0 12px"
+    height: "{spacing.control}"
+    typography: "{typography.body}"
   button-primary-hover:
-    backgroundColor: "{colors.seal-deep}"
+    backgroundColor: "{colors.violet-hover}"
   button-outline:
-    backgroundColor: "{colors.field}"
+    backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.button}"
     rounded: "{rounded.md}"
-    padding: "0 16px"
-    height: "36px"
+    padding: "0 12px"
+    height: "{spacing.control}"
   button-outline-hover:
     backgroundColor: "{colors.muted}"
-  button-ghost:
-    textColor: "{colors.ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.md}"
-    padding: "0 16px"
-    height: "36px"
-  button-primary-landing:
-    backgroundColor: "{colors.on-seal}"
-    textColor: "{colors.seal-deep}"
+  button-landing-primary:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.violet}"
     rounded: "{rounded.md}"
     padding: "0 20px"
-    height: "44px"
-  button-outline-landing:
-    textColor: "{colors.on-seal}"
-    rounded: "{rounded.md}"
-    padding: "0 20px"
-    height: "44px"
-  button-destructive:
-    backgroundColor: "{colors.danger}"
-    textColor: "#ffffff"
-    typography: "{typography.button}"
-    rounded: "{rounded.md}"
-    padding: "0 16px"
-    height: "36px"
+    height: "{spacing.landing-action}"
+    typography: "{typography.body-reading}"
   input:
-    backgroundColor: "{colors.field}"
+    backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.body-dense}"
     rounded: "{rounded.md}"
-    padding: "8px 12px"
-    height: "40px"
-  label:
-    textColor: "{colors.ink-2}"
+    padding: "4px 10px"
+    height: "{spacing.control}"
+  toolbar-chip:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: "0 8px"
+    height: "{spacing.control}"
+    typography: "{typography.row}"
+  toolbar-chip-on:
+    backgroundColor: "{colors.violet-tint}"
+    textColor: "{colors.violet}"
+  status-pill:
+    rounded: "{rounded.full}"
+    padding: "0 10px"
+    height: "24px"
     typography: "{typography.label}"
-  rail:
-    backgroundColor: "{colors.seal}"
-    textColor: "{colors.on-seal}"
-    width: "232px"
-  rail-nav-item:
-    textColor: "{colors.on-seal}"
-    typography: "{typography.body-dense}"
-    rounded: "{rounded.md}"
+  status-pill-amber:
+    backgroundColor: "{colors.status-amber-tint}"
+    textColor: "{colors.status-amber-ink}"
+  list-row:
+    height: "{spacing.row}"
     padding: "6px 12px"
-    height: "36px"
-  rail-nav-item-current:
-    backgroundColor: "{colors.seal-deep}"
-    textColor: "#ffffff"
+    typography: "{typography.body}"
   panel:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
+    backgroundColor: "{colors.canvas}"
     rounded: "{rounded.lg}"
     padding: "20px"
-  seal-sm:
-    backgroundColor: "{colors.field}"
-    textColor: "{colors.seal-ink}"
-    rounded: "{rounded.full}"
-    size: "24px"
-  seal-md:
-    backgroundColor: "{colors.field}"
-    textColor: "{colors.seal-ink}"
-    rounded: "{rounded.full}"
-    size: "32px"
-  seal-lg:
-    backgroundColor: "{colors.field}"
-    textColor: "{colors.seal-ink}"
-    rounded: "{rounded.full}"
-    size: "40px"
-  workspace-mark:
-    textColor: "{colors.seal-ink}"
+  rail:
+    backgroundColor: "{colors.rail}"
+    textColor: "{colors.on-violet}"
+    width: "{spacing.rail}"
+  sidebar:
+    backgroundColor: "{colors.sidebar}"
+    textColor: "{colors.ink}"
+    width: "{spacing.sidebar}"
+  nav-item-current:
+    backgroundColor: "{colors.violet-tint}"
+    textColor: "{colors.violet}"
     rounded: "{rounded.md}"
-    size: "32px"
-  stamp-box:
-    backgroundColor: "{colors.field}"
-    textColor: "{colors.seal-ink}"
-    rounded: "{rounded.stamp}"
-    size: "36px"
-  stamp-box-signed:
-    backgroundColor: "{colors.seal-tint}"
-    textColor: "{colors.seal-ink}"
-    rounded: "{rounded.stamp}"
-    size: "36px"
-  stamp-box-open:
-    backgroundColor: "{colors.field}"
-    textColor: "{colors.seal-ink}"
-    typography: "{typography.stamp}"
-    rounded: "{rounded.stamp}"
-    size: "36px"
 ---
 
 # Design System: Aureon CRM
 
 ## Overview
 
-**Creative North Star: "The Approval Circular"**
+**Creative North Star: "The Pipeline's Work OS"**
 
-Aureon reads like a circular passed from desk to desk in an office: each step carries the seal of the person who moved it. A full-height vermilion rail holds the workspace and its sections; to its right, bond-paper panels sit on a cool grey ground, ruled with one hairline. Text is sumi ink. People appear only as round vermilion seals with their initials, workspaces as square chops. The memorable object is the stamp row: one fixed box per pipeline stage, the reached stages signed, the open stage showing its exact days.
+Aureon works like the tool a sales team already lives in: one calm shell (an ink-violet rail, a cool off-white sidebar holding a tree of saved views, a white canvas under a 48 px top bar), and inside it every list is a set of coloured status sections and every record opens in a side panel without losing the list. Its craft peers are ClickUp, Linear and Attio; its identity is Aureon's own, never ClickUp's: the Aureon violet, the ink-violet rail and the orbit mark, a ring broken at the upper right with one satellite dot beyond the gap.
 
-The density is that of a working ledger: 36px controls and rows, small sentence-case labels in a second ink, figures set larger than their labels, hierarchy by scale and weight rather than decoration. Panels lie flat on the ground, separated by hairlines; depth is rare. The dark theme is lacquer: near-black warm surfaces under the same vermilion seal, never navy or cool grey.
+Density is the work-OS kind: 13 to 14 px UI text, 36 px rows, 32 px controls on a desktop (36 px on phones), tabular figures, hairlines rather than boxes. Colour is spent on meaning. Violet means "act, selected, focused"; the status hues mean where a record stands, and they always sit beside the words that say it. Surfaces lie flat; only what floats (menus, popovers, tooltips, the record panel, dialogs) casts a shadow. Dark is the same structure on violet-black, every pair rechecked.
 
-The world refuses the default CRM: no navy sidebar, no blue primary button, no grid of KPI tiles with icons in coloured circles. Every visible person, signature and stage says who did what.
+The status pill is the system's signature: a lead's status, a deal's stage or a task's state is one coloured pill that is also the control that changes it; grouped lists are headed by the same pill; the record's header draws the whole track with the current step filled and the satellite over it.
 
 **Key Characteristics:**
-- A full-bleed vermilion rail (`seal`) on the left edge; below 1024px it folds into a vermilion top bar that opens the rail as a drawer.
-- Hairline paper panels (`paper` on `ground`, 1px `rule` border, 6px radius) as the only container.
-- People are seals, workspaces are chops; both draw initials in `seal-ink`.
-- The stamp row: fixed 36px boxes, signed, open (2px ink outline, exact days) or blank.
-- Anuphan for Latin and Thai alike; mono only for record numbers and stamp days.
-- Light (bond paper) and dark (lacquer) themes from the same token names.
+- Ink-violet rail (56 px), off-white sidebar (240 px, folds into the rail), white canvas; dark is violet-black.
+- Aureon violet for primary actions, selection and focus only.
+- Six status tones, each a hue, a tint and an ink, applied with `data-tone`.
+- Inter for the UI, Anuphan for Thai; 13/14 px text, tabular figures.
+- 6 px controls, 8 px panels, full-round pills and avatars; hairline borders.
+- Flat panels; shadows only on floating layers.
+- The orbit mark, and its satellite as the "current" marker.
 
 ## Colors
 
-One loud colour, the seal vermilion, carried by one large field (the rail) and small signatures (seals, stamps, links); everything else is paper, ink and hairline.
+A neutral, slightly cool workspace where one violet acts and six status tones inform.
 
 ### Primary
-- **Seal Vermilion** (`seal`): the rail, the mobile top bar, the auth aside and the primary button fill. Carries white or `on-seal` text only; never used as text on paper.
-- **Seal Deep** (`seal-deep`): the primary button's hover and the current item on the rail.
-- **Seal Ink** (`seal-ink`; `lacquer-seal-ink` in dark): every seal-coloured mark drawn on paper: seal rings and initials, chop outlines, stamp text, link text, the caret. It holds AA contrast on paper and field in both themes, which `seal` itself does not.
-- **Seal Tint** (`seal-tint`; `lacquer-seal-tint` in dark): the fill of a signed stamp box and of the current settings link.
-- **On Seal** (`on-seal`): text, icons and outlines on the vermilion fills (4.9:1 on `seal`).
+- **Aureon Violet** (violet): the primary button fill (white text at 6.25:1), the current rail item, focus rings, caret, the selection wash, the violet ink of links and active tabs, and the public pages' brand fields (header, hero and closing bands, the auth aside). Hover deepens to **Violet Pressed** (violet-hover). **Violet Haze** (violet-tint) fills a current sidebar item and a toolbar chip that is on. In dark the fill lifts to dark-violet, the tint deepens to dark-violet-tint (the landing's band in dark, carrying white at 13.7:1) and violet text becomes dark-violet-ink (6.1:1 on the canvas).
 
 ### Secondary
-- **Crimson Danger** (`danger`; `lacquer-danger` in dark): errors, failed writes and destructive buttons. A cooler, bluer red than the seal, so an error never reads as a signature.
+- **Ink Violet** (rail): the global rail, its raised item (rail-raised), and the deep field under the landing's developer commands. White on it is 16.9:1.
 
 ### Tertiary
-- **Status inks** (`success` pine, `warning` ochre, `info` slate blue): status text and chart series only; they never fill large areas.
+The status tones. Each is a triplet: the hue (`--status-<tone>`) for dots, track segments and chart fills that sit beside their words; the tint for a pill's fill; the ink for text on the tint or the canvas (4.5:1 or more on both, in both themes). Any element with `data-tone="<tone>"` gets them as `--tone`, `--tone-tint` and `--tone-ink`.
+- **Signal Blue** (status-blue): new leads, open tasks, the first open stage, Companies, the coming week.
+- **Aureon Violet** (as status-violet): contacted leads, middle stages, Deals, later dates.
+- **Harvest Amber** (status-amber): qualified leads, the last open stage, Leads, due today, medium priority. Its hue is 2.3:1 on white; amber words are always status-amber-ink.
+- **Won Green** (status-green): converted, won, completed, Contacts.
+- **Signal Red** (status-red): lost, overdue, high priority, Tasks; as danger (the red ink) always with an icon and words.
+- **Quiet Slate** (status-slate): unqualified, cancelled, no date, low priority, a stage the list doesn't hold.
+
+Open stages walk blue → violet → amber in pipeline order, then green (won) and red (lost). Semantic aliases follow the inks: danger = red ink, warning = amber ink, success = green ink, info = blue ink.
+
+People take one of eight avatar colours by member id (violet, the blue, green, red, amber and slate inks, **Deep Teal** avatar-teal, **Orchid** avatar-orchid), white initials at 5:1 or more. Charts take five colours: violet, blue, green, **Chart Amber** (chart-amber, 3.1:1 on white) and red; in dark, the inks.
 
 ### Neutral
-- **Ground** (`ground`; `lacquer-ground`): the page behind the panels; also the browser theme colour.
-- **Bond Paper** (`paper`; `lacquer-paper`): panels, cards, list rows.
-- **Field** (`field`; `lacquer-field`): controls (inputs, outline buttons, menus, popovers) and the inside of seals and blank stamp boxes; one step above paper.
-- **Muted** (`muted`; `lacquer-muted`): hover and selected fills on rows, ghost and outline buttons.
-- **Sumi Ink** (`ink`; `lacquer-ink`): body text and headings.
-- **Second Ink** (`ink-2`; `lacquer-ink-2`): labels, secondary lines, counts, hints.
-- **Hairline** (`rule`; `lacquer-rule`): every border and divider between paper areas.
-- **Input Stroke** (`input-stroke`; `lacquer-input-stroke`): control borders only, at 3:1 against field, paper and ground.
+- **Canvas** (canvas): the page, panels, cards and controls (dark-canvas, and dark-card for panels and controls, in dark).
+- **Cool Paper** (sidebar): the sidebar and the board's column wells.
+- **Mist** (muted): hover and pressed fills, the secondary button, code chips, disabled fields.
+- **Ink** (ink) and **Slate Ink** (ink-2): text and secondary text (ink-2 is 5.8:1 on the sidebar).
+- **Hairline** (rule): every divider and panel border.
+- **Control Stroke** (input-stroke): input and checkbox borders, 3:1 or more on canvas and sidebar in both themes (WCAG 1.4.11).
 
 ### Named Rules
-**The Seal Is a Signature Rule.** Vermilion marks the rail, the primary action and who signed what. It never decorates, never colours a status and never signals an error.
+**The Hue Beside Its Words Rule.** A status hue is only ever a dot, a track segment or a chart fill next to the words that name it. Light amber (2.2:1 on the sidebar) and slate (3:1) are accepted only that way, never alone as a bar, stripe, icon or text colour. Anything that must read alone takes the `-ink` token.
 
-**The Crimson Is Not the Seal Rule.** Danger uses `danger`, never `seal` or `seal-ink`, and always arrives with an icon and words. Colour alone never signals an error.
+**The Violet Acts Rule.** Violet is for the primary action, what is selected or current, and focus. It never colours an error, and as a status it always comes with its pill's words.
 
-**The Lacquer Rule.** Dark mode keeps the same seal fill on the rail and swaps paper, ink and seal-ink for their `lacquer-` values; it adds no new accents.
-
-**Legacy note (scope only).** `src/styles/global.css` still carries the boilerplate's "Marksheet" tokens (`folder*`, `paper-card`, `ply`, `ink-950` to `ink-100`, `pass`, `pen`, `pencil`, `.form-label`, `.paper`, `shadow-paper`, the Kalam hand font, the button `inverse` variants). They exist only so the demo gallery under `/dashboard` keeps rendering (Kalam is declared in its layout alone); the public pages (landing, about, not found, the error pages) no longer use them. They are not part of this system, and new UI must not use them.
+**The Paired Theme Rule.** Every pair is checked in light and dark: text 4.5:1 or more, UI strokes and meaningful fills 3:1 or more. A new token lands with its dark value and both ratios.
 
 ## Typography
 
-**Display Font:** Anuphan (with ui-sans-serif, system-ui)
-**Body Font:** Anuphan (with ui-sans-serif, system-ui)
-**Label/Mono Font:** the platform monospace stack, for record numbers and stamp days only
+**Display Font:** Inter (Anuphan for Thai, then ui-sans-serif, system-ui)
+**Body Font:** Inter (Anuphan for Thai)
+**Label/Mono Font:** the system mono, only for record numbers, commands and code
 
-**Character:** One humanist sans sets Latin and Thai at the same weights, so a mixed English and Thai row keeps one texture. Hierarchy comes from size and weight; two inks do the rest.
+**Character:** One neutral grotesk carries everything, set tight and bold only at landing scale; Anuphan takes over glyph by glyph for Thai, which gets looser line-heights and no tracking.
 
 ### Hierarchy
-- **Display** (800, 30px, 1.2, −0.03em): the one heading of a standalone page (sign in, sign up, invitation).
-- **Headline** (700, 24px, 1.333, −0.01em): the page `h1` inside the CRM shell and on the workspace picker.
-- **Figure** (600, 18px): a value in a fact strip, larger than its label.
-- **Title** (600, 16px): a panel's heading.
-- **Body** (400, 16px, 1.5): running text; descriptions cap at 65ch.
-- **Body dense** (500, 15px): navigation items, names in list rows, control text from 640px up.
-- **Small** (400, 14px): secondary lines, emails under names, counts.
-- **Label** (500, 13px, sentence case, `ink-2`): form and fact labels. **Label table** (500, 12px, `ink-2`) for table heads.
-- **Record number** (mono, 13px, tabular figures): a record's identifier.
-- **Stamp** (mono, 700, 11px, tabular): the days inside an open stamp box.
-
-Under `lang="th"` line heights open (1.6 at 12–14px, 1.65 for body) and negative tracking on headings resets to normal, so stacked vowels and tone marks never touch or clip.
+- **Display** (700, 80px on desktop, 60px tablet, 44px phones, 1.02, -0.035em): the landing's one thesis line. Nowhere in the app.
+- **Headline** (700, 44px desktop / 32px phones, 1.1, -0.03em): landing section headings; the auth aside's statement at 28px semibold.
+- **Record Title** (600, 24px, -0.01em): a record's name in its header; the record form's name input at 22px.
+- **Title** (600, 20px, 28px leading): a page's h1 (lists, settings, a state that stands in for a page).
+- **Body Reading** (400, 15px, relaxed): landing prose and notes, card descriptions; the landing lede at 18px.
+- **Body** (400–500, 14px): table cells, buttons, forms, the default.
+- **Row** (500, 13px): toolbar chips, view tabs, inline-add rows, property chips, captions, the panel's location line.
+- **Label** (600, 12px): status pills, the track's stage names, badges; table heads at 500.
+- **Micro** (500, 11px): bylines under a full track, counters, the "More" count.
 
 ### Named Rules
-**The Quiet Label Rule.** Labels are sentence case, 12–13px, weight 500, in `ink-2`, with no uppercase and no letter-spacing. A label never competes with the value under it.
+**The Bracket Size Rule.** Off-scale sizes are written `text-[…rem]`, never as a custom named `text-<name>` utility: the project's `cn` reads an unknown `text-<name>` as a colour and drops the element's text colour. The app's ramp is 11/12/13/14/15/16/20/24 px.
 
-**The Figure Over Label Rule.** Values are set larger and heavier than their labels (18px/600 under a 13px label); tables, times and record numbers use tabular figures.
+**The Thai Breathes Rule.** Under `:lang(th)` line-heights open (1.6 on small text, 1.65 body, 1.35 on display) and letter-spacing returns to normal on headings, labels, table heads and badges.
 
-**The Record Number Rule.** A record's number is a type letter, a hyphen and a zero-padded number (`D-0042` for a deal), set in the record-number style, so it can be read aloud and scanned down a column.
+**The Tabular Rule.** Tables, times and figures use tabular numerals; record numbers are mono and dimmed.
 
 ## Layout
 
-From 1024px the CRM shell is a two-column grid: a 232px vermilion rail, sticky and full height, then the work area on `ground`. The rail holds the workspace switcher at the top and the section list under it. The work area opens with a 56px top bar carrying, at the right, the record search, the reminders bell and your seal; pages sit under it in a column up to 1152px wide, with 28px side padding (16px below 640px).
+The app is a three-column shell. The **rail** (56 px, ink violet) holds the mark, Home, the inbox, "+ New", the record search below 1024 px, and the account avatar at its foot. The **sidebar** (240 px, cool paper, hairline right edge) holds the workspace switcher, Spaces as a tree of saved views (each space on a 20 px tinted icon chip in its tone, expanding to its views), Insights and Settings; collapsed by the viewer, or by default from 768 to 1279 px, it folds into the rail so there is one strip. Below 768 px the sidebar lives in a drawer, always expanded. The **top bar** (48 px, hairline under) carries the location on the left and, from 1024 px, the "Search ⌘K" field centred (320 px, 384 px from 1280 px).
 
-Below 1024px the rail becomes a 56px vermilion top bar (menu button, workspace chop and name, your seal) that opens the rail as a 288px drawer from the left.
+The canvas pads 28 px on a desktop and 16 px on phones. A list page is: the title with its primary action, view tabs (List · Board) on a hairline, one toolbar line (search, filter chips, More, Group, Sort, Me, archived; Export at the end; below 768 px all but the search move into a "Filters" sheet), then status sections of 36 px rows. The board lays stages as 224–320 px columns on cool-paper wells, scrolling sideways with a canvas-coloured fade at the right edge; Won and Lost start as 40 px strips. The record panel slides in from the right at min(920 px, 92vw), with its own 48 px header.
 
-Page blocks stack 24px apart; panel grids use 20px gaps. Settings put a 192px link column beside the page from 1280px and a wrapping row of links above it below that. Standalone pages centre one column (576px for the workspace picker, 400px for auth forms). The auth pages split 5:7 on large screens, with a vermilion aside carrying the wordmark and a stamp row; on smaller screens the aside folds into a vermilion band with the same two.
+The landing is a 76 rem (1216 px) frame: a full-bleed violet band holding the nav, the sample deal, the thesis and two desks split by a white hairline; the board capture laid across the band's lower edge; then rows with an 800 px main column and a hairline developer margin beside each.
 
-Rows are dense: 36px minimum for controls and navigation, 48px for list rows with a seal, 12px cell padding in tables, 20px side padding in panels.
+Spacing runs on the 4 px grid; 6 px gaps inside controls and between toolbar items; landing rows pad 64–88 px vertically.
+
+### Named Rules
+**The Control Height Rule.** Rows are 36 px. Controls (buttons, inputs, chips) are 32 px from 640 px and 36 px on phones. 44 px actions exist on the landing only (the hero's and the closing band's two buttons).
 
 ## Elevation & Depth
 
-Aureon is flat. Inside the shell, panels lie on the ground with a hairline border and no shadow; separation comes from paper against ground and from the rule between rows. Two small shadows exist: a one-pixel ply under controls, so they read as raised from the paper, and a soft sheet under a card that stands alone on a page (the picker list, the create form, the auth form, the invitation card, error states) or under a row being dragged.
+Flat by default, with depth from tone (rail, sidebar, canvas) and hairlines. Panels, cards, tables and controls carry no shadow; the demos' ply and sheet shadow tokens resolve to nothing. Shadows appear only on layers that float above the page.
 
 ### Shadow Vocabulary
-- **Ply** (`box-shadow: 0 1px 2px rgb(17 27 48 / 10%)`): controls only (primary, outline and destructive buttons, inputs, selects).
-- **Sheet** (`box-shadow: 0 1px 0 rgb(17 27 48 / 5%), 0 1px 3px rgb(17 27 48 / 8%)`): a standalone card on a page, a dragged row, the skip link.
+- **Float** (`box-shadow: 0 4px 12px -2px rgb(29 26 46 / 10%), 0 12px 28px -6px rgb(29 26 46 / 14%)`): menus, popovers, tooltips, the chart tooltip, the skip link; a board card on hover (it can be picked up) and its dragged copy.
+- **Overlay** (`box-shadow: 0 12px 32px -8px rgb(29 26 46 / 18%), 0 32px 64px -16px rgb(29 26 46 / 24%)`): the record panel and sheets, dialogs, and the landing's capture sheet that crosses the band.
+- In dark both switch to black (35/45% and 45/55%).
 
 ### Named Rules
-**The One Hairline Rule.** Every division between paper areas is the same 1px `rule`. No double borders, no tinted section backgrounds, no shadows on panels inside the shell.
+**The Only What Floats Rule.** A shadow means "this is above the page". Panels lie flat on hairlines; nothing at rest is lifted.
 
 ## Shapes
 
-Corners are slightly softened and consistent: 6px on panels and cards, 4.8px on buttons, inputs and navigation items, 3px on stamp boxes. Seals are perfect circles; workspace chops are squares with 4.8px corners, so a circle means a person and a square means an organisation. The seal inside a stamp box and the brand seal are tilted −8°, as if pressed by hand.
+Gently rounded and consistent: 6 px for controls (buttons, inputs, chips, nav items, tooltips), 8 px for panels, cards, menus, popovers, dialogs and board columns, 12 px for the top of a phone's bottom sheet; full round for status pills, avatars, track segments and counters. Space icon chips have 5 px corners. Borders are 1 px hairlines; control borders take the 3:1 stroke. Unassigned is a dashed ring.
 
-**The Circle Is a Person Rule.** A circle with initials is always a person and a rounded square with initials is always a workspace. Nothing else takes either shape.
+The orbit mark is a 290° arc (stroke 3 on a 24 grid) open at the upper right, with a solid satellite dot beyond the gap, drawn in `currentColor`: violet on light, white on the rail and brand fields, violet on white in the app icon.
+
+### Named Rules
+**The Satellite Rule.** The mark's satellite (a 6 px dot) marks what is current: the active rail item, the current sidebar item and the current stage on a track, at the upper right as in the mark. It is decorative and never the only cue: the item is also filled, set heavier or named.
 
 ## Components
 
 ### Buttons
-Firm and compact: one height for every primary action.
-- **Shape:** 4.8px corners, 1px border, semibold 14px text, 16px side padding, 36px tall.
-- **Primary:** seal fill, white text, ply shadow; hover moves to seal-deep; pressing nudges it down 1px.
-- **Outline:** field fill, input-stroke border, ink text; hover deepens the border and fills muted.
-- **Ghost:** no fill until hover (muted).
-- **Destructive:** crimson fill with white text in light; in lacquer a crimson tint with crimson text, because the dark crimson cannot carry white.
-- **Link:** seal-ink text, underlined on hover.
-- **Focus:** a 2px seal ring with a 2px offset. On the vermilion rail and bars the ring is `on-seal`.
-- **Sizes:** 36px is the one height for primary actions. 32px and 28px serve inline tools in rows (reorder, reload, copy).
-- **The landing exception:** on the public landing page only, the two primary actions of the hero and of the closing band are 44px (`lg`, 15px text, 20px sides): an on-seal button with seal-deep text (in both themes: the lacquer seal-ink would not hold contrast on on-seal) and an on-seal outline button, both on the vermilion band; the header's Create a workspace takes the same fill at 32px. User decision, 2026-10-18; the app keeps 36px.
+- **Shape:** gently rounded (6 px), flat, 32 px tall (36 px on phones), 14 px medium, 12 px sides.
+- **Primary:** violet fill, white text; hover violet-hover; pressed nudges down 1 px.
+- **Hover / Focus:** 150 ms colour transitions; a 2 px violet ring with a 2 px offset in the background colour.
+- **Outline / Ghost / Secondary:** a hairline on the canvas, a bare text button, or a mist fill; all hover to mist.
+- **Destructive:** red-ink fill with white in light; in dark a 10% red tint with red-ink text (14% on hover, 4.58:1).
+- **Landing:** on violet fields the main action is white with violet text (6.25:1 in both themes) and the second a white outline; both 44 px, 15 px text, ringed in white.
 
-### Cards / Containers (panels)
-- **Corner Style:** 6px.
-- **Background:** paper.
-- **Shadow Strategy:** none inside the shell; sheet for a standalone card (see Elevation & Depth).
-- **Border:** 1px rule.
-- **Internal Padding:** 20px at the sides; a heading row (title left, count right in `ink-2`) over rows divided by the same rule. A fact strip is one panel split into cells by rules, each a label over a figure.
+### Status Pill (signature)
+A 24 px full-round pill: the tone's tint, its ink at 12 px semibold, an 8 px dot in the hue. With a menu it is the control: a chevron, the tone's border on hover and while open, read as "Status: Qualified". While a change is on its way (pending) a spinner replaces the dot and it is busy; pending or disabled, it keeps the focus but opens nothing (disabled at 60% opacity). Its look lives with the status colours so server-drawn pages (the landing, the sign-in sample, board headings) draw it without the menu code.
+
+### Status Track
+A deal's progress as 6 px full-round segments, one per open stage, filled in the stage's hue up to the current one (hairline grey after), the satellite over the current segment, and the stage's name in its ink with the days in it beside. Full (in a record header) writes each stage's name under its segment, and who moved the deal there and when. Every segment has a tooltip and screen-reader text; the track is named "Stage 2 of 4: Needs analysis".
+
+### Status Section
+A grouped list's group: a 36 px heading that is the collapse button (caret, the status pill or an owner, the count in muted tabular figures), a hairline, its rows, and "View all N" in violet ink when it shows only some.
+
+### Lists and Rows
+36 px rows on hairlines, 12 px cell padding, 12 px muted table heads. The record's name is the link (underlined on hover), its number in dimmed mono beside it (hidden on phones), a "…" menu at the end. **Inline Add Row:** the last row of a list or group, a + and muted 13 px text; typed into, Enter creates, the row waits for the server (spinner), and an error stays under it with the text kept.
+
+### Chips (toolbar)
+- **Style:** a 32 px control on a hairline over the canvas, 13 px medium. Filter Chip, Group, Sort and Me share it.
+- **State:** on, it fills violet-tint with violet-ink text; a set **Filter Chip** shows its value (cut short, whole in its tooltip) and an × that clears it. **More Filters** gathers rare filters behind one chip with a violet count badge.
+
+### View Tabs
+List · Board as 36 px links, 13 px medium, muted until current; the current one is ink with a 2 px violet-ink underline on the tabs' hairline.
+
+### Record Panel and Record Form
+The panel is a right sheet at min(920 px, 92vw) with the overlay shadow, a 48 px hairline header (the location in 13 px muted, open-full-page and ×), and the record's page inside. A record form opens on the name as a 22 px semibold input with no field surface until hovered, then a wrapping row of **Property Chips**: 32 px hairline chips with an icon and the value (the property's name, muted, while empty) that open the field in a popover; an error turns the chip red and is written under the row.
+
+### Cards / Containers
+- **Corner Style:** 8 px.
+- **Background:** canvas (dark-card in dark); board wells in cool paper.
+- **Shadow Strategy:** none at rest (see Elevation & Depth).
+- **Border:** 1 px hairline.
+- **Internal Padding:** 20 px (12 px for small and board cards).
 
 ### Inputs / Fields
-- **Style:** field fill, 1px input-stroke border, 4.8px corners, ply shadow, 40px tall, 16px text (15px from 640px).
-- **Focus:** the border turns seal, with a 3px seal ring at 20%.
-- **Error:** crimson border and ring; the message under the field in crimson, with an icon and words (the Crimson Is Not the Seal Rule). A form-level failure is a crimson-tinted alert with an icon at the top of the form, never a toast.
-- **Labels:** the Quiet Label Rule, 8px above the control.
+- **Style:** canvas fill, 1 px control stroke deepening to slate ink on hover, 6 px corners, 32 px (36 px on phones), 16 px text on phones (no zoom on focus) and 14 px from 640 px.
+- **Focus:** the page's 2 px violet outline with a 2 px offset.
+- **Error / Disabled:** red-ink border; disabled on mist at 60%.
 
 ### Navigation
-- **Rail items:** 36px rows, 15px medium `on-seal` text with a 16px icon; hover darkens by 10% black; the current item fills seal-deep and turns semibold white (weight is the cue besides colour).
-- **Settings links:** a column from 1280px, a wrapping row of bordered paper links below it; the current link fills seal-tint with seal-ink text.
-- **Account:** your seal in the top bar opens the account menu (profile, theme, language, sign out).
-- **Record search:** from 768px a field-like button in the top bar ("Search records" and the shortcut, ⌘K or Ctrl K); below that an icon button. It opens a palette near the top of the screen (up to 512px wide) with 5 hits per kind under their headings, each a record number in mono, the name and a detail line.
-- **Reminders bell:** an icon button with a badge (white on the vermilion bar, ink on paper: vermilion never colours a count) counting overdue tasks, tasks due within 24 hours and leads whose follow-up is due; hidden at none, "20+" for a list the API may have cut. Its popover is a field sheet, 352px at most, with the three groups and a line saying reminders live in the app. The layout's read is the first paint; the bell asks again on each navigation and when the tab returns, since a soft navigation keeps the layout.
+Rail items are 40 px, white at 75% on ink violet, hovering to white on a 10% white wash; the current one is filled violet with an inset white hairline and the satellite. Sidebar items are ink on cool paper; the current page is violet-tint with semibold violet ink and the satellite; a space holding the current view is set semibold in violet ink. "+ New" is a 36 px white disc on the rail. On phones the rail and sidebar move into a drawer; the top bar keeps the search and the inbox as icons.
 
-### Dashboard
-The workspace home, in this order: a header (the page `h1`, a line naming the workspace, the five "New ..." actions); the KPI strip (one panel split into cells, a small label over a 28px figure, each cell a link to the list it counts; overdue tasks in crimson with an icon); my deals beside my follow-ups (each deal a record number, name, amount and a compact stamp row signed by whoever moved it; tasks with the list's complete box); the open pipeline (per currency, open over weighted), won and lost (with the period picker) and the open stages (bars and their table); recent activity beside recent changes. Every figure is the API's, as sent: nothing is added across currencies, every amount carries its currency, and the period label is the response's `period`. Only won and lost follow the period; the panel says the rest is as of now. An empty workspace shows "Get started" (the create actions, no seals) instead.
-- **Charts** use `--chart-2..5` (never the seal's `--chart-1` for a plain series), name each bar with its stage and its count, and always sit above their table, which is the text equivalent: the chart itself is hidden from assistive technology and takes no focus. Animation is off under reduced motion.
-- **History entries** (`AuditEventItem`): the actor's seal (none for a former member), "Riley Rep changed Acme Trading" with the record as a link, the time in the workspace zone, and the changed fields as "Field: from → to". Money carries its currency only when the event names it; ids read "changed".
+### Person Avatar
+Round, white semibold initials on the member's colour (20, 24 or 32 px); unassigned is a dashed ring in the control stroke. With a title it is an image of the name with a tooltip.
 
-### Reports
-The reports page opens with its `h1` and a row of tab links (`?tab=pipeline|won-lost|funnel|activities|follow-ups`; the pipeline without one): the current tab is `bg-muted` and semibold with `aria-current="page"`, the one just followed shows a spinner until its report arrives. A line under the tabs says what the figures cover (the pipeline and the follow-ups are as of now; the other three follow a period, with the period picker at its right, which keeps the tab and the range when either changes). Every figure is the API's, as sent: no sum across currencies, owners or months, every amount in its currency, each currency on its own line, the period label from the response's `period`.
-- **Charts** draw their series in `--chart-2..5` and never in the seal's `--chart-1`; the one exception is Lost, which is ink (`--foreground`) by decision, as on the stamp row. Won is a solid pine (`--chart-3`) bar and Lost a hatched ink bar (diagonal stripes with an ink outline), so they read apart without their colours; the counts sit on the bars while there is room (up to six months). The chart is hidden from assistive technology and its text equivalent is `ChartTable`: the table, open at every width (the money and the months that are only in it are on the page and in find-in-page), under a ghost button named "Table" with `aria-expanded` that hides it.
-- **Funnel**: a table, one row per stage, "reached of created" beside a bar (open stages `--chart-2`, Won `--chart-3`); when the stage history starts after the period does, or there is none, a caution with a warning icon says so above it and the counts are never presented as complete.
-- **Activities**: a table per member (seal, calls, emails, meetings, notes, tasks completed, total of the row); the members who left are one row without a seal. On a phone it scrolls inside a focusable region, the member column staying in view.
+### Crm State
+What stands in for a page or panel (an error, no access, nothing found): a 40 px icon tile (mist, or the red tint and ink for an error), a 20 px semibold title, one or two sentences in muted text (60ch), then the ways on as buttons.
 
-### Tables
-- Heads in the label-table style, 40px tall, sentence case; rows divided by rule, 12px cell padding, muted on hover; tabular figures.
-
-### Seal (`Seal`)
-A person as a round seal: field fill, a seal-ink ring (1.5px at 24px, 2px at 32px and 40px), bold initials in seal-ink. Initials are the first character of the first two words of the name, else the first two characters of the email. Sizes: 24px in lists and tables, 32px in the top bar, 40px in headers and menus.
-
-**The Signed by the Actor Rule.** Seals are the only way a person appears: no photos, no generic avatars, no initials in coloured squares. A seal signs an action only for the member recorded as having done it, never the viewer because they are the one looking.
-
-### Workspace Mark (`WorkspaceMark`)
-A workspace as a square chop: 32px, 2px seal-ink outline, bold initials; on the vermilion rail it draws in `on-seal`. Always beside the written name, and decorative.
-
-### Stamp Box and Stamp Row (`StampBox`)
-The signature of the system. A stamp row is a line of `StampBox`es, 4px apart, one per pipeline stage in order. Each box is a fixed 36px square with 3px corners.
-- **Signed** (a stage the deal has passed): seal-tint fill holding a 28px seal of the member who moved the deal, tilted −8°.
-- **Open** (the current stage): field fill, a 2px ink outline, and the exact days in the stage in the stamp style ("8d"), never a rounded "about a week".
-- **Blank** (not reached): field fill, a 1px seal-ink outline at 40%.
-- **Reached, unsigned:** a stage passed over without a signature (a deal created further along, a move whose member has left) is filled with the seal tint and ticked, with no seal: a seal is only ever someone's.
-- **Won:** the WON stage, once reached, fills solid with the seal and its impression (the winner's seal, or a tick) draws in `on-seal`. It is the `won` state of `StampBox`; never build a second box.
-- **Lost:** the LOST stage, once reached, is marked in solid ink with the word "Lost", never in the seal colour and never with a seal (`lost` state).
-- **Press:** the box that becomes current after a move plays a 220 ms stamp-press (scale 1.06 to 1, the ink settling); none under reduced motion.
-
-**The Fixed Box Rule.** Stamp boxes are always 36px, whatever the stage name or language. Stage names live outside the box.
-
-## Landing
-
-The public landing page (`src/app/[locale]/(marketing)/page.tsx`) is composition **Two desks**: one page for the two audiences PRODUCT.md names, the sales team in a wide column and the developer in a hairline margin beside it. It lives in this world unchanged: no new colour, face or component family, only a display scale for headlines.
-
-- **Chrome:** the public header is the vermilion bar (64px, 72px from 1024px): the wordmark, the section links from 1280px, the language picker in its `seal` tone, Sign in (on-seal outline) and Create a workspace (on-seal fill with seal-deep text, from 640px), both 32px. A skip link comes first. The footer lies on the ground under a hairline: the wordmark and the sample-product note, About and the boilerplate link in seal-ink.
-- **The band:** the header's vermilion runs on into the hero. A five-box stamp row (three demo members' seals, the open stage's days, a blank) presses one box after another on load (the 220ms stamp-press, 140ms apart; none under reduced motion). The headline is `landing-display` (2.75rem on phones, 3.75rem from 640px, 5rem from 1024px). Under an on-seal hairline at 45% the band splits into two desks: the team's (a 13px label, `landing-subhead`, the two 44px actions) and the developer's (a label, one line, `make setup` and `pnpm dev` in mono on seal-deep, Read the code underlined in on-seal), stacked below 768px, where the team's label and the developer's line give way (the commands stay) so the sheet's signed card reaches the first screen.
-- **The sheet across the edge:** the deals board, captured, lies as a paper sheet (sheet shadow) across the band's lower edge; the band ends at 45% of the sheet's block, so the stamp rows of the cards show in the first viewport at 1440 by 900. From 768px it shows the board's columns at a 2:1 crop from the top left; below that the phone's board from the stage whose first card is the most signed, from that card down (the Thai page shows the Thai board).
-- **Sections:** a 1160px content column on the ground (1216px with its 28px sides). Each section is an 800px story column (`landing-headline`, 2rem on phones; an 18px lede in ink-2, 56ch) beside the developer note in the rest of the column (312px after the 48px gap) (15px ink-2 on a hairline left rule; the first carries "For developers" in ink); below 1024px the note follows the story. Sections are 88px apart on the one hairline. More space above a headline than below it.
-- **Captures:** only real screenshots of the demo workspace (`scripts/capture-landing.ts`, provenance in `public/landing/README.md`), in paper sheets with the hairline and a 13px caption ending "demo workspace, fictional data". Each has a light and a lacquer capture; the page shows the one its theme matches. Below 768px each section shows a narrow crop of its part (the signed card, the won deal's stamp row and history, the reminders popover, My deals, the chart) at a phone's density instead of the whole screen. Clips end on a row's or a panel's edge, never through a line of text. The dashboard and the report are two sheets on the desk from 768px: the report (97%, sheet shadow) covers exactly the dashboard's last whole row, leaving only the page's margin beside it.
-- **The signature:** a developer note about a part of its capture names it in 13px seal-ink beside a small outlined box, and the capture rings that part: a 2px seal-ink ring at 55% at rest, full with a 4px seal halo while the note is hovered (200ms, ease-out-expo; no transition under reduced motion).
-- **Illustrations:** the how-it-works steps draw the product's own rows with `StampBox` (a lead's lifecycle, then converted with ticks and no seals; a deal signed by two members, eight days open), hidden from assistive technology under a caption saying they are samples. The roles panel is a paper panel of the four roles, each beside a demo member's seal. The languages section sets each locale file's own headline (`landing-line`) under its endonym, beside the Thai phone capture.
-- **Developers:** a full-width row: the commands for both repositories in a field-coloured block (mono 13px, comments in ink-2) and a facts panel split by rules.
-- **Close:** a vermilion band with `landing-close` (2.5rem on phones), the two 44px actions and a won deal's stamp row; its Won box carries a 1px on-seal outline so the seal's fill still reads on the seal.
-- **Thai:** display headings open to a 1.35 line height and drop their negative tracking.
-
-The about page uses the same header and footer: one 768px column on the ground, the title at `landing-headline` from 1024px (2.5rem below), and a paper panel of what the template holds.
+### Landing
+The app's world on a public page: violet bands (header, hero, closing) carrying white, the deep violet tint in dark; commands in mono on ink violet; a sample deal drawn in HTML from the app's own pill and track (its track fills in 600 ms, already filled under reduced motion); real captures of the demo workspace as sheets with the overlay shadow, each beside a hairline developer note whose hover rings its spot on the capture. Every shipping raster carries a `.webp.json` provenance sidecar saying how it was made (real capture, by which script, when).
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** run the vermilion rail full-bleed down the left edge, on the ground, with hairline paper panels beside it.
-- **Do** write labels in sentence case, 12–13px, weight 500, `ink-2`.
-- **Do** use the 36px button height for every primary action (the landing page's hero and closing band take 44px, and nothing else does).
-- **Do** show people only as `Seal`s, signed by the member who actually did the action.
-- **Do** draw pipeline progress as a stamp row of fixed 36px `StampBox`es, with exact days on the open stage and the WON stage filled with the seal.
-- **Do** set record numbers in mono with tabular figures (`D-0042`).
-- **Do** pair every crimson error with an icon and words.
-- **Do** check every screen in Thai and in the lacquer theme.
+- **Do** apply status colour through `data-tone` and its hue, tint and ink; write status words in the ink.
+- **Do** put a status hue only beside the words that name it (dots, track segments, chart fills).
+- **Do** keep rows at 36 px and controls at 32 px (36 px on phones); keep 44 px for the landing's two main actions.
+- **Do** separate with 1 px hairlines and lie panels flat; give shadows only to menus, popovers, tooltips, the record panel, sheets and dialogs.
+- **Do** mark the current item with the satellite plus a fill, weight or name.
+- **Do** write off-scale sizes as `text-[…rem]`.
+- **Do** check every new pair in light and dark: 4.5:1 for text, 3:1 for strokes and meaningful fills.
+- **Do** give every shipping raster a `.webp.json` provenance sidecar.
 
 ### Don't:
-- **Don't** use uppercase or letter-spacing on labels, table heads or badges.
-- **Don't** use the seal vermilion for errors, or crimson for anything but danger.
-- **Don't** stamp the viewer's seal on an action someone else recorded.
-- **Don't** use photos, generic avatars or a second avatar style.
-- **Don't** add shadows to panels inside the shell, or a second border colour.
-- **Don't** use a navy sidebar, blue primary buttons or KPI tiles with icons in coloured circles.
-- **Don't** use the Marksheet tokens, `.form-label`, `.paper` or Kalam outside the `/dashboard` demo pages.
+- **Don't** use light amber or slate alone as a bar, stripe, icon or text colour.
+- **Don't** add a custom named `text-<size>` utility; `cn` drops the element's colour.
+- **Don't** shadow a panel, card or table at rest.
+- **Don't** let the satellite or a colour be the only cue for what is current or what a status is.
+- **Don't** use ClickUp's name, logo, violet or gradient.
+- **Don't** use the boilerplate demo's Marksheet tokens (`paper`, `folder`, `ink-*`, `pass`, `pen`, `pencil`, `.form-label`, `.paper`) in new UI; they exist for the /dashboard demos only.
