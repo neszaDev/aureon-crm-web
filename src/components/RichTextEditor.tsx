@@ -34,7 +34,7 @@ import { Toggle } from '@/components/ui/toggle';
 // Printed-page styles for the editing area (the editor's HTML has no classes of its own).
 const CONTENT_CLASS = cn(
   'px-4 py-3 text-[0.9375rem] leading-relaxed text-ink-900 outline-none',
-  '[&_a]:font-medium [&_a]:text-folder [&_a]:underline [&_a]:underline-offset-4',
+  '[&_a]:font-medium [&_a]:text-folder [&_a]:underline [&_a]:underline-offset-4 dark:[&_a]:text-folder-ink-soft',
   '[&_blockquote]:my-3 [&_blockquote]:border-l-[3px] [&_blockquote]:border-ink-300 [&_blockquote]:pl-4 [&_blockquote]:text-ink-700',
   '[&_code]:rounded-sm [&_code]:bg-ink-100 [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.8125rem]',
   '[&_h1]:mt-4 [&_h1]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:tracking-[-0.02em] [&_h1]:text-ink-950',

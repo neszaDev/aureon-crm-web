@@ -4,6 +4,7 @@ import { signUp } from './helpers';
 test.describe('Test results', () => {
   test('creates, lists, summarizes and deletes a result', async ({ page }) => {
     await signUp(page);
+    await page.goto('/dashboard');
     await page.getByRole('link', { name: 'Test results' }).click();
     await expect(page.getByText('No test results yet')).toBeVisible();
 
@@ -22,6 +23,14 @@ test.describe('Test results', () => {
     await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click();
     await expect(page.getByText('No test results yet')).toBeVisible();
     await expect(page.getByTestId('summary-PASSED')).toContainText('0');
+  });
+
+  test("writes the notes in the demos' hand", async ({ page }) => {
+    await signUp(page);
+    await page.goto('/dashboard/test-results');
+
+    // Kalam, which only the demos' layout loads.
+    await expect(page.getByLabel('Notes')).toHaveCSS('font-family', /Kalam/u);
   });
 
   test('rejects a score outside 0-100 before calling the backend', async ({ page }) => {

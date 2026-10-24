@@ -1,9 +1,13 @@
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server';
+import { cookies } from 'next/headers';
 import { PageHeader } from '@/components/PageHeader';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { getCurrentUser } from '@/libs/api/Queries';
+import { endRejectedSession } from '@/libs/api/Session';
 import { redirect } from '@/libs/I18nNavigation';
+import { parseTheme, THEME_COOKIE } from '@/libs/Theme';
 
 type AccountPageProps = {
   params: Promise<{ locale: string }>;
@@ -16,9 +20,15 @@ export default async function AccountPage(props: AccountPageProps) {
   const format = await getFormatter({ locale });
 
   const { user, unauthorized } = await getCurrentUser();
-  if (unauthorized || !user) {
+  if (unauthorized) {
+    return endRejectedSession(locale);
+  }
+  if (!user) {
     return redirect({ href: '/sign-in', locale });
   }
+
+  const jar = await cookies();
+  const theme = parseTheme(jar.get(THEME_COOKIE)?.value);
 
   const details = [
     { label: t('email_label'), value: <span className="break-all">{user.email}</span> },
@@ -38,6 +48,7 @@ export default async function AccountPage(props: AccountPageProps) {
       label: t('id_label'),
       value: <span className="tabular-nums">{user.id}</span>,
     },
+    { label: t('theme_label'), value: <ThemeSwitcher theme={theme} /> },
   ];
 
   return (

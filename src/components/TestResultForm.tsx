@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import type { TestResultFormValues } from '@/validations/TestResultValidation';
 import { TEST_STATUSES, TestResultFormValidation } from '@/validations/TestResultValidation';
 
@@ -44,16 +45,19 @@ export const TestResultForm = () => {
     });
 
     if (result.ok) {
-      form.reset();
+      // Field by field: `reset` finds the fields through registrations that the compiled form
+      // makes only once, so it clears the inputs the first time and never again.
+      form.resetField('testName');
+      form.resetField('status');
+      form.resetField('score');
+      form.resetField('testedAt');
+      form.resetField('notes');
       setCreated(true);
       return;
     }
-    for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (isFormField(field)) {
-        form.setError(field, { type: 'server', message });
-      }
-    }
-    setFormError(result.message);
+    setFormError(
+      applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)).message,
+    );
   });
 
   return (

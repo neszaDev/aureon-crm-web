@@ -6,15 +6,15 @@ import { cn } from 'cn';
 import { Toggle as TogglePrimitive } from 'radix-ui';
 import * as React from 'react';
 
-// Themed for Marksheet: rests like a ghost button; pressed fills ink-100 with darker ink.
+// Themed for Aureon: rests like a ghost button; pressed fills accent.
 const toggleVariants = cva(
-  "group/toggle inline-flex items-center justify-center gap-1 rounded-md text-sm font-semibold whitespace-nowrap text-ink-700 transition-[background-color,border-color,color,box-shadow] outline-none hover:bg-ink-100 hover:text-ink-900 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-pen aria-invalid:ring-pen/15 aria-pressed:bg-ink-100 aria-pressed:text-ink-950 data-[state=on]:bg-ink-100 data-[state=on]:text-ink-950 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/toggle inline-flex items-center justify-center gap-1 rounded-md text-sm font-semibold whitespace-nowrap text-foreground transition-[background-color,border-color,color,box-shadow] outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/15 aria-pressed:bg-accent aria-pressed:text-accent-foreground data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default: 'bg-transparent',
         outline:
-          'border border-input bg-ply shadow-ply hover:border-ink-400 hover:bg-paper-card aria-pressed:bg-ink-100 data-[state=on]:bg-ink-100',
+          'border border-input bg-field shadow-ply hover:border-muted-foreground hover:bg-accent aria-pressed:bg-accent data-[state=on]:bg-accent',
       },
       size: {
         default:

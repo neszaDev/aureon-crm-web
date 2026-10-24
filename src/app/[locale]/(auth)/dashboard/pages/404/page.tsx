@@ -16,7 +16,7 @@ export default async function Error404Page(props: { params: Promise<{ locale: st
         aria-labelledby="error-404-preview"
         className="flex justify-center rounded-sm border border-dashed border-ink-300 bg-paper px-4 py-12 sm:py-16"
       >
-        {/* Same card as the app's not-found page, with the Vue page's search box. */}
+        {/* The boilerplate's not-found card, with the Vue page's search box. */}
         <div className="paper relative w-full max-w-lg px-6 pt-10 pb-8 sm:px-8">
           <p
             aria-hidden="true"

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ACCESS_TOKEN_COOKIE,
+  clearedSessionCookies,
   isSecureAppUrl,
   REFRESH_TOKEN_COOKIE,
   sessionCookies,
@@ -41,13 +42,22 @@ describe('Auth', () => {
     });
   });
 
+  describe(clearedSessionCookies, () => {
+    it('expires both session cookies with the flags they were set with', () => {
+      const secure = sessionCookies(tokens, true);
+      const cleared = clearedSessionCookies(true);
+
+      expect(cleared).toStrictEqual(secure.map((cookie) => ({ ...cookie, value: '', maxAge: 0 })));
+    });
+  });
+
   describe(toSessionTokens, () => {
     it('returns tokens when every field is present', () => {
       expect(toSessionTokens({ ...tokens, tokenType: 'Bearer' })).toStrictEqual(tokens);
     });
 
-    it('returns undefined when a field is missing', () => {
-      expect(toSessionTokens({ ...tokens, refreshToken: undefined })).toBeUndefined();
+    it('returns undefined when a token is empty or the body is missing', () => {
+      expect(toSessionTokens({ ...tokens, tokenType: 'Bearer', refreshToken: '' })).toBeUndefined();
       expect(toSessionTokens()).toBeUndefined();
     });
   });

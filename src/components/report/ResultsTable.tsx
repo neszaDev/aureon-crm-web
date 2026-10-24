@@ -11,7 +11,7 @@ import {
 import type { TestStatus } from '@/validations/TestResultValidation';
 import { StatusMark } from './StatusMark';
 
-export type ResultRow = {
+type ResultRow = {
   id?: number;
   testName?: string;
   status?: TestStatus;

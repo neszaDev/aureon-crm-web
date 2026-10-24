@@ -6,7 +6,7 @@ import { AdminOnlyNotice } from '@/components/users/AdminOnlyNotice';
 import { UserSearchForm } from '@/components/users/UserSearchForm';
 import { UsersTable } from '@/components/users/UsersTable';
 import { listUsers } from '@/libs/api/Queries';
-import { redirect } from '@/libs/I18nNavigation';
+import { endRejectedSession } from '@/libs/api/Session';
 
 const PAGE_SIZE = 20;
 
@@ -25,7 +25,7 @@ export default async function UsersPage(props: UsersPageProps) {
 
   const { users, forbidden, unauthorized } = await listUsers({ query, page, size: PAGE_SIZE });
   if (unauthorized) {
-    return redirect({ href: '/sign-in', locale });
+    return endRejectedSession(locale);
   }
 
   if (forbidden) {

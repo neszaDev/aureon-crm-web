@@ -35,14 +35,16 @@ export const FormField = (props: {
   <div className={cn('flex flex-col gap-2', props.className)}>
     <div className="flex min-h-4 items-center justify-between gap-2">
       <Label htmlFor={props.htmlFor}>{props.label}</Label>
-      {props.aside && <span className="text-xs leading-none text-ink-600">{props.aside}</span>}
+      {props.aside && (
+        <span className="text-xs leading-none text-muted-foreground">{props.aside}</span>
+      )}
     </div>
     {props.children}
     {props.error ? (
       <FieldError error={props.error} id={describedBy(props.htmlFor)} />
     ) : (
       props.hint && (
-        <p id={describedBy(props.htmlFor)} className="text-[0.8125rem] text-ink-600">
+        <p id={describedBy(props.htmlFor)} className="text-[0.8125rem] text-muted-foreground">
           {props.hint}
         </p>
       )

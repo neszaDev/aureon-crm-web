@@ -30,6 +30,18 @@ test.describe('Files', () => {
     await expect(page.getByText('No files yet.')).toBeVisible();
   });
 
+  test('uploads a 5 MB file: this page alone may send a body over 1 MiB', async ({ page }) => {
+    await page.getByLabel('File', { exact: true }).setInputFiles({
+      name: 'scan.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.alloc(5 * 1024 * 1024, 'a'),
+    });
+    await page.getByRole('button', { name: 'Upload' }).click();
+
+    await expect(page.getByRole('status')).toHaveText('Uploaded scan.txt');
+    await expect(page.getByRole('link', { name: 'scan.txt' })).toBeVisible();
+  });
+
   test('refuses a file whose content does not match its type', async ({ page }) => {
     await page.getByLabel('File', { exact: true }).setInputFiles({
       name: 'picture.png',

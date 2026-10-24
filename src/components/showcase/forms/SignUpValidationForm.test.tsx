@@ -84,5 +84,17 @@ describe(SignUpValidationForm, () => {
       await expect.element(page.getByRole('button', { name: 'Reset' })).toBeDisabled();
       await expect.element(page.getByRole('heading', { name: 'Form values' })).toBeVisible();
     });
+
+    it('submits what is filled in after a reset', async () => {
+      await renderForm();
+      await fillValidForm();
+      await page.getByRole('button', { name: 'Reset' }).click();
+      await expect.element(page.getByLabelText('First name')).toHaveValue('');
+
+      await fillValidForm();
+      await page.getByRole('button', { name: 'Submit' }).click();
+
+      await expect.element(page.getByRole('heading', { name: 'Submitted values' })).toBeVisible();
+    });
   });
 });

@@ -157,7 +157,7 @@ const PlacesMap = (props: { openLabel: string | null; onToggle: (label: string) 
                 href={open.website}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="text-folder underline"
+                className="text-folder underline dark:text-folder-ink-soft"
               >
                 {open.website}
               </a>

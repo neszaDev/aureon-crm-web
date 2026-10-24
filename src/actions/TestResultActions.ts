@@ -25,7 +25,7 @@ export async function createTestResult(values: TestResultValues): Promise<Action
   const { error, response } = await api.POST('/api/v1/test-results', { body: parsed.data });
   await redirectIfUnauthorized(response.status);
   if (!response.ok) {
-    return toActionError(error, t('error_generic'));
+    return toActionError(error, await getTranslations('ApiError'));
   }
 
   revalidatePath('/[locale]/dashboard/test-results', 'page');

@@ -61,7 +61,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["register"];
+        post: operations["register_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -75,7 +75,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_1"];
+        get: operations["list_10"];
         put?: never;
         post: operations["upload"];
         delete?: never;
@@ -91,10 +91,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_2"];
+        get: operations["get_9"];
         put?: never;
         post?: never;
-        delete: operations["delete_2"];
+        delete: operations["delete_5"];
         options?: never;
         head?: never;
         patch?: never;
@@ -116,6 +116,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/invitations/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invitations/{token}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invitations/{token}/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/test-results": {
         parameters: {
             query?: never;
@@ -123,9 +171,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list"];
+        get: operations["list_9"];
         put?: never;
-        post: operations["create"];
+        post: operations["create_10"];
         delete?: never;
         options?: never;
         head?: never;
@@ -155,13 +203,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_1"];
+        get: operations["get_8"];
         put?: never;
         post?: never;
-        delete: operations["delete_1"];
+        delete: operations["delete_4"];
         options?: never;
         head?: never;
-        patch: operations["update_1"];
+        patch: operations["update_11"];
         trace?: never;
     };
     "/api/v1/users": {
@@ -171,7 +219,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_2"];
+        get: operations["list_13"];
         put?: never;
         post?: never;
         delete?: never;
@@ -188,8 +236,24 @@ export interface paths {
             cookie?: never;
         };
         get: operations["me"];
-        put?: never;
+        put: operations["updateMe"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["change"];
         delete?: never;
         options?: never;
         head?: never;
@@ -203,27 +267,1204 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get"];
+        get: operations["get_7"];
         put?: never;
+        post?: never;
+        delete: operations["delete_3"];
+        options?: never;
+        head?: never;
+        patch: operations["update_10"];
+        trace?: never;
+    };
+    "/api/v1/workspaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["mine"];
+        put?: never;
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get"];
+        put: operations["update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_8"];
+        put?: never;
+        post: operations["create_9"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/activities/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_6"];
+        put: operations["update_9"];
+        post?: never;
+        delete: operations["delete_2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/audit-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_12"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/companies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_7"];
+        put?: never;
+        post: operations["create_8"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/companies/duplicates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["duplicates_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/companies/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["export_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/companies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_5"];
+        put: operations["update_8"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/companies/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["archive_3"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/companies/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["restore_3"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_6"];
+        put?: never;
+        post: operations["create_7"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/contacts/duplicates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["duplicates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/contacts/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["export_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/contacts/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["tags"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/contacts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_4"];
+        put: operations["update_7"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/contacts/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["archive_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/contacts/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["restore_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/deals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_5"];
+        put?: never;
+        post: operations["create_6"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/deals/board": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["board"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/deals/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["export_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/deals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_3"];
+        put: operations["update_6"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/deals/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["archive_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/deals/{id}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/deals/{id}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["move"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/deals/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["restore_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_4"];
+        put?: never;
+        post: operations["create_5"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/invitations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/lead-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_3"];
+        put?: never;
+        post: operations["create_4"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/lead-sources/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["update_5"];
+        post?: never;
+        delete: operations["delete_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_2"];
+        put?: never;
+        post: operations["create_3"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/leads/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/leads/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_2"];
+        put: operations["update_4"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/leads/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/leads/{id}/convert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["convert"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/leads/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/leads/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["changeStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_11"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["update_3"];
+        post?: never;
+        delete: operations["remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/pipeline-stages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_1"];
+        put?: never;
+        post: operations["create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/pipeline-stages/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["reorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/pipeline-stages/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["update_2"];
         post?: never;
         delete: operations["delete"];
         options?: never;
         head?: never;
-        patch: operations["update"];
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/reminders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["reminders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/reports/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["activities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/reports/follow-ups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["followUps"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/reports/funnel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["funnel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/reports/pipeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["pipeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/reports/won-lost": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["wonLost"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list"];
+        put?: never;
+        post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/tasks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_1"];
+        put: operations["update_1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/tasks/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/tasks/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/tasks/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["reopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AcceptInvitationResponse: {
+            /** Format: int64 */
+            workspaceId: number;
+        };
+        ActivityReport: {
+            byUser: components["schemas"]["UserActivity"][];
+            period: components["schemas"]["PeriodDto"];
+        };
+        ActivityResponse: {
+            author?: components["schemas"]["MemberRef"];
+            body?: string;
+            company?: components["schemas"]["Ref"];
+            contact?: components["schemas"]["PersonRef"];
+            /** Format: date-time */
+            createdAt: string;
+            deal?: components["schemas"]["Ref"];
+            /** Format: int64 */
+            id: number;
+            lead?: components["schemas"]["PersonRef"];
+            /** Format: date-time */
+            occurredAt: string;
+            subject: string;
+            /** @enum {string} */
+            type: "CALL" | "EMAIL" | "MEETING" | "NOTE";
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: int64 */
+            version: number;
+        };
+        ApiError: {
+            /** @enum {string} */
+            code?: "VALIDATION_FAILED" | "TEXT_INVALID" | "PIPELINE_CHANGED" | "EXPORT_TOO_LARGE" | "FORBIDDEN" | "REGISTRATION_DISABLED" | "OWNER_ONLY" | "INVITATION_EMAIL_MISMATCH" | "NOT_FOUND" | "VERSION_CONFLICT" | "CONFLICT" | "EMAIL_TAKEN" | "OWN_ACCOUNT" | "ACCOUNT_OWNS_WORKSPACE" | "LAST_OWNER" | "ALREADY_MEMBER" | "ALREADY_INVITED" | "INVITATION_NOT_PENDING" | "DUPLICATE_NAME" | "STAGE_PROTECTED" | "STAGE_IN_USE" | "SOURCE_IN_USE" | "LEAD_CONVERTED" | "LEAD_NOT_QUALIFIED" | "TASK_STATUS_CONFLICT" | "RATE_LIMITED";
+            error: string;
+            fieldErrors: {
+                [key: string]: string;
+            };
+            message: string;
+            path: string;
+            /** Format: int32 */
+            status: number;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        AuditActor: {
+            displayName?: string;
+            email?: string;
+            /** Format: int64 */
+            userId?: number;
+        };
+        AuditEventResponse: {
+            /** @enum {string} */
+            action: "CREATE" | "UPDATE" | "ARCHIVE" | "RESTORE" | "DELETE" | "STATUS_CHANGE" | "CONVERT" | "STAGE_CHANGE" | "COMPLETE" | "REOPEN" | "CANCEL" | "INVITE" | "INVITE_REVOKE" | "JOIN" | "ROLE_CHANGE" | "MEMBER_REMOVE" | "LEAVE" | "EXPORT";
+            actor?: components["schemas"]["AuditActor"];
+            changes: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            entityId: number;
+            entityLabel?: string;
+            /** @enum {string} */
+            entityType: "WORKSPACE" | "MEMBER" | "INVITATION" | "PIPELINE_STAGE" | "LEAD_SOURCE" | "COMPANY" | "CONTACT" | "LEAD" | "DEAL" | "TASK" | "ACTIVITY";
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            occurredAt: string;
+        };
         AuthTokensResponse: {
-            accessToken?: string;
+            accessToken: string;
             /** Format: int64 */
-            expiresIn?: number;
+            expiresIn: number;
             /** Format: int64 */
-            refreshExpiresIn?: number;
-            refreshToken?: string;
-            tokenType?: string;
+            refreshExpiresIn: number;
+            refreshToken: string;
+            tokenType: string;
+        };
+        BoardColumn: {
+            /** Format: int64 */
+            count: number;
+            deals: components["schemas"]["DealSummary"][];
+            stage: components["schemas"]["StageResponse"];
+            totals: components["schemas"]["MoneyTotal"][];
+        };
+        BoardResponse: {
+            stages: components["schemas"]["BoardColumn"][];
+        };
+        ChangePasswordRequest: {
+            currentPassword: string;
+            newPassword: string;
+        };
+        CompanyRef: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            website?: string;
+        };
+        CompanyResponse: {
+            address?: string;
+            archived: boolean;
+            /** Format: date-time */
+            archivedAt?: string;
+            /** Format: int64 */
+            contactCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int32 */
+            employeeCount?: number;
+            /** Format: int64 */
+            id: number;
+            industry?: string;
+            name: string;
+            notes?: string;
+            /** Format: int64 */
+            openDealCount: number;
+            owner?: components["schemas"]["MemberRef"];
+            phone?: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: int64 */
+            version: number;
+            website?: string;
+        };
+        CompanySummary: {
+            archived: boolean;
+            /** Format: int64 */
+            contactCount: number;
+            /** Format: int64 */
+            id: number;
+            industry?: string;
+            name: string;
+            /** Format: int64 */
+            openDealCount: number;
+            owner?: components["schemas"]["MemberRef"];
+            phone?: string;
+            /** Format: date-time */
+            updatedAt: string;
+            website?: string;
+        };
+        ContactRef: {
+            email?: string;
+            fullName: string;
+            /** Format: int64 */
+            id: number;
+            phone?: string;
+        };
+        ContactResponse: {
+            archived: boolean;
+            /** Format: date-time */
+            archivedAt?: string;
+            company?: components["schemas"]["Ref"];
+            /** Format: date-time */
+            createdAt: string;
+            email?: string;
+            firstName: string;
+            fullName: string;
+            /** Format: int64 */
+            id: number;
+            jobTitle?: string;
+            lastName?: string;
+            notes?: string;
+            owner?: components["schemas"]["MemberRef"];
+            phone?: string;
+            source?: components["schemas"]["Ref"];
+            tags: string[];
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: int64 */
+            version: number;
+        };
+        ContactSummary: {
+            archived: boolean;
+            company?: components["schemas"]["Ref"];
+            email?: string;
+            firstName: string;
+            fullName: string;
+            /** Format: int64 */
+            id: number;
+            jobTitle?: string;
+            lastName?: string;
+            owner?: components["schemas"]["MemberRef"];
+            phone?: string;
+            tags: string[];
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CountedLeads: {
+            /** Format: int64 */
+            count: number;
+            first: components["schemas"]["LeadResponse"][];
+        };
+        CountedTasks: {
+            /** Format: int64 */
+            count: number;
+            first: components["schemas"]["TaskResponse"][];
+        };
+        Counts: {
+            /** Format: int64 */
+            companies: number;
+            /** Format: int64 */
+            contacts: number;
+            /** Format: int64 */
+            openDeals: number;
+            /** Format: int64 */
+            openLeads: number;
+            /** Format: int64 */
+            overdueTasks: number;
+        };
+        CreateActivityRequest: {
+            body?: string;
+            /** Format: int64 */
+            companyId?: number;
+            /** Format: int64 */
+            contactId?: number;
+            /** Format: int64 */
+            dealId?: number;
+            /** Format: int64 */
+            leadId?: number;
+            /** Format: date-time */
+            occurredAt?: string;
+            subject: string;
+            /** @enum {string} */
+            type: "CALL" | "EMAIL" | "MEETING" | "NOTE";
+        };
+        CreateCompanyRequest: {
+            address?: string;
+            /** Format: int32 */
+            employeeCount?: number;
+            industry?: string;
+            name: string;
+            notes?: string;
+            /** Format: int64 */
+            ownerId?: number;
+            phone?: string;
+            website?: string;
+        };
+        CreateContactRequest: {
+            /** Format: int64 */
+            companyId?: number;
+            email?: string;
+            firstName: string;
+            jobTitle?: string;
+            lastName?: string;
+            notes?: string;
+            /** Format: int64 */
+            ownerId?: number;
+            phone?: string;
+            /** Format: int64 */
+            sourceId?: number;
+            tags?: string[];
+        };
+        CreateDealRequest: {
+            /** @example 1250.00 */
+            amount: string;
+            /** Format: int64 */
+            companyId?: number;
+            /** Format: int64 */
+            contactId?: number;
+            currency?: string;
+            /** Format: date */
+            expectedCloseDate?: string;
+            name: string;
+            notes?: string;
+            /** Format: int64 */
+            ownerId?: number;
+            /** Format: int32 */
+            probability?: number;
+            /** Format: int64 */
+            sourceId?: number;
+            /** Format: int64 */
+            stageId?: number;
+        };
+        CreateInvitationRequest: {
+            /** Format: email */
+            email: string;
+            /** @enum {string} */
+            role: "OWNER" | "ADMIN" | "MANAGER" | "SALES_REP";
+        };
+        CreateLeadRequest: {
+            companyName?: string;
+            currency?: string;
+            email?: string;
+            /** @example 1250.00 */
+            estimatedValue?: string;
+            firstName: string;
+            /** Format: date */
+            followUpDate?: string;
+            jobTitle?: string;
+            lastName?: string;
+            notes?: string;
+            /** Format: int64 */
+            ownerId?: number;
+            phone?: string;
+            /** @enum {string} */
+            priority?: "LOW" | "MEDIUM" | "HIGH";
+            /** Format: int64 */
+            sourceId?: number;
+        };
+        CreateLeadSourceRequest: {
+            name: string;
+        };
+        CreateStageRequest: {
+            name: string;
+            /** Format: int32 */
+            probability: number;
+        };
+        CreateTaskRequest: {
+            /** Format: int64 */
+            assigneeId?: number;
+            /** Format: int64 */
+            companyId?: number;
+            /** Format: int64 */
+            contactId?: number;
+            /** Format: int64 */
+            dealId?: number;
+            description?: string;
+            /** Format: date-time */
+            dueAt?: string;
+            /** Format: int64 */
+            leadId?: number;
+            /** @enum {string} */
+            priority?: "LOW" | "MEDIUM" | "HIGH";
+            title: string;
         };
         CreateTestResultRequest: {
             notes?: string;
@@ -234,74 +1475,467 @@ export interface components {
             /** Format: date-time */
             testedAt: string;
         };
-        FileResponse: {
-            contentType?: string;
+        CreateWorkspaceRequest: {
+            defaultCurrency: string;
+            name: string;
+            timezone: string;
+        };
+        CreatedInvitationResponse: {
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
+            email: string;
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: int64 */
+            id: number;
+            invitedBy?: components["schemas"]["MemberRef"];
+            /** @enum {string} */
+            role: "OWNER" | "ADMIN" | "MANAGER" | "SALES_REP";
+            token: string;
+        };
+        DashboardResponse: {
+            byStage: components["schemas"]["StageBucket"][];
+            counts: components["schemas"]["Counts"];
+            lost: components["schemas"]["LostSummary"];
+            myOverdueTasks: components["schemas"]["TaskResponse"][];
+            myUpcomingTasks: components["schemas"]["TaskResponse"][];
+            openPipeline: components["schemas"]["PipelineTotal"][];
+            period: components["schemas"]["PeriodDto"];
+            recentActivities: components["schemas"]["ActivityResponse"][];
+            recentChanges: components["schemas"]["AuditEventResponse"][];
+            won: components["schemas"]["WonSummary"];
+        };
+        DealDraft: {
+            /** @example 1250.00 */
+            amount: string;
+            currency?: string;
+            /** Format: date */
+            expectedCloseDate?: string;
+            name: string;
+            /** Format: int64 */
+            stageId?: number;
+        };
+        DealResponse: {
+            /** @example 1250.00 */
+            amount: string;
+            archived: boolean;
+            /** Format: date-time */
+            archivedAt?: string;
+            /** Format: date-time */
+            closedAt?: string;
+            company?: components["schemas"]["Ref"];
+            contact?: components["schemas"]["PersonRef"];
+            /** Format: date-time */
+            createdAt: string;
+            currency: string;
+            /** Format: date */
+            expectedCloseDate?: string;
+            /** Format: int64 */
+            id: number;
+            lead?: components["schemas"]["PersonRef"];
+            lostReason?: string;
+            name: string;
+            notes?: string;
+            owner?: components["schemas"]["MemberRef"];
+            /** Format: int32 */
+            probability: number;
+            /** Format: int32 */
+            probabilityOverride?: number;
+            source?: components["schemas"]["Ref"];
+            stage: components["schemas"]["StageRef"];
+            /** Format: date-time */
+            stageEnteredAt: string;
+            /** @enum {string} */
+            status: "OPEN" | "WON" | "LOST";
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: int64 */
+            version: number;
+        };
+        DealSummary: {
+            /** @example 1250.00 */
+            amount: string;
+            archived: boolean;
+            /** Format: date-time */
+            closedAt?: string;
+            company?: components["schemas"]["Ref"];
+            contact?: components["schemas"]["PersonRef"];
+            currency: string;
+            /** Format: date */
+            expectedCloseDate?: string;
+            /** Format: int64 */
+            id: number;
+            name: string;
+            owner?: components["schemas"]["MemberRef"];
+            /** Format: int32 */
+            probability: number;
+            signatures: components["schemas"]["StageSignature"][];
+            stage: components["schemas"]["StageRef"];
+            /** Format: date-time */
+            stageEnteredAt: string;
+            /** @enum {string} */
+            status: "OPEN" | "WON" | "LOST";
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: int64 */
+            version: number;
+        };
+        FileResponse: {
+            contentType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** Format: int64 */
+            size: number;
+        };
+        FollowUpReport: {
+            dueLeads: components["schemas"]["CountedLeads"];
+            overdueTasks: components["schemas"]["CountedTasks"];
+            upcomingTasks: components["schemas"]["CountedTasks"];
+        };
+        FunnelReport: {
+            /** Format: int64 */
+            created: number;
+            /** Format: date */
+            historyFrom?: string;
+            period: components["schemas"]["PeriodDto"];
+            stages: components["schemas"]["FunnelStep"][];
+        };
+        FunnelStep: {
+            /** Format: int64 */
+            reached: number;
+            stage: components["schemas"]["StageResponse"];
+        };
+        HistoryStageRef: {
             /** Format: int64 */
             id?: number;
-            name?: string;
+            name: string;
+        };
+        InvitationPreviewResponse: {
+            email: string;
+            /** Format: date-time */
+            expiresAt: string;
+            /** @enum {string} */
+            role: "OWNER" | "ADMIN" | "MANAGER" | "SALES_REP";
+            /** @enum {string} */
+            status: "PENDING" | "ACCEPTED" | "REVOKED" | "EXPIRED";
             /** Format: int64 */
-            size?: number;
+            workspaceId: number;
+            workspaceName: string;
+        };
+        InvitationResponse: {
+            /** Format: date-time */
+            createdAt: string;
+            email: string;
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: int64 */
+            id: number;
+            invitedBy?: components["schemas"]["MemberRef"];
+            /** @enum {string} */
+            role: "OWNER" | "ADMIN" | "MANAGER" | "SALES_REP";
+        };
+        LeadConversionInput: {
+            /** Format: int64 */
+            companyId?: number;
+            /** Format: int64 */
+            contactId?: number;
+            createCompany: boolean;
+            deal?: components["schemas"]["DealDraft"];
+        };
+        LeadConversionResponse: {
+            alreadyConverted: boolean;
+            company?: components["schemas"]["Ref"];
+            contact: components["schemas"]["PersonRef"];
+            deal?: components["schemas"]["Ref"];
+            /** Format: int64 */
+            leadId: number;
+        };
+        LeadResponse: {
+            archived: boolean;
+            /** Format: date-time */
+            archivedAt?: string;
+            companyName?: string;
+            /** Format: date-time */
+            convertedAt?: string;
+            convertedCompany?: components["schemas"]["Ref"];
+            convertedContact?: components["schemas"]["PersonRef"];
+            convertedDeal?: components["schemas"]["Ref"];
+            /** Format: date-time */
+            createdAt: string;
+            currency?: string;
+            email?: string;
+            /** @example 1250.00 */
+            estimatedValue?: string;
+            firstName: string;
+            /** Format: date */
+            followUpDate?: string;
+            /** Format: int64 */
+            id: number;
+            jobTitle?: string;
+            lastName?: string;
+            notes?: string;
+            owner?: components["schemas"]["MemberRef"];
+            phone?: string;
+            /** @enum {string} */
+            priority: "LOW" | "MEDIUM" | "HIGH";
+            source?: components["schemas"]["Ref"];
+            /** @enum {string} */
+            status: "NEW" | "CONTACTED" | "QUALIFIED" | "UNQUALIFIED" | "CONVERTED";
+            unqualifiedReason?: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: int64 */
+            version: number;
+        };
+        LeadSourceResponse: {
+            archived: boolean;
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** Format: int64 */
+            version: number;
+        };
+        LeadStatusRequest: {
+            reason?: string;
+            /** @enum {string} */
+            status: "NEW" | "CONTACTED" | "QUALIFIED" | "UNQUALIFIED" | "CONVERTED";
+            /** Format: int64 */
+            version: number;
         };
         LoginRequest: {
             /** Format: email */
             email: string;
             password: string;
         };
-        PageFileResponse: {
-            content?: components["schemas"]["FileResponse"][];
-            empty?: boolean;
-            first?: boolean;
-            last?: boolean;
+        LostSummary: {
+            /** Format: int64 */
+            count: number;
+        };
+        MemberRef: {
+            displayName?: string;
+            email: string;
+            /** Format: int64 */
+            userId: number;
+        };
+        MemberResponse: {
+            displayName?: string;
+            email: string;
+            /** Format: date-time */
+            joinedAt: string;
+            /** @enum {string} */
+            role: "OWNER" | "ADMIN" | "MANAGER" | "SALES_REP";
+            /** Format: int64 */
+            userId: number;
+        };
+        MoneyTotal: {
+            /** @example 1250.00 */
+            amount: string;
+            currency: string;
+        };
+        MonthBucket: {
+            /** Format: int64 */
+            lost: number;
+            /** @example 2026-09 */
+            month: string;
+            /** Format: int64 */
+            won: number;
+            wonTotals: components["schemas"]["MoneyTotal"][];
+        };
+        MoveDealRequest: {
+            lostReason?: string;
+            /** Format: int64 */
+            stageId: number;
+            /** Format: int64 */
+            version: number;
+        };
+        OwnerBucket: {
+            /** Format: int64 */
+            count: number;
+            owner?: components["schemas"]["MemberRef"];
+            totals: components["schemas"]["MoneyTotal"][];
+        };
+        PageActivityResponse: {
+            content: components["schemas"]["ActivityResponse"][];
+            empty: boolean;
+            first: boolean;
+            last: boolean;
             /** Format: int32 */
-            number?: number;
+            number: number;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
-            size?: number;
+            size: number;
             sort?: components["schemas"]["SortObject"];
             /** Format: int64 */
-            totalElements?: number;
+            totalElements: number;
             /** Format: int32 */
-            totalPages?: number;
+            totalPages: number;
+        };
+        PageAuditEventResponse: {
+            content: components["schemas"]["AuditEventResponse"][];
+            empty: boolean;
+            first: boolean;
+            last: boolean;
+            /** Format: int32 */
+            number: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            size: number;
+            sort?: components["schemas"]["SortObject"];
+            /** Format: int64 */
+            totalElements: number;
+            /** Format: int32 */
+            totalPages: number;
+        };
+        PageCompanySummary: {
+            content: components["schemas"]["CompanySummary"][];
+            empty: boolean;
+            first: boolean;
+            last: boolean;
+            /** Format: int32 */
+            number: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            size: number;
+            sort?: components["schemas"]["SortObject"];
+            /** Format: int64 */
+            totalElements: number;
+            /** Format: int32 */
+            totalPages: number;
+        };
+        PageContactSummary: {
+            content: components["schemas"]["ContactSummary"][];
+            empty: boolean;
+            first: boolean;
+            last: boolean;
+            /** Format: int32 */
+            number: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            size: number;
+            sort?: components["schemas"]["SortObject"];
+            /** Format: int64 */
+            totalElements: number;
+            /** Format: int32 */
+            totalPages: number;
+        };
+        PageDealSummary: {
+            content: components["schemas"]["DealSummary"][];
+            empty: boolean;
+            first: boolean;
+            last: boolean;
+            /** Format: int32 */
+            number: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            size: number;
+            sort?: components["schemas"]["SortObject"];
+            /** Format: int64 */
+            totalElements: number;
+            /** Format: int32 */
+            totalPages: number;
+        };
+        PageFileResponse: {
+            content: components["schemas"]["FileResponse"][];
+            empty: boolean;
+            first: boolean;
+            last: boolean;
+            /** Format: int32 */
+            number: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            size: number;
+            sort?: components["schemas"]["SortObject"];
+            /** Format: int64 */
+            totalElements: number;
+            /** Format: int32 */
+            totalPages: number;
+        };
+        PageLeadResponse: {
+            content: components["schemas"]["LeadResponse"][];
+            empty: boolean;
+            first: boolean;
+            last: boolean;
+            /** Format: int32 */
+            number: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            size: number;
+            sort?: components["schemas"]["SortObject"];
+            /** Format: int64 */
+            totalElements: number;
+            /** Format: int32 */
+            totalPages: number;
+        };
+        PageTaskResponse: {
+            content: components["schemas"]["TaskResponse"][];
+            empty: boolean;
+            first: boolean;
+            last: boolean;
+            /** Format: int32 */
+            number: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            size: number;
+            sort?: components["schemas"]["SortObject"];
+            /** Format: int64 */
+            totalElements: number;
+            /** Format: int32 */
+            totalPages: number;
         };
         PageTestResultResponse: {
-            content?: components["schemas"]["TestResultResponse"][];
-            empty?: boolean;
-            first?: boolean;
-            last?: boolean;
+            content: components["schemas"]["TestResultResponse"][];
+            empty: boolean;
+            first: boolean;
+            last: boolean;
             /** Format: int32 */
-            number?: number;
+            number: number;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
-            size?: number;
+            size: number;
             sort?: components["schemas"]["SortObject"];
             /** Format: int64 */
-            totalElements?: number;
+            totalElements: number;
             /** Format: int32 */
-            totalPages?: number;
+            totalPages: number;
         };
         PageUserResponse: {
-            content?: components["schemas"]["UserResponse"][];
-            empty?: boolean;
-            first?: boolean;
-            last?: boolean;
+            content: components["schemas"]["UserResponse"][];
+            empty: boolean;
+            first: boolean;
+            last: boolean;
             /** Format: int32 */
-            number?: number;
+            number: number;
             /** Format: int32 */
             numberOfElements?: number;
             pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
-            size?: number;
+            size: number;
             sort?: components["schemas"]["SortObject"];
             /** Format: int64 */
-            totalElements?: number;
+            totalElements: number;
             /** Format: int32 */
-            totalPages?: number;
+            totalPages: number;
         };
         PageableObject: {
             /** Format: int64 */
@@ -314,6 +1948,33 @@ export interface components {
             sort?: components["schemas"]["SortObject"];
             unpaged?: boolean;
         };
+        PeriodDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+        };
+        PersonRef: {
+            fullName: string;
+            /** Format: int64 */
+            id: number;
+        };
+        PipelineReport: {
+            byOwner: components["schemas"]["OwnerBucket"][];
+            byStage: components["schemas"]["StageBucket"][];
+        };
+        PipelineTotal: {
+            /** @example 1250.00 */
+            amount: string;
+            currency: string;
+            /** @example 625.00 */
+            weightedAmount: string;
+        };
+        Ref: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+        };
         RefreshTokenRequest: {
             refreshToken: string;
         };
@@ -322,36 +1983,247 @@ export interface components {
             email: string;
             password: string;
         };
+        RegisterThroughInvitationRequest: {
+            displayName?: string;
+            password: string;
+        };
+        RemindersResponse: {
+            dueSoonTasks: components["schemas"]["TaskResponse"][];
+            followUpLeads: components["schemas"]["LeadResponse"][];
+            overdueTasks: components["schemas"]["TaskResponse"][];
+        };
+        ReorderStagesRequest: {
+            stageIds: number[];
+        };
         SortObject: {
             empty?: boolean;
             sorted?: boolean;
             unsorted?: boolean;
         };
+        StageBucket: {
+            /** Format: int64 */
+            count: number;
+            stage: components["schemas"]["StageResponse"];
+            totals: components["schemas"]["MoneyTotal"][];
+        };
+        StageChangeResponse: {
+            /** Format: date-time */
+            changedAt: string;
+            changedBy?: components["schemas"]["MemberRef"];
+            fromStage?: components["schemas"]["HistoryStageRef"];
+            toStage: components["schemas"]["HistoryStageRef"];
+        };
+        StageRef: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            kind: "OPEN" | "WON" | "LOST";
+            name: string;
+        };
+        StageResponse: {
+            /** Format: int64 */
+            dealCount: number;
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            kind: "OPEN" | "WON" | "LOST";
+            name: string;
+            /** Format: int32 */
+            position: number;
+            /** Format: int32 */
+            probability: number;
+            /** Format: int64 */
+            version: number;
+        };
+        StageSignature: {
+            by?: components["schemas"]["MemberRef"];
+            /** Format: int64 */
+            stageId: number;
+        };
         StatusCount: {
             /** Format: int64 */
-            count?: number;
+            count: number;
             /** @enum {string} */
-            status?: "PENDING" | "PASSED" | "FAILED";
+            status: "PENDING" | "PASSED" | "FAILED";
+        };
+        TaskResponse: {
+            assignee?: components["schemas"]["MemberRef"];
+            company?: components["schemas"]["Ref"];
+            /** Format: date-time */
+            completedAt?: string;
+            contact?: components["schemas"]["PersonRef"];
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: components["schemas"]["MemberRef"];
+            deal?: components["schemas"]["Ref"];
+            description?: string;
+            /** Format: date-time */
+            dueAt?: string;
+            /** Format: int64 */
+            id: number;
+            lead?: components["schemas"]["PersonRef"];
+            overdue: boolean;
+            /** @enum {string} */
+            priority: "LOW" | "MEDIUM" | "HIGH";
+            /** @enum {string} */
+            status: "OPEN" | "COMPLETED" | "CANCELLED";
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: int64 */
+            version: number;
         };
         TestResultResponse: {
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             /** Format: int64 */
-            id?: number;
+            id: number;
             notes?: string;
-            score?: number;
+            score: number;
             /** @enum {string} */
-            status?: "PENDING" | "PASSED" | "FAILED";
-            testName?: string;
+            status: "PENDING" | "PASSED" | "FAILED";
+            testName: string;
             /** Format: date-time */
-            testedAt?: string;
+            testedAt: string;
             /** Format: date-time */
-            updatedAt?: string;
+            updatedAt: string;
         };
         TestResultSummaryResponse: {
-            byStatus?: components["schemas"]["StatusCount"][];
+            byStatus: components["schemas"]["StatusCount"][];
             /** Format: int64 */
-            total?: number;
+            total: number;
+        };
+        UpdateActivityRequest: {
+            body?: string;
+            /** Format: int64 */
+            companyId?: number;
+            /** Format: int64 */
+            contactId?: number;
+            /** Format: int64 */
+            dealId?: number;
+            /** Format: int64 */
+            leadId?: number;
+            /** Format: date-time */
+            occurredAt?: string;
+            subject: string;
+            /** @enum {string} */
+            type: "CALL" | "EMAIL" | "MEETING" | "NOTE";
+            /** Format: int64 */
+            version: number;
+        };
+        UpdateCompanyRequest: {
+            address?: string;
+            /** Format: int32 */
+            employeeCount?: number;
+            industry?: string;
+            name: string;
+            notes?: string;
+            /** Format: int64 */
+            ownerId?: number;
+            phone?: string;
+            /** Format: int64 */
+            version: number;
+            website?: string;
+        };
+        UpdateContactRequest: {
+            /** Format: int64 */
+            companyId?: number;
+            email?: string;
+            firstName: string;
+            jobTitle?: string;
+            lastName?: string;
+            notes?: string;
+            /** Format: int64 */
+            ownerId?: number;
+            phone?: string;
+            /** Format: int64 */
+            sourceId?: number;
+            tags?: string[];
+            /** Format: int64 */
+            version: number;
+        };
+        UpdateDealRequest: {
+            /** @example 1250.00 */
+            amount: string;
+            /** Format: int64 */
+            companyId?: number;
+            /** Format: int64 */
+            contactId?: number;
+            currency?: string;
+            /** Format: date */
+            expectedCloseDate?: string;
+            name: string;
+            notes?: string;
+            /** Format: int64 */
+            ownerId?: number;
+            /** Format: int32 */
+            probability?: number;
+            /** Format: int64 */
+            sourceId?: number;
+            /** Format: int64 */
+            version: number;
+        };
+        UpdateLeadRequest: {
+            companyName?: string;
+            currency?: string;
+            email?: string;
+            /** @example 1250.00 */
+            estimatedValue?: string;
+            firstName: string;
+            /** Format: date */
+            followUpDate?: string;
+            jobTitle?: string;
+            lastName?: string;
+            notes?: string;
+            /** Format: int64 */
+            ownerId?: number;
+            phone?: string;
+            /** @enum {string} */
+            priority?: "LOW" | "MEDIUM" | "HIGH";
+            /** Format: int64 */
+            sourceId?: number;
+            /** Format: int64 */
+            version: number;
+        };
+        UpdateLeadSourceRequest: {
+            archived: boolean;
+            name: string;
+            /** Format: int64 */
+            version: number;
+        };
+        UpdateMemberRequest: {
+            /** @enum {string} */
+            role: "OWNER" | "ADMIN" | "MANAGER" | "SALES_REP";
+        };
+        UpdateProfileRequest: {
+            displayName?: string;
+        };
+        UpdateStageRequest: {
+            name: string;
+            /** Format: int32 */
+            probability: number;
+            /** Format: int64 */
+            version: number;
+        };
+        UpdateTaskRequest: {
+            /** Format: int64 */
+            assigneeId?: number;
+            /** Format: int64 */
+            companyId?: number;
+            /** Format: int64 */
+            contactId?: number;
+            /** Format: int64 */
+            dealId?: number;
+            description?: string;
+            /** Format: date-time */
+            dueAt?: string;
+            /** Format: int64 */
+            leadId?: number;
+            /** @enum {string} */
+            priority?: "LOW" | "MEDIUM" | "HIGH";
+            title: string;
+            /** Format: int64 */
+            version: number;
         };
         UpdateTestResultRequest: {
             notes?: string;
@@ -368,14 +2240,73 @@ export interface components {
             /** @enum {string} */
             role?: "USER" | "ADMIN";
         };
+        UpdateWorkspaceRequest: {
+            defaultCurrency: string;
+            name: string;
+            timezone: string;
+            /** Format: int64 */
+            version: number;
+        };
+        UserActivity: {
+            /** Format: int64 */
+            calls: number;
+            /** Format: int64 */
+            emails: number;
+            /** Format: int64 */
+            meetings: number;
+            /** Format: int64 */
+            notes: number;
+            /** Format: int64 */
+            tasksCompleted: number;
+            /** Format: int64 */
+            total: number;
+            user?: components["schemas"]["MemberRef"];
+        };
         UserResponse: {
             /** Format: date-time */
-            createdAt?: string;
-            email?: string;
+            createdAt: string;
+            displayName?: string;
+            email: string;
             /** Format: int64 */
-            id?: number;
+            id: number;
             /** @enum {string} */
-            role?: "USER" | "ADMIN";
+            role: "USER" | "ADMIN";
+        };
+        VersionRequest: {
+            /** Format: int64 */
+            version: number;
+        };
+        WonLostReport: {
+            months: components["schemas"]["MonthBucket"][];
+            period: components["schemas"]["PeriodDto"];
+        };
+        WonSummary: {
+            /** Format: int64 */
+            count: number;
+            totals: components["schemas"]["MoneyTotal"][];
+        };
+        WorkspaceResponse: {
+            /** Format: date-time */
+            createdAt: string;
+            defaultCurrency: string;
+            /** Format: int64 */
+            id: number;
+            name: string;
+            permissions: ("RECORDS_EDIT_ANY" | "RECORDS_ASSIGN" | "EXPORT" | "WORKSPACE_MANAGE" | "SETTINGS_MANAGE" | "MEMBERS_MANAGE" | "AUDIT_READ")[];
+            /** @enum {string} */
+            role: "OWNER" | "ADMIN" | "MANAGER" | "SALES_REP";
+            timezone: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: int64 */
+            version: number;
+        };
+        WorkspaceSummaryResponse: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** @enum {string} */
+            role: "OWNER" | "ADMIN" | "MANAGER" | "SALES_REP";
         };
     };
     responses: never;
@@ -456,7 +2387,7 @@ export interface operations {
             };
         };
     };
-    register: {
+    register_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -480,7 +2411,7 @@ export interface operations {
             };
         };
     };
-    list_1: {
+    list_10: {
         parameters: {
             query?: {
                 page?: number;
@@ -530,7 +2461,7 @@ export interface operations {
             };
         };
     };
-    get_2: {
+    get_9: {
         parameters: {
             query?: never;
             header?: never;
@@ -552,7 +2483,7 @@ export interface operations {
             };
         };
     };
-    delete_2: {
+    delete_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -594,7 +2525,77 @@ export interface operations {
             };
         };
     };
-    list: {
+    preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InvitationPreviewResponse"];
+                };
+            };
+        };
+    };
+    accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AcceptInvitationResponse"];
+                };
+            };
+        };
+    };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterThroughInvitationRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthTokensResponse"];
+                };
+            };
+        };
+    };
+    list_9: {
         parameters: {
             query?: {
                 page?: number;
@@ -617,7 +2618,7 @@ export interface operations {
             };
         };
     };
-    create: {
+    create_10: {
         parameters: {
             query?: never;
             header?: never;
@@ -661,7 +2662,7 @@ export interface operations {
             };
         };
     };
-    get_1: {
+    get_8: {
         parameters: {
             query?: never;
             header?: never;
@@ -683,7 +2684,7 @@ export interface operations {
             };
         };
     };
-    delete_1: {
+    delete_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -703,7 +2704,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_11: {
         parameters: {
             query?: never;
             header?: never;
@@ -729,7 +2730,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_13: {
         parameters: {
             query?: {
                 q?: string;
@@ -773,7 +2774,55 @@ export interface operations {
             };
         };
     };
-    get: {
+    updateMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserResponse"];
+                };
+            };
+        };
+    };
+    change: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthTokensResponse"];
+                };
+            };
+        };
+    };
+    get_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -795,7 +2844,7 @@ export interface operations {
             };
         };
     };
-    delete: {
+    delete_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -815,7 +2864,7 @@ export interface operations {
             };
         };
     };
-    update: {
+    update_10: {
         parameters: {
             query?: never;
             header?: never;
@@ -837,6 +2886,1937 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UserResponse"];
+                };
+            };
+        };
+    };
+    mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkspaceSummaryResponse"][];
+                };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateWorkspaceRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkspaceResponse"];
+                };
+            };
+        };
+    };
+    get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkspaceResponse"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateWorkspaceRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WorkspaceResponse"];
+                };
+            };
+        };
+    };
+    list_8: {
+        parameters: {
+            query?: {
+                type?: "CALL" | "EMAIL" | "MEETING" | "NOTE";
+                companyId?: number;
+                contactId?: number;
+                leadId?: number;
+                dealId?: number;
+                authorId?: number;
+                from?: string;
+                to?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageActivityResponse"];
+                };
+            };
+        };
+    };
+    create_9: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateActivityRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ActivityResponse"];
+                };
+            };
+        };
+    };
+    get_6: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ActivityResponse"];
+                };
+            };
+        };
+    };
+    update_9: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateActivityRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ActivityResponse"];
+                };
+            };
+        };
+    };
+    delete_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_12: {
+        parameters: {
+            query?: {
+                entityType?: "WORKSPACE" | "MEMBER" | "INVITATION" | "PIPELINE_STAGE" | "LEAD_SOURCE" | "COMPANY" | "CONTACT" | "LEAD" | "DEAL" | "TASK" | "ACTIVITY";
+                entityId?: number;
+                actorId?: number;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageAuditEventResponse"];
+                };
+            };
+        };
+    };
+    list_7: {
+        parameters: {
+            query?: {
+                q?: string;
+                ownerId?: number;
+                unassigned?: boolean;
+                industry?: string;
+                archived?: boolean;
+                page?: number;
+                size?: number;
+                sort?: "NAME" | "CREATED_AT" | "UPDATED_AT";
+                direction?: "ASC" | "DESC";
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageCompanySummary"];
+                };
+            };
+        };
+    };
+    create_8: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCompanyRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompanyResponse"];
+                };
+            };
+        };
+    };
+    duplicates_1: {
+        parameters: {
+            query?: {
+                name?: string;
+                website?: string;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompanyRef"][];
+                };
+            };
+        };
+    };
+    export_3: {
+        parameters: {
+            query?: {
+                q?: string;
+                ownerId?: number;
+                unassigned?: boolean;
+                industry?: string;
+                archived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The CSV file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    get_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompanyResponse"];
+                };
+            };
+        };
+    };
+    update_8: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCompanyRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompanyResponse"];
+                };
+            };
+        };
+    };
+    archive_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompanyResponse"];
+                };
+            };
+        };
+    };
+    restore_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompanyResponse"];
+                };
+            };
+        };
+    };
+    list_6: {
+        parameters: {
+            query?: {
+                q?: string;
+                companyId?: number;
+                ownerId?: number;
+                unassigned?: boolean;
+                sourceId?: number;
+                tag?: string;
+                archived?: boolean;
+                page?: number;
+                size?: number;
+                sort?: "NAME" | "COMPANY" | "CREATED_AT" | "UPDATED_AT";
+                direction?: "ASC" | "DESC";
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageContactSummary"];
+                };
+            };
+        };
+    };
+    create_7: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateContactRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContactResponse"];
+                };
+            };
+        };
+    };
+    duplicates: {
+        parameters: {
+            query?: {
+                email?: string;
+                phone?: string;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContactRef"][];
+                };
+            };
+        };
+    };
+    export_2: {
+        parameters: {
+            query?: {
+                q?: string;
+                companyId?: number;
+                ownerId?: number;
+                unassigned?: boolean;
+                sourceId?: number;
+                tag?: string;
+                archived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The CSV file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    tags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string[];
+                };
+            };
+        };
+    };
+    get_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContactResponse"];
+                };
+            };
+        };
+    };
+    update_7: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateContactRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContactResponse"];
+                };
+            };
+        };
+    };
+    archive_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContactResponse"];
+                };
+            };
+        };
+    };
+    restore_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContactResponse"];
+                };
+            };
+        };
+    };
+    dashboard: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DashboardResponse"];
+                };
+            };
+        };
+    };
+    list_5: {
+        parameters: {
+            query?: {
+                q?: string;
+                stageId?: number;
+                status?: "OPEN" | "WON" | "LOST";
+                ownerId?: number;
+                unassigned?: boolean;
+                companyId?: number;
+                contactId?: number;
+                sourceId?: number;
+                closeFrom?: string;
+                closeTo?: string;
+                archived?: boolean;
+                page?: number;
+                size?: number;
+                sort?: "UPDATED_AT" | "CREATED_AT" | "AMOUNT" | "NAME" | "EXPECTED_CLOSE_DATE";
+                direction?: "ASC" | "DESC";
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageDealSummary"];
+                };
+            };
+        };
+    };
+    create_6: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDealRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DealResponse"];
+                };
+            };
+        };
+    };
+    board: {
+        parameters: {
+            query?: {
+                q?: string;
+                ownerId?: number;
+                unassigned?: boolean;
+                companyId?: number;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BoardResponse"];
+                };
+            };
+        };
+    };
+    export_1: {
+        parameters: {
+            query?: {
+                q?: string;
+                stageId?: number;
+                status?: "OPEN" | "WON" | "LOST";
+                ownerId?: number;
+                unassigned?: boolean;
+                companyId?: number;
+                contactId?: number;
+                sourceId?: number;
+                closeFrom?: string;
+                closeTo?: string;
+                archived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The CSV file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    get_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DealResponse"];
+                };
+            };
+        };
+    };
+    update_6: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDealRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DealResponse"];
+                };
+            };
+        };
+    };
+    archive_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DealResponse"];
+                };
+            };
+        };
+    };
+    history: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StageChangeResponse"][];
+                };
+            };
+        };
+    };
+    move: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveDealRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DealResponse"];
+                };
+            };
+        };
+    };
+    restore_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DealResponse"];
+                };
+            };
+        };
+    };
+    list_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InvitationResponse"][];
+                };
+            };
+        };
+    };
+    create_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInvitationRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CreatedInvitationResponse"];
+                };
+            };
+        };
+    };
+    revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_3: {
+        parameters: {
+            query?: {
+                includeArchived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LeadSourceResponse"][];
+                };
+            };
+        };
+    };
+    create_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLeadSourceRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LeadSourceResponse"];
+                };
+            };
+        };
+    };
+    update_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLeadSourceRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LeadSourceResponse"];
+                };
+            };
+        };
+    };
+    delete_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_2: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: ("NEW" | "CONTACTED" | "QUALIFIED" | "UNQUALIFIED" | "CONVERTED")[];
+                ownerId?: number;
+                unassigned?: boolean;
+                sourceId?: number;
+                priority?: "LOW" | "MEDIUM" | "HIGH";
+                followUpBefore?: string;
+                archived?: boolean;
+                page?: number;
+                size?: number;
+                sort?: "CREATED_AT" | "UPDATED_AT" | "FOLLOW_UP_DATE" | "PRIORITY" | "NAME";
+                direction?: "ASC" | "DESC";
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageLeadResponse"];
+                };
+            };
+        };
+    };
+    create_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLeadRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LeadResponse"];
+                };
+            };
+        };
+    };
+    export: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: ("NEW" | "CONTACTED" | "QUALIFIED" | "UNQUALIFIED" | "CONVERTED")[];
+                ownerId?: number;
+                unassigned?: boolean;
+                sourceId?: number;
+                priority?: "LOW" | "MEDIUM" | "HIGH";
+                followUpBefore?: string;
+                archived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The CSV file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    get_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LeadResponse"];
+                };
+            };
+        };
+    };
+    update_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLeadRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LeadResponse"];
+                };
+            };
+        };
+    };
+    archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LeadResponse"];
+                };
+            };
+        };
+    };
+    convert: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeadConversionInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LeadConversionResponse"];
+                };
+            };
+        };
+    };
+    restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LeadResponse"];
+                };
+            };
+        };
+    };
+    changeStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeadStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LeadResponse"];
+                };
+            };
+        };
+    };
+    list_11: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MemberResponse"][];
+                };
+            };
+        };
+    };
+    update_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMemberRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MemberResponse"];
+                };
+            };
+        };
+    };
+    remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StageResponse"][];
+                };
+            };
+        };
+    };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStageRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StageResponse"];
+                };
+            };
+        };
+    };
+    reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderStagesRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StageResponse"][];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStageRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StageResponse"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    reminders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RemindersResponse"];
+                };
+            };
+        };
+    };
+    activities: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                ownerId?: number;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ActivityReport"];
+                };
+            };
+        };
+    };
+    followUps: {
+        parameters: {
+            query?: {
+                ownerId?: number;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FollowUpReport"];
+                };
+            };
+        };
+    };
+    funnel: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                ownerId?: number;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FunnelReport"];
+                };
+            };
+        };
+    };
+    pipeline: {
+        parameters: {
+            query?: {
+                ownerId?: number;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PipelineReport"];
+                };
+            };
+        };
+    };
+    wonLost: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                ownerId?: number;
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WonLostReport"];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: ("OPEN" | "COMPLETED" | "CANCELLED")[];
+                assigneeId?: number;
+                unassigned?: boolean;
+                mine?: boolean;
+                overdue?: boolean;
+                dueFrom?: string;
+                dueTo?: string;
+                companyId?: number;
+                contactId?: number;
+                leadId?: number;
+                dealId?: number;
+                page?: number;
+                size?: number;
+                sort?: "DUE_AT" | "PRIORITY" | "CREATED_AT" | "UPDATED_AT";
+                direction?: "ASC" | "DESC";
+            };
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageTaskResponse"];
+                };
+            };
+        };
+    };
+    create_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTaskRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"];
+                };
+            };
+        };
+    };
+    get_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"];
+                };
+            };
+        };
+    };
+    update_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTaskRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"];
+                };
+            };
+        };
+    };
+    cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"];
+                };
+            };
+        };
+    };
+    complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"];
+                };
+            };
+        };
+    };
+    reopen: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspaceId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"];
                 };
             };
         };

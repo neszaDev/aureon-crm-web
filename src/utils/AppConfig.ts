@@ -5,10 +5,14 @@ const localePrefix: LocalePrefixMode = 'as-needed';
 
 /** Centralized application configuration. */
 export const AppConfig = {
-  // The sample product's name. Replace it (and the copy in src/locales) with your own.
-  name: 'Marksheet',
+  // A placeholder product name: replace it (and the Brand copy in src/locales) with your own.
+  name: 'Aureon CRM',
+  // Where the public pages send developers: this frontend's code and its API's.
+  // shortcut: the CRM lives on feat/crm until it is merged; point these at the default branch then.
+  sourceUrl: 'https://github.com/neszaDev/aureon-crm-web/tree/feat/crm',
+  apiSourceUrl: 'https://github.com/neszaDev/aureon-crm-api/tree/feat/crm',
   i18n: {
-    locales: ['en', 'fr'],
+    locales: ['en', 'fr', 'th'],
     defaultLocale: 'en',
     localePrefix,
   },

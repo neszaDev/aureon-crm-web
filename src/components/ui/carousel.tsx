@@ -28,7 +28,7 @@ type CarouselContextProps = {
   canScrollNext: boolean;
 } & CarouselProps;
 
-// Themed for Marksheet: the arrows keep the square-cut button corners (no round shapes).
+// The arrows keep the square-cut button corners (no round shapes).
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
 
 function useCarousel() {

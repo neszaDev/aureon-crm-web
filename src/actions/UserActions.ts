@@ -35,7 +35,7 @@ export async function updateUser(id: number, values: UpdateUserValues): Promise<
     return { ok: false, fieldErrors: { email: t('error_email_taken') } };
   }
   if (!response.ok) {
-    return toActionError(error, t('error_generic'));
+    return toActionError(error, await getTranslations('ApiError'));
   }
 
   revalidatePath('/[locale]/dashboard/users', 'layout');
@@ -48,14 +48,13 @@ export async function updateUser(id: number, values: UpdateUserValues): Promise<
  * @returns A form error; on success it redirects instead of returning.
  */
 export async function deleteUser(id: number): Promise<ActionResult> {
-  const t = await getTranslations('UserForm');
   const api = await authedBackend();
   const { error, response } = await api.DELETE('/api/v1/users/{id}', {
     params: { path: { id } },
   });
   await redirectIfUnauthorized(response.status);
   if (!response.ok && response.status !== 404) {
-    return toActionError(error, t('error_generic'));
+    return toActionError(error, await getTranslations('ApiError'));
   }
 
   revalidatePath('/[locale]/dashboard/users', 'layout');

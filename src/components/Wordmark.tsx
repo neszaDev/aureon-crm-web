@@ -1,40 +1,46 @@
 import { cn } from 'cn';
 import { useTranslations } from 'next-intl';
-import { Mark } from '@/components/report/Mark';
+import { AureonMark } from '@/components/brand/AureonMark';
 import { Link } from '@/libs/I18nNavigation';
-import { AppConfig } from '@/utils/AppConfig';
+
+const TONES = {
+  canvas: { link: 'text-foreground', mark: 'text-violet-ink' },
+  brand: { link: 'text-on-rail focus-visible:outline-on-rail', mark: 'text-on-rail' },
+  folder: {
+    link: 'text-folder-ink focus-visible:outline-folder-ink',
+    mark: 'text-folder-ink-soft',
+  },
+};
 
 /**
- * The product name with its tick, linking home.
+ * The brand: the orbit mark and "Aureon", linking home.
  * @param props Component props.
- * @param props.tone `folder` on the green fields, `paper` on the card stock.
+ * @param props.tone `canvas` on the canvas and panels (default), `brand` on the violet fields of
+ *   the public pages, `folder` on the boilerplate demo's green fields.
  * @param props.href Where the wordmark links (home by default).
  * @param props.className Extra classes.
  * @returns The wordmark link.
  */
 export const Wordmark = (props: {
-  tone?: 'folder' | 'paper';
+  tone?: keyof typeof TONES;
   href?: string;
   className?: string;
 }) => {
   const t = useTranslations('Brand');
-  const onFolder = props.tone === 'folder';
+  const tone = TONES[props.tone ?? 'canvas'];
 
   return (
     <Link
       href={props.href ?? '/'}
       aria-label={t('home_label')}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-sm text-lg font-extrabold tracking-[-0.03em] no-underline',
-        onFolder ? 'text-folder-ink focus-visible:outline-folder-ink' : 'text-ink-950',
+        'inline-flex items-center gap-2 rounded-sm text-xl font-semibold tracking-[-0.02em] no-underline',
+        tone.link,
         props.className,
       )}
     >
-      <Mark
-        status="PASSED"
-        className={cn('size-6 -translate-y-px', onFolder ? 'text-folder-ink-soft' : 'text-pass')}
-      />
-      {AppConfig.name}
+      <AureonMark className={cn('size-6 shrink-0', tone.mark)} />
+      {t('wordmark')}
     </Link>
   );
 };

@@ -1,0 +1,404 @@
+import { describe, expect, it, vi } from 'vitest';
+import { parseListQuery } from '@/libs/crm/ListQuery';
+import { authedBackend } from './Backend';
+import {
+  COMPANY_LIST,
+  DEAL_LIST,
+  getAuditEvents,
+  getCompanies,
+  getActivityReport,
+  getDashboard,
+  getDeals,
+  getFollowUpReport,
+  getFunnelReport,
+  getLeads,
+  getPipelineReport,
+  getReminders,
+  getWonLostReport,
+  getUndatedTasks,
+  LEAD_LIST,
+} from './CrmQueries';
+
+vi.mock(import('server-only'), () => ({}));
+vi.mock(import('./Backend'), () => ({ authedBackend: vi.fn<typeof authedBackend>() }));
+
+describe(getCompanies, () => {
+  it('flags a query the backend refuses as invalid, without data', async () => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue({
+      error: { status: 400, code: 'VALIDATION_FAILED', message: 'Validation failed' },
+      response: new Response(null, { status: 400 }),
+    });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    const result = await getCompanies('7', parseListQuery(COMPANY_LIST, { q: 'a'.repeat(201) }));
+
+    expect(result).toStrictEqual({
+      companies: undefined,
+      unauthorized: false,
+      forbidden: false,
+      notFound: false,
+      invalid: true,
+    });
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/companies', {
+      params: {
+        path: { workspaceId: 7 },
+        query: expect.objectContaining({ q: 'a'.repeat(201), page: 0, size: 20, sort: 'NAME' }),
+      },
+    });
+  });
+});
+
+describe(getLeads, () => {
+  it('asks for the statuses, the unassigned filter and the follow-up date as the backend names them', async () => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue({
+      data: { content: [] },
+      response: new Response(null, { status: 200 }),
+    });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await getLeads(
+      '7',
+      parseListQuery(LEAD_LIST, {
+        status: ['NEW', 'QUALIFIED', 'NOPE'],
+        ownerId: 'unassigned',
+        priority: 'HIGH',
+        followUpBefore: '2026-10-20',
+        sort: 'FOLLOW_UP_DATE',
+      }),
+    );
+
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/leads', {
+      params: {
+        path: { workspaceId: 7 },
+        query: expect.objectContaining({
+          status: ['NEW', 'QUALIFIED'],
+          unassigned: true,
+          priority: 'HIGH',
+          followUpBefore: '2026-10-20',
+          sort: 'FOLLOW_UP_DATE',
+        }),
+      },
+    });
+  });
+});
+
+describe(getDeals, () => {
+  it("asks for the table's filters, the lead source among them, as the backend names them", async () => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue({
+      data: { content: [] },
+      response: new Response(null, { status: 200 }),
+    });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await getDeals(
+      '7',
+      parseListQuery(DEAL_LIST, { view: 'list', sourceId: '6', stageId: '4', status: 'OPEN' }),
+    );
+
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/deals', {
+      params: {
+        path: { workspaceId: 7 },
+        query: expect.objectContaining({ sourceId: 6, stageId: 4, status: 'OPEN' }),
+      },
+    });
+  });
+});
+
+const task = (id: number, dueAt?: string) => ({ id, ...(dueAt && { dueAt }) });
+
+describe(getUndatedTasks, () => {
+  it('reads the undated tasks after the dated ones, across two pages of the open list', async () => {
+    // 3 + 2 dated tasks, then 4 undated: with pages of 2, the undated begin on page 2's second row.
+    const GET = vi.fn<
+      (path: string, init: { params: { query: Record<string, unknown> } }) => Promise<unknown>
+    >(async (_path, init) => {
+      await Promise.resolve();
+      const { dueTo, dueFrom, page } = init.params.query;
+      const ok = new Response(null, { status: 200 });
+      if (dueTo !== undefined || dueFrom !== undefined) {
+        return { data: { content: [], totalElements: dueTo ? 3 : 2 }, response: ok };
+      }
+      const pages: Record<number, unknown[]> = {
+        2: [task(5, '2026-11-01T00:00:00Z'), task(6)],
+        3: [task(7), task(8)],
+      };
+      return {
+        data: { content: pages[Number(page)] ?? [], totalElements: 9, totalPages: 5 },
+        response: ok,
+      };
+    });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    const result = await getUndatedTasks(
+      '7',
+      { q: 'quote', page: 0, size: 2 },
+      '2026-10-18T03:00:00.000Z',
+    );
+
+    expect(result.tasks?.content).toStrictEqual([task(6), task(7)]);
+    expect(result.tasks?.totalElements).toBe(4);
+    expect(result.tasks?.totalPages).toBe(2);
+    expect(GET.mock.calls.map((call) => call[1].params.query)).toStrictEqual([
+      expect.objectContaining({
+        q: 'quote',
+        status: ['OPEN'],
+        dueTo: '2026-10-18T03:00:00.000Z',
+        size: 1,
+      }),
+      expect.objectContaining({
+        q: 'quote',
+        status: ['OPEN'],
+        dueFrom: '2026-10-18T03:00:00.000Z',
+        size: 1,
+      }),
+      expect.objectContaining({ q: 'quote', status: ['OPEN'], sort: 'DUE_AT', page: 2, size: 2 }),
+      expect.objectContaining({ q: 'quote', status: ['OPEN'], sort: 'DUE_AT', page: 3, size: 2 }),
+    ]);
+  });
+
+  it('passes a lost session on', async () => {
+    const GET = vi
+      .fn<() => Promise<unknown>>()
+      .mockResolvedValue({ response: new Response(null, { status: 401 }) });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    const result = await getUndatedTasks('7', { page: 0, size: 20 }, '2026-10-18T03:00:00.000Z');
+
+    expect(result.tasks).toBeUndefined();
+    expect(result.unauthorized).toBeTruthy();
+  });
+});
+
+describe(getReminders, () => {
+  it("reads the caller's reminders of the workspace, and flags a lost session", async () => {
+    const reminders = { overdueTasks: [], dueSoonTasks: [], followUpLeads: [] };
+    const GET = vi
+      .fn<() => Promise<unknown>>()
+      .mockResolvedValueOnce({ data: reminders, response: new Response(null, { status: 200 }) })
+      .mockResolvedValueOnce({ response: new Response(null, { status: 401 }) });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await expect(getReminders('7')).resolves.toStrictEqual({
+      reminders,
+      unauthorized: false,
+      forbidden: false,
+      notFound: false,
+      invalid: false,
+    });
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/reminders', {
+      params: { path: { workspaceId: 7 } },
+    });
+    // A second workspace: the request-scoped cache is per argument, and a 401 has no data.
+    await expect(getReminders('8')).resolves.toMatchObject({
+      reminders: undefined,
+      unauthorized: true,
+    });
+  });
+
+  it('finds none for a malformed workspace id, without asking the backend', async () => {
+    vi.mocked(authedBackend).mockClear();
+
+    await expect(getReminders('seven')).resolves.toMatchObject({
+      reminders: undefined,
+      notFound: true,
+    });
+    expect(authedBackend).not.toHaveBeenCalled();
+  });
+});
+
+describe(getDashboard, () => {
+  it('asks for the period as it is, leaves out what is not given, and flags a refusal as invalid', async () => {
+    const GET = vi
+      .fn<() => Promise<unknown>>()
+      .mockResolvedValueOnce({
+        data: { counts: {} },
+        response: new Response(null, { status: 200 }),
+      })
+      .mockResolvedValueOnce({ response: new Response(null, { status: 200 }), data: {} })
+      .mockResolvedValueOnce({
+        error: { status: 400, code: 'VALIDATION_FAILED', message: 'Validation failed' },
+        response: new Response(null, { status: 400 }),
+      });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await expect(
+      getDashboard('7', { from: '2026-09-01', to: '2026-09-30' }),
+    ).resolves.toMatchObject({ dashboard: { counts: {} }, invalid: false });
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/dashboard', {
+      params: { path: { workspaceId: 7 }, query: { from: '2026-09-01', to: '2026-09-30' } },
+    });
+    await getDashboard('7', {});
+    expect(GET).toHaveBeenLastCalledWith('/api/v1/workspaces/{workspaceId}/dashboard', {
+      params: { path: { workspaceId: 7 }, query: {} },
+    });
+    await expect(getDashboard('7', { from: '2026-09-01' })).resolves.toStrictEqual({
+      dashboard: undefined,
+      unauthorized: false,
+      forbidden: false,
+      notFound: false,
+      invalid: true,
+    });
+  });
+
+  it('finds none for a malformed workspace id, without asking the backend', async () => {
+    vi.mocked(authedBackend).mockClear();
+
+    await expect(getDashboard('seven', {})).resolves.toMatchObject({
+      dashboard: undefined,
+      notFound: true,
+    });
+    expect(authedBackend).not.toHaveBeenCalled();
+  });
+});
+
+describe('the reports', () => {
+  const ok = { data: { period: {} }, response: new Response(null, { status: 200 }) };
+  const refused = {
+    error: { status: 400, code: 'VALIDATION_FAILED', message: 'Validation failed' },
+    response: new Response(null, { status: 400 }),
+  };
+
+  it.each([
+    ['won-lost', getWonLostReport],
+    ['funnel', getFunnelReport],
+    ['activities', getActivityReport],
+  ] as const)(
+    'asks %s for the period as it is, and flags a refusal as invalid',
+    async (path, get) => {
+      const GET = vi
+        .fn<() => Promise<unknown>>()
+        .mockResolvedValueOnce(ok)
+        .mockResolvedValueOnce(ok)
+        .mockResolvedValueOnce(refused);
+      // @ts-expect-error -- only the call this query makes
+      vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+      const result = await get('7', { from: '2026-09-01', to: '2026-09-30' });
+
+      expect(result).toMatchObject({ report: { period: {} }, invalid: false });
+      expect(GET).toHaveBeenCalledWith(`/api/v1/workspaces/{workspaceId}/reports/${path}`, {
+        params: { path: { workspaceId: 7 }, query: { from: '2026-09-01', to: '2026-09-30' } },
+      });
+      await get('7', {});
+      expect(GET).toHaveBeenLastCalledWith(`/api/v1/workspaces/{workspaceId}/reports/${path}`, {
+        params: { path: { workspaceId: 7 }, query: {} },
+      });
+      await expect(get('7', { from: '2026-09-01' })).resolves.toStrictEqual({
+        report: undefined,
+        unauthorized: false,
+        forbidden: false,
+        notFound: false,
+        invalid: true,
+      });
+    },
+  );
+
+  it.each([
+    ['won-lost', getWonLostReport],
+    ['funnel', getFunnelReport],
+    ['activities', getActivityReport],
+    ['pipeline', getPipelineReport],
+    ['follow-ups', getFollowUpReport],
+  ] as const)(
+    "asks %s for the owner's records, and flags a refused owner as invalid",
+    async (path, get) => {
+      const GET = vi
+        .fn<() => Promise<unknown>>()
+        .mockResolvedValueOnce(ok)
+        .mockResolvedValueOnce(refused);
+      // @ts-expect-error -- only the call this query makes
+      vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+      await expect(get('7', { ownerId: 12 })).resolves.toMatchObject({ invalid: false });
+      expect(GET).toHaveBeenCalledWith(`/api/v1/workspaces/{workspaceId}/reports/${path}`, {
+        params: { path: { workspaceId: 7 }, query: { ownerId: 12 } },
+      });
+      await expect(get('7', { ownerId: 99 })).resolves.toMatchObject({
+        report: undefined,
+        invalid: true,
+      });
+    },
+  );
+
+  it.each([
+    ['pipeline', getPipelineReport],
+    ['follow-ups', getFollowUpReport],
+  ] as const)('asks %s for no period: it is as of now', async (path, get) => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue(ok);
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await expect(get('7', {})).resolves.toMatchObject({ report: { period: {} }, forbidden: false });
+    expect(GET).toHaveBeenCalledWith(`/api/v1/workspaces/{workspaceId}/reports/${path}`, {
+      params: { path: { workspaceId: 7 }, query: {} },
+    });
+  });
+
+  it.each([
+    getPipelineReport,
+    getFollowUpReport,
+    getWonLostReport,
+    getFunnelReport,
+    getActivityReport,
+  ])('finds none for a malformed workspace id, without asking the backend', async (get) => {
+    vi.mocked(authedBackend).mockClear();
+
+    await expect(get('seven', {})).resolves.toMatchObject({ report: undefined, notFound: true });
+    expect(authedBackend).not.toHaveBeenCalled();
+  });
+});
+
+describe(getAuditEvents, () => {
+  it("asks for a page of the workspace's history by the filters the backend names", async () => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue({
+      data: { content: [] },
+      response: new Response(null, { status: 200 }),
+    });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await expect(
+      getAuditEvents('7', { entityType: 'DEAL', entityId: 12, page: 2, size: 10 }),
+    ).resolves.toStrictEqual({
+      events: { content: [] },
+      unauthorized: false,
+      forbidden: false,
+      notFound: false,
+      invalid: false,
+    });
+    expect(GET).toHaveBeenCalledWith('/api/v1/workspaces/{workspaceId}/audit-events', {
+      params: {
+        path: { workspaceId: 7 },
+        query: { entityType: 'DEAL', entityId: 12, page: 2, size: 10 },
+      },
+    });
+  });
+
+  it('flags a member without AUDIT_READ asking for everything', async () => {
+    const GET = vi.fn<() => Promise<unknown>>().mockResolvedValue({
+      error: { status: 403, code: 'FORBIDDEN', message: 'Forbidden' },
+      response: new Response(null, { status: 403 }),
+    });
+    // @ts-expect-error -- only the call this query makes
+    vi.mocked(authedBackend).mockResolvedValue({ GET });
+
+    await expect(getAuditEvents('7', { page: 0, size: 20 })).resolves.toMatchObject({
+      events: undefined,
+      forbidden: true,
+    });
+  });
+
+  it('finds nothing for a malformed workspace without asking', async () => {
+    vi.mocked(authedBackend).mockClear();
+
+    await expect(getAuditEvents('abc', {})).resolves.toMatchObject({ notFound: true });
+    expect(authedBackend).not.toHaveBeenCalled();
+  });
+});

@@ -20,11 +20,14 @@ it keeps API paths in one place).
 ## Regenerating types
 
 ```sh
-make api-types     # starts the backend if needed, then writes schema.d.ts
+# With the API repo (aureon-crm-api, feat/crm) running on 8081 through its `make up`:
+BACKEND_URL=http://localhost:8081 pnpm api:types   # writes schema.d.ts
 ```
 
-Run it whenever the backend API changes (or `BACKEND_TAG` moves to a version with changes) and
-commit `schema.d.ts`. The generator runs through `pnpm dlx` with pinned versions
+`make api-types` does the same after starting the published API image with `make backend-up`;
+that image isn't published yet ([configuration](configuration.md#local-docker-stack-envenv)), so
+use the command above until it is. Run it whenever the backend API changes and commit
+`schema.d.ts`. The generator runs through `pnpm dlx` with pinned versions
 (openapi-typescript 7 needs the TypeScript 5 compiler API; this project uses TypeScript 7).
 
 **Type errors after regenerating are the point.** A renamed field or removed endpoint in the
@@ -41,7 +44,11 @@ isn't in the backend's spec, so it's written by hand in `ApiError.ts`. In action
   taken), then fall back to the backend's message.
 - A 401 on an authenticated call means the session is gone: redirect to `/sign-in`
   (`redirectIfUnauthorized` in `src/libs/api/Session.ts`).
-- 403 means the user lacks a role (admin pages): render `AdminOnlyNotice`, don't redirect.
+- 403 means the user lacks a role (admin pages): render `AdminOnlyNotice`, don't redirect. In the
+  CRM, a role without the permission: render `ForbiddenNotice`.
+- CRM workspace layouts: a 404 on the workspace (unknown, or not a member) is `notFound()`
+  ("Workspace not found"); any other failure throws to the error boundary, which offers a
+  retry. Never redirect to sign-in for those: the access cookie is still valid, so it loops.
 - 429 (sign-in, sign-up) carries `Retry-After`; the form says how many minutes to wait.
 
 ## Client IP and rate limits
@@ -50,14 +57,21 @@ The backend limits sign-in and registration per client IP. Every request reaches
 server, so `AuthActions` forwards the browser's address as `X-Forwarded-For`
 (`src/libs/api/ClientIp.ts`: the last entry of the incoming header, which Next.js or the proxy in
 front of it wrote). The backend trusts that header only from private and loopback addresses.
-Behind more than one proxy, or with this server exposed directly, adjust `clientIpFrom`.
+Next.js keeps a header the request already has, so this server runs behind a reverse proxy that
+makes the client's address its last entry, by overwriting it or appending to it (a deployment
+requirement: [configuration](configuration.md)). Exposed directly, a client picks its own
+address and the per-IP limits don't hold; the per-email limit does. Behind more than one proxy,
+adjust `clientIpFrom`.
 
 ## Files
 
 Uploads go through a server action (`FileActions.uploadFile`, multipart to `POST /files`).
 `next.config.ts` raises the server-action and proxy body limits to 11 MB to fit the backend's
-10 MB maximum. Downloads stream through `dashboard/files/[id]/content/route.ts`, so the browser
-never calls the backend and the token stays in its httpOnly cookie; the proxy refreshes it first.
+10 MB maximum. `src/proxy.ts` refuses a body over 1 MiB on every other path; the files page
+takes 11 MB from anyone, signed in or not, and the reverse proxy's body cap bounds it
+([request bodies](architecture.md#request-bodies)). Downloads stream through
+`dashboard/files/[id]/content/route.ts`, so the browser never calls the backend and the token
+stays in its httpOnly cookie; the proxy refreshes it first.
 The route always answers with an attachment, `nosniff` and a sandbox CSP.
 - Unexpected and 5xx responses are logged (`src/libs/Logger.ts`).
 

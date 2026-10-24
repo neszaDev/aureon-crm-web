@@ -4,6 +4,7 @@ import { ADMIN, signIn, signUp } from './helpers';
 test.describe('User management', () => {
   test('is hidden from regular users', async ({ page }) => {
     await signUp(page);
+    await page.goto('/dashboard');
 
     const nav = page.getByRole('navigation', { name: 'App navigation' });
     await expect(nav.getByRole('link', { name: 'Files' })).toBeVisible();
@@ -20,6 +21,7 @@ test.describe('User management', () => {
     const email = await signUp(otherPage);
 
     await signIn(page, ADMIN);
+    await page.goto('/dashboard');
     await page
       .getByRole('navigation', { name: 'App navigation' })
       .getByRole('link', { name: 'Users', exact: true })

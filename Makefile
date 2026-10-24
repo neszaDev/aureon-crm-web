@@ -30,6 +30,8 @@ lint: ## Lint, type check, unused code/deps, i18n keys (no fixes)
 	pnpm run check:types
 	pnpm run check:deps
 	pnpm run check:i18n
+	@! grep -rnE '\.setError\(' src --include='*.ts' --include='*.tsx' | grep -v '^src/libs/form/' \
+		|| { echo 'Show server field errors with applyFieldErrors (src/libs/form/), never a bare setError (AGENTS.md).'; exit 1; }
 
 test: ## Unit + UI component tests (no backend needed)
 	pnpm run test
@@ -42,11 +44,12 @@ backend-up: env/.env docker-ready ## Start Postgres + the backend API (for `pnpm
 	@echo "Backend ready at $(BACKEND_URL)"
 
 e2e: backend-up ## End-to-end tests against a local dev server + the backend
-	pnpm run test:e2e
+	E2E_POSTGRES_CONTAINER=$$($(COMPOSE) ps -q postgres) pnpm run test:e2e
 
 e2e-image: env/.env docker-ready ## As CI does: build the frontend image, run everything in containers, test
 	$(COMPOSE) --profile full up -d --build --wait --wait-timeout 300
-	E2E_BASE_URL=http://localhost:$${FRONTEND_PORT:-3000} pnpm run test:e2e
+	E2E_POSTGRES_CONTAINER=$$($(COMPOSE) ps -q postgres) \
+		E2E_BASE_URL=http://localhost:$${FRONTEND_PORT:-3000} pnpm run test:e2e
 
 api-types: backend-up ## Regenerate src/libs/api/schema.d.ts from the backend's OpenAPI spec
 	BACKEND_URL=$(BACKEND_URL) pnpm run api:types
@@ -60,9 +63,10 @@ up: env/.env docker-ready ## Run the full stack in containers (frontend on :3000
 down: env/.env docker-ready ## Stop all containers (keeps data)
 	$(COMPOSE) --profile full down
 
+# The volume belongs to the compose project: COMPOSE_PROJECT_NAME when set, else the directory name.
 db-reset: env/.env docker-ready ## Stop containers and delete the local backend database
 	$(COMPOSE) --profile full down
-	docker volume rm -f $(notdir $(CURDIR))_postgres-data
+	docker volume rm -f $(or $(COMPOSE_PROJECT_NAME),$(notdir $(CURDIR)))_postgres-data
 
 docker-ready: ## Check Docker is running; on macOS start Docker Desktop and wait
 	@scripts/ensure-docker.sh

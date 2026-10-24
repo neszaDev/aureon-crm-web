@@ -10,15 +10,16 @@ import {
 import { Toaster as Sonner } from 'sonner';
 import type { ToasterProps } from 'sonner';
 
-// Themed for Marksheet: toasts sit on the white ply with an ink-200 rule.
+// Themed for Aureon: toasts are popovers, so they follow the light and dark tokens.
 const TOASTER_STYLE: React.CSSProperties & Record<`--${string}`, string> = {
-  '--normal-bg': 'var(--ply)',
-  '--normal-text': 'var(--ink-900)',
-  '--normal-border': 'var(--ink-200)',
+  '--normal-bg': 'var(--popover)',
+  '--normal-text': 'var(--popover-foreground)',
+  '--normal-border': 'var(--border)',
   '--border-radius': 'var(--radius)',
 };
 
-// Marksheet has a single light theme, so the next-themes lookup is dropped.
+// The theme comes from the CSS tokens (cookie class or OS), not next-themes; the description
+// colour is the one part sonner hard-codes per theme, so it is overridden.
 const Toaster = ({ ...props }: ToasterProps) => (
   <Sonner
     theme="light"
@@ -34,6 +35,7 @@ const Toaster = ({ ...props }: ToasterProps) => (
     toastOptions={{
       classNames: {
         toast: 'cn-toast',
+        description: 'text-muted-foreground!',
       },
     }}
     {...props}

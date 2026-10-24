@@ -1,0 +1,245 @@
+import { NextIntlClientProvider } from 'next-intl';
+import { useState } from 'react';
+import { describe, expect, it, vi } from 'vitest';
+import { render } from 'vitest-browser-react';
+import { page } from 'vitest/browser';
+import type { ActionResult } from '@/libs/api/ApiError';
+import messages from '@/locales/en.json';
+import type { WorkspaceRole } from '@/validations/crm/MemberValidation';
+import type { MemberRow } from './MembersTable';
+import { MembersTable } from './MembersTable';
+
+const OWNER: MemberRow = {
+  userId: 1,
+  email: 'olga@example.com',
+  displayName: 'Olga Owner',
+  role: 'OWNER',
+  joined: 'Oct 1, 2026',
+};
+const ADMIN: MemberRow = {
+  userId: 2,
+  email: 'adam@example.com',
+  displayName: 'Adam Admin',
+  role: 'ADMIN',
+  joined: 'Oct 2, 2026',
+};
+const MANAGER: MemberRow = {
+  userId: 3,
+  email: 'mia@example.com',
+  displayName: 'Mia Manager',
+  role: 'MANAGER',
+  joined: 'Oct 3, 2026',
+};
+
+type ChangeRole = (userId: number, role: WorkspaceRole) => Promise<ActionResult>;
+type Remove = (userId: number) => Promise<ActionResult>;
+
+const renderTable = async (options: {
+  members: MemberRow[];
+  me: number;
+  callerRole: WorkspaceRole;
+  changeRole?: ChangeRole;
+}) => {
+  await render(
+    <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+      <MembersTable
+        members={options.members}
+        me={options.me}
+        callerRole={options.callerRole}
+        canManage
+        workspaceName="Acme"
+        headingId="members-heading"
+        actions={{
+          changeRole: options.changeRole ?? vi.fn<ChangeRole>().mockResolvedValue({ ok: true }),
+          remove: vi.fn<Remove>().mockResolvedValue({ ok: true }),
+        }}
+      />
+    </NextIntlClientProvider>,
+  );
+};
+
+describe(MembersTable, () => {
+  describe('as an admin', () => {
+    it('leaves owner rows without controls and offers no Owner role', async () => {
+      await renderTable({
+        members: [OWNER, ADMIN, MANAGER],
+        me: ADMIN.userId,
+        callerRole: 'ADMIN',
+      });
+
+      expect(page.getByLabelText('Role of Olga Owner').elements()).toHaveLength(0);
+      expect(page.getByRole('button', { name: 'Remove Olga Owner' }).elements()).toHaveLength(0);
+      await expect.element(page.getByRole('cell', { name: 'Owner', exact: true })).toBeVisible();
+
+      await expect.element(page.getByLabelText('Role of Mia Manager')).toHaveValue('MANAGER');
+      await expect.element(page.getByRole('button', { name: 'Remove Mia Manager' })).toBeVisible();
+      // The roles an admin gives are there, so "no Owner" isn't true of an empty list.
+      const options = page.getByLabelText('Role of Mia Manager').getByRole('option');
+      expect(options.elements().map((option) => option.textContent)).toStrictEqual([
+        'Admin',
+        'Manager',
+        'Sales rep',
+      ]);
+      expect(page.getByRole('option', { name: 'Owner' }).elements()).toHaveLength(0);
+    });
+
+    it('names its icon-only Remove in a tooltip from 640 to 1279 px', async () => {
+      await page.viewport(1024, 800);
+      await renderTable({
+        members: [OWNER, ADMIN, MANAGER],
+        me: ADMIN.userId,
+        callerRole: 'ADMIN',
+      });
+
+      await page.getByRole('button', { name: 'Remove Mia Manager' }).hover();
+
+      await expect
+        .element(page.getByRole('tooltip', { name: 'Remove Mia Manager' }))
+        .toBeInTheDocument();
+    });
+
+    it("changes another member's role straight away", async () => {
+      const changeRole = vi.fn<ChangeRole>().mockResolvedValue({ ok: true });
+      await renderTable({
+        members: [OWNER, ADMIN, MANAGER],
+        me: ADMIN.userId,
+        callerRole: 'ADMIN',
+        changeRole,
+      });
+
+      await page.getByLabelText('Role of Mia Manager').selectOptions('SALES_REP');
+
+      expect(changeRole).toHaveBeenCalledWith(MANAGER.userId, 'SALES_REP');
+      expect(page.getByRole('alertdialog').elements()).toHaveLength(0);
+    });
+
+    it("locks a member's role while its change saves", async () => {
+      const { promise, resolve } = Promise.withResolvers<ActionResult>();
+      const changeRole = vi.fn<ChangeRole>().mockReturnValue(promise);
+      await renderTable({
+        members: [OWNER, ADMIN, MANAGER],
+        me: ADMIN.userId,
+        callerRole: 'ADMIN',
+        changeRole,
+      });
+      const select = page.getByLabelText('Role of Mia Manager');
+      const element = select.element();
+      if (!(element instanceof HTMLSelectElement)) {
+        throw new TypeError('Expected a select');
+      }
+      element.focus();
+
+      await select.selectOptions('SALES_REP');
+      await expect.element(select).toHaveAttribute('aria-disabled', 'true');
+      // A browser still lets you pick from it; Playwright refuses to, so pick as the DOM does.
+      element.value = 'ADMIN';
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+
+      // The second change is ignored, and the select keeps the focus.
+      await expect.element(select).toHaveValue('SALES_REP');
+      await expect.element(select).toHaveFocus();
+      resolve({ ok: true });
+      await expect.element(select).not.toHaveAttribute('aria-disabled');
+      expect(changeRole).toHaveBeenCalledOnce();
+    });
+
+    it('asks before changing your own role', async () => {
+      const changeRole = vi.fn<ChangeRole>().mockResolvedValue({ ok: true });
+      await renderTable({
+        members: [OWNER, ADMIN, MANAGER],
+        me: ADMIN.userId,
+        callerRole: 'ADMIN',
+        changeRole,
+      });
+      const own = page.getByLabelText('Role of Adam Admin');
+
+      await own.selectOptions('SALES_REP');
+
+      const dialog = page.getByRole('alertdialog');
+      await expect
+        .element(dialog.getByRole('heading', { name: 'Change your own role to Sales rep?' }))
+        .toBeVisible();
+      await expect.element(own).toHaveValue('ADMIN');
+      await dialog.getByRole('button', { name: 'Cancel' }).click();
+      expect(changeRole).not.toHaveBeenCalled();
+      await expect.element(own).toHaveFocus();
+
+      await own.selectOptions('MANAGER');
+      await page.getByRole('button', { name: 'Change my role' }).click();
+
+      expect(changeRole).toHaveBeenCalledWith(ADMIN.userId, 'MANAGER');
+      await expect.poll(() => page.getByRole('alertdialog').elements()).toHaveLength(0);
+    });
+
+    it('moves the focus to your name when the new role takes the select away', async () => {
+      // As after the page refreshes: a sales rep manages no one, so the rows lose their selects.
+      const Refreshing = () => {
+        const [role, setRole] = useState<WorkspaceRole>('ADMIN');
+
+        return (
+          <MembersTable
+            members={[OWNER, { ...ADMIN, role }, MANAGER]}
+            me={ADMIN.userId}
+            callerRole={role}
+            canManage={role === 'ADMIN'}
+            workspaceName="Acme"
+            headingId="members-heading"
+            actions={{
+              changeRole: async (_userId, next) => {
+                setRole(next);
+                return await Promise.resolve({ ok: true });
+              },
+              remove: vi.fn<Remove>(),
+            }}
+          />
+        );
+      };
+      await render(
+        <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+          <Refreshing />
+        </NextIntlClientProvider>,
+      );
+
+      await page.getByLabelText('Role of Adam Admin').selectOptions('SALES_REP');
+      await page.getByRole('button', { name: 'Change my role' }).click();
+
+      await expect.poll(() => page.getByRole('alertdialog').elements()).toHaveLength(0);
+      expect(page.getByLabelText('Role of Adam Admin').elements()).toHaveLength(0);
+      // Not the page's start: the name itself (the body would contain the name too).
+      await expect.poll(() => document.activeElement?.textContent).toBe('Adam Admin · You');
+    });
+  });
+
+  describe('as an owner', () => {
+    it('says before leaving that the last owner must hand over first', async () => {
+      await renderTable({ members: [OWNER, MANAGER], me: OWNER.userId, callerRole: 'OWNER' });
+
+      await page.getByRole('button', { name: 'Leave workspace' }).click();
+
+      await expect
+        .element(
+          page
+            .getByRole('alertdialog')
+            .getByText(
+              'No one else owns this workspace. Make another member an owner before you leave.',
+            ),
+        )
+        .toBeVisible();
+    });
+
+    it('leaves without the note when another owner remains', async () => {
+      await renderTable({
+        members: [OWNER, { ...ADMIN, role: 'OWNER' }],
+        me: OWNER.userId,
+        callerRole: 'OWNER',
+      });
+
+      await page.getByRole('button', { name: 'Leave workspace' }).click();
+
+      await expect.element(page.getByRole('alertdialog')).toBeVisible();
+      expect(
+        page.getByText('No one else owns this workspace', { exact: false }).elements(),
+      ).toHaveLength(0);
+    });
+  });
+});

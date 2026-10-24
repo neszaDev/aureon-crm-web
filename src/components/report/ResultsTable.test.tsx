@@ -53,11 +53,23 @@ describe(ResultsTable, () => {
 describe(TotalsStrip, () => {
   it('shows every mark, with zero for statuses the summary leaves out', async () => {
     await render(
-      withIntl(<TotalsStrip summary={{ total: 3, byStatus: [{ status: 'PASSED', count: 3 }] }} />),
+      withIntl(
+        <TotalsStrip testIds summary={{ total: 3, byStatus: [{ status: 'PASSED', count: 3 }] }} />,
+      ),
     );
 
     await expect.element(page.getByTestId('summary-PASSED')).toHaveTextContent('3');
     await expect.element(page.getByTestId('summary-FAILED')).toHaveTextContent('0');
     await expect.element(page.getByTestId('summary-PENDING')).toHaveTextContent('0');
+  });
+
+  // A page's streamed copy can stay in the DOM, hidden, after a quick client navigation (React's
+  // late Suspense swap finds its boundary gone): a second strip with the same ids there made
+  // `getByTestId('summary-PASSED')` ambiguous on the next page. Only the page under test has them.
+  it('carries no test ids unless the page asks for them', async () => {
+    await render(withIntl(<TotalsStrip summary={{ total: 1 }} />));
+
+    await expect.element(page.getByText('Passed')).toBeVisible();
+    expect(document.querySelector('[data-testid^="summary-"]')).toBeNull();
   });
 });

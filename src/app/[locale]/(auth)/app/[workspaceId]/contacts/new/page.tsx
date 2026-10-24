@@ -1,0 +1,95 @@
+import type { Metadata } from 'next';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { createContact, findContactDuplicates } from '@/actions/crm/ContactActions';
+import { ContactForm } from '@/components/crm/contact/ContactForm';
+import { RecordFormPage } from '@/components/crm/record/RecordLayout';
+import { getCompany, getContactTags, getLeadSources, getMembers } from '@/libs/api/CrmQueries';
+import { getCurrentUser } from '@/libs/api/Queries';
+import { endRejectedSession } from '@/libs/api/Session';
+import { getOpenWorkspace } from '@/libs/crm/OpenWorkspace';
+import { workspacePageMetadata } from '@/libs/crm/PageMetadata';
+import { canAssign } from '@/libs/crm/RecordAccess';
+import { toRecordId } from '@/libs/crm/WorkspaceId';
+
+type NewContactPageProps = {
+  params: Promise<{ locale: string; workspaceId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export async function generateMetadata(props: NewContactPageProps): Promise<Metadata> {
+  const { locale, workspaceId } = await props.params;
+  const t = await getTranslations({ locale, namespace: 'NewContactPage' });
+
+  return await workspacePageMetadata({ locale, workspaceId, title: t('title') });
+}
+
+export default async function NewContactPage(props: NewContactPageProps) {
+  const { locale, workspaceId } = await props.params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'NewContactPage' });
+  // From a company's page or a list's group (`?companyId=`, `?ownerId=`): filled in.
+  const { companyId: companyParam, ownerId: ownerParam } = await props.searchParams;
+  const companyId = typeof companyParam === 'string' ? toRecordId(companyParam) : undefined;
+  const ownerId = typeof ownerParam === 'string' ? toRecordId(ownerParam) : undefined;
+
+  // The workspace (a cached call); a lost one is "not found" even on a client navigation.
+  const [{ workspace }, { user }, members, sources, tags, linked] = await Promise.all([
+    getOpenWorkspace(locale, workspaceId),
+    getCurrentUser(),
+    getMembers(workspaceId),
+    getLeadSources(workspaceId),
+    getContactTags(workspaceId),
+    companyId === undefined ? undefined : getCompany(workspaceId, String(companyId)),
+  ]);
+  if ([members, sources, tags, linked].some((result) => result?.unauthorized)) {
+    return endRejectedSession(locale);
+  }
+  if (!workspace || !user || !members.members || !sources.sources || !tags.tags) {
+    throw new Error('Could not load the contact form');
+  }
+  const path = `/app/${workspace.id}/contacts`;
+  // An unknown company in the link is left out rather than refused.
+  const company = linked?.company ? { id: linked.company.id, label: linked.company.name } : null;
+  // Another member only for a role that may give it to them; anyone else gets the caller.
+  const owner =
+    canAssign(workspace) && members.members.some((member) => member.userId === ownerId)
+      ? ownerId
+      : undefined;
+
+  return (
+    <RecordFormPage
+      title={t('title')}
+      headingId="contact-heading"
+      description={t('description')}
+      label={t('title')}
+    >
+      <ContactForm
+        action={createContact.bind(null, workspace.id)}
+        findDuplicates={findContactDuplicates.bind(null, workspace.id)}
+        // A new contact is the caller's unless they give it to someone else.
+        defaults={{
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          jobTitle: '',
+          companyId: company?.id ?? null,
+          ownerId: owner ?? user.id,
+          sourceId: null,
+          tags: [],
+          notes: '',
+        }}
+        company={company}
+        workspaceId={workspace.id}
+        members={members.members}
+        me={user.id}
+        canAssign={canAssign(workspace)}
+        sources={sources.sources}
+        tags={tags.tags}
+        listPath={path}
+        cancelHref={company ? `/app/${workspace.id}/companies/${company.id}` : path}
+        submitLabel={t('submit')}
+      />
+    </RecordFormPage>
+  );
+}

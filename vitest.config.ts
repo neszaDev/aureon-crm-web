@@ -1,4 +1,5 @@
-import react from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
@@ -9,7 +10,9 @@ const testEnv = {
 };
 
 export default defineConfig({
-  plugins: [react()],
+  // The React Compiler runs in production builds only (next.config.ts); compile the tests with it too,
+  // so a component that only breaks when compiled fails here (react-hook-form's in-place `errors`).
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
   resolve: {
     tsconfigPaths: true,
     // `next/image` is a CommonJS re-export whose default import arrives as the module object
@@ -17,9 +20,10 @@ export default defineConfig({
     alias: { 'next/image': 'next/dist/esm/shared/lib/image-external.js' },
   },
   // Pre-bundle dnd-kit: on a cold cache, Vite otherwise re-optimises mid-run and the first
-  // drag-and-drop test loads a second React copy ("Invalid hook call").
+  // drag-and-drop test loads a second React copy ("Invalid hook call"). The calendar's locales
+  // and the server renderer (the server-rendered HTML tests) are two more such late imports.
   optimizeDeps: {
-    include: ['@dnd-kit/core', '@dnd-kit/sortable'],
+    include: ['@dnd-kit/core', '@dnd-kit/sortable', 'react-day-picker/locale', 'react-dom/server'],
   },
   test: {
     coverage: {

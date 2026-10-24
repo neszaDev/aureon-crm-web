@@ -58,4 +58,22 @@ describe(ComposeForm, () => {
 
     await expect.element(bold).toHaveAttribute('aria-pressed', 'true');
   });
+
+  it('sends a second message from the cleared form, with what was typed next', async () => {
+    await renderCompose();
+    const to = page.getByLabelText('To');
+    const subject = page.getByLabelText('Subject');
+
+    await to.fill('ada@example.com');
+    await subject.fill('First');
+    await page.getByRole('button', { name: 'Send' }).click();
+    await expect.element(subject).toHaveValue('');
+    await to.fill('grace@example.com');
+    await subject.fill('Second');
+    await page.getByRole('button', { name: 'Send' }).click();
+
+    await expect.element(subject).toHaveValue('');
+    await expect.element(to).toHaveValue('');
+    expect(page.getByText('Required').elements()).toHaveLength(0);
+  });
 });

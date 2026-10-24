@@ -1,12 +1,20 @@
 import { useTranslations } from 'next-intl';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
+import { BRAND_OUTLINE_BUTTON, BRAND_PRIMARY_BUTTON } from '@/components/marketing/brandButton';
 import { Button } from '@/components/ui/button';
 import { Wordmark } from '@/components/Wordmark';
 import { Link } from '@/libs/I18nNavigation';
 import { AppConfig } from '@/utils/AppConfig';
 
+// The landing page's sections, linked from the header from 1280 px.
+const SECTIONS = ['how-it-works', 'features', 'roles', 'developers'] as const;
+
+const NAV_LINK =
+  'rounded-md px-2.5 py-1.5 text-[0.9375rem] font-medium text-white no-underline hover:bg-white/12 focus-visible:outline-white';
+
 /**
- * Public pages: the folder-green header band, the page, and the footer.
+ * Public pages: the violet header (the top of the landing page's band; its deep tint in the dark
+ * theme), the page on the canvas, and a footer with the sample-product note.
  * @param props Component props.
  * @param props.children Page content.
  * @returns The marketing layout.
@@ -15,54 +23,80 @@ export const MarketingTemplate = (props: { children: React.ReactNode }) => {
   const t = useTranslations('RootLayout');
   const tFooter = useTranslations('Footer');
   const tBrand = useTranslations('Brand');
+  const labels = {
+    'how-it-works': t('how_link'),
+    features: t('features_link'),
+    roles: t('roles_link'),
+    developers: t('developers_link'),
+  };
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="bg-folder text-folder-ink">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6 lg:px-8">
-          <Wordmark tone="folder" />
-          <nav aria-label={t('main_navigation_label')} className="flex flex-1 items-center gap-1">
-            <Button asChild variant="inverse-ghost" size="sm" className="max-sm:hidden">
-              <Link href="/about/">{t('about_link')}</Link>
-            </Button>
-            <div className="ml-auto flex items-center gap-1.5">
-              <Button asChild variant="inverse-ghost" size="sm">
-                <Link href="/sign-in/">{t('sign_in_link')}</Link>
+      <a
+        href="#main"
+        className="sr-only rounded-md bg-field text-sm font-semibold text-foreground shadow-float focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2"
+      >
+        {t('skip_link')}
+      </a>
+      <header className="bg-violet text-white dark:bg-violet-tint">
+        <div className="mx-auto flex h-16 max-w-[76rem] items-center gap-8 px-4 sm:px-7 lg:h-18">
+          <Wordmark tone="brand" />
+          <nav aria-label={t('main_navigation_label')} className="flex flex-1 items-center gap-2">
+            <ul className="hidden items-center gap-1 xl:flex">
+              {SECTIONS.map((section) => (
+                <li key={section}>
+                  <Link href={{ pathname: '/', hash: section }} className={NAV_LINK}>
+                    {labels[section]}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link href="/about" className={NAV_LINK}>
+                  {t('about_link')}
+                </Link>
+              </li>
+            </ul>
+            <div className="ml-auto flex items-center gap-2">
+              <LocaleSwitcher tone="brand" />
+              <Button asChild variant="outline" size="sm" className={BRAND_OUTLINE_BUTTON}>
+                <Link href="/sign-in">{t('sign_in_link')}</Link>
               </Button>
-              <Button asChild variant="inverse" size="sm">
-                <Link href="/sign-up/">{t('sign_up_link')}</Link>
+              <Button asChild size="sm" className={`${BRAND_PRIMARY_BUTTON} max-sm:hidden`}>
+                <Link href="/sign-up">{t('sign_up_link')}</Link>
               </Button>
-              <LocaleSwitcher tone="folder" className="ml-1.5 max-sm:hidden" />
             </div>
           </nav>
         </div>
       </header>
 
-      <main className="flex-1">{props.children}</main>
+      {/* Focusable so the skip link moves focus here in Safari too. */}
+      <main id="main" tabIndex={-1} className="flex-1 outline-none">
+        {props.children}
+      </main>
 
-      <footer className="bg-folder-deep text-folder-ink-soft">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 md:flex-row md:items-end md:justify-between lg:px-8">
-          <div className="flex max-w-md flex-col gap-3">
-            <Wordmark tone="folder" />
-            <p className="text-sm">{tBrand('sample_note')}</p>
+      <footer className="border-t border-rule">
+        <div className="mx-auto flex max-w-[76rem] flex-col gap-6 px-4 py-10 sm:px-7 md:flex-row md:items-end md:justify-between md:gap-12">
+          <div className="flex max-w-md flex-col gap-2.5">
+            <Wordmark className="self-start" />
+            <p className="text-sm text-ink-2">{tBrand('sample_note')}</p>
           </div>
           <nav
             aria-label={tFooter('footer_navigation_label')}
-            className="flex flex-col gap-2 text-sm md:items-end"
+            className="flex flex-col gap-1.5 text-sm md:items-end"
           >
-            <ul className="flex flex-wrap gap-x-5 gap-y-2 sm:hidden">
+            <ul className="flex flex-wrap gap-x-5 gap-y-1.5">
               <li>
-                <Link href="/about/" className="text-folder-ink underline-offset-4 hover:underline">
+                <Link href="/about" className="font-medium text-violet-ink hover:underline">
                   {t('about_link')}
                 </Link>
               </li>
+              <li>
+                <Link href="/about" className="font-medium text-violet-ink hover:underline">
+                  {tFooter('template_link')}
+                </Link>
+              </li>
             </ul>
-            {/* On phones the language picker lives here, so the header keeps both actions. */}
-            <LocaleSwitcher tone="folder" className="sm:hidden" />
-            <Link href="/about/" className="text-folder-ink underline-offset-4 hover:underline">
-              {tFooter('template_link')}
-            </Link>
-            <p>
+            <p className="text-ink-2">
               {tFooter('footer_text', { year: new Date().getFullYear(), name: AppConfig.name })}
             </p>
           </nav>

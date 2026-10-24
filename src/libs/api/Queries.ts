@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { authedBackend } from './Backend';
 import {
   placeholderAgencies,
@@ -12,15 +13,16 @@ import {
 // Each returns `unauthorized: true` when the backend rejects the session (HTTP 401).
 
 /**
- * Loads the signed-in user (`GET /users/me`).
+ * Loads the signed-in user (`GET /users/me`). Cached for the request, so a layout and its
+ * pages share one call.
  * @returns The user, or `unauthorized` when the session is no longer valid.
  */
-export const getCurrentUser = async () => {
+export const getCurrentUser = cache(async () => {
   const api = await authedBackend();
   const { data, response } = await api.GET('/api/v1/users/me');
 
   return { user: data, unauthorized: response.status === 401 };
-};
+});
 
 /**
  * Loads one page of the user's test results plus the per-status summary.

@@ -11,6 +11,7 @@ import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
 import type { UpdateUserValues } from '@/validations/UserValidation';
 import { UpdateUserValidation, USER_ROLES } from '@/validations/UserValidation';
 
@@ -46,16 +47,14 @@ export const EditUserForm = (props: { id: number; defaults: UpdateUserValues }) 
     const result = await updateUser(props.id, values);
 
     if (result.ok) {
-      form.reset(values);
+      // Keep the fields' registrations: dropped, the compiled form never registers them again.
+      form.reset(values, { keepFieldsRef: true });
       setSaved(true);
       return;
     }
-    for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (isFormField(field)) {
-        form.setError(field, { type: 'server', message });
-      }
-    }
-    setFormError(result.message);
+    setFormError(
+      applyFieldErrors(form, result, (name) => (isFormField(name) ? name : undefined)).message,
+    );
   });
 
   return (

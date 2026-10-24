@@ -1,0 +1,65 @@
+'use client';
+
+import { cn } from 'cn';
+import { useTranslations } from 'next-intl';
+import { useLinkStatus } from 'next/link';
+import { Spinner } from '@/components/ui/spinner';
+import type { PeriodQuery } from '@/libs/crm/PeriodQuery';
+import { periodHref } from '@/libs/crm/PeriodQuery';
+import type { ReportTab } from '@/libs/crm/Reports';
+import { REPORT_TABS, reportParams } from '@/libs/crm/Reports';
+import { Link } from '@/libs/I18nNavigation';
+
+// A spinner in the tab that was just followed, until its report arrives.
+const Pending = () => {
+  const { pending } = useLinkStatus();
+
+  return pending ? <Spinner aria-hidden="true" className="size-3.5" /> : null;
+};
+
+/**
+ * The reports as tabs under the page's title, as a list's views: one link per report (`?tab=`),
+ * the current one underlined in violet (`aria-current`), the followed one with a spinner until it
+ * answers. The period and the owner the page shows go with each link, so a range or an owner chosen
+ * on one report is still there on the next. On a phone the row scrolls sideways inside itself.
+ * @param props Component props.
+ * @param props.current The tab shown.
+ * @param props.path The reports page's path.
+ * @param props.period The period in the URL (what `parsePeriod` read).
+ * @param props.ownerId The owner in the URL (what `parseOwner` read).
+ * @returns The navigation.
+ */
+export const ReportTabs = (props: {
+  current: ReportTab;
+  path: string;
+  period: PeriodQuery;
+  ownerId?: number;
+}) => {
+  const t = useTranslations('ReportTabs');
+
+  return (
+    <nav aria-label={t('label')} className="-mb-px overflow-x-auto">
+      <ul className="flex gap-1">
+        {REPORT_TABS.map((tab) => (
+          <li key={tab} className="shrink-0">
+            <Link
+              href={periodHref(props.path, reportParams(tab, props.ownerId), props.period)}
+              aria-current={tab === props.current ? 'page' : undefined}
+              scroll={false}
+              className={cn(
+                // Its outline drawn inside: the nav's scroll box would clip it.
+                'flex h-9 items-center gap-1.5 border-b-2 px-2 text-[0.8125rem] font-medium whitespace-nowrap no-underline transition-colors duration-150 focus-visible:-outline-offset-2',
+                tab === props.current
+                  ? 'border-violet-ink text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {t(`tab_${tab}`)}
+              <Pending />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+};

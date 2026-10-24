@@ -36,7 +36,7 @@ export async function uploadFile(form: FormData): Promise<ActionResult> {
     };
     return reasons[response.status]
       ? { ok: false, message: reasons[response.status] }
-      : toActionError(error, t('error_generic'));
+      : toActionError(error, await getTranslations('ApiError'));
   }
 
   revalidatePath('/[locale]/dashboard/files', 'page');

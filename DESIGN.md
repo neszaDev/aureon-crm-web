@@ -1,356 +1,428 @@
 ---
-name: Marksheet
-description: A school report card for test results; folder-green cover, ruled card stock, navy form ink, red pen kept for failures.
+name: Aureon CRM
+description: A work OS for the pipeline; one calm shell, every list a set of coloured status sections, every record a click away in a panel.
 colors:
-  folder: "#1f5c45"
-  folder-deep: "#164433"
-  folder-ink: "#f1f5ef"
-  folder-ink-soft: "#bcd3c5"
-  paper: "#e8eee6"
-  paper-card: "#f5f8f3"
-  ply: "#ffffff"
-  ink-950: "#111b30"
-  ink-900: "#1b2b4b"
-  ink-700: "#33436a"
-  ink-600: "#4a5878"
-  ink-400: "#8a94a9"
-  ink-300: "#b3bccb"
-  ink-200: "#cfd7de"
-  ink-100: "#dfe5e6"
-  pass: "#1f6b4e"
-  pen: "#c42f2a"
-  pencil: "#5f666e"
+  violet: "#5a45e0"
+  violet-hover: "#4a36c7"
+  violet-tint: "#efedfd"
+  on-violet: "#ffffff"
+  rail: "#1d1a2e"
+  rail-raised: "#2e2a45"
+  sidebar: "#f7f7fa"
+  canvas: "#ffffff"
+  muted: "#f1f1f5"
+  ink: "#1f2030"
+  ink-2: "#5d6072"
+  rule: "#e6e6ec"
+  input-stroke: "#878b9f"
+  status-blue: "#2f7de1"
+  status-blue-tint: "#e4eefb"
+  status-blue-ink: "#2769bd"
+  status-teal: "#10929a"
+  status-teal-tint: "#dff1f2"
+  status-teal-ink: "#0b6f75"
+  status-amber: "#e69a1c"
+  status-amber-tint: "#fcf2e1"
+  status-amber-ink: "#956412"
+  status-green: "#1f9d63"
+  status-green-tint: "#e2f2eb"
+  status-green-ink: "#187a4d"
+  status-red: "#d8433a"
+  status-red-tint: "#fae7e5"
+  status-red-ink: "#bc3a32"
+  status-slate: "#8b8fa3"
+  status-slate-tint: "#f0f0f3"
+  status-slate-ink: "#686b7a"
+  avatar-teal: "#0e7490"
+  avatar-orchid: "#b4367a"
+  chart-amber: "#c98410"
+  dark-rail: "#120f1f"
+  dark-rail-raised: "#262140"
+  dark-sidebar: "#1b1925"
+  dark-canvas: "#17151f"
+  dark-card: "#1f1c2a"
+  dark-muted: "#2a2737"
+  dark-ink: "#ecebf2"
+  dark-ink-2: "#a4a2b6"
+  dark-rule: "#2f2c3d"
+  dark-input-stroke: "#6f6c82"
+  dark-violet: "#6956e3"
+  dark-violet-tint: "#2e284f"
+  dark-violet-ink: "#9689eb"
+  dark-status-blue-tint: "#222f4f"
+  dark-status-blue-ink: "#5f9be8"
+  dark-status-teal-tint: "#1a3439"
+  dark-status-teal-ink: "#3cb0b8"
+  dark-status-amber-tint: "#473527"
+  dark-status-green-tint: "#1f3635"
+  dark-status-green-ink: "#45ae7e"
+  dark-status-red-tint: "#44242d"
+  dark-status-red-ink: "#e3766f"
+  dark-status-slate-tint: "#353342"
+  dark-status-slate-ink: "#9a9eaf"
 typography:
   display:
-    fontFamily: "Libre Franklin, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "clamp(2.75rem, 6vw, 4.25rem)"
-    fontWeight: 800
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "5rem"
+    fontWeight: 700
     lineHeight: 1.02
     letterSpacing: "-0.035em"
   headline:
-    fontFamily: "Libre Franklin, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "2.25rem"
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.75rem"
     fontWeight: 700
-    lineHeight: 1.11
-    letterSpacing: "-0.025em"
-  page-title:
-    fontFamily: "Libre Franklin, ui-sans-serif, system-ui, sans-serif"
+    lineHeight: 1.1
+    letterSpacing: "-0.03em"
+  display-tablet:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "3.75rem"
+    fontWeight: 700
+    lineHeight: 1.05
+    letterSpacing: "-0.035em"
+  display-close-phone:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.5rem"
+    fontWeight: 700
+    lineHeight: 1.05
+    letterSpacing: "-0.035em"
+  headline-phone:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
     fontSize: "2rem"
     fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: "-0.02em"
-  title:
-    fontFamily: "Libre Franklin, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.125rem"
+    lineHeight: 1.1
+    letterSpacing: "-0.03em"
+  language-sample:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.625rem"
     fontWeight: 600
-    lineHeight: 1.375
+    lineHeight: 1.25
     letterSpacing: "-0.01em"
-  lead:
-    fontFamily: "Libre Franklin, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.125rem"
+  desk-statement:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.375rem"
+    fontWeight: 500
+    lineHeight: 1.375
+  record-title:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 600
+    lineHeight: 1.25
+    letterSpacing: "-0.01em"
+  title:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 600
+    lineHeight: 1.4
+    letterSpacing: "-0.01em"
+  body-reading:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.9375rem"
     fontWeight: 400
     lineHeight: 1.625
   body:
-    fontFamily: "Libre Franklin, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.9375rem"
-    fontWeight: 400
-    lineHeight: 1.5
-  table:
-    fontFamily: "Libre Franklin, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.43
-    fontFeature: "\"tnum\""
-  figure:
-    fontFamily: "Libre Franklin, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.875rem"
-    fontWeight: 600
-    lineHeight: 1.2
-    letterSpacing: "-0.025em"
-    fontFeature: "\"tnum\""
+  row:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 500
+    lineHeight: 1.4
   label:
-    fontFamily: "Libre Franklin, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 600
+    lineHeight: 1.33
+  micro:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.6875rem"
-    fontWeight: 600
-    lineHeight: 1
-    letterSpacing: "0.12em"
-  button:
-    fontFamily: "Libre Franklin, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 600
-    lineHeight: 1.43
-  hand-remark:
-    fontFamily: "Kalam, Bradley Hand, cursive"
-    fontSize: "1.375rem"
-    fontWeight: 400
-    lineHeight: 1.375
-  hand-note:
-    fontFamily: "Kalam, Bradley Hand, cursive"
-    fontSize: "0.9375rem"
-    fontWeight: 400
-    lineHeight: 1.375
+    fontWeight: 500
+    lineHeight: 1.45
 rounded:
-  sm: "3.6px"
-  md: "4.8px"
-  lg: "6px"
-  xl: "8.4px"
+  sm: "4px"
+  md: "6px"
+  lg: "8px"
+  xl: "12px"
+  full: "9999px"
 spacing:
-  hairline: "2px"
-  xs: "4px"
-  sm: "8px"
-  md: "12px"
-  card: "20px"
-  lg: "24px"
-  xl: "32px"
-  section: "80px"
-  section-lg: "112px"
+  row: "36px"
+  control: "32px"
+  control-phone: "36px"
+  landing-action: "44px"
+  topbar: "48px"
+  rail: "56px"
+  sidebar: "240px"
+  page-x: "28px"
+  page-x-phone: "16px"
 components:
   button-primary:
-    backgroundColor: "{colors.folder}"
-    textColor: "{colors.folder-ink}"
-    typography: "{typography.button}"
+    backgroundColor: "{colors.violet}"
+    textColor: "{colors.on-violet}"
     rounded: "{rounded.md}"
-    padding: "0 16px"
-    height: "36px"
+    padding: "0 12px"
+    height: "{spacing.control}"
+    typography: "{typography.body}"
   button-primary-hover:
-    backgroundColor: "{colors.folder-deep}"
-  button-inverse:
-    backgroundColor: "{colors.folder-ink}"
-    textColor: "{colors.folder}"
-    typography: "{typography.button}"
+    backgroundColor: "{colors.violet-hover}"
+  button-outline:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: "0 12px"
+    height: "{spacing.control}"
+  button-outline-hover:
+    backgroundColor: "{colors.muted}"
+  button-landing-primary:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.violet}"
     rounded: "{rounded.md}"
     padding: "0 20px"
-    height: "44px"
-  button-inverse-hover:
-    backgroundColor: "{colors.ply}"
-  button-inverse-ghost:
-    textColor: "{colors.folder-ink}"
-    rounded: "{rounded.md}"
-    padding: "0 12px"
-    height: "32px"
-  button-outline:
-    backgroundColor: "{colors.ply}"
-    textColor: "{colors.ink-900}"
-    rounded: "{rounded.md}"
-    padding: "0 16px"
-    height: "36px"
-  button-outline-hover:
-    backgroundColor: "{colors.paper-card}"
-  button-ghost:
-    textColor: "{colors.ink-700}"
-    rounded: "{rounded.md}"
-    padding: "0 16px"
-    height: "36px"
-  button-ghost-hover:
-    backgroundColor: "{colors.ink-100}"
-    textColor: "{colors.ink-900}"
-  button-destructive:
-    backgroundColor: "{colors.pen}"
-    textColor: "{colors.ply}"
-    rounded: "{rounded.md}"
-    padding: "0 16px"
-    height: "36px"
+    height: "{spacing.landing-action}"
+    typography: "{typography.body-reading}"
   input:
-    backgroundColor: "{colors.ply}"
-    textColor: "{colors.ink-900}"
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
     rounded: "{rounded.md}"
-    padding: "8px 12px"
-    height: "40px"
-  badge-tag:
-    backgroundColor: "{colors.ply}"
-    textColor: "{colors.ink-700}"
-    typography: "{typography.label}"
-    rounded: "{rounded.sm}"
-    padding: "2px 8px"
+    padding: "4px 10px"
+    height: "{spacing.control}"
+  toolbar-chip:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: "0 8px"
+    height: "{spacing.control}"
+    typography: "{typography.row}"
+  toolbar-chip-on:
+    backgroundColor: "{colors.violet-tint}"
+    textColor: "{colors.violet}"
+  status-pill:
+    rounded: "{rounded.full}"
+    padding: "0 10px"
     height: "24px"
-  card-sheet:
-    backgroundColor: "{colors.paper-card}"
-    textColor: "{colors.ink-900}"
-    rounded: "{rounded.sm}"
-    padding: "20px"
-  paper:
-    backgroundColor: "{colors.paper-card}"
-    textColor: "{colors.ink-900}"
+    typography: "{typography.label}"
+  status-pill-amber:
+    backgroundColor: "{colors.status-amber-tint}"
+    textColor: "{colors.status-amber-ink}"
+  list-row:
+    height: "{spacing.row}"
+    padding: "6px 12px"
+    typography: "{typography.body}"
+  panel:
+    backgroundColor: "{colors.canvas}"
     rounded: "{rounded.lg}"
-  nav-item:
-    textColor: "{colors.folder-ink-soft}"
-    rounded: "{rounded.md}"
-    padding: "0 12px"
-    height: "40px"
+    padding: "20px"
+  rail:
+    backgroundColor: "{colors.rail}"
+    textColor: "{colors.on-violet}"
+    width: "{spacing.rail}"
+  sidebar:
+    backgroundColor: "{colors.sidebar}"
+    textColor: "{colors.ink}"
+    width: "{spacing.sidebar}"
   nav-item-current:
-    backgroundColor: "{colors.folder-deep}"
-    textColor: "{colors.folder-ink}"
-  table-row:
-    textColor: "{colors.ink-900}"
-    typography: "{typography.table}"
-    padding: "12px"
+    backgroundColor: "{colors.violet-tint}"
+    textColor: "{colors.violet}"
+    rounded: "{rounded.md}"
 ---
 
-# Design System: Marksheet
+# Design System: Aureon CRM
 
 ## Overview
 
-**Creative North Star: "The Report Card"**
+**Creative North Star: "The Pipeline's Work OS"**
 
-Every surface is a page of a school report card lying on a desk in daylight. Folder green is the cover: it owns the large fields (marketing header and hero, the app sidebar, the auth aside, the closing band and footer). Inside, pale card stock is the working ground, printed in navy form ink on one stepped ramp. Results are written onto ruled rows; status is a drawn mark, never a pill: a green tick for passed, a red pen circle for failed, a graphite pencil box for pending.
+Aureon works like the tool a sales team already lives in: one calm shell (an ink-violet rail, a cool off-white sidebar holding a tree of saved views, a white canvas under a 48 px top bar), and inside it every list is a set of coloured status sections and every record opens in a side panel without losing the list. Its craft peers are ClickUp, Linear and Attio; its identity is Aureon's own, never ClickUp's: the Aureon violet, the ink-violet rail and the orbit mark, a ring broken at the upper right with one satellite dot beyond the gap.
 
-The type is a printed form. Libre Franklin carries everything printed: tight, heavy headlines, tracked small caps for field labels and column heads, tabular figures in every table and total. Kalam is the hand that fills the form in: remarks, row notes, and the few entries a person writes onto a printed field. Controls do not belong to the print; they sit on their own white ply, a sheet above the card with a hairline shadow. Density is that of a form: compact rows, generous section breathing room around them.
+Density is the work-OS kind: 13 to 14 px UI text, 36 px rows, 32 px controls on a desktop (36 px on phones), tabular figures, hairlines rather than boxes. Colour is spent on meaning. Violet means "act, selected, focused"; the status hues mean where a record stands, and they always sit beside the words that say it. Surfaces lie flat; only what floats (menus, popovers, tooltips, the record panel, dialogs) casts a shadow. Dark is the same structure on violet-black, every pair rechecked.
 
-Motion is a pen. Marks draw on as strokes in sequence (on the landing card, on the key as it scrolls into view, and on a result created in the last 20 seconds), then the remark writes on left to right. Nothing else moves beyond 150-200ms state transitions and overlay fades. Under reduced motion everything is static. The scene is daylight only; there is no dark mode.
+The status pill is the system's signature: a lead's status, a deal's stage or a task's state is one coloured pill that is also the control that changes it; grouped lists are headed by the same pill; the record's header draws the whole track with the current step filled and the satellite over it.
 
 **Key Characteristics:**
-- Folder green for large fields only; card stock for work.
-- One navy neutral ramp; no grays outside it except pencil.
-- Status as a drawn SVG mark paired with its name.
-- Double-rule header bands on every card and page head.
-- Controls on a white ply above the printed card.
-- Empty tables keep their ruled rows.
-- Pen-stroke motion, static under reduced motion.
-
-### Reskinning a derived product
-
-The system is built to be swapped, not extended forever. A derived product reskins it in this order:
-
-1. **Primitives.** Replace the `:root` values in `src/styles/global.css` (folder, paper, ink ramp, pass/pen/pencil). The shadcn semantic tokens (`--primary`, `--background`, `--destructive`, `--ring`, ...) are mapped onto those primitives and need no edits unless the role changes. Keep one neutral ramp and one field color, or rename them consistently in both `:root` and `@theme inline`.
-2. **Faces.** Swap the two `next/font/google` imports in `src/app/[locale]/layout.tsx`; `--font-franklin` feeds `--font-sans`/`--font-heading`, `--font-kalam` feeds `--font-hand`. If the new world has no handwritten voice, delete `font-hand` usages rather than mapping it to a sans.
-3. **Loose literals.** Update `themeColor` in the layout metadata and the destructive hover literal in `src/components/ui/button.tsx`; they are not token-bound.
-4. **Domain.** `src/components/report/*` (Mark, StatusMark, TotalsStrip, ResultsTable, SampleCard) is the grading metaphor. A product without pass/fail status replaces the mark strokes or deletes the folder; the ui primitives, PageHeader, FormField and the templates survive.
-5. **This file.** Re-run the documenter once the new world is built; do not hand-edit tokens here ahead of the code.
+- Ink-violet rail (56 px), off-white sidebar (240 px, folds into the rail), white canvas; dark is violet-black.
+- Aureon violet for primary actions, selection and focus only.
+- Seven status tones, each a hue, a tint and an ink, applied with `data-tone`.
+- Inter for the UI, Anuphan for Thai; 13/14 px text, tabular figures.
+- 6 px controls, 8 px panels, full-round pills and avatars; hairline borders.
+- Flat panels; shadows only on floating layers.
+- The orbit mark, and its satellite as the "current" marker.
 
 ## Colors
 
-A daylight desk palette: one deep green cover, pale green-grey card stock, navy form ink, and three marking colors.
+A neutral, slightly cool workspace where one violet acts and seven status tones inform.
 
 ### Primary
-- **Folder Green** (#1f5c45): the report card's cover. Hero, marketing header, app sidebar and mobile app bar, auth aside, closing band; also the default button, focus ring, caret and links on card stock. Never a small accent sprinkled on paper.
-- **Folder Deep** (#164433): the inside of the cover. Footer band, primary-button hover, the current item in the sidebar nav.
-- **Folder Ink** (#f1f5ef): text and the inverse button on folder fields.
-- **Folder Ink Soft** (#bcd3c5): secondary text on folder fields, the wordmark tick on green, nav items at rest.
+- **Aureon Violet** (violet): the primary button fill (white text at 6.25:1), the current rail item, focus rings, caret, the selection wash, the violet ink of links and active tabs, and the public pages' brand fields (header, hero and closing bands, the auth aside). Hover deepens to **Violet Pressed** (violet-hover). **Violet Haze** (violet-tint) fills a current sidebar item and a toolbar chip that is on. In dark the fill lifts to dark-violet, the tint deepens to dark-violet-tint (the landing's band in dark, carrying white at 13.7:1) and violet text becomes dark-violet-ink (6.1:1 on the canvas).
 
-### Secondary (marks)
-- **Pass Green** (#1f6b4e): the tick. Used only for the passed mark and the wordmark tick on paper.
-- **Red Pen** (#c42f2a): the failed circle, failed status text, a non-zero failed total, field and form errors, the destructive delete action, and the 404 "Absent" stamp.
-- **Graphite Pencil** (#5f666e): the pending box.
+### Secondary
+- **Ink Violet** (rail): the global rail, its raised item (rail-raised), and the deep field under the landing's developer commands. White on it is 16.9:1.
+
+### Tertiary
+The status tones. Each is a triplet: the hue (`--status-<tone>`) for dots, track segments and chart fills that sit beside their words; the tint for a pill's fill; the ink for text on the tint or the canvas (4.5:1 or more on both, in both themes). Any element with `data-tone="<tone>"` gets them as `--tone`, `--tone-tint` and `--tone-ink`.
+- **Signal Blue** (status-blue): new leads, open tasks, the first open stage, Companies, the coming week.
+- **Lagoon Teal** (status-teal): the second open stage of four (and every fourth after it in a longer pipeline), so neighbouring stages never share a tone. Hue 3.8:1 on white and 4.8:1 on the dark canvas; its ink 5.1:1 on its tint and 5.9:1 on white (dark: 5.1:1 and 7:1).
+- **Aureon Violet** (as status-violet): contacted leads, the middle open stage, Deals, later dates.
+- **Harvest Amber** (status-amber): qualified leads, the last open stage, Leads, due today, medium priority. Its hue is 2.3:1 on white; amber words are always status-amber-ink.
+- **Won Green** (status-green): converted, won, completed, Contacts.
+- **Signal Red** (status-red): lost, overdue, high priority, Tasks; as danger (the red ink) always with an icon and words.
+- **Quiet Slate** (status-slate): unqualified, cancelled, no date, low priority, a stage the list doesn't hold.
+
+Open stages take the walk blue → teal → violet → amber in pipeline order: up to four spread over it (the first blue, the last amber; three are blue, violet, amber), more cycle through it, so neighbouring open stages never share a tone. Then green (won) and red (lost). Semantic aliases follow the inks: danger = red ink, warning = amber ink, success = green ink, info = blue ink.
+
+People take one of eight avatar colours by member id (violet, the blue, green, red, amber and slate inks, **Deep Teal** avatar-teal, **Orchid** avatar-orchid), white initials at 5:1 or more. Charts take five colours: violet, blue, green, **Chart Amber** (chart-amber, 3.1:1 on white) and red; in dark, the inks.
 
 ### Neutral
-- **Desk Card Stock** (#e8eee6): page background (`--background`).
-- **Card Face** (#f5f8f3): cards, the paper surface, the alert dialog, the "row taken apart" band.
-- **White Ply** (#ffffff): every control surface (inputs, selects, textareas, outline buttons, the sample tag) and popovers/sheets.
-- **Navy Form Ink ramp**: 950 (#111b30) headings and figures; 900 (#1b2b4b) body text; 700 (#33436a) labels, hand-written text, ghost buttons; 600 (#4a5878) muted text and column heads; 400 (#8a94a9) placeholders, hovered control borders; 300 (#b3bccb) control borders, double rules, table-head rule; 200 (#cfd7de) row rules and card borders; 100 (#dfe5e6) muted fills, hover rows.
+- **Canvas** (canvas): the page, panels, cards and controls (dark-canvas, and dark-card for panels and controls, in dark).
+- **Cool Paper** (sidebar): the sidebar and the board's column wells.
+- **Mist** (muted): hover and pressed fills, the secondary button, code chips, disabled fields.
+- **Ink** (ink) and **Slate Ink** (ink-2): text and secondary text (ink-2 is 5.8:1 on the sidebar).
+- **Hairline** (rule): every divider and panel border.
+- **Control Stroke** (input-stroke): input and checkbox borders, 3:1 or more on canvas and sidebar in both themes (WCAG 1.4.11).
 
 ### Named Rules
-**The Red Pen Rule.** Red pen marks what went wrong and nothing else: a failed result, an error, a destructive act. It is never decoration, never a highlight, never a brand accent.
+**The Hue Beside Its Words Rule.** A status hue is only ever a dot, a track segment, a funnel bar labelled with its stage or a chart fill next to the words that name it. Light amber (2.2:1 on the sidebar) and slate (3:1) are accepted only that way, never alone as a bar, stripe, icon or text colour. Anything that must read alone takes the `-ink` token.
 
-**The One Ramp Rule.** Every neutral is a step of the navy ink ramp. Do not introduce Tailwind grays or slates; pencil is the single exception and it is reserved for the pending mark.
+**The Violet Acts Rule.** Violet is for the primary action, what is selected or current, and focus. It never colours an error, and as a status it always comes with its pill's words.
 
-**The Cover Rule.** Folder green is a field color. It fills whole bands and columns; on card stock it appears only as the primary button, focus ring and link.
+**The Paired Theme Rule.** Every pair is checked in light and dark: text 4.5:1 or more, UI strokes and meaningful fills 3:1 or more. A new token lands with its dark value and both ratios.
 
 ## Typography
 
-**Display Font:** Libre Franklin (with ui-sans-serif, system-ui)
-**Body Font:** Libre Franklin
-**Hand Font:** Kalam 400/700 (with Bradley Hand, cursive)
+**Display Font:** Inter (Anuphan for Thai, then ui-sans-serif, system-ui)
+**Body Font:** Inter (Anuphan for Thai)
+**Label/Mono Font:** the system mono, only for record numbers, commands and code
 
-**Character:** A printed school form filled in by hand. Franklin is set heavy and tight for headings and small, tracked and capitalized for labels; Kalam is loose and human, and appears only where a person has written on the form.
+**Character:** One neutral grotesk carries everything, set tight and bold only at landing scale; Anuphan takes over glyph by glyph for Thai, which gets looser line-heights and no tracking.
 
 ### Hierarchy
-- **Display** (800, 2.75rem to 3.75rem to 4.25rem, 1.02, -0.035em): the hero headline on folder green. The 404 title and closing band use 800 at 1.875-3rem.
-- **Headline** (700, 1.875rem to 2.25rem, -0.025em): marketing section heads on card stock.
-- **Page title** (700, 1.75rem to 2rem, 1.25, -0.02em): the single h1 of an app page in PageHeader.
-- **Title** (600, 1.125rem, 1.375, -0.01em, ink-950): card titles; the sample card title runs 700 at 1.25-1.5rem.
-- **Lead** (400, 1.125rem, 1.625): intro paragraphs, max 34-40ch on marketing, 62ch on About.
-- **Body** (400, 0.9375rem-1rem): descriptions, hints (0.8125rem), sidebar nav (500).
-- **Table** (400, 0.875rem; compact 0.8125rem; tabular): results rows; test names 600 ink-950, scores 600 at 1rem right-aligned.
-- **Figure** (600, 1.875rem, -0.025em, tabular): totals.
-- **Label** (600, 0.6875rem, 0.12em, uppercase, ink-600/700): field labels, column heads, definition terms, the totals captions. Badges use the same cut at 0.1em.
-- **Hand remark** (Kalam 400, 1.25rem to 1.375rem, 1.375, ink-700): the card's remark. **Hand note** (Kalam 400, 0.9375rem, ink-600): row notes and the notes textarea.
+- **Display** (700, 80px on desktop, 60px tablet, 44px phones, 1.02, -0.035em): the landing's one thesis line. Nowhere in the app.
+- **Display Tablet** (display-tablet, 700, 60px, 1.05): the thesis from 640 px and the closing band's heading from 1024 px; **Display Close Phone** (display-close-phone, 40px): the closing band's heading on phones, and the about page's h1 there.
+- **Headline** (700, 44px desktop / 32px phones as **Headline Phone**, headline-phone, 1.1, -0.03em): landing section headings.
+- **Record Title** (600, 24px, -0.01em): a record's name in its header, the record form's name input, and the auth aside's statement.
+- **Title** (600, 20px, 28px leading): a page's h1 (lists, settings, a state that stands in for a page); the dashboard's line of figures.
+- **Language Sample** (language-sample, 600, 26px): the landing's three language samples. **Desk Statement** (desk-statement, 500, 22px): the hero desks' statements from 1024 px (18px below).
+- **Body Reading** (400, 15px, relaxed): landing prose and notes, card descriptions, a record header's figure (semibold); the landing lede at 18px.
+- **Body** (400–500, 14px): table cells, buttons, forms, the default.
+- **Row** (500, 13px): toolbar chips, view tabs, inline-add rows, property chips, captions, the panel's location line.
+- **Label** (600, 12px): status pills, the track's stage names, badges; table heads at 500.
+- **Micro** (500, 11px): bylines under a full track, counters, the "More" count, initials in 20 and 24 px avatars and workspace marks.
 
 ### Named Rules
-**The Printed Label Rule.** Small tracked caps are a form's field labels: they sit beside or above a value, a control or a column. They never sit above a heading as a section kicker.
+**The Bracket Size Rule.** Off-scale sizes are written `text-[…rem]`, never as a custom named `text-<name>` utility: the project's `cn` reads an unknown `text-<name>` as a colour and drops the element's text colour. The app's ramp is 11/12/13/14/15/16/20/24 px.
 
-**The Hand Rule.** Kalam is the hand that fills the form: remarks, notes, and a value written onto a printed field (the sample card's name, the 404 stamp). Headings, labels, buttons, navigation and figures are always printed Franklin.
+**The Thai Breathes Rule.** Under `:lang(th)` line-heights open (1.6 on small text, 1.65 body, 1.35 on display, 1.5 in a record form's name input, which would clip its marks) and letter-spacing returns to normal on headings, labels, table heads and badges.
 
-**The Tabular Rule.** Tables, `time` and totals use tabular figures; scores align right.
+**The Tabular Rule.** Tables, times and figures use tabular numerals; record numbers are mono and dimmed.
 
 ## Layout
 
-Marketing pages run in a 1280px container (`max-w-7xl`) with 16/24/32px side padding and a 12-column grid at `lg` (copy on 5 columns, the card on 7). Sections breathe at 80px vertical (112px at `lg`); the hero card hangs 112-176px below the folder band so its lower edge crosses into card stock, and tilts -1.5deg only at `lg`.
+The app is a three-column shell. The **rail** (56 px, ink violet) holds the mark, Home, the inbox, "+ New", the record search below 1024 px, and the account avatar at its foot. The **sidebar** (240 px, cool paper, hairline right edge) holds the workspace switcher, Spaces as a tree of saved views (each space on a 20 px tinted icon chip in its tone, expanding to its views), Insights and Settings; collapsed by the viewer, or by default from 768 to 1279 px, it folds into the rail so there is one strip. Below 768 px the sidebar lives in a drawer, always expanded. The **top bar** (48 px, hairline under) carries the location on the left and, from 1024 px, the "Search ⌘K" field centred (320 px, 384 px from 1280 px).
 
-The app is a 264px folder-green sidebar beside content at `lg`; below `lg` a 56px folder app bar opens the same sidebar in a left sheet. Content sits in a 1152px column with 16/32/48px padding, 32px vertical gaps between blocks. Auth pages split 5:7 with a folder aside (hidden below `lg`) and a 400px form column.
+The canvas pads 28 px on a desktop and 16 px on phones. A list page is: the title with its primary action, view tabs (List · Board) on a hairline, one toolbar line (search, filter chips, More, Group, Sort, Me, archived; Export at the end; below 768 px all but the search move into a "Filters" sheet), then status sections of 36 px rows. The board lays stages as 224–320 px columns on cool-paper wells, scrolling sideways with a canvas-coloured fade at the right edge. A card's track keeps the days in the stage but not the stage's name, which the column already says. Won and Lost start as 40 px strips carrying only the pill and the count down the strip; their totals are the expanded column's. In pipeline settings, Won's and Lost's rows hold empty cells where the open stages have their move and delete controls, so every probability lines up in one column. The record panel slides in from the right at min(920 px, 92vw), with its own 48 px header.
 
-Rhythm is Tailwind's 4px base: 8px inside label/control pairs, 12px row padding (10px compact), 20px card padding (12px small cards), 24px in key and field lists, 32px between page blocks. Breakpoints are Tailwind defaults (640/768/1024/1280px).
+The landing is a 76 rem (1216 px) frame: a full-bleed violet band holding the nav, the sample deal, the thesis and two desks split by a white hairline; the board capture laid across the band's lower edge; then rows with an 800 px main column and a hairline developer margin beside each.
+
+Spacing runs on the 4 px grid; 6 px gaps inside controls and between toolbar items; landing rows pad 64–88 px vertically.
+
+### Named Rules
+**The Control Height Rule.** Rows are 36 px. Controls (buttons, inputs, chips) are 32 px from 640 px and 36 px on phones. 44 px actions exist on the landing only (the hero's and the closing band's two buttons).
 
 ## Elevation & Depth
 
-Depth is physical and shallow: a card lying on a desk, a control ply on the card, and the hero card lifted off the folder. Three shadows only; everything else is flat with ruled borders.
+Flat by default, with depth from tone (rail, sidebar, canvas) and hairlines. Panels, cards, tables and controls carry no shadow; the demos' ply and sheet shadow tokens resolve to nothing. Shadows appear only on layers that float above the page.
 
 ### Shadow Vocabulary
-- **Paper** (`box-shadow: 0 1px 0 rgb(17 27 48 / 6%), 0 2px 4px -2px rgb(17 27 48 / 10%), 0 24px 48px -24px rgb(10 32 22 / 45%)`): the lifted card: the landing sample card, the 404 card, alert dialog, sheets, the mark tiles on the auth aside.
-- **Sheet** (`box-shadow: 0 1px 0 rgb(17 27 48 / 5%), 0 1px 3px rgb(17 27 48 / 8%)`): app cards and the totals strip, lying flat.
-- **Ply** (`box-shadow: 0 1px 2px rgb(17 27 48 / 10%)`): every control: inputs, selects, textareas, filled and outline buttons.
+- **Float** (`box-shadow: 0 4px 12px -2px rgb(29 26 46 / 10%), 0 12px 28px -6px rgb(29 26 46 / 14%)`): menus, popovers, tooltips, the chart tooltip, the skip link, the bulk bar and its alert; a board card on hover (it can be picked up) and its dragged copy.
+- **Overlay** (`box-shadow: 0 12px 32px -8px rgb(29 26 46 / 18%), 0 32px 64px -16px rgb(29 26 46 / 24%)`): the record panel and sheets, dialogs, and the landing's capture sheet that crosses the band.
+- In dark both switch to black (35/45% and 45/55%).
 
 ### Named Rules
-**The White Ply Rule.** Controls sit on their own white ply (#ffffff, ply shadow, ink-300 border) above the printed card. A control never takes the card's face color, and printed content never takes the ply.
+**The Only What Floats Rule.** A shadow means "this is above the page". Panels lie flat on hairlines; nothing at rest is lifted.
 
 ## Shapes
 
-Corners are barely softened, like trimmed card: 3.6px for app cards, badges and the totals strip; 4.8px for buttons, inputs and nav items; 6px for the lifted paper and dialogs. The only round shape is the 404 stamp's pen ellipse.
+Gently rounded and consistent: 6 px for controls (buttons, inputs, chips, nav items, tooltips), 8 px for panels, cards, menus, popovers, dialogs and board columns, 12 px for the top of a phone's bottom sheet; full round for status pills, avatars, track segments and counters. Space icon chips have 5 px corners. Borders are 1 px hairlines; control borders take the 3:1 stroke. Unassigned is a dashed ring.
 
-Structure comes from rules, not boxes. Row rules are 1px ink-200; the table head and section edges are 1px ink-300. **The Double Rule Rule.** Every header band (card headers in the app, PageHeader, the About header, the loading card, the sample card head, the edge of the key and the row breakdown) closes with a 3px double rule in ink-300; it is the system's signature line and is not used mid-content.
+The orbit mark is a 290° arc (stroke 3 on a 24 grid) open at the upper right, with a solid satellite dot beyond the gap, drawn in `currentColor`: violet on light, white on the rail and brand fields, violet on white in the app icon.
+
+### Named Rules
+**The Satellite Rule.** The mark's satellite (a 6 px dot) marks what is current: the active rail item, the current sidebar item and the current stage on a track, at the upper right as in the mark. It is decorative and never the only cue: the item is also filled, set heavier or named.
 
 ## Components
 
 ### Buttons
-Printed tabs on a ply: firm, flat, small.
-- **Shape:** 4.8px radius; heights 28/32/36/44px (xs/sm/default/lg), 600 weight, a 1px press-down on active.
-- **Primary:** folder green on folder ink with the ply shadow; hover goes to folder deep.
-- **Inverse / Inverse ghost:** for folder fields only. Inverse is folder ink with green text (hover to white); inverse ghost is text-only folder ink with a 10% white hover.
-- **Outline:** white ply, ink-300 border, ink-900 text; hover to ink-400 border and card face.
-- **Ghost / Secondary / Link:** ink-700 text with ink-100 hover; ink-100 fill; folder-green underlined text.
-- **Destructive:** red pen fill, white text, deeper red hover; only in the delete confirmation.
-- **Focus:** 2px ring in folder green (folder ink on green fields) offset 2px.
+- **Shape:** gently rounded (6 px), flat, 32 px tall (36 px on phones), 14 px medium, 12 px sides.
+- **Primary:** violet fill, white text; hover violet-hover; pressed nudges down 1 px.
+- **Hover / Focus:** 150 ms colour transitions; a 2 px violet ring with a 2 px offset in the background colour.
+- **Outline / Ghost / Secondary:** a hairline on the canvas, a bare text button, or a mist fill; all hover to mist.
+- **Destructive:** red-ink fill with white in light; in dark a 10% red tint with red-ink text (14% on hover, 4.58:1).
+- **Landing:** on violet fields the main action is white with violet text (6.25:1 in both themes) and the second a white outline; both 44 px, 15 px text, ringed in white.
 
-### Badges
-- **Style:** the "Sample data" tag: ply fill, ink-300 border, tracked caps label, 3.6px radius, 24px high. Status is never a badge; it is a mark.
+### Status Pill (signature)
+A 24 px full-round pill: the tone's tint, its ink at 12 px semibold, an 8 px dot in the hue. With a menu it is the control: a chevron, the tone's border on hover and while open, read as "Status: Qualified". While a change is on its way (pending) a spinner replaces the dot and it is busy; pending or disabled, it keeps the focus but opens nothing (disabled at 60% opacity). Its look lives with the status colours so server-drawn pages (the landing, the sign-in sample, board headings) draw it without the menu code.
+
+### Status Track
+A deal's progress as 6 px full-round segments, one per open stage, filled in the stage's hue up to the current one (hairline grey after), the satellite over the current segment, and the stage's name in its ink with the days in it beside. Full (in a record header) writes each stage's name under its segment, and who moved the deal there and when. Every segment has a tooltip and screen-reader text; the track is named "Stage 2 of 4: Needs analysis".
+
+### Status Section
+A grouped list's group: a 36 px heading that is the collapse button (caret, the status pill or an owner, the count in muted tabular figures), a hairline, its rows, and "View all N" in violet ink when it shows only some.
+
+### Lists and Rows
+36 px rows on hairlines, 12 px cell padding, 12 px muted table heads. A 16 px select box leads each row (shown on the row's hover or focus, on touch, and while anything is selected; the head's box selects its section and shows a dash while only some is); a selected row takes the violet tint. The record's name is the link (underlined on hover), its number in dimmed mono beside it (hidden on phones), a "…" menu at the end. On a phone (below 640 px) the column heads go (sort lives under the toolbar), the select boxes always show (a 36 px target), a section's select-all box moves into its heading row before the pill (an ungrouped list gets a "Select all" line above it), the name wraps, and a second 13 px muted line under it says what the hidden columns would: a deal's amount (tabular, in ink), its owner's avatar and expected close; a lead's owner and source; a company's owner and industry; a contact's owner and company; a task's due time (short, "Oct 20, 4:40 PM", the year only outside the current one, never cut) and linked records. Each value on that line is preceded, for screen readers, by its column's name (sr-only), as the missing head would say it. Its "…" is a 36 px control there. A task row completes from a round status circle (in the control stroke, filling Completed green), apart from its square select box; a record's linked records are set apart by a middle dot. **Inline Add Row:** the last row of a list or group, a + over the select boxes and muted 13 px text where the names start; typed into, Enter creates, the row waits for the server (spinner), and an error stays under it with the text kept.
+
+### Bulk Bar
+While rows are selected, an ink-violet toolbar (rail; in dark the lighter rail-raised ink, dark-rail-raised, so it stands off the violet-black canvas by its fill, not only its ring; 8 px corners, the float shadow, a 10% white ring; one Tab stop, the arrow keys moving between its controls) rendered into a sticky slot at the foot of the shell's canvas, so it stays 16 px above the foot of the screen, centred over the canvas, and the page's scroll padding keeps what takes the focus above it: "N selected" in 13 px semibold, then only the actions every selected record allows as rail-style controls (white at 80%, a white wash on hover or open, the on-rail focus ring), menus opening upward, and × to clear. It keeps to one row: below 640 px each action is its icon alone (named for assistive technology, its name in a tooltip there on a device with hover; from 640 px the words show and there is none), and should the actions still not fit they scroll inside the bar between the count and ×, never the page. While records are on their way it counts them ("Updating 3 of 7") with a spinner; refusals rise above it in a popover-coloured alert, a red-ink icon and the count, then each record by name with the server's reason. While anything is selected, a section's select-all box and each ticked row's box are followed by a "Go to bulk actions" skip button, hidden until focused, then shown just above the bar (canvas field, 14 px semibold, the float shadow), which hands the focus to the bar past the rest of the rows.
+
+### Chips (toolbar)
+- **Style:** a 32 px control on a hairline over the canvas, 13 px medium. Filter Chip, Group, Sort and Me share it.
+- **State:** on, it fills violet-tint with violet-ink text; a set **Filter Chip** shows its value (cut short, whole in its tooltip) and an × that clears it. **More Filters** gathers rare filters behind one chip with a violet count badge. The Reports' **Owner** chip is the list's owner filter without Unassigned; an owner it cannot count (no member of the workspace) is dropped before asking, and the whole workspace's report shows under a notice: a hairline card with an amber-ink warning triangle, a semibold title, a muted sentence and a violet-ink link back.
+
+### View Tabs
+List · Board as 36 px links, 13 px medium, muted until current; the current one is ink with a 2 px violet-ink underline on the tabs' hairline.
+
+### Record Panel and Record Form
+The panel is a right sheet at min(920 px, 92vw) with the overlay shadow, a 48 px hairline header (the location in 13 px muted, open-full-page and ×), and the record's page inside. A record form opens on the name as a 24 px semibold input with no field surface until hovered, then a wrapping row of **Property Chips**: 32 px hairline chips with an icon and the value (the property's name, muted, while empty) that open the field in a popover; an error turns the chip red and is written under the row.
 
 ### Cards / Containers
-- **Corner Style:** 3.6px (app card), 6px (paper).
-- **Background:** card face (#f5f8f3).
-- **Shadow Strategy:** sheet for app cards, paper for lifted surfaces.
-- **Border:** 1px ink-200 on app cards; paper has none.
-- **Internal Padding:** 20px (12px small); headers close with the double rule.
+- **Corner Style:** 8 px.
+- **Background:** canvas (dark-card in dark); board wells in cool paper.
+- **Shadow Strategy:** none at rest (see Elevation & Depth).
+- **Border:** 1 px hairline.
+- **Internal Padding:** 20 px (12 px for small and board cards).
 
 ### Inputs / Fields
-- **Style:** white ply, 1px ink-300 border, ply shadow, 4.8px radius, 40px high, 15px text on `sm+`, ink-400 placeholder.
-- **Focus:** border to folder green plus a 3px folder ring at 20%.
-- **Error / Disabled:** red pen border with a 3px pen ring at 15%, message below in red pen 13px 500; disabled fills ink-100 at 60% opacity.
-- **FormField:** printed label (tracked caps) with an optional aside on the same line, the control, then a hint or the error. Form-level failures use FormAlert: a pen-tinted box (6% fill, 30% border) at the top of the form, never a toast. The notes textarea is set in the hand face.
+- **Style:** canvas fill, 1 px control stroke deepening to slate ink on hover, 6 px corners, 32 px (36 px on phones), 16 px text on phones (no zoom on focus) and 14 px from 640 px.
+- **Focus:** the page's 2 px violet outline with a 2 px offset.
+- **Error / Disabled:** red-ink border; disabled on mist at 60%.
 
 ### Navigation
-- **Marketing:** a 64px folder header: wordmark left, About as inverse ghost, Sign in (inverse ghost) and Create account (inverse) right, language switcher; on phones About and language move to the footer.
-- **App:** sidebar items 40px, 15px 500, Lucide icon at 18px; rest in folder ink soft, hover 8% white, current item on folder deep with an inner top highlight. Signed-in email and sign-out sit under a 12% white rule at the bottom.
+Rail items are 40 px, white at 75% on ink violet, hovering to white on a 10% white wash; the current one is filled violet with an inset white hairline and the satellite. Sidebar items are ink on cool paper; the current page is violet-tint with semibold violet ink and the satellite; a space holding the current view is set semibold in violet ink. "+ New" is a 36 px white disc on the rail. On phones the rail and sidebar move into a drawer; the top bar keeps the search and the inbox as icons.
 
-### Report Card (signature)
-- **Mark:** a 24px-viewbox SVG stroke with round caps (tick 2.6, circle 2.2, box 1.8 stroke width) in pass, pen or pencil. Decorative; always paired with the status text (hidden visually on phones in tables).
-- **ResultsTable:** columns test (with hand note below), status, score, tested at (date folds under the name on phones). Empty state keeps three blank ruled 48px rows under the message.
-- **TotalsStrip:** a 4-cell ruled box (2x2 on phones) of label plus 30px tabular figure; the failed count turns red pen only when above zero.
-- **SampleCard:** paper surface with double-rule head, a name line filled in by hand, compact rows, and a remark that writes on after the marks.
-- **Motion:** stroke draw 700ms on `cubic-bezier(0.16, 1, 0.3, 1)`, staggered 220ms on the landing (from 500ms) and 150ms for fresh app rows; remark write-on 900ms at 1.6s; key marks draw on scroll via `animation-timeline: view()` where supported.
+### Person Avatar
+Round, white semibold initials on the member's colour (20, 24 or 32 px); unassigned is a dashed ring in the control stroke. With a title it is an image of the name with a tooltip.
+
+### Crm State
+What stands in for a page or panel (an error, no access, nothing found): a 40 px icon tile (mist, or the red tint and ink for an error), a 20 px semibold title, one or two sentences in muted text (60ch), then the ways on as buttons.
+
+### Landing
+The app's world on a public page: violet bands (header, hero, closing) carrying white, the deep violet tint in dark; commands in mono on ink violet; a sample deal drawn in HTML from the app's own pill and track (its track fills in 600 ms, already filled under reduced motion); real captures of the demo workspace as sheets with the overlay shadow, each beside a hairline developer note whose first words name the spot it rings on the capture when hovered; the three language samples (26 px) each carry their language's name after them as a 13 px muted caption. No eyebrows or kickers above a heading or sample. Every shipping raster carries a `.webp.json` provenance sidecar saying how it was made (real capture, by which script, when).
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** fill whole bands and columns with folder green (#1f5c45) and keep work on card stock (#e8eee6 / #f5f8f3).
-- **Do** put every control on the white ply (#ffffff, ply shadow, ink-300 border).
-- **Do** close every card and page header with the 3px double rule in ink-300.
-- **Do** show status as the drawn Mark plus its name, and keep empty tables ruled.
-- **Do** use tabular figures for every score, date and total.
-- **Do** keep marks static under `prefers-reduced-motion`.
+- **Do** apply status colour through `data-tone` and its hue, tint and ink; write status words in the ink.
+- **Do** put a status hue only beside the words that name it (dots, track segments, chart fills).
+- **Do** keep rows at 36 px and controls at 32 px (36 px on phones); keep 44 px for the landing's two main actions.
+- **Do** separate with 1 px hairlines and lie panels flat; give shadows only to menus, popovers, tooltips, the bulk bar, the record panel, sheets and dialogs.
+- **Do** mark the current item with the satellite plus a fill, weight or name.
+- **Do** write off-scale sizes as `text-[…rem]`.
+- **Do** check every new pair in light and dark: 4.5:1 for text, 3:1 for strokes and meaningful fills.
+- **Do** give every shipping raster a `.webp.json` provenance sidecar.
 
 ### Don't:
-- **Don't** use red pen (#c42f2a) for anything but failed marks, errors and destructive actions.
-- **Don't** set headings, labels, buttons, navigation or figures in Kalam; the hand face is for remarks, notes and written-in entries.
-- **Don't** put a tracked-caps kicker or eyebrow above a heading; tracked caps are field labels only.
-- **Don't** render status as colored pills or badges.
-- **Don't** add neutrals outside the navy ink ramp.
-- **Don't** add shadows beyond paper, sheet and ply, or a dark theme.
+- **Don't** use light amber or slate alone as a bar, stripe, icon or text colour.
+- **Don't** add a custom named `text-<size>` utility; `cn` drops the element's colour.
+- **Don't** shadow a panel, card or table at rest.
+- **Don't** let the satellite or a colour be the only cue for what is current or what a status is.
+- **Don't** use ClickUp's name, logo, violet or gradient.
+- **Don't** use the boilerplate demo's Marksheet tokens (`paper`, `folder`, `ink-*`, `pass`, `pen`, `pencil`, `.form-label`, `.paper`) in new UI; they exist for the /dashboard demos only.

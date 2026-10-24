@@ -1,14 +1,16 @@
 'use client';
 
 import { ErrorState } from '@/components/ErrorState';
+import { PublicFrame } from '@/components/PublicFrame';
 
+// The public pages' error: the wordmark over the canvas, and the error's card on it.
 export default function ErrorPage(props: {
   error: Error & { digest?: string };
   retry: () => void;
 }) {
   return (
-    <main className="grid min-h-dvh place-items-center px-4 py-16">
+    <PublicFrame>
       <ErrorState retry={props.retry} />
-    </main>
+    </PublicFrame>
   );
 }

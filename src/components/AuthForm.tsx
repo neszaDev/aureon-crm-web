@@ -10,11 +10,17 @@ import { FormAlert } from '@/components/FormAlert';
 import { describedBy, FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { applyFieldErrors } from '@/libs/form/ApplyFieldErrors';
+import { useSettle } from '@/utils/SettleAction';
 import type { AuthValues } from '@/validations/AuthValidation';
 import { SignInValidation, SignUpValidation } from '@/validations/AuthValidation';
 
+// The auth pages hold one form each: their fields and button are a size up (40 px).
+const FIELD = 'h-10 sm:h-10';
+
 export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
   const t = useTranslations('AuthForm');
+  const settle = useSettle();
   const [formError, setFormError] = useState<string>();
   const form = useForm<AuthValues>({
     resolver: zodResolver(props.mode === 'sign-in' ? SignInValidation : SignUpValidation),
@@ -25,25 +31,27 @@ export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(undefined);
+    // Read at submit so the auth pages stay static; the action checks it with safeNextPath.
+    const next = new URLSearchParams(window.location.search).get('next');
     // On success the action redirects, so a result means something went wrong.
-    const result = await (isSignUp ? signUp(values) : signIn(values));
+    const result = await settle(isSignUp ? signUp(values, next) : signIn(values, next));
 
-    for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
-      if (field === 'email' || field === 'password') {
-        form.setError(field, { type: 'server', message });
-      }
-    }
-    setFormError(result.message);
+    setFormError(
+      applyFieldErrors(form, result, (name) =>
+        name === 'email' || name === 'password' ? name : undefined,
+      ).message,
+    );
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
       {formError && <FormAlert>{formError}</FormAlert>}
 
       <FormField htmlFor="email" label={t('email_label')} error={errors.email}>
         <Input
           id="email"
           type="email"
+          className={FIELD}
           autoComplete="email"
           inputMode="email"
           aria-invalid={errors.email ? true : undefined}
@@ -61,6 +69,7 @@ export const AuthForm = (props: { mode: 'sign-in' | 'sign-up' }) => {
         <Input
           id="password"
           type="password"
+          className={FIELD}
           autoComplete={isSignUp ? 'new-password' : 'current-password'}
           aria-invalid={errors.password ? true : undefined}
           aria-describedby={errors.password || isSignUp ? describedBy('password') : undefined}
