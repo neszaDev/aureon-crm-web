@@ -142,7 +142,7 @@ test.describe('Records', () => {
     await page.goto(`${owner.path}/deals?view=list`);
     await expect(page.getByRole('heading', { name: '1 deal', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: DEALS.tablets })).toBeVisible();
-    await expect(page.getByText('€1,250.00')).toBeVisible();
+    await expect(page.getByRole('cell', { name: '€1,250.00' })).toBeVisible();
     await page.goto(`${owner.path}/companies`);
     await expect(page.getByRole('heading', { name: '1 company' })).toBeVisible();
   });
@@ -845,6 +845,72 @@ test.describe('Records', () => {
       await expect(page.getByRole('heading', { name: '1 company' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Filters 1 filter on' })).toBeVisible();
       await expectNoSidewaysScroll(page, `${owner.path}/companies?group=owner`);
+    });
+
+    test('gives each row a second line of what matters, under no column heads', async ({
+      page,
+      request,
+    }) => {
+      const owner = await seedWorkspace(request, { owner: PEOPLE.owner });
+      const source = await apiCall<{ id: number }>(
+        request,
+        owner,
+        'POST',
+        `/workspaces/${owner.workspaceId}/lead-sources`,
+        { name: 'Trade show' },
+      );
+      const company = await seed(request, owner, 'companies', {
+        name: COMPANIES.brightwater.name,
+        industry: 'Logistics',
+      });
+      await seed(request, owner, 'contacts', { ...CONTACTS.buyer, companyId: company.id });
+      await seed(request, owner, 'leads', { ...MORE_LEADS[0], sourceId: source.id });
+      await seed(request, owner, 'deals', {
+        name: DEALS.tablets,
+        amount: '1250.00',
+        expectedCloseDate: '2030-11-12',
+      });
+      await signIn(page, { email: owner.email, password: PASSWORD });
+      const row = (name: string) => page.getByRole('main').getByRole('row', { name });
+
+      await expectFits(page, { url: `${owner.path}/deals?view=list` });
+      // The stage's section says the stage; the row its amount, owner and expected close.
+      await expect(
+        row(DEALS.tablets).getByText('€1,250.00').filter({ visible: true }),
+      ).toBeVisible();
+      await expect(row(DEALS.tablets).getByRole('img', { name: PEOPLE.owner })).toBeVisible();
+      await expect(
+        row(DEALS.tablets).getByText('Nov 12, 2030').filter({ visible: true }),
+      ).toBeVisible();
+      await expect(page.getByRole('columnheader')).toHaveCount(0);
+      // Its menu is a phone's 36 px control.
+      const menu = await row(DEALS.tablets)
+        .getByRole('button', { name: `Actions for ${DEALS.tablets}` })
+        .boundingBox();
+      expect(menu?.height).toBe(36);
+
+      const lead = `${MORE_LEADS[0]?.firstName} ${MORE_LEADS[0]?.lastName}`;
+      await expectFits(page, { url: `${owner.path}/leads` });
+      await expect(row(lead).getByText(PEOPLE.owner).filter({ visible: true })).toBeVisible();
+      await expect(row(lead).getByText('Trade show').filter({ visible: true })).toBeVisible();
+
+      await expectFits(page, { url: `${owner.path}/companies` });
+      await expect(
+        row(COMPANIES.brightwater.name).getByText(PEOPLE.owner).filter({ visible: true }),
+      ).toBeVisible();
+      await expect(
+        row(COMPANIES.brightwater.name)
+          .getByText('Logistics', { exact: true })
+          .filter({ visible: true }),
+      ).toBeVisible();
+
+      await expectFits(page, { url: `${owner.path}/contacts` });
+      const buyer = `${CONTACTS.buyer.firstName} ${CONTACTS.buyer.lastName}`;
+      await expect(row(buyer).getByText(PEOPLE.owner).filter({ visible: true })).toBeVisible();
+      await expect(
+        row(buyer).getByText(COMPANIES.brightwater.name).filter({ visible: true }),
+      ).toBeVisible();
+      await expect(page.getByRole('columnheader')).toHaveCount(0);
     });
 
     test('scrolls the Unqualify and Convert dialogs to their buttons', async ({

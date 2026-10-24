@@ -283,7 +283,8 @@ export const TaskRow = (props: {
         </span>
       </TableCell>
       {!props.compact && (
-        <TableCell className="whitespace-normal">
+        // Its width on a phone, whose list has no head row to set it.
+        <TableCell className="whitespace-normal max-sm:w-32">
           <TaskStatusPill
             task={props.task}
             workspaceId={props.workspaceId}

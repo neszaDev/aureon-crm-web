@@ -4,7 +4,7 @@ import { archiveLead, restoreLead } from '@/actions/crm/LeadActions';
 import { isFollowUpOverdue, LeadFollowUp } from '@/components/crm/lead/LeadFollowUp';
 import { LeadStatusPill } from '@/components/crm/lead/LeadStatusPill';
 import { SelectAllHead } from '@/components/crm/list/BulkSelect';
-import { OwnerCell } from '@/components/crm/list/OwnerCell';
+import { OwnerCell, OwnerName } from '@/components/crm/list/OwnerCell';
 import { RecordRow } from '@/components/crm/list/RecordRow';
 import { RowMenu } from '@/components/crm/list/RowMenu';
 import { SortHeader } from '@/components/crm/list/SortHeader';
@@ -30,8 +30,8 @@ const none = <span className="text-muted-foreground">—</span>;
  * that changes it), the priority flag, the follow-up date (an overdue one in red), owner,
  * estimated value, when it was created, and the row menu (archive, or restore) where the caller
  * may change it. Name, priority, follow-up and "Created" sort the list. A phone shows name and
- * status (in a status's section, its heading says the status: the name has the row); wider screens
- * add columns.
+ * status (in a status's section, its heading says the status: the name has the row) under no
+ * column heads, and under the name the owner and the source; wider screens add columns.
  * @param props Component props.
  * @param props.rows The leads.
  * @param props.path The list's path; a lead's page is under it.
@@ -61,7 +61,8 @@ export const LeadTable = (props: {
   return (
     // Fixed columns, so the groups of a grouped list line up.
     <Table className="table-fixed">
-      <TableHeader>
+      {/* A phone's rows say what they hold; its sort is under the toolbar. */}
+      <TableHeader className="max-sm:hidden">
         <TableRow>
           <SelectAllHead />
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
@@ -117,6 +118,12 @@ export const LeadTable = (props: {
               name={name}
               href={`${props.path}/${lead.id}`}
               number={recordNumber('lead', lead.id)}
+              detail={
+                <>
+                  <OwnerName owner={lead.owner} />
+                  {lead.source && <span className="break-words">{lead.source.name}</span>}
+                </>
+              }
               menu={
                 mayEdit && (
                   <RowMenu
@@ -137,7 +144,9 @@ export const LeadTable = (props: {
                   none
                 )}
               </TableCell>
-              <TableCell className={cn('whitespace-normal', byStatus && 'max-sm:hidden')}>
+              <TableCell
+                className={cn('whitespace-normal', byStatus ? 'max-sm:hidden' : 'max-sm:w-36')}
+              >
                 <LeadStatusPill
                   workspaceId={props.workspace.id}
                   lead={lead}

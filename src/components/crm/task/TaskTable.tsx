@@ -52,8 +52,8 @@ export const TaskTable = (props: {
   return (
     <Table className={cn(props.fixed && 'table-fixed')}>
       {/* A compact list's section already says what its rows are: the head is for assistive
-          technology only. */}
-      <TableHeader className={cn(props.compact && 'sr-only')}>
+          technology only. A phone's rows say what they hold, and its sort is under the toolbar. */}
+      <TableHeader className={props.compact ? 'sr-only' : 'max-sm:hidden'}>
         <TableRow>
           {props.selectable && <SelectAllHead />}
           <TableHead className="w-10 pr-0">

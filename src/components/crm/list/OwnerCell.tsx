@@ -5,6 +5,26 @@ import { TableCell } from '@/components/ui/table';
 import type { components } from '@/libs/api/schema';
 
 /**
+ * A record's owner on a phone row's second line (`RecordRow`'s `detail`): their small avatar and
+ * name, or the dashed ring and "Unassigned". The name wraps, since a phone can't hover a title.
+ * @param props Component props.
+ * @param props.owner The record's owner, if any.
+ * @returns The owner.
+ */
+export const OwnerName = (props: { owner?: components['schemas']['MemberRef'] }) => {
+  const t = useTranslations('RecordList');
+
+  return (
+    <span className="flex min-w-0 items-center gap-1.5">
+      <PersonAvatar person={props.owner} size="xs" />
+      <span className="min-w-0 break-words">
+        {props.owner ? (props.owner.displayName ?? props.owner.email) : t('unassigned')}
+      </span>
+    </span>
+  );
+};
+
+/**
  * A list row's owner: their avatar and name, or "Unassigned". From 640 px the name keeps to one
  * line, and one too long for the cell is cut short, in full as its title; below that it wraps,
  * since a phone can't hover a title.

@@ -2,7 +2,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { archiveContact, restoreContact } from '@/actions/crm/ContactActions';
 import { TagBadge } from '@/components/crm/contact/TagBadge';
 import { SelectAllHead } from '@/components/crm/list/BulkSelect';
-import { OwnerCell } from '@/components/crm/list/OwnerCell';
+import { OwnerCell, OwnerName } from '@/components/crm/list/OwnerCell';
 import { RecordRow } from '@/components/crm/list/RecordRow';
 import { RowMenu } from '@/components/crm/list/RowMenu';
 import { SortHeader } from '@/components/crm/list/SortHeader';
@@ -30,6 +30,7 @@ const none = <span className="text-muted-foreground">—</span>;
  * Contacts as list rows: the box that selects one for a bulk action, the name with its record
  * number, company, email, phone, owner, the first tags, when it last changed, and the row menu
  * (archive, or restore) where the caller may change it. Name, company and "Updated" sort the list.
+ * A phone shows the name under no column heads, and under it the owner and the company.
  * @param props Component props.
  * @param props.rows The contacts.
  * @param props.path The list's path; a contact's page is under it.
@@ -58,7 +59,8 @@ export const ContactTable = (props: {
   return (
     // Fixed columns, so the groups of a grouped list line up.
     <Table className="table-fixed">
-      <TableHeader>
+      {/* A phone's rows say what they hold; its sort is under the toolbar. */}
+      <TableHeader className="max-sm:hidden">
         <TableRow>
           <SelectAllHead />
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
@@ -75,7 +77,7 @@ export const ContactTable = (props: {
           <TableHead title={t('phone')} className="w-[9%] truncate max-lg:hidden">
             {t('phone')}
           </TableHead>
-          <TableHead title={t('owner')} className="w-[13%] truncate max-sm:w-32">
+          <TableHead title={t('owner')} className="w-[13%] truncate">
             {t('owner')}
           </TableHead>
           <TableHead title={t('tags')} className="w-[13%] truncate max-lg:hidden">
@@ -101,6 +103,12 @@ export const ContactTable = (props: {
             name={contact.fullName}
             href={`${props.path}/${contact.id}`}
             number={recordNumber('contact', contact.id)}
+            detail={
+              <>
+                <OwnerName owner={contact.owner} />
+                {contact.company && <span className="break-words">{contact.company.name}</span>}
+              </>
+            }
             menu={
               canEditRecord(props.workspace, props.me, contact.owner?.userId) && (
                 <RowMenu
@@ -137,7 +145,7 @@ export const ContactTable = (props: {
             <TableCell title={contact.phone} className="truncate tabular-nums max-lg:hidden">
               {contact.phone ?? none}
             </TableCell>
-            <OwnerCell owner={contact.owner} />
+            <OwnerCell owner={contact.owner} className="max-sm:hidden" />
             <TableCell className="max-lg:hidden">
               {contact.tags.length > 0 ? (
                 <span className="flex items-center gap-1">

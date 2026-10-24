@@ -1,4 +1,5 @@
 import { cn } from 'cn';
+import { CalendarIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { archiveDeal, restoreDeal } from '@/actions/crm/DealActions';
 import { DealStagePill } from '@/components/crm/deal/DealStagePill';
@@ -7,6 +8,7 @@ import { OwnerCell } from '@/components/crm/list/OwnerCell';
 import { RecordRow } from '@/components/crm/list/RecordRow';
 import { RowMenu } from '@/components/crm/list/RowMenu';
 import { SortHeader } from '@/components/crm/list/SortHeader';
+import { PersonAvatar } from '@/components/crm/PersonAvatar';
 import {
   Table,
   TableBody,
@@ -31,7 +33,8 @@ const none = <span className="text-muted-foreground">—</span>;
  * the row menu (archive, or restore) where the caller may change it. Name, amount, close date and
  * "Updated" sort the list (a deal row carries no creation date, so "Created" sorts from the
  * toolbar). A phone shows name and stage (in a stage's section, its heading says the stage: the
- * name has the row); wider screens add columns.
+ * name has the row) under no column heads, and under the name the amount, the owner's avatar and
+ * the expected close; wider screens add columns.
  * @param props Component props.
  * @param props.rows The deals.
  * @param props.path The deals page's path; a deal's page is under it.
@@ -57,13 +60,15 @@ export const DealTable = (props: {
 }) => {
   const t = useTranslations('DealTable');
   const tList = useTranslations('ListToolbar');
+  const tRecord = useTranslations('RecordList');
   const locale = useLocale();
   const byStage = props.query.group === 'stage';
 
   return (
     // Fixed columns, so the groups of a grouped list line up.
     <Table className="table-fixed">
-      <TableHeader>
+      {/* A phone's rows say what they hold; its sort is under the toolbar. */}
+      <TableHeader className="max-sm:hidden">
         <TableRow>
           <SelectAllHead />
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
@@ -115,6 +120,29 @@ export const DealTable = (props: {
               name={deal.name}
               href={`${props.path}/${deal.id}`}
               number={recordNumber('deal', deal.id)}
+              detail={
+                <>
+                  <span className="font-medium text-foreground tabular-nums">
+                    {formatMoney(deal.amount, deal.currency, locale)}
+                  </span>
+                  <PersonAvatar
+                    person={deal.owner}
+                    size="xs"
+                    title={
+                      deal.owner
+                        ? (deal.owner.displayName ?? deal.owner.email)
+                        : tRecord('unassigned')
+                    }
+                  />
+                  {deal.expectedCloseDate && (
+                    <span className="inline-flex items-center gap-1 tabular-nums">
+                      <CalendarIcon aria-hidden="true" className="size-3.5 shrink-0" />
+                      <span className="sr-only">{`${t('close')} `}</span>
+                      {formatDate(deal.expectedCloseDate, locale)}
+                    </span>
+                  )}
+                </>
+              }
               menu={
                 mayEdit && (
                   <RowMenu
@@ -139,7 +167,9 @@ export const DealTable = (props: {
                   none
                 )}
               </TableCell>
-              <TableCell className={cn('whitespace-normal', byStage && 'max-sm:hidden')}>
+              <TableCell
+                className={cn('whitespace-normal', byStage ? 'max-sm:hidden' : 'max-sm:w-32')}
+              >
                 <DealStagePill
                   workspaceId={props.workspace.id}
                   deal={deal}

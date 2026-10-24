@@ -1,7 +1,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { archiveCompany, restoreCompany } from '@/actions/crm/CompanyActions';
 import { SelectAllHead } from '@/components/crm/list/BulkSelect';
-import { OwnerCell } from '@/components/crm/list/OwnerCell';
+import { OwnerCell, OwnerName } from '@/components/crm/list/OwnerCell';
 import { RecordRow } from '@/components/crm/list/RecordRow';
 import { RowMenu } from '@/components/crm/list/RowMenu';
 import { SortHeader } from '@/components/crm/list/SortHeader';
@@ -22,7 +22,8 @@ import { canEditRecord } from '@/libs/crm/RecordAccess';
 /**
  * Companies as list rows: the box that selects one for a bulk action, the name with its record
  * number, industry, owner, contacts, open deals, when it last changed, and the row menu (archive,
- * or restore) where the caller may change it. Name and "Updated" sort the list.
+ * or restore) where the caller may change it. Name and "Updated" sort the list. A phone shows the
+ * name under no column heads, and under it the owner and the industry.
  * @param props Component props.
  * @param props.rows The companies.
  * @param props.path The list's path; a company's page is under it.
@@ -49,14 +50,15 @@ export const CompanyTable = (props: {
   return (
     // Fixed columns, so the groups of a grouped list line up.
     <Table className="table-fixed">
-      <TableHeader>
+      {/* A phone's rows say what they hold; its sort is under the toolbar. */}
+      <TableHeader className="max-sm:hidden">
         <TableRow>
           <SelectAllHead />
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
           <TableHead title={t('industry')} className="w-[16%] truncate max-md:hidden">
             {t('industry')}
           </TableHead>
-          <TableHead title={t('owner')} className="w-[20%] truncate max-sm:w-32">
+          <TableHead title={t('owner')} className="w-[20%] truncate">
             {t('owner')}
           </TableHead>
           <TableHead title={t('contacts')} className="w-[10%] truncate text-right max-lg:hidden">
@@ -85,6 +87,12 @@ export const CompanyTable = (props: {
             name={company.name}
             href={`${props.path}/${company.id}`}
             number={recordNumber('company', company.id)}
+            detail={
+              <>
+                <OwnerName owner={company.owner} />
+                {company.industry && <span className="break-words">{company.industry}</span>}
+              </>
+            }
             menu={
               canEditRecord(props.workspace, props.me, company.owner?.userId) && (
                 <RowMenu
@@ -101,7 +109,7 @@ export const CompanyTable = (props: {
                 {company.industry ?? <span className="text-muted-foreground">—</span>}
               </span>
             </TableCell>
-            <OwnerCell owner={company.owner} />
+            <OwnerCell owner={company.owner} className="max-sm:hidden" />
             <TableCell className="text-right tabular-nums max-lg:hidden">
               {company.contactCount}
             </TableCell>

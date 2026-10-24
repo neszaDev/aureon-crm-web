@@ -53,7 +53,8 @@ export const RowMenu = (props: {
             size="icon-xs"
             aria-label={tList('row_menu', { name: props.name })}
             aria-disabled={isPending || undefined}
-            className="aria-expanded:opacity-100 md:group-focus-within/row:opacity-100 md:group-hover/row:opacity-100 [@media(hover:hover)]:md:opacity-0"
+            // A phone's control is 36 px.
+            className="aria-expanded:opacity-100 max-sm:size-9 md:group-focus-within/row:opacity-100 md:group-hover/row:opacity-100 max-sm:[&_svg]:size-4 [@media(hover:hover)]:md:opacity-0"
           >
             {isPending ? <LoaderCircleIcon className="animate-spin" /> : <EllipsisIcon />}
           </Button>
