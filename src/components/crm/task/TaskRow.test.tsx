@@ -293,6 +293,22 @@ describe(TaskRow, () => {
     ).toBeTruthy();
   });
 
+  it.each([
+    ['full', false],
+    ['compact', true],
+  ])(
+    'lists a %s row\'s linked records under its title on a phone, the first and "+N"',
+    async (_, compact) => {
+      await page.viewport(390, 844);
+      await renderRow({ ...TASK, deal: { id: 4, name: 'Acme renewal' } }, compact);
+
+      await expect.element(page.getByRole('link', { name: 'Acme', exact: true })).toBeVisible();
+      await expect
+        .element(page.getByRole('link', { name: '1 more: Acme renewal' }))
+        .toHaveTextContent('+1');
+    },
+  );
+
   it('lists the linked records on one line, the first and "+N" for the rest, all in its tooltip', async () => {
     await page.viewport(1280, 800);
     await renderRow({

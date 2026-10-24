@@ -113,12 +113,13 @@ export const TaskDue = (props: {
  * A task in a list, a 36 px row: a box that completes it (ticked at once, unticked with a toast
  * if refused), its title and its number beside it, its status pill (the control that completes,
  * cancels once confirmed, or reopens it), when it is due (an overdue one in crimson with the word
- * "Overdue", in a list in its due section's colour; on a phone under the title), its priority
- * flag, assignee and linked records (the first, then "+N"). A compact row (the home's, a record's)
- * has a menu instead of the pill: Reopen a completed or cancelled task, Cancel an open one
- * (confirmed); its linked records follow its title. The controls work only for its assignee, its creator and
- * with `RECORDS_EDIT_ANY`. A row that leaves the list with the focus in it (completed out of an
- * open list) hands the focus to the list's heading.
+ * "Overdue", in a list in its due section's colour), its priority flag, assignee and linked
+ * records (the first, then "+N"); on a phone the due time and the linked records sit under the
+ * title. A compact row (the home's, a record's) has a menu instead of the pill: Reopen a completed
+ * or cancelled task, Cancel an open one (confirmed); its linked records follow its title. The
+ * controls work only for its assignee, its creator and with `RECORDS_EDIT_ANY`. A row that leaves
+ * the list with the focus in it (completed out of an open list) hands the focus to the list's
+ * heading.
  * @param props Component props.
  * @param props.task The task.
  * @param props.workspaceId The workspace.
@@ -246,10 +247,14 @@ export const TaskRow = (props: {
               {t(`status_${props.task.status}`)}
             </span>
           )}
-          {props.compact && linked('ml-auto max-w-[45%] text-[0.8125rem] max-md:hidden')}
+          {props.compact && linked('ml-auto max-w-[45%] text-[0.8125rem] max-sm:hidden')}
         </span>
-        {/* A phone's row has no room for the due column: the due time sits under the title. */}
-        <span className="flex text-[0.8125rem] sm:hidden">{due}</span>
+        {/* A phone's row has no room for the due and linked columns: they sit under the title, the
+            linked records on a line of their own when the due time leaves them none. */}
+        <span className="flex flex-wrap items-baseline gap-x-2 text-[0.8125rem] sm:hidden">
+          {due}
+          {linked('max-w-full')}
+        </span>
       </TableCell>
       {!props.compact && (
         <TableCell className="whitespace-normal">
