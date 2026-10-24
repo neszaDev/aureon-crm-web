@@ -97,8 +97,9 @@ export async function addTask(
  * @param taskId The task.
  * @param version The version it was read at; an outdated one is the reload message.
  * @param values Every field, with the assignee to keep, reassign to, or none to unassign.
- * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
- *   its last record.
+ * @param options How it ends.
+ * @param options.refreshPage Whether it refreshes the page (default true); a bulk action
+ *   refreshes once, after its last record.
  * @returns Success, or field and form errors.
  */
 export async function updateTask(
@@ -106,7 +107,7 @@ export async function updateTask(
   taskId: number,
   version: number,
   values: TaskValues,
-  refreshPage = true,
+  options?: { refreshPage?: boolean },
 ): Promise<ActionResult> {
   const t = await getTranslations('TaskDialog');
   const parsed = TaskValidation.safeParse(values);
@@ -123,7 +124,7 @@ export async function updateTask(
     return await actionFailure(response, error);
   }
 
-  if (refreshPage) {
+  if (options?.refreshPage ?? true) {
     refresh();
   }
   return { ok: true };
@@ -138,8 +139,9 @@ export async function updateTask(
  * @param version The version the list read; none (a list without versions: companies,
  *   contacts) sends the one just read.
  * @param assigneeId The new assignee.
- * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
- *   its last record.
+ * @param options How it ends.
+ * @param options.refreshPage Whether it refreshes the page (default true); a bulk action
+ *   refreshes once, after its last record.
  * @returns Success, or the translated refusal.
  */
 export async function assignTask(
@@ -147,7 +149,7 @@ export async function assignTask(
   taskId: number,
   version: number | undefined,
   assigneeId: number,
-  refreshPage = true,
+  options?: { refreshPage?: boolean },
 ): Promise<ActionResult> {
   const api = await authedBackend();
   const { data, error, response } = await api.GET('/api/v1/workspaces/{workspaceId}/tasks/{id}', {
@@ -165,7 +167,7 @@ export async function assignTask(
       ...taskValues(data),
       assigneeId,
     },
-    refreshPage,
+    options,
   );
 }
 
@@ -176,8 +178,9 @@ export async function assignTask(
  * @param workspaceId The workspace.
  * @param taskId The task.
  * @param version The version it was read at.
- * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
- *   its last record.
+ * @param options How it ends.
+ * @param options.refreshPage Whether it refreshes the page (default true); a bulk action
+ *   refreshes once, after its last record.
  * @returns Success, or the translated refusal.
  */
 const moveTask = async (
@@ -185,7 +188,7 @@ const moveTask = async (
   workspaceId: number,
   taskId: number,
   version: number,
-  refreshPage = true,
+  options?: { refreshPage?: boolean },
 ): Promise<ActionResult> => {
   const api = await authedBackend();
   const { error, response } = await api.POST(path, {
@@ -196,7 +199,7 @@ const moveTask = async (
     return await actionFailure(response, error);
   }
 
-  if (refreshPage) {
+  if (options?.refreshPage ?? true) {
     refresh();
   }
   return { ok: true };
@@ -207,22 +210,23 @@ const moveTask = async (
  * @param workspaceId The workspace.
  * @param taskId The task.
  * @param version The version it was read at.
- * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
- *   its last record.
+ * @param options How it ends.
+ * @param options.refreshPage Whether it refreshes the page (default true); a bulk action
+ *   refreshes once, after its last record.
  * @returns Success, or the translated refusal.
  */
 export async function completeTask(
   workspaceId: number,
   taskId: number,
   version: number,
-  refreshPage = true,
+  options?: { refreshPage?: boolean },
 ): Promise<ActionResult> {
   return await moveTask(
     '/api/v1/workspaces/{workspaceId}/tasks/{id}/complete',
     workspaceId,
     taskId,
     version,
-    refreshPage,
+    options,
   );
 }
 
@@ -231,22 +235,23 @@ export async function completeTask(
  * @param workspaceId The workspace.
  * @param taskId The task.
  * @param version The version it was read at.
- * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
- *   its last record.
+ * @param options How it ends.
+ * @param options.refreshPage Whether it refreshes the page (default true); a bulk action
+ *   refreshes once, after its last record.
  * @returns Success, or the translated refusal.
  */
 export async function reopenTask(
   workspaceId: number,
   taskId: number,
   version: number,
-  refreshPage = true,
+  options?: { refreshPage?: boolean },
 ): Promise<ActionResult> {
   return await moveTask(
     '/api/v1/workspaces/{workspaceId}/tasks/{id}/reopen',
     workspaceId,
     taskId,
     version,
-    refreshPage,
+    options,
   );
 }
 
@@ -255,21 +260,22 @@ export async function reopenTask(
  * @param workspaceId The workspace.
  * @param taskId The task.
  * @param version The version it was read at.
- * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
- *   its last record.
+ * @param options How it ends.
+ * @param options.refreshPage Whether it refreshes the page (default true); a bulk action
+ *   refreshes once, after its last record.
  * @returns Success, or the translated refusal.
  */
 export async function cancelTask(
   workspaceId: number,
   taskId: number,
   version: number,
-  refreshPage = true,
+  options?: { refreshPage?: boolean },
 ): Promise<ActionResult> {
   return await moveTask(
     '/api/v1/workspaces/{workspaceId}/tasks/{id}/cancel',
     workspaceId,
     taskId,
     version,
-    refreshPage,
+    options,
   );
 }

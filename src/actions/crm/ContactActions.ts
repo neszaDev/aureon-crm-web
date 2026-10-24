@@ -75,8 +75,9 @@ export async function createContact(
  * @param contactId The contact.
  * @param version The version the form was read at; an outdated one is the reload message.
  * @param values Form values, with the owner to keep, reassign to, or none to unassign.
- * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
- *   its last record.
+ * @param options How it ends.
+ * @param options.refreshPage Whether it refreshes the page (default true); a bulk action
+ *   refreshes once, after its last record.
  * @returns Success, or field and form errors.
  */
 export async function updateContact(
@@ -84,7 +85,7 @@ export async function updateContact(
   contactId: number,
   version: number,
   values: ContactValues,
-  refreshPage = true,
+  options?: { refreshPage?: boolean },
 ): Promise<ActionResult> {
   const t = await getTranslations('ContactForm');
   const parsed = ContactValidation.safeParse(values);
@@ -101,7 +102,7 @@ export async function updateContact(
     return await actionFailure(response, error);
   }
 
-  if (refreshPage) {
+  if (options?.refreshPage ?? true) {
     refresh();
   }
   return { ok: true };
@@ -116,8 +117,9 @@ export async function updateContact(
  * @param version The version the list read; none (a list without versions: companies,
  *   contacts) sends the one just read.
  * @param ownerId The new owner.
- * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
- *   its last record.
+ * @param options How it ends.
+ * @param options.refreshPage Whether it refreshes the page (default true); a bulk action
+ *   refreshes once, after its last record.
  * @returns Success, or the translated refusal.
  */
 export async function assignContact(
@@ -125,7 +127,7 @@ export async function assignContact(
   contactId: number,
   version: number | undefined,
   ownerId: number,
-  refreshPage = true,
+  options?: { refreshPage?: boolean },
 ): Promise<ActionResult> {
   const api = await authedBackend();
   const { data, error, response } = await api.GET(
@@ -146,7 +148,7 @@ export async function assignContact(
       ...contactValues(data),
       ownerId,
     },
-    refreshPage,
+    options,
   );
 }
 
@@ -154,14 +156,15 @@ export async function assignContact(
  * Archives a contact (`POST .../contacts/{id}/archive`): it leaves the lists, its history stays.
  * @param workspaceId The workspace.
  * @param contactId The contact.
- * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
- *   its last record.
+ * @param options How it ends.
+ * @param options.refreshPage Whether it refreshes the page (default true); a bulk action
+ *   refreshes once, after its last record.
  * @returns Success, or the translated refusal.
  */
 export async function archiveContact(
   workspaceId: number,
   contactId: number,
-  refreshPage = true,
+  options?: { refreshPage?: boolean },
 ): Promise<ActionResult> {
   const api = await authedBackend();
   const { error, response } = await api.POST(
@@ -172,7 +175,7 @@ export async function archiveContact(
     return await actionFailure(response, error);
   }
 
-  if (refreshPage) {
+  if (options?.refreshPage ?? true) {
     refresh();
   }
   return { ok: true };
@@ -182,14 +185,15 @@ export async function archiveContact(
  * Restores an archived contact (`POST .../contacts/{id}/restore`).
  * @param workspaceId The workspace.
  * @param contactId The contact.
- * @param refreshPage Whether it refreshes the page (default); a bulk action refreshes once, after
- *   its last record.
+ * @param options How it ends.
+ * @param options.refreshPage Whether it refreshes the page (default true); a bulk action
+ *   refreshes once, after its last record.
  * @returns Success, or the translated refusal.
  */
 export async function restoreContact(
   workspaceId: number,
   contactId: number,
-  refreshPage = true,
+  options?: { refreshPage?: boolean },
 ): Promise<ActionResult> {
   const api = await authedBackend();
   const { error, response } = await api.POST(
@@ -200,7 +204,7 @@ export async function restoreContact(
     return await actionFailure(response, error);
   }
 
-  if (refreshPage) {
+  if (options?.refreshPage ?? true) {
     refresh();
   }
   return { ok: true };

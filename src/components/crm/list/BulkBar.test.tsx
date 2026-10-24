@@ -249,13 +249,13 @@ describe(BulkBar, () => {
         1,
         1,
         { stageId: 3, version: 10, lostReason: 'Went with a competitor' },
-        false,
+        { refreshPage: false },
       );
       expect(DealActions.moveDeal).toHaveBeenCalledWith(
         1,
         2,
         { stageId: 3, version: 20, lostReason: 'Went with a competitor' },
-        false,
+        { refreshPage: false },
       );
       expect(onClear).toHaveBeenCalledOnce();
       expect(refresh).toHaveBeenCalledOnce();
@@ -338,7 +338,7 @@ describe(BulkBar, () => {
         1,
         2,
         { stageId: 2, version: 20, lostReason: undefined },
-        false,
+        { refreshPage: false },
       );
     });
 
@@ -347,7 +347,7 @@ describe(BulkBar, () => {
       await bar().getByRole('button', { name: 'Assign' }).click();
       await page.getByRole('menuitem', { name: 'Mia Rossi' }).click();
       await expect.element(page.getByText('1 deal assigned to Mia Rossi')).toBeVisible();
-      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 1, 10, 2, false);
+      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 1, 10, 2, { refreshPage: false });
     });
 
     it('assigns every deal to the member chosen, at the version the list read', async () => {
@@ -357,8 +357,8 @@ describe(BulkBar, () => {
       await page.getByRole('menuitem', { name: 'Mia Rossi' }).click();
 
       await expect.element(page.getByText('2 deals assigned to Mia Rossi')).toBeVisible();
-      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 1, 10, 2, false);
-      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 2, 20, 2, false);
+      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 1, 10, 2, { refreshPage: false });
+      expect(DealActions.assignDeal).toHaveBeenCalledWith(1, 2, 20, 2, { refreshPage: false });
       expect(refresh).toHaveBeenCalledOnce();
     });
 

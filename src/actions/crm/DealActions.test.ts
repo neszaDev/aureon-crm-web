@@ -78,9 +78,9 @@ describe('refreshing the page', () => {
   });
 
   it('leaves the refresh to the bulk bar, which does it once after its last record', async () => {
-    await archiveDeal(1, 9, false);
-    await moveDeal(1, 9, { stageId: 3, version: 1 }, false);
-    await assignDeal(1, 9, 1, 3, false);
+    await archiveDeal(1, 9, { refreshPage: false });
+    await moveDeal(1, 9, { stageId: 3, version: 1 }, { refreshPage: false });
+    await assignDeal(1, 9, 1, 3, { refreshPage: false });
 
     expect(refresh).not.toHaveBeenCalled();
   });
