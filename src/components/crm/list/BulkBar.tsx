@@ -262,6 +262,14 @@ export const BulkBar = (props: BulkBarProps) => {
   const allowed = bulkActions(props.entity, props.chosen, props);
   const { assign: assignOne, archive, restore } = actionsOf(props.entity);
   const records = (many: number) => t('records', { entity: props.entity, count: many });
+  // Why a record was refused, in words that fit a list: there are no fields to highlight, and the
+  // list shows a record changed meanwhile as it is now (it refreshes after the run).
+  const reasonOf = (result?: ActionResult) => {
+    if (result?.conflict) {
+      return t('changed_meanwhile');
+    }
+    return result?.fieldErrors ? tApi('status_400') : (result?.message ?? tApi('generic'));
+  };
   const run = (act: Act, done: (many: number) => string) => {
     if (isPending) {
       return;
@@ -283,9 +291,7 @@ export const BulkBar = (props: BulkBarProps) => {
       router.refresh();
       const failed = targets.flatMap((item, index) => {
         const result = results[index];
-        return result?.ok
-          ? []
-          : [{ id: item.id, name: item.name, reason: result?.message ?? tApi('generic') }];
+        return result?.ok ? [] : [{ id: item.id, name: item.name, reason: reasonOf(result) }];
       });
       if (failed.length === 0) {
         toast.success(done(targets.length));

@@ -250,6 +250,38 @@ describe(BulkBar, () => {
       expect(refresh).toHaveBeenCalledOnce();
     });
 
+    it('says in words why each record was refused: changed meanwhile, or a value refused', async () => {
+      vi.mocked(DealActions.moveDeal).mockImplementation(
+        async (_workspace, id) =>
+          await Promise.resolve(
+            id === 1
+              ? {
+                  ok: false,
+                  message: 'Someone else changed this. Reload to see their version.',
+                  conflict: true,
+                }
+              : {
+                  ok: false,
+                  message: 'Check the highlighted fields and try again.',
+                  fieldErrors: { lostReason: 'size must be between 0 and 1000' },
+                },
+          ),
+      );
+      await renderBar('deal', [item(1, 'Fleet tablets'), item(2, 'Depot rollout')]);
+
+      await bar().getByRole('button', { name: 'Stage' }).click();
+      await page.getByRole('menuitem', { name: 'Won' }).click();
+
+      const alert = page.getByRole('alert');
+      await expect
+        .element(alert.getByRole('listitem').filter({ hasText: 'Fleet tablets' }))
+        .toHaveTextContent('Someone changed this meanwhile; the list shows it now.');
+      await expect
+        .element(alert.getByRole('listitem').filter({ hasText: 'Depot rollout' }))
+        .toHaveTextContent("Something in the request isn't valid. Check it and try again.");
+      expect(alert.element().textContent).not.toContain('highlighted');
+    });
+
     it('sends every record, those the list shows already there too: the server has the last word', async () => {
       await renderBar('deal', [
         item(1, 'Fleet tablets', { state: '1' }),

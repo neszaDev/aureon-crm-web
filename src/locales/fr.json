@@ -1002,6 +1002,7 @@
     "done_reopen": "{count, plural, one {# tâche rouverte} other {# tâches rouvertes}}",
     "done_cancel": "{count, plural, one {# tâche annulée} other {# tâches annulées}}",
     "refused": "{failed, plural, one {# sur {total, number} n'a pas été modifié} other {# sur {total, number} n'ont pas été modifiés}}",
+    "changed_meanwhile": "Quelqu'un l'a modifié entre-temps ; la liste l'affiche tel qu'il est maintenant.",
     "dismiss": "Fermer",
     "archive_title": "Archiver {records} ?",
     "archive_text": "Les fiches quittent les listes et les recherches, leur historique reste. Vous pourrez les restaurer depuis les archives.",

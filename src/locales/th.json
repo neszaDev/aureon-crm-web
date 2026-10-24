@@ -1002,6 +1002,7 @@
     "done_reopen": "{count, plural, other {เปิดอีกครั้ง # งานแล้ว}}",
     "done_cancel": "{count, plural, other {ยกเลิก # งานแล้ว}}",
     "refused": "{failed, plural, other {# จาก {total, number} รายการไม่ได้เปลี่ยน}}",
+    "changed_meanwhile": "มีคนแก้ไขรายการนี้ไปก่อนแล้ว รายการแสดงค่าล่าสุดแล้ว",
     "dismiss": "ปิด",
     "archive_title": "เก็บถาวร{records}หรือไม่?",
     "archive_text": "ระเบียนจะไม่แสดงในรายการและการค้นหา แต่ประวัติยังอยู่ คุณกู้คืนได้จากมุมมองที่เก็บถาวร",

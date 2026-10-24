@@ -1002,6 +1002,7 @@
     "done_reopen": "{count, plural, one {# task reopened} other {# tasks reopened}}",
     "done_cancel": "{count, plural, one {# task cancelled} other {# tasks cancelled}}",
     "refused": "{failed, plural, one {# of {total, number} wasn't changed} other {# of {total, number} weren't changed}}",
+    "changed_meanwhile": "Someone changed this meanwhile; the list shows it now.",
     "dismiss": "Dismiss",
     "archive_title": "Archive {records}?",
     "archive_text": "They leave the lists and searches, and their history stays. You can restore them from the archived view.",
