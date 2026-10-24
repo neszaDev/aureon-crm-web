@@ -188,6 +188,35 @@ describe(BulkBar, () => {
     });
   });
 
+  describe('keyboard', () => {
+    it('takes one Tab stop, and the arrow keys move between its controls', async () => {
+      await renderBar('deal', [item(1, 'Fleet tablets'), item(2, 'Depot rollout')]);
+      const button = (name: string) => bar().getByRole('button', { name, exact: true });
+
+      // The toolbar is the stop, and hands the focus to its first control.
+      await expect.element(bar()).toHaveAttribute('tabindex', '0');
+      expect(
+        bar()
+          .getByRole('button')
+          .elements()
+          .map((control) => control.getAttribute('tabindex')),
+      ).toStrictEqual(['-1', '-1', '-1', '-1']);
+      const toolbar = bar().element();
+      if (toolbar instanceof HTMLElement) {
+        toolbar.focus();
+      }
+      await expect.element(button('Assign')).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      await expect.element(button('Stage')).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      await expect.element(button('Archive')).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      await expect.element(button('Clear selection')).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      await expect.element(button('Assign')).toHaveFocus();
+    });
+  });
+
   describe('running', () => {
     it('asks for the lost reason once and sends it with every deal', async () => {
       const { onClear } = await renderBar('deal', [

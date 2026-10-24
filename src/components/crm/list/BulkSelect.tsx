@@ -85,9 +85,14 @@ export const BulkSection = (props: {
   </Section>
 );
 
+// Shown only while focused, as a skip link: just above the bar it leads to.
+const TO_BAR =
+  'sr-only focus:not-sr-only focus:fixed focus:bottom-20 focus:left-1/2 focus:z-40 focus:-translate-x-1/2 focus:rounded-md focus:bg-field focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:whitespace-nowrap focus:text-foreground focus:shadow-float';
+
 /**
  * The select-all box at the head of a section's table: tri-state (mixed while some of the section
- * is selected), named after the section's heading.
+ * is selected), named after the section's heading. While rows are selected, the next Tab stop is
+ * "Go to bulk actions", which takes the keyboard to the bar past the rest of the rows.
  * @returns The head cell.
  */
 export const SelectAllHead = () => {
@@ -111,6 +116,18 @@ export const SelectAllHead = () => {
               bulk.toggleSection(section.ids);
             }}
           />
+          {bulk.chosen.length > 0 && (
+            <button
+              type="button"
+              className={TO_BAR}
+              onClick={() => {
+                // The toolbar hands the focus on to its current control.
+                document.querySelector<HTMLElement>('[data-bulk-bar] [role="toolbar"]')?.focus();
+              }}
+            >
+              {t('go_to_bar')}
+            </button>
+          )}
         </>
       )}
     </TableHead>

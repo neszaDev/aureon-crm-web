@@ -979,6 +979,7 @@
     "selected": "เลือก {count, number} รายการ",
     "select": "เลือก {name}",
     "select_all": "เลือกทั้งหมด",
+    "go_to_bar": "ไปที่การทำงานกับหลายรายการ",
     "assign": "มอบหมาย",
     "assign_to": "มอบหมายให้",
     "status": "สถานะ",

@@ -979,6 +979,7 @@
     "selected": "{count, number} selected",
     "select": "Select {name}",
     "select_all": "Select all",
+    "go_to_bar": "Go to bulk actions",
     "assign": "Assign",
     "assign_to": "Assign to",
     "status": "Status",

@@ -979,6 +979,7 @@
     "selected": "{count, plural, one {# sélectionné} other {# sélectionnés}}",
     "select": "Sélectionner {name}",
     "select_all": "Tout sélectionner",
+    "go_to_bar": "Aller aux actions groupées",
     "assign": "Attribuer",
     "assign_to": "Attribuer à",
     "status": "Statut",

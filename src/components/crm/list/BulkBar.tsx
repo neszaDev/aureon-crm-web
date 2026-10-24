@@ -11,6 +11,7 @@ import {
   XIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Toolbar } from 'radix-ui';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { archiveCompany, assignCompany, restoreCompany } from '@/actions/crm/CompanyActions';
@@ -141,16 +142,18 @@ const BarMenu = (props: {
       }}
     >
       <DropdownMenuTrigger asChild>
-        <Button
-          data-bar-menu={props.name}
-          variant="ghost"
-          aria-disabled={props.busy || undefined}
-          className={ON_BAR}
-        >
-          {props.icon}
-          {props.label}
-          <ChevronDownIcon data-icon="inline-end" className="opacity-70" />
-        </Button>
+        <Toolbar.Button asChild>
+          <Button
+            data-bar-menu={props.name}
+            variant="ghost"
+            aria-disabled={props.busy || undefined}
+            className={ON_BAR}
+          >
+            {props.icon}
+            {props.label}
+            <ChevronDownIcon data-icon="inline-end" className="opacity-70" />
+          </Button>
+        </Toolbar.Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="top" align="start" className="max-h-72 overflow-y-auto">
         <DropdownMenuLabel>{props.menuLabel}</DropdownMenuLabel>
@@ -451,8 +454,8 @@ export const BulkBar = (props: BulkBarProps) => {
           </div>
         )}
         {(count > 0 || isPending) && (
-          <div
-            role="toolbar"
+          // One Tab stop; the arrow keys move between its controls.
+          <Toolbar.Root
             aria-label={t('selected', { count })}
             className="flex flex-wrap items-center justify-center gap-1 rounded-lg bg-rail p-1.5 text-on-rail shadow-float ring-1 ring-white/10"
           >
@@ -497,53 +500,59 @@ export const BulkBar = (props: BulkBarProps) => {
               </BarMenu>
             )}
             {allowed.restore && restore && (
-              <Button
-                variant="ghost"
-                aria-disabled={busy}
-                className={ON_BAR}
-                onClick={() => {
-                  run(
-                    async (item) => await restore(props.workspaceId, item.id, false),
-                    (many) => t('done_restore', { records: records(many) }),
-                  );
-                }}
-              >
-                <ArchiveRestoreIcon data-icon="inline-start" />
-                {t('restore')}
-              </Button>
+              <Toolbar.Button asChild>
+                <Button
+                  variant="ghost"
+                  aria-disabled={busy}
+                  className={ON_BAR}
+                  onClick={() => {
+                    run(
+                      async (item) => await restore(props.workspaceId, item.id, false),
+                      (many) => t('done_restore', { records: records(many) }),
+                    );
+                  }}
+                >
+                  <ArchiveRestoreIcon data-icon="inline-start" />
+                  {t('restore')}
+                </Button>
+              </Toolbar.Button>
             )}
             {allowed.archive && (
+              <Toolbar.Button asChild>
+                <Button
+                  variant="ghost"
+                  aria-disabled={busy}
+                  className={ON_BAR}
+                  onClick={() => {
+                    if (!isPending) {
+                      setAsking('archive');
+                    }
+                  }}
+                >
+                  <ArchiveIcon data-icon="inline-start" />
+                  {t('archive')}
+                </Button>
+              </Toolbar.Button>
+            )}
+            <Toolbar.Button asChild>
               <Button
                 variant="ghost"
+                size="icon"
+                aria-label={t('clear')}
+                title={t('clear')}
                 aria-disabled={busy}
                 className={ON_BAR}
                 onClick={() => {
                   if (!isPending) {
-                    setAsking('archive');
+                    setRefused([]);
+                    props.onClear();
                   }
                 }}
               >
-                <ArchiveIcon data-icon="inline-start" />
-                {t('archive')}
+                <XIcon />
               </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t('clear')}
-              title={t('clear')}
-              aria-disabled={busy}
-              className={ON_BAR}
-              onClick={() => {
-                if (!isPending) {
-                  setRefused([]);
-                  props.onClear();
-                }
-              }}
-            >
-              <XIcon />
-            </Button>
-          </div>
+            </Toolbar.Button>
+          </Toolbar.Root>
         )}
       </div>
 

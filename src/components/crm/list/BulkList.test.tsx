@@ -114,6 +114,7 @@ const box = (name: string) => page.getByRole('checkbox', { name: `Select ${name}
 const all = (section: string) =>
   page.getByRole('checkbox', { name: `Select all ${section}`, exact: true });
 const toolbar = () => page.getByRole('toolbar');
+const shortcut = () => page.getByRole('button', { name: 'Go to bulk actions' });
 
 describe(BulkList, () => {
   it('selects rows, shows the bar with the count, and marks the section’s box mixed, then all', async () => {
@@ -201,6 +202,19 @@ describe(BulkList, () => {
 
     await expect.element(toolbar()).not.toBeInTheDocument();
     await expect.element(box('Acme')).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('offers a way to the bar from the section’s select-all box while rows are selected', async () => {
+    await render(<List scope="a" sections={[NEW, WON]} />);
+    expect(shortcut().elements()).toHaveLength(0);
+
+    await box('Acme').click();
+    focus(all('New'));
+    await userEvent.keyboard('{Tab}');
+    await expect.element(shortcut().first()).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+
+    await expect.element(toolbar().getByRole('button', { name: 'Archive' })).toHaveFocus();
   });
 
   it('hands the focus to the list’s heading when the bar clears with it', async () => {
