@@ -37,7 +37,7 @@ export const WorkspaceSwitcher = (props: {
         aria-label={t('switcher_label', { name: props.current.name })}
         className="flex h-9 min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-md px-2 text-left text-foreground transition-colors duration-150 hover:bg-ink/6 aria-expanded:bg-ink/6"
       >
-        <WorkspaceMark name={props.current.name} className="size-6 text-[0.625rem]" />
+        <WorkspaceMark name={props.current.name} className="size-6 text-[0.6875rem]" />
         <span title={props.current.name} className="min-w-0 flex-1 truncate text-sm font-semibold">
           {props.current.name}
         </span>
@@ -52,7 +52,7 @@ export const WorkspaceSwitcher = (props: {
           return (
             <DropdownMenuItem key={workspace.id} asChild className="gap-2.5 py-2">
               <Link href={`/app/${workspace.id}`} aria-current={current ? 'page' : undefined}>
-                <WorkspaceMark name={name} className="size-6 text-[0.625rem]" />
+                <WorkspaceMark name={name} className="size-6 text-[0.6875rem]" />
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate font-medium">{name}</span>
                   <span className="text-xs text-muted-foreground">

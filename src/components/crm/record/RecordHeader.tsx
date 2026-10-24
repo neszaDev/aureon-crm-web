@@ -69,7 +69,7 @@ export const RecordHeader = (props: {
             {props.name}
           </h1>
           {props.figure && (
-            <p className="text-[1.0625rem] font-semibold tabular-nums">{props.figure}</p>
+            <p className="text-[0.9375rem] font-semibold tabular-nums">{props.figure}</p>
           )}
         </div>
         {props.actions && (

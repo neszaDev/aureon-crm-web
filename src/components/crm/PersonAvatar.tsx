@@ -3,8 +3,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { initialsOf } from '@/libs/crm/Format';
 
 const SIZES = {
-  xs: 'size-5 text-[0.5625rem]',
-  sm: 'size-6 text-[0.625rem]',
+  xs: 'size-5 text-[0.6875rem]',
+  sm: 'size-6 text-[0.6875rem]',
   md: 'size-8 text-xs',
 };
 

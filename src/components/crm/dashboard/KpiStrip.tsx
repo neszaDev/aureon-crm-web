@@ -56,7 +56,7 @@ export const KpiStrip = (props: {
                 </span>{' '}
                 <span
                   className={cn(
-                    'inline-flex items-center gap-1.5 text-[1.125rem] leading-6 font-semibold text-foreground tabular-nums',
+                    'inline-flex items-center gap-1.5 text-[1.25rem] leading-6 font-semibold text-foreground tabular-nums',
                     late && 'text-danger',
                   )}
                 >

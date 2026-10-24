@@ -20,7 +20,7 @@ export type SamplePerson = { name: string; colour: number };
 export const SampleAvatar = (props: { person: SamplePerson }) => (
   <span
     style={{ backgroundColor: `var(--avatar-${props.person.colour})` }}
-    className="inline-grid size-5 shrink-0 place-items-center rounded-full text-[0.5625rem] leading-none font-semibold text-white"
+    className="inline-grid size-5 shrink-0 place-items-center rounded-full text-[0.6875rem] leading-none font-semibold text-white"
   >
     {initialsOf(props.person.name, '')}
   </span>

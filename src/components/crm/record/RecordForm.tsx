@@ -22,7 +22,7 @@ import { Link } from '@/libs/I18nNavigation';
  * draws the border), the field's name as its placeholder. Pass it to `Input`'s `className`.
  */
 export const TITLE_INPUT =
-  '-mx-2 h-auto border-transparent bg-transparent px-2 py-1 text-[1.375rem] leading-8 font-semibold tracking-[-0.01em] hover:border-transparent hover:bg-muted/70 sm:h-auto sm:text-[1.375rem]';
+  '-mx-2 h-auto border-transparent bg-transparent px-2 py-1 text-[1.5rem] leading-8 font-semibold tracking-[-0.01em] hover:border-transparent hover:bg-muted/70 sm:h-auto sm:text-[1.5rem]';
 
 /** The row of a record form's property chips, which wraps; their errors go under it. */
 export const CHIP_ROW = 'flex flex-wrap items-center gap-1.5';

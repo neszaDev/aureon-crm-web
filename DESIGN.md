@@ -73,6 +73,35 @@ typography:
     fontWeight: 700
     lineHeight: 1.1
     letterSpacing: "-0.03em"
+  display-tablet:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "3.75rem"
+    fontWeight: 700
+    lineHeight: 1.05
+    letterSpacing: "-0.035em"
+  display-close-phone:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.5rem"
+    fontWeight: 700
+    lineHeight: 1.05
+    letterSpacing: "-0.035em"
+  headline-phone:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2rem"
+    fontWeight: 700
+    lineHeight: 1.1
+    letterSpacing: "-0.03em"
+  language-sample:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.625rem"
+    fontWeight: 600
+    lineHeight: 1.25
+    letterSpacing: "-0.01em"
+  desk-statement:
+    fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.375rem"
+    fontWeight: 500
+    lineHeight: 1.375
   record-title:
     fontFamily: "Inter, Anuphan, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.5rem"
@@ -267,14 +296,16 @@ People take one of eight avatar colours by member id (violet, the blue, green, r
 
 ### Hierarchy
 - **Display** (700, 80px on desktop, 60px tablet, 44px phones, 1.02, -0.035em): the landing's one thesis line. Nowhere in the app.
-- **Headline** (700, 44px desktop / 32px phones, 1.1, -0.03em): landing section headings; the auth aside's statement at 28px semibold.
-- **Record Title** (600, 24px, -0.01em): a record's name in its header; the record form's name input at 22px.
-- **Title** (600, 20px, 28px leading): a page's h1 (lists, settings, a state that stands in for a page).
-- **Body Reading** (400, 15px, relaxed): landing prose and notes, card descriptions; the landing lede at 18px.
+- **Display Tablet** (display-tablet, 700, 60px, 1.05): the thesis from 640 px and the closing band's heading from 1024 px; **Display Close Phone** (display-close-phone, 40px): the closing band's heading on phones, and the about page's h1 there.
+- **Headline** (700, 44px desktop / 32px phones as **Headline Phone**, headline-phone, 1.1, -0.03em): landing section headings.
+- **Record Title** (600, 24px, -0.01em): a record's name in its header, the record form's name input, and the auth aside's statement.
+- **Title** (600, 20px, 28px leading): a page's h1 (lists, settings, a state that stands in for a page); the dashboard's line of figures.
+- **Language Sample** (language-sample, 600, 26px): the landing's three language samples. **Desk Statement** (desk-statement, 500, 22px): the hero desks' statements from 1024 px (18px below).
+- **Body Reading** (400, 15px, relaxed): landing prose and notes, card descriptions, a record header's figure (semibold); the landing lede at 18px.
 - **Body** (400–500, 14px): table cells, buttons, forms, the default.
 - **Row** (500, 13px): toolbar chips, view tabs, inline-add rows, property chips, captions, the panel's location line.
 - **Label** (600, 12px): status pills, the track's stage names, badges; table heads at 500.
-- **Micro** (500, 11px): bylines under a full track, counters, the "More" count.
+- **Micro** (500, 11px): bylines under a full track, counters, the "More" count, initials in 20 and 24 px avatars and workspace marks.
 
 ### Named Rules
 **The Bracket Size Rule.** Off-scale sizes are written `text-[…rem]`, never as a custom named `text-<name>` utility: the project's `cn` reads an unknown `text-<name>` as a colour and drops the element's text colour. The app's ramp is 11/12/13/14/15/16/20/24 px.
@@ -350,7 +381,7 @@ While rows are selected, an ink-violet toolbar (8 px corners, the float shadow, 
 List · Board as 36 px links, 13 px medium, muted until current; the current one is ink with a 2 px violet-ink underline on the tabs' hairline.
 
 ### Record Panel and Record Form
-The panel is a right sheet at min(920 px, 92vw) with the overlay shadow, a 48 px hairline header (the location in 13 px muted, open-full-page and ×), and the record's page inside. A record form opens on the name as a 22 px semibold input with no field surface until hovered, then a wrapping row of **Property Chips**: 32 px hairline chips with an icon and the value (the property's name, muted, while empty) that open the field in a popover; an error turns the chip red and is written under the row.
+The panel is a right sheet at min(920 px, 92vw) with the overlay shadow, a 48 px hairline header (the location in 13 px muted, open-full-page and ×), and the record's page inside. A record form opens on the name as a 24 px semibold input with no field surface until hovered, then a wrapping row of **Property Chips**: 32 px hairline chips with an icon and the value (the property's name, muted, while empty) that open the field in a popover; an error turns the chip red and is written under the row.
 
 ### Cards / Containers
 - **Corner Style:** 8 px.

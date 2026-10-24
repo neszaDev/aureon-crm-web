@@ -67,7 +67,7 @@ const SampleSection = (props: {
               <span className="min-w-0 flex-1 truncate font-medium">{row.name}</span>
               <span
                 style={{ backgroundColor: `var(--avatar-${row.ownerId})` }}
-                className="inline-grid size-5 shrink-0 place-items-center rounded-full text-[0.5625rem] leading-none font-semibold text-white"
+                className="inline-grid size-5 shrink-0 place-items-center rounded-full text-[0.6875rem] leading-none font-semibold text-white"
               >
                 {initialsOf(row.owner, '')}
               </span>
@@ -100,7 +100,7 @@ export default async function AuthLayout(props: {
         <aside className="hidden flex-col justify-between gap-12 bg-violet p-10 text-on-rail lg:flex xl:p-14 dark:bg-violet-tint">
           <Wordmark tone="brand" className="self-start" />
           <div className="flex max-w-md flex-col gap-10">
-            <p className="text-[1.75rem] leading-tight font-semibold tracking-[-0.02em] text-balance">
+            <p className="text-[1.5rem] leading-tight font-semibold tracking-[-0.02em] text-balance">
               {t('aside_text')}
             </p>
             <SampleSection
