@@ -75,4 +75,13 @@ describe(CompanyTable, () => {
     expect(industry?.getBoundingClientRect().right).toBeLessThanOrEqual(edge);
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390);
   });
+
+  it("says what each value of a phone row's second line is, to assistive technology", async () => {
+    await renderPhone();
+    const row = page.getByRole('row', { name: new RegExp(LONG, 'u') });
+
+    // Without the column heads, each value is named.
+    await expect.element(row).toHaveTextContent(/Owner\s*Mia Rossi/u);
+    await expect.element(row).toHaveTextContent(new RegExp(`Industry\\s*${INDUSTRY}`, 'u'));
+  });
 });

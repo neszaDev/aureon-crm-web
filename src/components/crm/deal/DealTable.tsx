@@ -123,6 +123,7 @@ export const DealTable = (props: {
               detail={
                 <>
                   <span className="font-medium text-foreground tabular-nums">
+                    <span className="sr-only">{`${t('amount')} `}</span>
                     {formatMoney(deal.amount, deal.currency, locale)}
                   </span>
                   <PersonAvatar

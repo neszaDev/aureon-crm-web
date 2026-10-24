@@ -105,9 +105,12 @@ export const ContactTable = (props: {
             number={recordNumber('contact', contact.id)}
             detail={
               <>
-                <OwnerName owner={contact.owner} />
+                <OwnerName owner={contact.owner} label={t('owner')} />
                 {contact.company && (
-                  <span className="min-w-0 break-words">{contact.company.name}</span>
+                  <span className="min-w-0 break-words">
+                    <span className="sr-only">{`${t('company')} `}</span>
+                    {contact.company.name}
+                  </span>
                 )}
               </>
             }

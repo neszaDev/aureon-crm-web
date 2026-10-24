@@ -900,7 +900,8 @@ test.describe('Records', () => {
       ).toBeVisible();
       await expect(
         row(COMPANIES.brightwater.name)
-          .getByText('Logistics', { exact: true })
+          // Named for assistive technology, as each value of the line is.
+          .getByText('Industry Logistics')
           .filter({ visible: true }),
       ).toBeVisible();
 

@@ -120,8 +120,13 @@ export const LeadTable = (props: {
               number={recordNumber('lead', lead.id)}
               detail={
                 <>
-                  <OwnerName owner={lead.owner} />
-                  {lead.source && <span className="min-w-0 break-words">{lead.source.name}</span>}
+                  <OwnerName owner={lead.owner} label={t('owner')} />
+                  {lead.source && (
+                    <span className="min-w-0 break-words">
+                      <span className="sr-only">{`${t('source')} `}</span>
+                      {lead.source.name}
+                    </span>
+                  )}
                 </>
               }
               menu={

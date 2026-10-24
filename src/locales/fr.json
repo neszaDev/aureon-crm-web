@@ -3399,6 +3399,7 @@
     "priority": "Priorité",
     "follow_up": "Relance",
     "owner": "Propriétaire",
+    "source": "Source",
     "value": "Valeur estimée",
     "created": "Créé"
   },

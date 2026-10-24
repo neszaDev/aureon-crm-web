@@ -6,18 +6,21 @@ import type { components } from '@/libs/api/schema';
 
 /**
  * A record's owner on a phone row's second line (`RecordRow`'s `detail`): their small avatar and
- * name, or the dashed ring and "Unassigned". The name wraps, since a phone can't hover a title.
+ * name, or the dashed ring and "Unassigned". The name wraps, since a phone can't hover a title;
+ * with no column head there, assistive technology hears what it is first.
  * @param props Component props.
  * @param props.owner The record's owner, if any.
+ * @param props.label What it is, such as "Owner", read out before it.
  * @returns The owner.
  */
-export const OwnerName = (props: { owner?: components['schemas']['MemberRef'] }) => {
+export const OwnerName = (props: { owner?: components['schemas']['MemberRef']; label: string }) => {
   const t = useTranslations('RecordList');
 
   return (
     <span className="flex min-w-0 items-center gap-1.5">
       <PersonAvatar person={props.owner} size="xs" />
       <span className="min-w-0 break-words">
+        <span className="sr-only">{`${props.label} `}</span>
         {props.owner ? (props.owner.displayName ?? props.owner.email) : t('unassigned')}
       </span>
     </span>

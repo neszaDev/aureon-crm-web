@@ -89,9 +89,12 @@ export const CompanyTable = (props: {
             number={recordNumber('company', company.id)}
             detail={
               <>
-                <OwnerName owner={company.owner} />
+                <OwnerName owner={company.owner} label={t('owner')} />
                 {company.industry && (
-                  <span className="min-w-0 break-words">{company.industry}</span>
+                  <span className="min-w-0 break-words">
+                    <span className="sr-only">{`${t('industry')} `}</span>
+                    {company.industry}
+                  </span>
                 )}
               </>
             }
