@@ -168,7 +168,7 @@ export const TASKS = {
  * A new email address for a person, as their workplace would give it.
  * @param name Their full name.
  * @param domain Their workplace's domain.
- * @returns Such as `olivia.bennett.3fa9c2@northwind.example`: lower-case ASCII, unique per call.
+ * @returns Such as `olivia.bennett.3fa9c2e1b07d@northwind.example`: lower-case ASCII, unique per call (48 random bits, so runs against a long-lived database don't collide).
  */
 export const emailFor = (name: string, domain = TEAMS.default.domain) => {
   // Accents dropped, then each run of letters a part: "José Núñez" is jose.nunez.
@@ -179,5 +179,5 @@ export const emailFor = (name: string, domain = TEAMS.default.domain) => {
       .toLowerCase()
       .match(/[a-z]+/gu) ?? [];
 
-  return `${[...parts, randomBytes(3).toString('hex')].join('.')}@${domain}`;
+  return `${[...parts, randomBytes(6).toString('hex')].join('.')}@${domain}`;
 };
