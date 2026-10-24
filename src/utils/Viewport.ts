@@ -20,6 +20,13 @@ const useWidth = (query: string) =>
   );
 
 /**
+ * Tells whether the window is a phone's (below 640 px; Tailwind's `sm`), where the bulk bar's
+ * actions are icons whose names show in tooltips.
+ * @returns Whether it is, once known.
+ */
+export const usePhone = () => useWidth('(width < 40rem)');
+
+/**
  * Tells whether the CRM's rail is on screen (768 px and wider; Tailwind's `md`), for the controls
  * that must exist once (the reminders' reads, the ⌘K listener) but sit in the rail or in the
  * phone's top bar.

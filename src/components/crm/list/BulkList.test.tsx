@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import type { Locator } from 'vitest/browser';
 import { page, userEvent } from 'vitest/browser';
@@ -309,5 +309,28 @@ describe(BulkList, () => {
 
     await rerender(<List scope="b" sections={[NEW.filter((row) => row.id !== 2), WON]} />);
     await expect.element(page.getByRole('alert')).not.toBeInTheDocument();
+  });
+  describe('on a desktop', () => {
+    afterEach(async () => {
+      await page.viewport(414, 896);
+    });
+
+    it('clears with one Escape from the bar: no tooltip takes it first', async () => {
+      await page.viewport(1280, 800);
+      await render(<List scope="a" sections={[NEW, WON]} />);
+      await box('Acme').click();
+      focus(box('Acme'));
+      await userEvent.keyboard('{Tab}');
+      await userEvent.keyboard('{Enter}');
+      const archive = toolbar().getByRole('button', { name: 'Archive' });
+      await expect.element(archive).toHaveFocus();
+      // Its name is on it: no tooltip describes it again.
+      await expect.element(archive).not.toHaveAttribute('aria-describedby');
+
+      await userEvent.keyboard('{Escape}');
+
+      await expect.element(toolbar()).not.toBeInTheDocument();
+      await expect.element(box('Acme')).not.toBeChecked();
+    });
   });
 });

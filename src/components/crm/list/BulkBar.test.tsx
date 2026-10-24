@@ -238,6 +238,9 @@ describe(BulkBar, () => {
           expect(middle(button)).toBe(middle(count));
         }
         expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390);
+        // Where there is hover, the name shows over the icon.
+        await userEvent.hover(bar().getByRole('button', { name: names[2], exact: true }));
+        await expect.element(page.getByRole('tooltip', { name: names[2] })).toBeVisible();
       },
     );
   });

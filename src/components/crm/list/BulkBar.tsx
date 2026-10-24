@@ -41,6 +41,7 @@ import type { StageRef } from '@/libs/crm/Stages';
 import { LEAD_STATUS_TONES, stageTone, TASK_STATUS_TONES } from '@/libs/crm/StatusColors';
 import { useRouter } from '@/libs/I18nNavigation';
 import { useSettle } from '@/utils/SettleAction';
+import { usePhone } from '@/utils/Viewport';
 import { LEAD_TARGETS } from '@/validations/crm/LeadValidation';
 
 type Member = components['schemas']['MemberResponse'];
@@ -66,20 +67,26 @@ const ON_BAR =
 
 /**
  * An action's name over its icon where a phone's bar draws the icon alone, on a device with hover
- * (a touch screen opens no tooltip). Needs the bar's `TooltipProvider`.
+ * (a touch screen opens no tooltip). Wider, where the name is written, the tooltip never opens:
+ * an open one would take the first Escape, which clears the selection, and describe the button
+ * again. Needs the bar's `TooltipProvider`.
  * @param props Component props.
  * @param props.label The action's name.
  * @param props.children The action's button.
  * @returns The button with its tooltip.
  */
-const PhoneTip = (props: { label: string; children: React.ReactElement }) => (
-  <Tooltip>
-    <TooltipTrigger asChild>{props.children}</TooltipTrigger>
-    <TooltipContent side="top" sideOffset={6} className="sm:hidden">
-      {props.label}
-    </TooltipContent>
-  </Tooltip>
-);
+const PhoneTip = (props: { label: string; children: React.ReactElement }) => {
+  const phone = usePhone();
+
+  return (
+    <Tooltip open={phone ? undefined : false}>
+      <TooltipTrigger asChild>{props.children}</TooltipTrigger>
+      <TooltipContent side="top" sideOffset={6}>
+        {props.label}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
 
 /**
  * The records' own actions: assign each, and archive or restore it (tasks are never archived).
