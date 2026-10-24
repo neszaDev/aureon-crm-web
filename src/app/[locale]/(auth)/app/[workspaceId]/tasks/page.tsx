@@ -206,6 +206,7 @@ export default async function TasksPage(props: TasksPageProps) {
               headingId="tasks-heading"
               bounds={bounds}
               fixed
+              sectioned={query.group !== undefined}
             />
           )}
           // A task by its title, due today in the Today section and without a due time in its own

@@ -357,9 +357,7 @@
     "title": "My deals",
     "total": "{count, number} open",
     "all": "All my deals",
-    "empty_title": "No open deals of yours",
-    "empty_text": "Deals you own that are still open appear here.",
-    "new": "New deal"
+    "empty": "No open deals of yours. <link>Add a deal</link>"
   },
   "MyWork": {
     "title": "My work",
@@ -370,7 +368,7 @@
     "section_week": "Next 7 days",
     "tasks_count": "{count, plural, one {# task} other {# tasks}}",
     "tasks_count_capped": "{count, number} tasks or more",
-    "tasks_none": "Nothing due in the next 7 days.",
+    "tasks_none": "Nothing due in the next 7 days. <link>Add a task</link>",
     "leads": "Leads to follow up",
     "leads_count": "{count, plural, one {# lead} other {# leads}}",
     "leads_count_capped": "{count, number} leads or more",
@@ -3695,5 +3693,8 @@
     "level_LOW": "Low priority",
     "level_MEDIUM": "Medium priority",
     "level_HIGH": "High priority"
+  },
+  "LinkedRecords": {
+    "more": "{count, number} more: {names}"
   }
 }

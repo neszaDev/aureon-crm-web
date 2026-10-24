@@ -1,3 +1,4 @@
+import { cn } from 'cn';
 import { useLocale, useTranslations } from 'next-intl';
 import { archiveDeal, restoreDeal } from '@/actions/crm/DealActions';
 import { DealStagePill } from '@/components/crm/deal/DealStagePill';
@@ -28,7 +29,8 @@ const none = <span className="text-muted-foreground">—</span>;
  * moves it; won green, lost red), amount, expected close date, owner, when it last changed, and
  * the row menu (archive, or restore) where the caller may change it. Name, amount, close date and
  * "Updated" sort the list (a deal row carries no creation date, so "Created" sorts from the
- * toolbar). A phone shows name and stage; wider screens add columns.
+ * toolbar). A phone shows name and stage (in a stage's section, its heading says the stage: the
+ * name has the row); wider screens add columns.
  * @param props Component props.
  * @param props.rows The deals.
  * @param props.path The deals page's path; a deal's page is under it.
@@ -55,6 +57,7 @@ export const DealTable = (props: {
   const t = useTranslations('DealTable');
   const tList = useTranslations('ListToolbar');
   const locale = useLocale();
+  const byStage = props.query.group === 'stage';
 
   return (
     // Fixed columns, so the groups of a grouped list line up.
@@ -62,10 +65,13 @@ export const DealTable = (props: {
       <TableHeader>
         <TableRow>
           <SortHeader label={t('name')} sort="NAME" path={props.path} query={props.query} />
-          <TableHead title={t('company')} className="w-[15%] truncate max-md:hidden">
+          <TableHead title={t('company')} className="w-[17%] truncate max-md:hidden">
             {t('company')}
           </TableHead>
-          <TableHead title={t('stage')} className="w-44 truncate max-sm:w-32">
+          <TableHead
+            title={t('stage')}
+            className={cn('w-44 truncate', byStage ? 'max-sm:hidden' : 'max-sm:w-32')}
+          >
             {t('stage')}
           </TableHead>
           <SortHeader
@@ -73,7 +79,7 @@ export const DealTable = (props: {
             sort="AMOUNT"
             path={props.path}
             query={props.query}
-            className="w-[12%] truncate text-right max-sm:hidden"
+            className="w-32 truncate text-right max-sm:hidden"
           />
           <SortHeader
             label={t('close')}
@@ -82,7 +88,7 @@ export const DealTable = (props: {
             query={props.query}
             className="w-[13%] truncate max-lg:hidden"
           />
-          <TableHead title={t('owner')} className="w-[14%] truncate max-lg:hidden">
+          <TableHead title={t('owner')} className="w-[13%] truncate max-lg:hidden">
             {t('owner')}
           </TableHead>
           <SortHeader
@@ -130,7 +136,7 @@ export const DealTable = (props: {
                   none
                 )}
               </TableCell>
-              <TableCell className="whitespace-normal">
+              <TableCell className={cn('whitespace-normal', byStage && 'max-sm:hidden')}>
                 <DealStagePill
                   workspaceId={props.workspace.id}
                   deal={deal}
@@ -138,7 +144,11 @@ export const DealTable = (props: {
                   canEdit={mayEdit}
                 />
               </TableCell>
-              <TableCell className="truncate text-right font-medium tabular-nums max-sm:hidden">
+              <TableCell
+                // Whole in its tooltip should a long amount, or a locale's way of writing it, not fit.
+                title={formatMoney(deal.amount, deal.currency, locale)}
+                className="truncate text-right font-medium tabular-nums max-sm:hidden"
+              >
                 {formatMoney(deal.amount, deal.currency, locale)}
               </TableCell>
               <TableCell className="truncate tabular-nums max-lg:hidden">

@@ -190,7 +190,9 @@ test.describe('Records', () => {
     await expect(week).toHaveAttribute('aria-expanded', 'true');
     const row = page.getByRole('row', { name: /Send proposal/u });
     await expect(row).toContainText(`${inParis({ dateStyle: 'medium' })}, 9:00 AM`);
-    await expect(row).toContainText(DEALS.tablets);
+    // The linked records on one line: the company, then the deal behind "+1", named in full.
+    await expect(row.getByRole('link', { name: COMPANIES.brightwater.name })).toBeVisible();
+    await expect(row.getByRole('link', { name: `1 more: ${DEALS.tablets}` })).toHaveText('+1');
     await expectNoA11yViolations(page);
 
     // Completed, it leaves the open sections for Completed, which starts folded.

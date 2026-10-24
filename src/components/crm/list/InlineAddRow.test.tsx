@@ -1,5 +1,7 @@
+// The phone's layout is the styles'.
+import '@/styles/global.css';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import { Toaster } from '@/components/ui/sonner';
@@ -22,7 +24,24 @@ const renderRow = async (action: (name: string) => Promise<ActionResult>) => {
   return page.getByRole('textbox', { name: 'Add company' });
 };
 
+const renderLeadRow = async (action: (name: string, extra?: string) => Promise<ActionResult>) =>
+  await render(
+    <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+      <InlineAddRow
+        label="Add lead"
+        placeholder="Name"
+        extra={{ label: 'Company', placeholder: 'Company (optional)' }}
+        action={action}
+      />
+      <Toaster />
+    </NextIntlClientProvider>,
+  );
+
 describe(InlineAddRow, () => {
+  beforeEach(async () => {
+    await page.viewport(1024, 768);
+  });
+
   it('creates the trimmed name on Enter, then clears for the next one', async () => {
     const action = vi.fn<(name: string) => Promise<ActionResult>>().mockResolvedValue({ ok: true });
     const field = await renderRow(action);
@@ -114,6 +133,21 @@ describe(InlineAddRow, () => {
 
     expect(action).toHaveBeenCalledExactlyOnceWith('Noa Park', 'Acme');
     await expect.element(page.getByRole('textbox', { name: 'Company' })).toHaveValue('');
+  });
+
+  it("leaves the second value to the record's form on a phone, the row the name's", async () => {
+    await page.viewport(390, 844);
+    const action = vi
+      .fn<(name: string, extra?: string) => Promise<ActionResult>>()
+      .mockResolvedValue({ ok: true });
+    await renderLeadRow(action);
+    const name = page.getByRole('textbox', { name: 'Add lead' });
+
+    await expect.element(page.getByRole('textbox', { name: 'Company' })).not.toBeInTheDocument();
+    // The whole row but its icon and padding.
+    expect(name.element().getBoundingClientRect().width).toBeGreaterThan(300);
+    await userEvent.type(name, 'Noa Park{Enter}');
+    expect(action).toHaveBeenCalledExactlyOnceWith('Noa Park', '');
   });
 
   it('marks the second field with a refusal too', async () => {

@@ -10,6 +10,7 @@ import { ConfirmAction } from '@/components/crm/ConfirmAction';
 import { OwnerCell } from '@/components/crm/list/OwnerCell';
 import { PriorityFlag } from '@/components/crm/PriorityFlag';
 import { LinkedRecords } from '@/components/crm/record/LinkedRecords';
+import { PILL_SCOPE, pillIn } from '@/components/crm/StatusChange';
 import { TaskStatusPill } from '@/components/crm/task/TaskStatusPill';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -34,12 +35,16 @@ type StatusAction = (workspaceId: number, taskId: number, version: number) => Pr
 
 /**
  * When a task is due, in the workspace's time zone; an overdue one in crimson with an icon and
- * the word "Overdue", never by colour alone. In a list, in the colour of its due section.
+ * the word "Overdue", never by colour alone. In a list, in the colour of its due section, and on
+ * one line (in a fixed column, cut short, whole in its tooltip); in the Overdue section, whose
+ * heading says it, the word is for assistive technology only.
  * @param props Component props.
  * @param props.dueAt Its due time, if any.
  * @param props.overdue Whether it is open and past it (the backend says).
  * @param props.timeZone The workspace's time zone.
  * @param props.tone The colour of its due section (`TaskViews`), in a list.
+ * @param props.line Whether it is a fixed column's: on one line, cut short.
+ * @param props.quiet Whether the word "Overdue" is read out but not drawn.
  * @returns The due time, or "No due date".
  */
 export const TaskDue = (props: {
@@ -47,6 +52,8 @@ export const TaskDue = (props: {
   overdue: boolean;
   timeZone: string;
   tone?: StatusTone;
+  line?: boolean;
+  quiet?: boolean;
 }) => {
   const t = useTranslations('TaskRow');
   const locale = useLocale();
@@ -54,20 +61,42 @@ export const TaskDue = (props: {
     return <span className="text-muted-foreground">{t('no_due')}</span>;
   }
   const due = instantParts(props.dueAt, { locale, timeZone: props.timeZone });
+  const look = cn(
+    'tabular-nums',
+    props.tone && 'text-(--tone-ink)',
+    props.overdue && 'font-medium text-danger',
+  );
+  const icon = props.overdue && (
+    <CircleAlertIcon aria-hidden="true" className="size-3.5 shrink-0" />
+  );
+  const word = props.overdue && (
+    <span className={cn(props.quiet && 'sr-only')}>{`${t('overdue')} `}</span>
+  );
+
+  if (props.line) {
+    return (
+      <span
+        data-tone={props.tone}
+        title={`${props.overdue ? `${t('overdue')} ` : ''}${due.date}${due.between}${due.time}`}
+        className={cn('flex min-w-0 items-center gap-1 whitespace-nowrap', look)}
+      >
+        {icon}
+        <span className="truncate">
+          {word}
+          {due.date}
+          {due.between}
+          {due.time}
+        </span>
+      </span>
+    );
+  }
 
   return (
-    <span
-      data-tone={props.tone}
-      className={cn(
-        'inline-flex flex-wrap gap-x-1.5 tabular-nums',
-        props.tone && 'text-(--tone-ink)',
-        props.overdue && 'font-medium text-danger',
-      )}
-    >
+    <span data-tone={props.tone} className={cn('inline-flex flex-wrap gap-x-1.5', look)}>
       {props.overdue && (
         <span className="flex items-center gap-1">
-          <CircleAlertIcon aria-hidden="true" className="size-3.5 shrink-0" />
-          {t('overdue')}
+          {icon}
+          {word}
         </span>
       )}
       {/* Each part whole: a narrow cell breaks between the date and the time only. */}
@@ -81,13 +110,13 @@ export const TaskDue = (props: {
 };
 
 /**
- * A task in a list: a box that completes it (ticked at once, unticked with a toast if refused),
- * its title over its number, its status pill (the control that completes, cancels once
- * confirmed, or reopens it), when it is due (an overdue one in crimson with the word "Overdue",
- * in a list in its due section's colour; on a phone under the title), its priority flag, assignee
- * and linked records. A
- * compact row (the dashboard's) has a menu instead of the pill: Reopen a completed or cancelled
- * task, Cancel an open one (confirmed). The controls work only for its assignee, its creator and
+ * A task in a list, a 36 px row: a box that completes it (ticked at once, unticked with a toast
+ * if refused), its title and its number beside it, its status pill (the control that completes,
+ * cancels once confirmed, or reopens it), when it is due (an overdue one in crimson with the word
+ * "Overdue", in a list in its due section's colour; on a phone under the title), its priority
+ * flag, assignee and linked records (the first, then "+N"). A compact row (the home's, a record's)
+ * has a menu instead of the pill: Reopen a completed or cancelled task, Cancel an open one
+ * (confirmed); its linked records follow its title. The controls work only for its assignee, its creator and
  * with `RECORDS_EDIT_ANY`. A row that leaves the list with the focus in it (completed out of an
  * open list) hands the focus to the list's heading.
  * @param props Component props.
@@ -98,8 +127,9 @@ export const TaskDue = (props: {
  * @param props.dueTone The colour of its due section, in a list.
  * @param props.viewed The record whose page this is, left out of the linked records.
  * @param props.headingId The list's heading, which takes the focus when the row leaves.
- * @param props.compact A narrow list (the dashboard's): the title, due time and menu only, the
- *   linked records under the title; status, priority and assignee are left out.
+ * @param props.compact A narrow list (the home's, a record's): the title, due time and menu only,
+ *   the linked records beside the title; status, priority and assignee are left out.
+ * @param props.sectioned Whether the row is in a due section, whose heading says "Overdue".
  * @returns The table row.
  */
 export const TaskRow = (props: {
@@ -111,6 +141,7 @@ export const TaskRow = (props: {
   viewed?: ActivityLink;
   headingId: string;
   compact?: boolean;
+  sectioned?: boolean;
 }) => {
   const t = useTranslations('TaskRow');
   const tError = useTranslations('ActionError');
@@ -128,6 +159,20 @@ export const TaskRow = (props: {
       overdue={props.task.overdue}
       timeZone={props.timeZone}
       tone={props.dueTone}
+      quiet={props.sectioned}
+      // The full list's columns are fixed; a compact one sizes them to their content, which wraps
+      // where it is narrow (a record's panel) and keeps to one line where it is not (Home).
+      line={!props.compact}
+    />
+  );
+  const href = `/app/${props.workspaceId}/tasks/${props.task.id}`;
+  const linked = (className: string) => (
+    <LinkedRecords
+      record={props.task}
+      workspaceId={props.workspaceId}
+      viewed={props.viewed}
+      more={href}
+      className={className}
     />
   );
 
@@ -138,12 +183,12 @@ export const TaskRow = (props: {
     const node = row.current;
     return () => {
       if (node?.contains(document.activeElement)) {
+        const scope = node.closest(PILL_SCOPE) ?? document;
         setTimeout(() => {
           if (document.activeElement === document.body) {
             (
-              document.querySelector<HTMLElement>(
-                `[data-pill="${CSS.escape(`task-${props.task.id}`)}"] button`,
-              ) ?? document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
+              pillIn(scope, `task-${props.task.id}`) ??
+              document.querySelector<HTMLElement>(`#${CSS.escape(props.headingId)}`)
             )?.focus();
           }
         }, 0);
@@ -179,31 +224,32 @@ export const TaskRow = (props: {
           }}
         />
       </TableCell>
-      <TableCell className="py-2 whitespace-normal">
-        <span className="flex min-w-0 flex-col">
+      {/* On a phone the row is two lines anyway (its due time under the title): the title wraps. */}
+      <TableCell className={props.compact ? 'whitespace-normal' : 'max-sm:whitespace-normal'}>
+        <span className={cn('flex min-w-0 items-baseline gap-x-2', props.compact && 'flex-wrap')}>
           <Link
-            href={`/app/${props.workspaceId}/tasks/${props.task.id}`}
+            href={href}
+            title={props.task.title}
             className={cn(
-              'text-[0.9375rem] font-medium break-words text-foreground',
+              'font-medium break-words text-foreground no-underline hover:underline',
+              !props.compact && 'sm:truncate',
               !isOpen && 'text-muted-foreground line-through',
             )}
           >
             {props.task.title}
           </Link>
-          <span className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] text-muted-foreground">
-            <span className="font-mono tabular-nums">{recordNumber('task', props.task.id)}</span>
-            {props.compact && !isOpen && <span>{t(`status_${props.task.status}`)}</span>}
-            {/* A phone's row has no room for the due column: the due time sits here. */}
-            <span className="sm:hidden">{due}</span>
-            {props.compact && (
-              <LinkedRecords
-                record={props.task}
-                workspaceId={props.workspaceId}
-                viewed={props.viewed}
-              />
-            )}
+          <span className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums max-sm:hidden">
+            {recordNumber('task', props.task.id)}
           </span>
+          {props.compact && !isOpen && (
+            <span className="shrink-0 text-[0.8125rem] text-muted-foreground">
+              {t(`status_${props.task.status}`)}
+            </span>
+          )}
+          {props.compact && linked('ml-auto max-w-[45%] text-[0.8125rem] max-md:hidden')}
         </span>
+        {/* A phone's row has no room for the due column: the due time sits under the title. */}
+        <span className="flex text-[0.8125rem] sm:hidden">{due}</span>
       </TableCell>
       {!props.compact && (
         <TableCell className="whitespace-normal">
@@ -215,20 +261,14 @@ export const TaskRow = (props: {
           />
         </TableCell>
       )}
-      <TableCell className="whitespace-normal max-sm:hidden">{due}</TableCell>
+      <TableCell className="max-sm:hidden">{due}</TableCell>
       {!props.compact && (
         <>
           <TableCell className="max-md:hidden">
             <PriorityFlag priority={props.task.priority} />
           </TableCell>
           <OwnerCell owner={props.task.assignee} className="max-md:hidden" />
-          <TableCell className="whitespace-normal max-lg:hidden">
-            <LinkedRecords
-              record={props.task}
-              workspaceId={props.workspaceId}
-              viewed={props.viewed}
-            />
-          </TableCell>
+          <TableCell className="max-lg:hidden">{linked('')}</TableCell>
         </>
       )}
       {props.compact && (

@@ -26,6 +26,7 @@ import type { ActivityLink } from '@/validations/crm/ActivityValidation';
  * @param props.bounds Where the due sections part: an open task's due time takes its section's
  *   colour.
  * @param props.fixed Fixed columns, so the groups of a grouped list line up.
+ * @param props.sectioned Whether the rows are in due sections, whose headings say "Overdue".
  * @returns The table.
  */
 export const TaskTable = (props: {
@@ -39,6 +40,7 @@ export const TaskTable = (props: {
   compact?: boolean;
   bounds?: DueBounds;
   fixed?: boolean;
+  sectioned?: boolean;
 }) => {
   const t = useTranslations('TaskTable');
   const { bounds } = props;
@@ -60,7 +62,7 @@ export const TaskTable = (props: {
           )}
           <TableHead
             title={t('due')}
-            className={cn(props.fixed && 'w-[17%]', 'truncate max-sm:hidden')}
+            className={cn(props.fixed && 'w-52', 'truncate max-sm:hidden')}
           >
             {t('due')}
           </TableHead>
@@ -74,13 +76,13 @@ export const TaskTable = (props: {
               </TableHead>
               <TableHead
                 title={t('assignee')}
-                className={cn(props.fixed && 'w-[15%]', 'truncate max-md:hidden')}
+                className={cn(props.fixed && 'w-[14%]', 'truncate max-md:hidden')}
               >
                 {t('assignee')}
               </TableHead>
               <TableHead
                 title={t('linked')}
-                className={cn(props.fixed && 'w-[16%]', 'truncate max-lg:hidden')}
+                className={cn(props.fixed && 'w-[15%]', 'truncate max-lg:hidden')}
               >
                 {t('linked')}
               </TableHead>
@@ -112,6 +114,7 @@ export const TaskTable = (props: {
             viewed={props.viewed}
             headingId={props.headingId}
             compact={props.compact}
+            sectioned={props.sectioned}
           />
         ))}
       </TableBody>

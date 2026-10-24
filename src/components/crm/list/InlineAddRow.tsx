@@ -16,7 +16,8 @@ const FIELD =
 
 /**
  * The last row of a list or of a group, to add a record there. With `action` it is a field: type
- * a name (and, with `extra`, a second value, such as a lead's company) and press Enter in either,
+ * a name (and, with `extra`, a second value, such as a lead's company, left to the record's own
+ * form on a phone, where the row is the name's) and press Enter in either,
  * and the row waits for the server's answer: the list refreshes with the new record and a toast
  * says so, or the refusal shows under the row (the text stays, to fix): the name's own error,
  * else the action's message. Escape clears it. With `href` it is a link to the create form,
@@ -103,7 +104,7 @@ export const InlineAddRow = (
     <div className="flex flex-col">
       <div className={`${ROW} focus-within:text-foreground hover:bg-accent/60`}>
         <label
-          className={`flex h-full min-w-0 items-center gap-2 ${props.extra ? 'basis-72' : 'flex-1'}`}
+          className={`flex h-full min-w-0 flex-1 items-center gap-2 ${props.extra ? 'sm:flex-none sm:basis-72' : ''}`}
         >
           {isPending ? (
             <LoaderCircleIcon aria-hidden="true" className="size-4 shrink-0 animate-spin" />
@@ -136,7 +137,7 @@ export const InlineAddRow = (
             maxLength={200}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? errorId : undefined}
-            className={`${FIELD} flex-1 border-l border-rule pl-2`}
+            className={`${FIELD} flex-1 border-l border-rule pl-2 max-sm:hidden`}
             onChange={(event) => {
               setExtra(event.target.value);
               setError(undefined);

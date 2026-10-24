@@ -21,15 +21,37 @@ export const isFollowUpOverdue = (lead: Pick<Lead, 'followUpDate' | 'status'>, t
 
 /**
  * A lead's follow-up date as the same day in every time zone; an overdue one in crimson with the
- * word "Overdue", as a task's due time.
+ * word "Overdue", as a task's due time. In a list's fixed column, on one line, cut short, whole in
+ * its tooltip.
  * @param props Component props.
  * @param props.date The follow-up date, `YYYY-MM-DD`.
  * @param props.overdue Whether it is overdue.
+ * @param props.line Whether it is a list row's.
  * @returns The date, or "No follow-up".
  */
-export const LeadFollowUp = (props: { date?: string; overdue: boolean }) => {
+export const LeadFollowUp = (props: { date?: string; overdue: boolean; line?: boolean }) => {
   const t = useTranslations('LeadFollowUp');
   const locale = useLocale();
+  const icon = props.overdue && (
+    <CircleAlertIcon aria-hidden="true" className="size-3.5 shrink-0" />
+  );
+  if (props.line) {
+    const date = props.date ? formatDate(props.date, locale) : t('none');
+    const text = props.overdue ? `${t('overdue')} ${date}` : date;
+    return (
+      <span
+        title={text}
+        className={cn(
+          'flex min-w-0 items-center gap-1 tabular-nums',
+          !props.date && 'text-muted-foreground',
+          props.overdue && 'font-medium text-danger',
+        )}
+      >
+        {icon}
+        <span className="truncate">{text}</span>
+      </span>
+    );
+  }
   if (!props.date) {
     return <span className="text-muted-foreground">{t('none')}</span>;
   }
@@ -43,7 +65,7 @@ export const LeadFollowUp = (props: { date?: string; overdue: boolean }) => {
     >
       {props.overdue && (
         <span className="flex items-center gap-1">
-          <CircleAlertIcon aria-hidden="true" className="size-3.5 shrink-0" />
+          {icon}
           {t('overdue')}
         </span>
       )}

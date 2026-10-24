@@ -143,7 +143,12 @@ describe(MyWork, () => {
   it('says so when nothing is due this week, and that the leads could not be read when they could not', async () => {
     await myWork(props({ overdue: [], upcoming: [], leads: undefined }));
 
-    await expect.element(page.getByText('Nothing due in the next 7 days.')).toBeVisible();
+    await expect
+      .element(page.getByText('Nothing due in the next 7 days.', { exact: false }))
+      .toHaveTextContent('Nothing due in the next 7 days. Add a task');
+    await expect
+      .element(page.getByRole('link', { name: 'Add a task' }))
+      .toHaveAttribute('href', '/app/1/tasks?new=1');
     await expect.element(page.getByText('Lead follow-ups could not be loaded.')).toBeVisible();
   });
 

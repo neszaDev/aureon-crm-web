@@ -76,13 +76,17 @@ describe(MyDeals, () => {
       .toHaveAttribute('href', '/app/1/deals?view=list&status=OPEN&ownerId=3');
   });
 
-  it('says so when the caller has no open deals, and offers a new one', async () => {
+  it('says so in one line when the caller has no open deals, with the way to add one', async () => {
     await mine(props({ deals: [], total: 0 }));
 
-    await expect.element(page.getByText('No open deals of yours')).toBeVisible();
     await expect
-      .element(page.getByRole('link', { name: 'New deal' }))
+      .element(page.getByText('No open deals of yours.', { exact: false }))
+      .toHaveTextContent('No open deals of yours. Add a deal');
+    await expect
+      .element(page.getByRole('link', { name: 'Add a deal' }))
       .toHaveAttribute('href', '/app/1/deals/new');
+    // No tile, no icon: a line of text.
+    expect(document.querySelector('#my-deals svg')).toBeNull();
     expect(page.getByRole('link', { name: 'All my deals' }).elements()).toHaveLength(0);
   });
 });

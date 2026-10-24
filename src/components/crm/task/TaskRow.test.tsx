@@ -1,3 +1,5 @@
+// A row's line and height are the styles'.
+import '@/styles/global.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
@@ -6,6 +8,7 @@ import type { cancelTask, completeTask, reopenTask } from '@/actions/crm/TaskAct
 import * as TaskActions from '@/actions/crm/TaskActions';
 import { Toaster } from '@/components/ui/sonner';
 import { Table, TableBody } from '@/components/ui/table';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import type { components } from '@/libs/api/schema';
 import messages from '@/locales/en.json';
 import { TaskDue, TaskRow } from './TaskRow';
@@ -32,27 +35,39 @@ const TASK: Task = {
   version: 3,
 };
 
-const renderRow = async (task: Task, compact?: boolean) => {
+const renderRow = async (task: Task, compact?: boolean, sectioned?: boolean) => {
   await render(
     <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-      <Table>
-        <TableBody>
-          <TaskRow
-            task={task}
-            workspaceId={1}
-            canEdit
-            timeZone="Asia/Bangkok"
-            headingId="tasks-heading"
-            compact={compact}
-          />
-        </TableBody>
-      </Table>
+      <TooltipProvider>
+        <Table>
+          <TableBody>
+            <TaskRow
+              task={task}
+              workspaceId={1}
+              canEdit
+              timeZone="Asia/Bangkok"
+              headingId="tasks-heading"
+              compact={compact}
+              sectioned={sectioned}
+            />
+          </TableBody>
+        </Table>
+      </TooltipProvider>
       <Toaster />
     </NextIntlClientProvider>,
   );
 };
 
 const checkbox = () => page.getByRole('checkbox', { name: 'Complete Send the proposal' });
+// Whether two texts sit on one line: their boxes' middles level.
+const sameLine = (first: string, second: string) => {
+  const [a, b] = [first, second].map((text) =>
+    page.getByText(text, { exact: true }).first().element().getBoundingClientRect(),
+  );
+  return (
+    a !== undefined && b !== undefined && Math.abs(a.y + a.height / 2 - (b.y + b.height / 2)) < 3
+  );
+};
 const menu = () => page.getByRole('button', { name: 'More actions for Send the proposal' });
 const pill = (status: string) => page.getByRole('button', { name: `Status: ${status}` });
 // Marked while a change is on its way, so a refresh that redraws the row keeps the focus.
@@ -233,6 +248,7 @@ describe(TaskRow, () => {
   });
 
   it('marks an overdue task in words, not colour alone', async () => {
+    await page.viewport(1280, 800);
     await renderRow({ ...TASK, overdue: true, dueAt: '2026-10-10T02:00:00Z' });
 
     // The due column says so, and on a phone the title's cell (the column is hidden there).
@@ -240,15 +256,56 @@ describe(TaskRow, () => {
     expect(page.getByText('Overdue', { exact: true }).elements()).toHaveLength(2);
   });
 
-  it('keeps a compact row to its title, due time and menu, with the linked records under the title', async () => {
+  it('keeps a compact row to its title, due time and menu, with the linked records beside the title', async () => {
+    await page.viewport(1280, 800);
     await renderRow(TASK, true);
 
-    // The priority and the assignee are columns of the full row; the company moves under the title.
+    // The priority and the assignee are columns of the full row; the company joins the title.
     expect(page.getByRole('cell').elements()).toHaveLength(4);
     expect(page.getByText('High').elements()).toHaveLength(0);
     expect(page.getByText('Mia Manager').elements()).toHaveLength(0);
     await expect.element(page.getByRole('link', { name: 'Acme' })).toBeVisible();
-    await expect.element(checkbox()).toBeVisible();
+    expect(sameLine('Send the proposal', 'Acme')).toBeTruthy();
     await expect.element(menu()).toBeVisible();
+  });
+
+  it('draws a 36 px row: its number beside its title, its due time whole on one line', async () => {
+    await page.viewport(1280, 800);
+    await renderRow({ ...TASK, overdue: true, dueAt: '2026-10-10T02:00:00Z' });
+
+    expect(page.getByRole('row').element().getBoundingClientRect().height).toBe(36);
+    expect(sameLine('Send the proposal', 'T-0042')).toBeTruthy();
+    const due = page.getByRole('cell', { name: /^Overdue Oct 10, 2026, 9:00\sAM$/u });
+    await expect.element(due).toBeVisible();
+    // Its icon beside it, on the one line.
+    expect(due.element().getBoundingClientRect().height).toBe(36);
+  });
+
+  it('says "Overdue" to assistive technology only in the Overdue section, whose heading says it', async () => {
+    await renderRow({ ...TASK, overdue: true, dueAt: '2026-10-10T02:00:00Z' }, false, true);
+
+    await expect.element(page.getByRole('cell', { name: /^Overdue Oct 10/u })).toBeVisible();
+    expect(
+      page
+        .getByText('Overdue', { exact: true })
+        .elements()
+        .every((word) => word.classList.contains('sr-only')),
+    ).toBeTruthy();
+  });
+
+  it('lists the linked records on one line, the first and "+N" for the rest, all in its tooltip', async () => {
+    await page.viewport(1280, 800);
+    await renderRow({
+      ...TASK,
+      contact: { id: 9, fullName: 'Noa Park' },
+      deal: { id: 4, name: 'Acme renewal' },
+    });
+    const more = page.getByRole('link', { name: '2 more: Noa Park, Acme renewal' });
+
+    await expect.element(page.getByRole('link', { name: 'Acme', exact: true })).toBeVisible();
+    await expect.element(more).toHaveTextContent('+2');
+    expect(page.getByRole('row').element().getBoundingClientRect().height).toBe(36);
+    await more.hover();
+    await expect.element(page.getByRole('tooltip')).toHaveTextContent('AcmeNoa ParkAcme renewal');
   });
 });

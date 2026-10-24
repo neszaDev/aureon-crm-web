@@ -357,9 +357,7 @@
     "title": "Mes affaires",
     "total": "{count, number} en cours",
     "all": "Toutes mes affaires",
-    "empty_title": "Aucune affaire en cours à votre nom",
-    "empty_text": "Les affaires dont vous êtes propriétaire et qui sont en cours apparaissent ici.",
-    "new": "Nouvelle affaire"
+    "empty": "Aucune affaire en cours à votre nom. <link>Ajouter une affaire</link>"
   },
   "MyWork": {
     "title": "Mon travail",
@@ -370,7 +368,7 @@
     "section_week": "7 prochains jours",
     "tasks_count": "{count, plural, one {# tâche} other {# tâches}}",
     "tasks_count_capped": "{count, number} tâches ou plus",
-    "tasks_none": "Rien à faire dans les 7 prochains jours.",
+    "tasks_none": "Rien à faire dans les 7 prochains jours. <link>Ajouter une tâche</link>",
     "leads": "Prospects à relancer",
     "leads_count": "{count, plural, one {# prospect} other {# prospects}}",
     "leads_count_capped": "{count, number} prospects ou plus",
@@ -3695,5 +3693,8 @@
     "level_LOW": "Priorité basse",
     "level_MEDIUM": "Priorité moyenne",
     "level_HIGH": "Priorité haute"
+  },
+  "LinkedRecords": {
+    "more": "{count, number} de plus : {names}"
   }
 }

@@ -357,9 +357,7 @@
     "title": "ดีลของฉัน",
     "total": "เปิดอยู่ {count, number} ดีล",
     "all": "ดีลทั้งหมดของฉัน",
-    "empty_title": "คุณไม่มีดีลที่เปิดอยู่",
-    "empty_text": "ดีลที่คุณเป็นเจ้าของและยังเปิดอยู่จะแสดงที่นี่",
-    "new": "เพิ่มดีล"
+    "empty": "คุณไม่มีดีลที่เปิดอยู่ <link>เพิ่มดีล</link>"
   },
   "MyWork": {
     "title": "งานของฉัน",
@@ -370,7 +368,7 @@
     "section_week": "7 วันข้างหน้า",
     "tasks_count": "{count, plural, other {# งาน}}",
     "tasks_count_capped": "{count, number} งานขึ้นไป",
-    "tasks_none": "ไม่มีงานที่ถึงกำหนดใน 7 วันข้างหน้า",
+    "tasks_none": "ไม่มีงานที่ถึงกำหนดใน 7 วันข้างหน้า <link>เพิ่มงาน</link>",
     "leads": "ลีดที่ต้องติดตาม",
     "leads_count": "{count, plural, other {# ลีด}}",
     "leads_count_capped": "{count, number} ลีดขึ้นไป",
@@ -3695,5 +3693,8 @@
     "level_LOW": "ความสำคัญต่ำ",
     "level_MEDIUM": "ความสำคัญปานกลาง",
     "level_HIGH": "ความสำคัญสูง"
+  },
+  "LinkedRecords": {
+    "more": "อีก {count, number} รายการ: {names}"
   }
 }

@@ -41,11 +41,26 @@ export const useStatusChange = (onRefused?: () => void) => {
   return { isPending, failure, run };
 };
 
+/** What holds a record's pill: the record's panel (a dialog), or the page behind it. */
+export const PILL_SCOPE = '[role="dialog"], #crm-main';
+
+/**
+ * A record's pill, by its key, in what holds it: the panel's or the page's, never the other's.
+ * @param scope The panel or the page, if it is still there; else the document.
+ * @param key The record, such as `lead-42`.
+ * @returns The pill's button, if it is there.
+ */
+export const pillIn = (scope: ParentNode, key: string) =>
+  (scope instanceof Node && !scope.isConnected ? document : scope).querySelector<HTMLElement>(
+    `[data-pill="${CSS.escape(key)}"] button`,
+  );
+
 /**
  * Keeps the focus on a record's pill when a new status moves its row to another section: the row
  * is drawn anew there, in the same commit that closes the pill's menu, so the focus falls to the
  * page; the new pill takes it back. Only for a pill whose menu was used (`markUsed`) or that held
- * the focus, and only while nothing else has it. Its cell carries `data-pill`. A change that
+ * the focus, and only while nothing else has it, in the list or the panel it was in. Its cell
+ * carries `data-pill`. A change that
  * doesn't happen (refused, or its dialog cancelled) calls `release`, so a later redraw leaves the
  * focus alone.
  * @param key The record, such as `lead-42`.
@@ -58,9 +73,11 @@ export const useKeptFocus = (key: string) => {
     const node = cell.current;
     return () => {
       if (node?.dataset.used === 'true' || node?.contains(document.activeElement)) {
+        // Where the pill was, the list or the record's panel: both may show the record's pill.
+        const scope = node.closest(PILL_SCOPE) ?? document;
         setTimeout(() => {
           if (document.activeElement === document.body) {
-            document.querySelector<HTMLElement>(`[data-pill="${CSS.escape(key)}"] button`)?.focus();
+            pillIn(scope, key)?.focus();
           }
         }, 0);
       }

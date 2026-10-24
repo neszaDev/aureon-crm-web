@@ -1,8 +1,6 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { Panel } from '@/components/crm/dashboard/Panel';
-import { ListEmpty } from '@/components/crm/list/ListEmpty';
 import { StatusTrack } from '@/components/crm/StatusTrack';
-import { Button } from '@/components/ui/button';
 import type { components } from '@/libs/api/schema';
 import { signaturesOf } from '@/libs/crm/DealHistory';
 import { formatMoney, recordNumber } from '@/libs/crm/Format';
@@ -94,16 +92,16 @@ export const MyDeals = (props: {
           ))}
         </ul>
       ) : (
-        <ListEmpty
-          variant="none"
-          title={t('empty_title')}
-          text={t('empty_text')}
-          action={
-            <Button asChild variant="outline">
-              <Link href={`${base}/new`}>{t('new')}</Link>
-            </Button>
-          }
-        />
+        // One line and the next step: the panel's heading already says what is missing.
+        <p className="px-4 pb-4 text-sm text-muted-foreground sm:px-5">
+          {t.rich('empty', {
+            link: (chunks) => (
+              <Link href={`${base}/new`} className="font-medium text-violet-ink">
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
       )}
     </Panel>
   );

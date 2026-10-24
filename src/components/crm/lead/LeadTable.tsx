@@ -1,3 +1,4 @@
+import { cn } from 'cn';
 import { useLocale, useTranslations } from 'next-intl';
 import { archiveLead, restoreLead } from '@/actions/crm/LeadActions';
 import { isFollowUpOverdue, LeadFollowUp } from '@/components/crm/lead/LeadFollowUp';
@@ -28,7 +29,8 @@ const none = <span className="text-muted-foreground">—</span>;
  * that changes it), the priority flag, the follow-up date (an overdue one in red), owner,
  * estimated value, when it was created, and the row menu (archive, or restore) where the caller
  * may change it. Name, priority, follow-up and "Created" sort the list. A phone shows name and
- * status; wider screens add columns.
+ * status (in a status's section, its heading says the status: the name has the row); wider screens
+ * add columns.
  * @param props Component props.
  * @param props.rows The leads.
  * @param props.path The list's path; a lead's page is under it.
@@ -53,6 +55,7 @@ export const LeadTable = (props: {
   const t = useTranslations('LeadTable');
   const tList = useTranslations('ListToolbar');
   const locale = useLocale();
+  const byStatus = props.query.group === 'status';
 
   return (
     // Fixed columns, so the groups of a grouped list line up.
@@ -63,7 +66,10 @@ export const LeadTable = (props: {
           <TableHead title={t('company')} className="w-[15%] truncate max-md:hidden">
             {t('company')}
           </TableHead>
-          <TableHead title={t('status')} className="w-36 truncate">
+          <TableHead
+            title={t('status')}
+            className={cn('w-36 truncate', byStatus && 'max-sm:hidden')}
+          >
             {t('status')}
           </TableHead>
           <SortHeader
@@ -128,7 +134,7 @@ export const LeadTable = (props: {
                   none
                 )}
               </TableCell>
-              <TableCell className="whitespace-normal">
+              <TableCell className={cn('whitespace-normal', byStatus && 'max-sm:hidden')}>
                 <LeadStatusPill
                   workspaceId={props.workspace.id}
                   lead={lead}
@@ -139,10 +145,11 @@ export const LeadTable = (props: {
               <TableCell className="max-md:hidden">
                 <PriorityFlag priority={lead.priority} />
               </TableCell>
-              <TableCell className="truncate max-lg:hidden">
+              <TableCell className="max-lg:hidden">
                 <LeadFollowUp
                   date={lead.followUpDate}
                   overdue={isFollowUpOverdue(lead, props.today)}
+                  line
                 />
               </TableCell>
               <OwnerCell owner={lead.owner} className="max-sm:hidden" />

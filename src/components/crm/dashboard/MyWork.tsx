@@ -97,11 +97,23 @@ export const MyWork = (props: {
               headingId={HEADING}
               bounds={props.bounds}
               compact
+              sectioned
             />
           </StatusSection>
         ))}
         {sections.length === 0 && (
-          <p className="py-2 text-sm text-muted-foreground">{t('tasks_none')}</p>
+          <p className="py-2 text-sm text-muted-foreground">
+            {t.rich('tasks_none', {
+              link: (chunks) => (
+                <Link
+                  href={`/app/${props.workspace.id}/tasks?new=1`}
+                  className="font-medium text-violet-ink"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
         )}
         {props.leads ? (
           props.leads.length > 0 && (
