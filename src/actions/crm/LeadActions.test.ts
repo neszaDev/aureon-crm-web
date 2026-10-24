@@ -204,6 +204,22 @@ describe(addLead, () => {
     expect(result).toStrictEqual({ ok: false, message: 'error_invalid_input' });
     expect(POST).not.toHaveBeenCalled();
   });
+
+  it('refuses a name or company that is not text, making nothing and throwing nothing', async () => {
+    const { POST } = backend(200, { id: 9, version: 0 });
+
+    // Both reach the action from the browser as they were sent.
+    // @ts-expect-error -- a forged name
+    const name = await addLead(1, { status: 'NEW', ownerId: null }, { trim: 1 });
+    // @ts-expect-error -- a forged company
+    const company = await addLead(1, { status: 'NEW', ownerId: null }, 'Noa', 7);
+
+    expect([name, company]).toStrictEqual([
+      { ok: false, message: 'error_invalid_input' },
+      { ok: false, message: 'error_invalid_input' },
+    ]);
+    expect(POST).not.toHaveBeenCalled();
+  });
 });
 
 describe(convertLead, () => {
