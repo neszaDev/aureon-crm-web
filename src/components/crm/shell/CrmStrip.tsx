@@ -9,7 +9,7 @@ import { INSIGHTS, SETTINGS, sectionOf, SPACES } from '@/components/crm/shell/Cr
 import { useSidebarKeys } from '@/components/crm/shell/CrmSidebar';
 import { ShellTip } from '@/components/crm/shell/ShellTip';
 import { Button } from '@/components/ui/button';
-import { toggleSidebar } from '@/libs/crm/Sidebar';
+import { STRIP_EXPAND_ID, toggleSidebar } from '@/libs/crm/Sidebar';
 import { Link, usePathname } from '@/libs/I18nNavigation';
 
 // An icon on the rail: white at 75% (9:1 on the ink violet), full white on hover, the on-rail
@@ -106,6 +106,7 @@ export const CrmStrip = (props: { workspaceId: number }) => {
           <Button
             variant="ghost"
             size="icon"
+            id={STRIP_EXPAND_ID}
             aria-label={t('expand_sidebar')}
             aria-expanded={false}
             aria-controls="crm-sidebar"

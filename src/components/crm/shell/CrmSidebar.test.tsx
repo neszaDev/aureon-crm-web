@@ -191,6 +191,45 @@ describe(CrmSidebar, () => {
     });
   });
 
+  describe('the focus', () => {
+    it('moves to the other toggle as either one folds or expands the sidebar', async () => {
+      await renderSidebar();
+
+      await toggle('Collapse sidebar').click();
+      await expect.element(toggle('Expand sidebar')).toHaveFocus();
+
+      await toggle('Expand sidebar').click();
+      await expect.element(toggle('Collapse sidebar')).toHaveFocus();
+    });
+
+    it('moves to the other toggle when Ctrl+\\ hides the link that had it', async () => {
+      await renderSidebar();
+      nav().getByRole('link', { name: 'Reports' }).element().focus();
+
+      pressToggleKey({ ctrlKey: true });
+      await expect.element(toggle('Expand sidebar')).toHaveFocus();
+
+      // From the rail's strip, back to the sidebar's toggle.
+      await expect.poll(visibility).toBe('hidden');
+      nav().getByRole('link', { name: 'Reports' }).element().focus();
+      pressToggleKey({ metaKey: true });
+      await expect.element(toggle('Collapse sidebar')).toHaveFocus();
+    });
+
+    it('stays where it is when the shortcut comes from outside the sidebar and the rail', async () => {
+      await renderSidebar();
+      const notes = page.getByText('Rich notes');
+      // Focusable, as the page's main region is, but no field: the shortcut works there.
+      notes.element().setAttribute('tabindex', '-1');
+      notes.element().removeAttribute('contenteditable');
+      notes.element().focus();
+
+      pressToggleKey({ ctrlKey: true });
+      await expect.element(toggle('Expand sidebar')).toBeVisible();
+      await expect.element(notes).toHaveFocus();
+    });
+  });
+
   it('toggles with Ctrl+\\ and Cmd+\\, but not while typing in a field', async () => {
     await renderSidebar();
 

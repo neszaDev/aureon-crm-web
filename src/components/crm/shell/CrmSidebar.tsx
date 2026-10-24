@@ -8,7 +8,7 @@ import { ShellTip } from '@/components/crm/shell/ShellTip';
 import { WorkspaceSwitcher } from '@/components/crm/shell/WorkspaceSwitcher';
 import { Button } from '@/components/ui/button';
 import type { components } from '@/libs/api/schema';
-import { applyStoredSidebar, toggleSidebar } from '@/libs/crm/Sidebar';
+import { applyStoredSidebar, SIDEBAR_COLLAPSE_ID, toggleSidebar } from '@/libs/crm/Sidebar';
 import { useIsApple } from '@/utils/Platform';
 
 // The backslash key: its character, or on a layout whose key gives another one (Thai), its place.
@@ -97,6 +97,7 @@ export const CrmSidebar = (props: {
             <Button
               variant="ghost"
               size="icon-sm"
+              id={SIDEBAR_COLLAPSE_ID}
               aria-label={t('collapse_sidebar')}
               aria-expanded
               aria-controls="crm-sidebar"

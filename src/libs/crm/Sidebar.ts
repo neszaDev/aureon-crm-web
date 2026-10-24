@@ -87,9 +87,45 @@ const keep = (key: string, attribute: 'sidebar' | 'spaces', value: string) => {
   }
 };
 
-/** Folds an expanded sidebar into the rail or expands a folded one. Browser only. */
+/** The sidebar's own toggle, which folds it. */
+export const SIDEBAR_COLLAPSE_ID = 'crm-sidebar-collapse';
+/** The rail strip's toggle, which expands the sidebar again. */
+export const STRIP_EXPAND_ID = 'crm-strip-expand';
+
+/**
+ * Moves the focus from what a change hides to an element, a frame on, and again each frame while
+ * it hasn't moved (an expanding sidebar is hidden at its transition's first instant, so it can't
+ * take the focus then), for a few frames at most; never once the viewer put it elsewhere.
+ * @param from What had the focus.
+ * @param id The element's id.
+ * @param frames How many frames to try.
+ */
+const moveFocus = (from: Element, id: string, frames = 12) => {
+  requestAnimationFrame(() => {
+    const active = document.activeElement;
+    const target = document.querySelector<HTMLElement>(`#${id}`);
+    if (!target || (active !== from && active !== null && active !== document.body)) {
+      return;
+    }
+    target.focus();
+    if (document.activeElement !== target && frames > 1) {
+      moveFocus(from, id, frames - 1);
+    }
+  });
+};
+
+/**
+ * Folds an expanded sidebar into the rail or expands a folded one. The focus, if it was in what
+ * the change hides (the sidebar or the rail's strip of sections), moves to the toggle that undoes
+ * it, rather than fall to the page. Browser only.
+ */
 export const toggleSidebar = () => {
-  keep(SIDEBAR_KEY, 'sidebar', isSidebarCollapsed() ? 'expanded' : 'collapsed');
+  const collapsed = isSidebarCollapsed();
+  const from = document.activeElement;
+  keep(SIDEBAR_KEY, 'sidebar', collapsed ? 'expanded' : 'collapsed');
+  if (from?.closest('#crm-sidebar, [data-strip]')) {
+    moveFocus(from, collapsed ? SIDEBAR_COLLAPSE_ID : STRIP_EXPAND_ID);
+  }
 };
 
 // The spaces open in the sidebar's tree, in the order they were opened.
