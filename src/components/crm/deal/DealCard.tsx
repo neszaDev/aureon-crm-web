@@ -24,7 +24,8 @@ type Deal = components['schemas']['DealSummary'];
 
 /**
  * What a board card shows: the deal's number, its name (a link to the deal), its company, its
- * amount, its owner's avatar, its status track (each segment names who moved the deal there) and
+ * amount, its owner's avatar, its status track with its days in the stage (the column says the
+ * stage; each segment names who moved the deal there) and
  * its expected close date, in danger red with an icon and words once an open deal is past it. The
  * dragged copy shows the same, without controls.
  * @param props Component props.
@@ -98,6 +99,7 @@ export const DealCardBody = (props: {
         signatures={signaturesOf(props.deal.signatures)}
         now={props.now}
         timeZone={props.timeZone}
+        unnamed
       />
       {close && (
         <span

@@ -68,6 +68,8 @@ const stateOf = (
  * @param props.full Whether to write it all out, as a record's header does: each stage's name
  *   under its segment (the current one's days beside it), and under that who moved the deal there
  *   and when.
+ * @param props.unnamed Leaves the stage's name out of a compact track, the days kept: on a board
+ *   card, whose column says the stage. The track's own name still says it.
  * @param props.className Extra classes.
  * @returns The track.
  */
@@ -79,6 +81,7 @@ export const StatusTrack = (props: {
   now: Date;
   timeZone: string;
   full?: boolean;
+  unnamed?: boolean;
   className?: string;
 }) => {
   const t = useTranslations('StatusTrack');
@@ -215,9 +218,11 @@ export const StatusTrack = (props: {
         aria-hidden="true"
         className="flex min-w-0 shrink items-baseline gap-1 text-xs font-medium text-(--tone-ink)"
       >
-        <span title={props.stage.name} className="truncate">
-          {props.stage.name}
-        </span>
+        {!props.unnamed && (
+          <span title={props.stage.name} className="truncate">
+            {props.stage.name}
+          </span>
+        )}
         {!closed && (
           <span className="shrink-0 text-muted-foreground tabular-nums">
             {t('days_short', { count: days })}

@@ -358,7 +358,7 @@ describe(DealBoard, () => {
 
     expect(scroller?.scrollWidth).toBe(scroller?.clientWidth);
     expect(fadeOpacity()).toBe('0');
-    // The card's track and its stage's name on one line.
+    // The card's track and its days on one line.
     const track = page.getByRole('list', { name: 'Stage 1 of 4: Qualification' }).element();
     expect(track.parentElement?.getBoundingClientRect().height).toBeLessThanOrEqual(20);
   });
@@ -524,11 +524,18 @@ describe(DealBoard, () => {
     await expect
       .element(qualification.getByRole('img', { name: 'Mia Manager' }).first())
       .toBeVisible();
-    // The status track on the card, its stage and days written beside it.
+    // The status track on the card, its days written beside it; the column says the stage, so the
+    // card doesn't repeat it (the track's name still does, for assistive technology).
     await expect
       .element(qualification.getByRole('list', { name: 'Stage 1 of 2: Qualification' }).first())
       .toBeVisible();
     await expect.element(qualification.getByText('8d').first()).toBeVisible();
+    expect(
+      qualification
+        .getByText('Qualification', { exact: true })
+        .elements()
+        .filter((element) => element.checkVisibility()),
+    ).toHaveLength(1);
   });
 
   it('writes a past close date of an open deal in red, with an icon and words', async () => {
