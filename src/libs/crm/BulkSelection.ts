@@ -1,3 +1,9 @@
+/**
+ * The id of the strip at the foot of the canvas that holds a list's bulk bar (the shell's), so the
+ * bar floats over the canvas, never under a short list.
+ */
+export const BULK_BAR_SLOT = 'crm-bulk-bar';
+
 /** The records a list selects for a bulk action. */
 export type BulkEntity = 'company' | 'contact' | 'lead' | 'deal' | 'task';
 

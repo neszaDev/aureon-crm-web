@@ -13,6 +13,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { Toolbar } from 'radix-ui';
 import { useState, useTransition } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { archiveCompany, assignCompany, restoreCompany } from '@/actions/crm/CompanyActions';
 import { archiveContact, assignContact, restoreContact } from '@/actions/crm/ContactActions';
@@ -34,7 +35,7 @@ import {
 import type { ActionResult } from '@/libs/api/ApiError';
 import type { components } from '@/libs/api/schema';
 import type { BulkEntity, BulkItem } from '@/libs/crm/BulkSelection';
-import { bulkActions, runPooled } from '@/libs/crm/BulkSelection';
+import { BULK_BAR_SLOT, bulkActions, runPooled } from '@/libs/crm/BulkSelection';
 import type { StageRef } from '@/libs/crm/Stages';
 import { LEAD_STATUS_TONES, stageTone, TASK_STATUS_TONES } from '@/libs/crm/StatusColors';
 import { useRouter } from '@/libs/I18nNavigation';
@@ -434,13 +435,10 @@ export const BulkBar = (props: BulkBarProps) => {
   // A control that stays while records are on their way, but does nothing.
   const busy = isPending || undefined;
 
-  return (
-    // Under the list's last row, and stuck to the foot of the screen while the list runs past it;
-    // only the bar takes the pointer, not the strip it is centred in.
-    <div
-      data-bulk-bar
-      className="pointer-events-none sticky bottom-4 z-30 mt-4 flex justify-center"
-    >
+  const bar = (
+    // In the shell's strip at the foot of the canvas (under the list where there is none, as in a
+    // test); only the bar takes the pointer, not the strip it is centred in.
+    <div data-bulk-bar className="pointer-events-none mt-4 flex justify-center px-4 sm:px-7">
       <div className="pointer-events-auto relative flex max-w-full flex-col items-center">
         {refused.length > 0 && (
           <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2">
@@ -621,4 +619,7 @@ export const BulkBar = (props: BulkBarProps) => {
       />
     </div>
   );
+  const slot = document.querySelector(`#${BULK_BAR_SLOT}`);
+
+  return slot ? createPortal(bar, slot) : bar;
 };

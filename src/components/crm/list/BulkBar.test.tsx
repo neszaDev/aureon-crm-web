@@ -188,6 +188,18 @@ describe(BulkBar, () => {
     });
   });
 
+  describe('place', () => {
+    it("floats in the shell's strip at the foot of the canvas when there is one", async () => {
+      const slot = document.createElement('div');
+      slot.id = 'crm-bulk-bar';
+      document.body.append(slot);
+      await renderBar('deal', [item(1, 'Fleet tablets')]);
+
+      expect(slot.querySelector('[role="toolbar"]')).not.toBeNull();
+      slot.remove();
+    });
+  });
+
   describe('keyboard', () => {
     it('takes one Tab stop, and the arrow keys move between its controls', async () => {
       await renderBar('deal', [item(1, 'Fleet tablets'), item(2, 'Depot rollout')]);

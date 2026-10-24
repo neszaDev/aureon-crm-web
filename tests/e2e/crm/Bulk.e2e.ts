@@ -98,7 +98,7 @@ test.describe('Bulk actions', () => {
     await expect(alert.getByRole('listitem')).toHaveCount(2);
     await expect(alert.getByRole('listitem').filter({ hasText: MINE[2] ?? '' })).toBeVisible();
     await expect(alert.getByRole('listitem').filter({ hasText: MINE[3] ?? '' })).toContainText(
-      'Someone else changed this',
+      'Someone changed this meanwhile; the list shows it now.',
     );
     const read = async (deal?: { id: number }) =>
       await apiCall<Deal>(request, owner, 'GET', `${deals}/${deal?.id}`);
@@ -152,6 +152,25 @@ test.describe('Bulk actions', () => {
     await all.click();
     await expect(all).toBeChecked();
     await expect(bar).toHaveAccessibleName('3 selected');
+    // Under a short list too, the bar floats 16 px above the foot of the screen, centred over the
+    // canvas (not the whole window: the rail and the sidebar are on its left).
+    const [floating, canvas, height] = await Promise.all([
+      bar.boundingBox(),
+      page.locator('#crm-main').boundingBox(),
+      page.evaluate(() => window.innerHeight),
+    ]);
+    expect(height - ((floating?.y ?? 0) + (floating?.height ?? 0))).toBeCloseTo(16, 0);
+    expect((floating?.x ?? 0) + (floating?.width ?? 0) / 2).toBeCloseTo(
+      (canvas?.x ?? 0) + (canvas?.width ?? 0) / 2,
+      0,
+    );
+    // From the section's box, one key reaches the bar past the rows.
+    await all.focus();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Enter');
+    await expect(bar.getByRole('button', { name: 'Assign' })).toBeFocused();
+    await page.keyboard.press('ArrowRight');
+    await expect(bar.getByRole('button', { name: 'Archive' })).toBeFocused();
     await expectNoA11yViolations(page);
     await page.emulateMedia({ colorScheme: 'dark' });
     await expectNoA11yViolations(page);

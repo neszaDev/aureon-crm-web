@@ -8,6 +8,7 @@ import { WorkspaceSwitcher } from '@/components/crm/shell/WorkspaceSwitcher';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { components } from '@/libs/api/schema';
+import { BULK_BAR_SLOT } from '@/libs/crm/BulkSelection';
 import type { BellReminders } from '@/libs/crm/Reminders';
 
 type Schemas = components['schemas'];
@@ -87,6 +88,9 @@ export const CrmShell = (props: {
           >
             {props.children}
           </main>
+          {/* A list's bulk bar, 16 px above the foot of the screen and centred over the canvas,
+              even under a short list; only the bar itself takes the pointer. */}
+          <div id={BULK_BAR_SLOT} className="pointer-events-none sticky bottom-4 z-30" />
           <Toaster position="bottom-right" />
         </div>
       </div>
