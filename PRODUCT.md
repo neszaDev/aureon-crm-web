@@ -36,9 +36,11 @@ without rediscovering the architecture.
 
 ## Positioning
 
-A CRM that reads as an approval circular: every step of a relationship is signed. Pipeline stages
-are stamped by the member who moved the deal, and the open stage shows its exact days. It refuses
-the default navy-sidebar, blue-button, KPI-tile CRM.
+A CRM that works like the team's work OS: one calm shell, every list a set of coloured status
+sections, every record a click away in a side panel. Each record's status is one pill that is also
+the control, and a deal's track shows how far it has come and who moved it at each stage. It
+refuses the boilerplate admin page: a title and a paragraph, a stacked filter form, a table in a
+card.
 
 As a template, it is wired end to end to one specific Spring backend. The Next.js server holds the
 backend's JWT and rotating refresh tokens in httpOnly cookies, API types are generated from the
@@ -79,10 +81,15 @@ backend's OpenAPI spec, and CI runs end-to-end tests of the real frontend agains
 
 - "Aureon CRM" is a placeholder name: derived products rename it in `AppConfig.name` and the
   `Brand` copy in `src/locales`.
-- The chosen identity is the "Seal and circular" world: a vermilion seal rail, bond-paper panels
-  on a grey ground, sumi ink text, hairline rules, people as round vermilion ink seals with their
-  initials, Anuphan for Latin and Thai, and a lacquer-black dark theme with the same seal. The
-  tokens live in `src/styles/global.css`.
+- The chosen identity (user-pinned 2026-10-23, replacing "Seal and circular") is the work-OS
+  canon at the craft level of ClickUp, Linear and Attio, in Aureon's own identity and never
+  ClickUp's branding: an ink-violet rail beside a cool off-white sidebar and a white canvas, Aureon
+  violet for actions, selection and focus, status colours that do the work (pills, sections, the
+  track), people as initials on their member colour, the orbit mark (a ring with one satellite
+  dot), Inter with Anuphan for Thai. The tokens live in `src/styles/global.css`; the system is
+  documented in `DESIGN.md`.
+- The landing page keeps the user's decisions: composition "A · Two desks", the main call to
+  action "Create a workspace" (never "Start free"), 44 px actions on that page only.
 - Upstream credit to ixartz's Next.js Boilerplate (MIT) stays on the about page.
 
 ## Evidence on Hand
