@@ -90,7 +90,9 @@ export const CompanyTable = (props: {
             detail={
               <>
                 <OwnerName owner={company.owner} />
-                {company.industry && <span className="break-words">{company.industry}</span>}
+                {company.industry && (
+                  <span className="min-w-0 break-words">{company.industry}</span>
+                )}
               </>
             }
             menu={

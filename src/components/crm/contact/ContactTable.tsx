@@ -106,7 +106,9 @@ export const ContactTable = (props: {
             detail={
               <>
                 <OwnerName owner={contact.owner} />
-                {contact.company && <span className="break-words">{contact.company.name}</span>}
+                {contact.company && (
+                  <span className="min-w-0 break-words">{contact.company.name}</span>
+                )}
               </>
             }
             menu={

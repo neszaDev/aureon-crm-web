@@ -34,7 +34,7 @@ export const RecordRow = (props: {
         <Link
           href={props.href}
           title={props.name}
-          className="font-medium break-words text-foreground no-underline hover:underline sm:truncate"
+          className="min-w-0 font-medium break-words text-foreground no-underline hover:underline sm:truncate"
         >
           {props.name}
         </Link>

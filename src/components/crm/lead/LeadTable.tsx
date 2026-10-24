@@ -121,7 +121,7 @@ export const LeadTable = (props: {
               detail={
                 <>
                   <OwnerName owner={lead.owner} />
-                  {lead.source && <span className="break-words">{lead.source.name}</span>}
+                  {lead.source && <span className="min-w-0 break-words">{lead.source.name}</span>}
                 </>
               }
               menu={
