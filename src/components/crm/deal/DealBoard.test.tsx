@@ -190,7 +190,7 @@ describe(DealBoard, () => {
     await expect.element(column('Proposal').getByText('No deals')).toBeVisible();
   });
 
-  it('folds Won and Lost into strips: pill, count, totals without their cents, a link to the list, no cards', async () => {
+  it('folds Won and Lost into strips: pill, count and a link to the list; no totals, no cards', async () => {
     await renderBoard({}, [
       FIRST_COLUMN,
       { stage: PROPOSAL, count: 0, totals: [], deals: [] },
@@ -207,12 +207,11 @@ describe(DealBoard, () => {
     ]);
 
     const won = column('Won');
-    const totals = won.getByRole('list', { name: 'Total value' });
 
     await expect.element(won.getByText('1 deal')).toBeVisible();
-    // Whole amounts lose only the zeros after the point: 1,250.50 keeps every digit.
-    await expect.element(totals.getByText('$47,000', { exact: true })).toBeVisible();
-    await expect.element(totals.getByText('€1,250.50')).toBeVisible();
+    // Down a 40 px strip, amounts don't read: they stay in the expanded column's header.
+    await expect.element(won.getByText('$47,000.00', { exact: true })).not.toBeVisible();
+    await expect.element(won.getByText('€1,250.50', { exact: true })).not.toBeVisible();
     await expect
       .element(won.getByRole('link', { name: 'View in list: Won' }))
       .toHaveAttribute('href', '/app/1/deals?q=acme&view=list&stageId=13');
@@ -315,9 +314,11 @@ describe(DealBoard, () => {
     await page.getByLabelText('Stage shown').selectOptions('13');
 
     await expect.element(column('Won').getByRole('link', { name: 'Won big' })).toBeVisible();
-    // A full column: its totals keep their cents, as the open columns' do.
+    // A full column: its totals with their cents, as the open columns' are.
     await expect.element(column('Won').getByText('$47,000.00', { exact: true })).toBeVisible();
-    await expect.element(column('Won').getByText('$47,000', { exact: true })).not.toBeVisible();
+    await expect
+      .element(column('Won').getByText('$47,000', { exact: true }))
+      .not.toBeInTheDocument();
     expect(
       column('Won')
         .getByRole('link', { name: /View in list/u })

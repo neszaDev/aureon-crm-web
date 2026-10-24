@@ -18,9 +18,9 @@ import { Link } from '@/libs/I18nNavigation';
  * count beside it, then its total in each currency (never added across currencies), the cards
  * (or a note that it is empty), a link to the list when it holds more than the cards shown and,
  * for an open stage, "Add deal" (the create form in that stage). From 768 px Won and Lost start as
- * a 40 px strip: the pill and the count written down the strip, the totals without their cents
- * and a link to the list; the strip (all of it) expands into a whole column, cards and all, and
- * collapses back. Below 768 px only the chosen column shows, always whole.
+ * a 40 px strip: the pill and the count written down the strip, and a link to the list (the totals
+ * are the expanded column's); the strip (all of it) expands into a whole column, cards and all,
+ * and collapses back. Below 768 px only the chosen column shows, always whole.
  * @param props Component props.
  * @param props.column The stage, its count and its totals, as the server counted them.
  * @param props.shown How many cards the server sent for it (at most 50).
@@ -125,31 +125,17 @@ export const BoardColumn = (props: {
           <span className="sr-only">{t('count', { count })}</span>
         </div>
         {props.column.totals.length > 0 && (
+          // Not down a strip, where amounts don't read: the expanded column's header has them.
           <ul
             aria-label={t('totals')}
             className={cn(
               'flex flex-wrap gap-x-2 text-xs font-medium text-muted-foreground tabular-nums',
-              strip && 'md:flex-col md:items-center md:gap-2',
+              strip && 'md:hidden',
             )}
           >
-            {props.column.totals.map((total) => {
-              const full = formatMoney(total.amount, total.currency, locale);
-              const short = formatMoney(total.amount, total.currency, locale, { short: strip });
-
-              return (
-                <li key={total.currency} className={cn(strip && 'md:[writing-mode:vertical-rl]')}>
-                  {short === full ? (
-                    full
-                  ) : (
-                    // Short in the strip only: below 768 px the column is whole, cents and all.
-                    <>
-                      <span className="md:hidden">{full}</span>
-                      <span className="max-md:hidden">{short}</span>
-                    </>
-                  )}
-                </li>
-              );
-            })}
+            {props.column.totals.map((total) => (
+              <li key={total.currency}>{formatMoney(total.amount, total.currency, locale)}</li>
+            ))}
           </ul>
         )}
         {closing && (
