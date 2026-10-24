@@ -1,3 +1,5 @@
+// The probability column's place is the styles'.
+import '@/styles/global.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -49,6 +51,14 @@ const pillOf = (name: string) =>
   [...document.querySelectorAll('[data-stage-name]')]
     .find((node) => node.textContent === name)
     ?.closest<HTMLElement>('[data-tone]');
+
+/**
+ * Where a text ends on screen, to line up a column.
+ * @param text The text.
+ * @returns Its box's right edge, in whole pixels.
+ */
+const right = (text: string) =>
+  Math.round(page.getByText(text, { exact: true }).element().getBoundingClientRect().right);
 
 describe(StageList, () => {
   it('moves a stage with the buttons and shows the order the server saved', async () => {
@@ -151,6 +161,13 @@ describe(StageList, () => {
     expect(
       page.getByRole('button', { name: /^(Move|Delete) (Won|Lost)/u }).elements(),
     ).toHaveLength(0);
+  });
+
+  it("lines up every stage's probability in one column, Won's and Lost's too", async () => {
+    await page.viewport(1280, 800);
+    await renderList(vi.fn<Reorder>());
+    expect(right('100%')).toBe(right('10%'));
+    expect(right('0%')).toBe(right('60%'));
   });
 
   it('shows the pipeline without controls to a member who cannot change it', async () => {

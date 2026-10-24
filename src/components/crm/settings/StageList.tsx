@@ -219,6 +219,9 @@ const StageItem = (props: {
     setEditing(false);
     setEdited(true);
   };
+  // A control's room where a row has none, so Won's and Lost's probability lines up with the
+  // open stages'.
+  const gap = <span aria-hidden="true" className="size-8 shrink-0 sm:size-7" />;
   const moveButton = (offset: -1 | 1) => {
     const key = `${props.stage.id}:${offset}`;
     const unavailable =
@@ -317,8 +320,8 @@ const StageItem = (props: {
           </span>
           {props.canManage && (
             <span className="ml-auto flex shrink-0 items-center gap-0.5">
-              {isOpen && moveButton(-1)}
-              {isOpen && moveButton(1)}
+              {isOpen ? moveButton(-1) : gap}
+              {isOpen ? moveButton(1) : gap}
               <Button
                 ref={edited ? focusOnMount : undefined}
                 variant="ghost"
@@ -331,7 +334,7 @@ const StageItem = (props: {
                 <PencilIcon />
               </Button>
               {/* The pipeline keeps at least one open stage. */}
-              {isOpen && props.openCount > 1 && (
+              {isOpen && props.openCount > 1 ? (
                 <ConfirmAction
                   trigger={
                     <Button
@@ -351,6 +354,8 @@ const StageItem = (props: {
                   }
                   action={async () => await props.actions.remove(props.stage.id)}
                 />
+              ) : (
+                gap
               )}
             </span>
           )}
