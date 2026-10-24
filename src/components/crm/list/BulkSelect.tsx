@@ -24,6 +24,10 @@ import {
  */
 export const useSelection = (scope: string, items: BulkItem[], headingId: string) => {
   const [selection, setSelection] = useState(() => emptySelection(scope));
+  // Another list state starts afresh, so the old selection can't come back with its state.
+  if (selection.scope !== scope) {
+    setSelection(emptySelection(scope));
+  }
   const live = liveSelection(
     selection,
     scope,

@@ -178,6 +178,19 @@ describe(BulkList, () => {
     await expect.element(box('Acme')).toHaveAttribute('aria-checked', 'false');
   });
 
+  it('forgets the selection of a list state once another is shown, when the first comes back', async () => {
+    const { rerender } = await render(<List scope="a" sections={[NEW, WON]} />);
+    await all('New').click();
+    await expect.element(toolbar()).toHaveAccessibleName('3 selected');
+
+    await rerender(<List scope="b" sections={[NEW, WON]} />);
+    await expect.element(toolbar()).not.toBeInTheDocument();
+    await rerender(<List scope="a" sections={[NEW, WON]} />);
+
+    await expect.element(toolbar()).not.toBeInTheDocument();
+    await expect.element(box('Acme')).toHaveAttribute('aria-checked', 'false');
+  });
+
   it('hands the focus to the list’s heading when the bar clears with it', async () => {
     await render(<List scope="a" sections={[NEW, WON]} />);
     await box('Acme').click();
